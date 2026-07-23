@@ -421,6 +421,18 @@ describe("list", () => {
 		expect(items).toEqual([]);
 	});
 
+	it("stops when a continuation token repeats", async () => {
+		sendMock.mockResolvedValue({
+			Contents: [{ Key: "a.txt", Size: 1 }],
+			NextContinuationToken: "same-token",
+		});
+
+		await list({ path: "root" });
+
+		// First page (no token) + second page (token once). Third would repeat.
+		expect(sendMock).toHaveBeenCalledTimes(2);
+	});
+
 	it("includes child directory counts when requested", async () => {
 		sendMock
 			.mockResolvedValueOnce({

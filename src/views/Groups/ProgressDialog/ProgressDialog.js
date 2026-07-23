@@ -735,7 +735,9 @@ function ProgressItem({ item, translations, expanded, onToggle }) {
 							<div style={{ flex: 1 }} />
 							<span className={styles.progressDetails}>
 								{item.year && `${item.year} - `}
-								{item.progress} / {item.count} {translations.YEARS}
+								{item.sessionCount > 0 && item.progress < item.count
+									? `${item.sessionProgress || 0} / ${item.sessionCount} sessions`
+									: `${item.progress} / ${item.count} ${translations.YEARS}`}
 							</span>
 						</div>
 					</div>

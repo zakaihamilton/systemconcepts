@@ -381,12 +381,19 @@ describe("updateGroupProcess", () => {
 			expect.stringContaining("Skipped unchanged year"),
 			expect.anything(),
 		);
+		expect(addSyncLog).toHaveBeenCalledWith(
+			expect.stringContaining("Adding 1 missing session(s)."),
+			"info",
+		);
+		// Fingerprint matched — reuse cached metadata instead of refetching.
+		expect(fetchSessionMetadata).not.toHaveBeenCalled();
 		expect(updateYearSync).toHaveBeenCalledTimes(1);
 		const [, year, sessions] = updateYearSync.mock.calls[0];
 		expect(year).toBe(currentYear);
 		expect(sessions.map((session) => session.id)).toEqual(
 			expect.arrayContaining([existingId, newId]),
 		);
+		expect(UpdateSessionsStore.getRawState().status[0].sessionCount).toBe(0);
 	});
 
 	it("skips remote metadata fetch when year cache metadata fingerprint is unchanged", async () => {
@@ -2179,6 +2186,10 @@ describe("updateGroupProcess", () => {
 
 		await updateGroupProcess("test", false, false);
 
+		expect(addSyncLog).toHaveBeenCalledWith(
+			expect.stringContaining("Adding 1 missing session(s)."),
+			"info",
+		);
 		expect(updateYearSync).toHaveBeenCalled();
 		const [, , sessions] = updateYearSync.mock.calls[0];
 		expect(sessions.map((session) => session.id)).toEqual(

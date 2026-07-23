@@ -69,24 +69,6 @@ function getSessionFileId(file) {
 	return id;
 }
 
-function getMetadataValue(map, id, sessionName) {
-	if (!map) return undefined;
-	if (map[id] !== undefined) return map[id];
-	if (sessionName && map[sessionName] !== undefined) return map[sessionName];
-
-	const normalize = (str) => str.toLowerCase().replace(/[^a-z0-9]/g, "");
-	const normId = normalize(id);
-	const normName = sessionName ? normalize(sessionName) : "";
-
-	for (const key of Object.keys(map)) {
-		const normKey = normalize(key);
-		if (normKey === normId || (normName && normKey === normName)) {
-			return map[key];
-		}
-	}
-	return undefined;
-}
-
 function groupFilesBySessionId(files, yearName) {
 	const map = {};
 	for (const file of files || []) {
@@ -108,13 +90,14 @@ function isCandidateSessionId(id) {
 	return /^\d{4}-\d{2}-\d{2} .+/.test(String(id || "").trim());
 }
 
-function listingHasMissingSessions(yearItems, cachedYearSessions, yearName) {
+function getMissingSessionIds(yearItems, cachedYearSessions, yearName) {
 	const wasabiFilesMap = groupFilesBySessionId(yearItems, yearName);
 	const cachedIds = new Set(
 		(cachedYearSessions || [])
 			.map((session) => session.id || session.name)
 			.filter(Boolean),
 	);
+	const missingIds = [];
 	for (const [id, files] of Object.entries(wasabiFilesMap)) {
 		if (!isCandidateSessionId(id)) {
 			continue;
@@ -129,12 +112,46 @@ function listingHasMissingSessions(yearItems, cachedYearSessions, yearName) {
 			continue;
 		}
 		if (!cachedIds.has(id)) {
-			return true;
+			missingIds.push(id);
 		}
 	}
-	return false;
+	return missingIds.sort((a, b) => a.localeCompare(b));
 }
 
+function buildMetadataLookup(map) {
+	if (!map) return null;
+	const normalize = (str) =>
+		String(str || "")
+			.toLowerCase()
+			.replace(/[^a-z0-9]/g, "");
+	const normalized = new Map();
+	for (const key of Object.keys(map)) {
+		normalized.set(normalize(key), map[key]);
+	}
+	return { exact: map, normalized, normalize };
+}
+
+function getMetadataValue(mapOrLookup, id, sessionName) {
+	if (!mapOrLookup) return undefined;
+	const lookup =
+		mapOrLookup.exact && mapOrLookup.normalized
+			? mapOrLookup
+			: buildMetadataLookup(mapOrLookup);
+	if (!lookup) return undefined;
+	if (lookup.exact[id] !== undefined) return lookup.exact[id];
+	if (sessionName && lookup.exact[sessionName] !== undefined) {
+		return lookup.exact[sessionName];
+	}
+	const normId = lookup.normalize(id);
+	if (lookup.normalized.has(normId)) return lookup.normalized.get(normId);
+	if (sessionName) {
+		const normName = lookup.normalize(sessionName);
+		if (normName && lookup.normalized.has(normName)) {
+			return lookup.normalized.get(normName);
+		}
+	}
+	return undefined;
+}
 function hasImageFile(files) {
 	return (files || []).some((file) => isImageFile(file.name));
 }
@@ -670,31 +687,45 @@ export async function updateGroupProcess(
 						(s) => s.id === targetSessionId || s.name === targetSessionId,
 					);
 
-				const hasMissingSessions = listingHasMissingSessions(
+				const missingSessionIds = getMissingSessionIds(
 					yearItems,
 					cachedYearSessions,
 					year.name,
 				);
+				const fingerprintMatches =
+					cachedYear?.fingerprint === yearFingerprint;
+				const hasCachedSessions =
+					cachedYearSessions && cachedYearSessions.length > 0;
 				if (
 					!forceUpdate &&
 					!isTargetInThisYear &&
-					cachedYear?.fingerprint === yearFingerprint &&
-					!hasMissingSessions
+					fingerprintMatches &&
+					missingSessionIds.length === 0 &&
+					hasCachedSessions
 				) {
-					if (cachedYearSessions && cachedYearSessions.length > 0) {
-						if (isMerged || isBundled) {
-							allSessions.push(...cachedYearSessions);
-						}
-						for (const session of cachedYearSessions) {
-							allSessionNames.add(session.id || session.name);
-						}
-						addSyncLog(
-							`[${name}/${year.name}] ✓ Skipped unchanged year.`,
-							"info",
-						);
-						return;
+					if (isMerged || isBundled) {
+						allSessions.push(...cachedYearSessions);
 					}
+					for (const session of cachedYearSessions) {
+						allSessionNames.add(session.id || session.name);
+					}
+					addSyncLog(
+						`[${name}/${year.name}] ✓ Skipped unchanged year.`,
+						"info",
+					);
+					return;
 				}
+
+				// When the listing fingerprint is unchanged but local cache is
+				// missing media sessions, only materialize those IDs instead of
+				// reprocessing the entire year (which hung large groups at 0/1).
+				const shouldOnlyFillMissing =
+					!forceUpdate &&
+					!isTargetInThisYear &&
+					!recentCutoff &&
+					fingerprintMatches &&
+					missingSessionIds.length > 0 &&
+					hasCachedSessions;
 
 				const metadata = await getYearMetadata(
 					year,
@@ -705,10 +736,12 @@ export async function updateGroupProcess(
 					metadataFingerprint,
 				);
 				const metadataYearItems = metadata.items;
-				const sessionTagsMap = metadata.tags;
-				const sessionDurationMap = metadata.durations;
-				const sessionSummariesMap = metadata.summaries;
-				const sessionTranscriptionMap = metadata.transcriptions;
+				const sessionTagsMap = buildMetadataLookup(metadata.tags);
+				const sessionDurationMap = buildMetadataLookup(metadata.durations);
+				const sessionSummariesMap = buildMetadataLookup(metadata.summaries);
+				const sessionTranscriptionMap = buildMetadataLookup(
+					metadata.transcriptions,
+				);
 
 				const wasabiFilesMap = groupFilesBySessionId(yearItems, year.name);
 				const digitalOceanFilesMap = groupFilesBySessionId(
@@ -725,202 +758,235 @@ export async function updateGroupProcess(
 				).sort((a, b) => a.localeCompare(b));
 				const shouldRefreshOnlyRecentSessions =
 					recentCutoff && cachedYearSessions && cachedYearSessions.length > 0;
-				const sessionIds = shouldRefreshOnlyRecentSessions
-					? sortedIds.filter((id) => {
-							const sessionDate = getSessionDate(id);
-							return sessionDate && sessionDate >= recentCutoff;
-						})
-					: sortedIds;
+				let sessionIds = shouldOnlyFillMissing
+					? missingSessionIds
+					: shouldRefreshOnlyRecentSessions
+						? sortedIds.filter((id) => {
+								const sessionDate = getSessionDate(id);
+								return sessionDate && sessionDate >= recentCutoff;
+							})
+						: sortedIds;
 
-				if (recentCutoff && !shouldRefreshOnlyRecentSessions) {
+				if (shouldOnlyFillMissing) {
+					addSyncLog(
+						`[${name}/${year.name}] Adding ${missingSessionIds.length} missing session(s).`,
+						"info",
+					);
+				} else if (recentCutoff && !shouldRefreshOnlyRecentSessions) {
 					addSyncLog(
 						`[${name}/${year.name}] No local year cache; refreshing the full year.`,
 						"info",
 					);
 				}
 
+				UpdateSessionsStore.update((s) => {
+					s.status[itemIndex].sessionProgress = 0;
+					s.status[itemIndex].sessionCount = sessionIds.length;
+					s.status = [...s.status];
+				});
+
+				let completedSessions = 0;
 				const yearSessionsLimit = pLimit(10);
 				const yearSessions = (
 					await Promise.all(
 						sessionIds.map((id) =>
 							yearSessionsLimit(async () => {
-								if (targetSessionId && id !== targetSessionId) {
-									const cachedSession = (cachedYearSessions || []).find(
-										(s) => s.id === id || s.name === id,
-									);
-									if (cachedSession) {
-										return cachedSession;
+								try {
+									if (targetSessionId && id !== targetSessionId) {
+										const cachedSession = (cachedYearSessions || []).find(
+											(s) => s.id === id || s.name === id,
+										);
+										if (cachedSession) {
+											return cachedSession;
+										}
+									} else if (targetSessionId && id === targetSessionId) {
+										addSyncLog(
+											`[${name}] Force re-fetching metadata for targeted session: ${id}`,
+											"info",
+										);
 									}
-								} else if (targetSessionId && id === targetSessionId) {
-									addSyncLog(
-										`[${name}] Force re-fetching metadata for targeted session: ${id}`,
-										"info",
-									);
-								}
 
-								const [, , sessionName] =
-									id.trim().match(/(\d+-\d+-\d+) (.*)/) || [];
-								let tags =
-									getMetadataValue(sessionTagsMap, id, sessionName) || [];
-								let duration = getMetadataValue(
-									sessionDurationMap,
-									id,
-									sessionName,
-								);
-								let summary = getMetadataValue(
-									sessionSummariesMap,
-									id,
-									sessionName,
-								);
-								let transcription = getMetadataValue(
-									sessionTranscriptionMap,
-									id,
-									sessionName,
-								);
-								if (targetSessionId && id === targetSessionId) {
-									addSyncLog(
-										`[${name}] Resolved metadata keys - id: "${id}", sessionName: "${sessionName || "none"}"`,
-										"info",
+									const [, , sessionName] =
+										id.trim().match(/(\d+-\d+-\d+) (.*)/) || [];
+									let tags =
+										getMetadataValue(sessionTagsMap, id, sessionName) || [];
+									let duration = getMetadataValue(
+										sessionDurationMap,
+										id,
+										sessionName,
 									);
-									addSyncLog(
-										`[${name}] Resolved tags from S3: ${JSON.stringify(tags)}`,
-										"info",
+									let summary = getMetadataValue(
+										sessionSummariesMap,
+										id,
+										sessionName,
 									);
-									addSyncLog(
-										`[${name}] Resolved duration from S3: ${duration || "none"}`,
-										"info",
+									let transcription = getMetadataValue(
+										sessionTranscriptionMap,
+										id,
+										sessionName,
 									);
-									addSyncLog(
-										`[${name}] Resolved summary from S3: ${summary ? summary.substring(0, 80) + "..." : "none"}`,
-										"info",
+									if (targetSessionId && id === targetSessionId) {
+										addSyncLog(
+											`[${name}] Resolved metadata keys - id: "${id}", sessionName: "${sessionName || "none"}"`,
+											"info",
+										);
+										addSyncLog(
+											`[${name}] Resolved tags from S3: ${JSON.stringify(tags)}`,
+											"info",
+										);
+										addSyncLog(
+											`[${name}] Resolved duration from S3: ${duration || "none"}`,
+											"info",
+										);
+										addSyncLog(
+											`[${name}] Resolved summary from S3: ${summary ? summary.substring(0, 80) + "..." : "none"}`,
+											"info",
+										);
+										addSyncLog(
+											`[${name}] Resolved transcription from S3: ${transcription || "none"}`,
+											"info",
+										);
+									}
+									let transcriptPath = null;
+									const wasabiFiles = wasabiFilesMap[id] || [];
+									const digitalOceanFiles = getDigitalOceanSessionFiles(
+										digitalOceanFilesMap[id],
+										wasabiFiles,
 									);
-									addSyncLog(
-										`[${name}] Resolved transcription from S3: ${transcription || "none"}`,
-										"info",
-									);
-								}
-								let transcriptPath = null;
-								const wasabiFiles = wasabiFilesMap[id] || [];
-								const digitalOceanFiles = getDigitalOceanSessionFiles(
-									digitalOceanFilesMap[id],
-									wasabiFiles,
-								);
-								const files = [
-									...getWasabiSessionFiles(wasabiFiles),
-									...digitalOceanFiles,
-								];
-								const metadataFallbackFiles = [
-									...digitalOceanFiles,
-									...wasabiFiles,
-								];
+									const files = [
+										...getWasabiSessionFiles(wasabiFiles),
+										...digitalOceanFiles,
+									];
+									const metadataFallbackFiles = [
+										...digitalOceanFiles,
+										...wasabiFiles,
+									];
 
-								if (!tags.length) {
-									const tagsFile = metadataFallbackFiles.find((f) =>
-										isTagsFile(f.name),
-									);
-									if (tagsFile) {
-										try {
-											const content = await storage.readFile(tagsFile.path);
-											const parsed = JSON.parse(content);
-											if (Array.isArray(parsed)) {
-												tags = parsed;
-											} else if (parsed && Array.isArray(parsed.tags)) {
-												tags = parsed.tags;
+									if (!tags.length) {
+										const tagsFile = metadataFallbackFiles.find((f) =>
+											isTagsFile(f.name),
+										);
+										if (tagsFile) {
+											try {
+												const content = await storage.readFile(tagsFile.path);
+												const parsed = JSON.parse(content);
+												if (Array.isArray(parsed)) {
+													tags = parsed;
+												} else if (parsed && Array.isArray(parsed.tags)) {
+													tags = parsed.tags;
+												}
+											} catch (err) {
+												structuredLogger.warn(
+													`[Sync] Failed to read tags file ${tagsFile.path}`,
+													err,
+												);
 											}
-										} catch (err) {
-											structuredLogger.warn(
-												`[Sync] Failed to read tags file ${tagsFile.path}`,
-												err,
-											);
 										}
 									}
-								}
 
-								if (!duration || duration < 1) {
-									const durationFile = metadataFallbackFiles.find((f) =>
-										isDurationFile(f.name),
-									);
-									if (durationFile) {
-										try {
-											const content = await storage.readFile(durationFile.path);
+									if (!duration || duration < 1) {
+										const durationFile = metadataFallbackFiles.find((f) =>
+											isDurationFile(f.name),
+										);
+										if (durationFile) {
 											try {
-												const parsed = JSON.parse(content);
-												if (parsed && typeof parsed.duration === "number") {
-													duration = parsed.duration;
-												} else {
+												const content = await storage.readFile(
+													durationFile.path,
+												);
+												try {
+													const parsed = JSON.parse(content);
+													if (parsed && typeof parsed.duration === "number") {
+														duration = parsed.duration;
+													} else {
+														duration = parseFloat(content);
+													}
+												} catch {
 													duration = parseFloat(content);
 												}
-											} catch {
-												duration = parseFloat(content);
+											} catch (err) {
+												structuredLogger.warn(
+													`[Sync] Failed to read duration file ${durationFile.path}`,
+													err,
+												);
 											}
-										} catch (err) {
-											structuredLogger.warn(
-												`[Sync] Failed to read duration file ${durationFile.path}`,
-												err,
-											);
 										}
 									}
-								}
 
-								if (!summary) {
-									const summaryFile = metadataFallbackFiles.find((f) =>
-										isSummaryFile(f.name),
-									);
-									if (summaryFile) {
-										try {
-											summary = await storage.readFile(summaryFile.path);
-										} catch (err) {
-											structuredLogger.warn(
-												`[Sync] Failed to read summary file ${summaryFile.path}`,
-												err,
-											);
+									if (!summary) {
+										const summaryFile = metadataFallbackFiles.find((f) =>
+											isSummaryFile(f.name),
+										);
+										if (summaryFile) {
+											try {
+												summary = await storage.readFile(summaryFile.path);
+											} catch (err) {
+												structuredLogger.warn(
+													`[Sync] Failed to read summary file ${summaryFile.path}`,
+													err,
+												);
+											}
 										}
 									}
-								}
 
-								// If not in consolidated zip, check for individual file or .txt inside the folder.
-								// Usually it's sessionID.txt. If we didn't get it from zip, check files list.
-								if (!transcription) {
-									const txtFile = metadataFallbackFiles.find((f) =>
-										f.name.toLowerCase().endsWith(".txt"),
+									// If not in consolidated zip, check for individual file or .txt inside the folder.
+									// Usually it's sessionID.txt. If we didn't get it from zip, check files list.
+									if (!transcription) {
+										const txtFile = metadataFallbackFiles.find((f) =>
+											f.name.toLowerCase().endsWith(".txt"),
+										);
+										if (txtFile) {
+											transcription = true;
+											transcriptPath = txtFile.path;
+										}
+									}
+
+									const item = createSessionItem(
+										id,
+										files,
+										year.name,
+										name,
+										tags,
+										duration,
+										summary,
+										transcription,
+										transcriptPath,
 									);
-									if (txtFile) {
-										transcription = true;
-										transcriptPath = txtFile.path;
+
+									if (targetSessionId && id === targetSessionId) {
+										addSyncLog(
+											`[${name}] Targeted session metadata updated successfully: ${id}`,
+											"success",
+										);
+									}
+
+									return item;
+								} finally {
+									completedSessions++;
+									if (
+										completedSessions === sessionIds.length ||
+										completedSessions % 25 === 0
+									) {
+										UpdateSessionsStore.update((s) => {
+											s.status[itemIndex].sessionProgress = completedSessions;
+											s.status[itemIndex].sessionCount = sessionIds.length;
+											s.status = [...s.status];
+										});
 									}
 								}
-
-								const item = createSessionItem(
-									id,
-									files,
-									year.name,
-									name,
-									tags,
-									duration,
-									summary,
-									transcription,
-									transcriptPath,
-								);
-
-								if (targetSessionId && id === targetSessionId) {
-									addSyncLog(
-										`[${name}] Targeted session metadata updated successfully: ${id}`,
-										"success",
-									);
-								}
-
-								return item;
 							}),
 						),
 					)
 				).filter(Boolean);
 
-				const sessionsToPersist = shouldRefreshOnlyRecentSessions
-					? mergeSessionsById(cachedYearSessions, yearSessions)
-					: yearSessions;
+				const sessionsToPersist =
+					shouldRefreshOnlyRecentSessions || shouldOnlyFillMissing
+						? mergeSessionsById(cachedYearSessions, yearSessions)
+						: yearSessions;
 
 				if (isMerged || isBundled) {
-					allSessions.push(...yearSessions);
+					// Always persist the full year view: fill-missing / recent
+					// refreshes only process a subset, so push the merged result.
+					allSessions.push(...sessionsToPersist);
 				} else {
 					const { counter, newCount, newSessions } = await updateYearSync(
 						name,
@@ -960,10 +1026,10 @@ export async function updateGroupProcess(
 					metadataFingerprint,
 					{
 						items: metadataYearItems,
-						tags: sessionTagsMap,
-						durations: sessionDurationMap,
-						summaries: sessionSummariesMap,
-						transcriptions: sessionTranscriptionMap,
+						tags: metadata.tags,
+						durations: metadata.durations,
+						summaries: metadata.summaries,
+						transcriptions: metadata.transcriptions,
 					},
 				);
 			} catch (err) {
@@ -976,6 +1042,8 @@ export async function updateGroupProcess(
 			} finally {
 				UpdateSessionsStore.update((s) => {
 					s.status[itemIndex].progress++;
+					s.status[itemIndex].sessionProgress = 0;
+					s.status[itemIndex].sessionCount = 0;
 					s.status = [...s.status];
 				});
 			}
