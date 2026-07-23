@@ -174,6 +174,18 @@ export default function Controls({
 					clearPendingError();
 					return;
 				}
+				// Media errors often emit pause next. Stash resume intent now so that
+				// pause cannot clear wantPlaying before URL renew/path change runs.
+				if (!pendingResumeRef.current) {
+					const position =
+						Number.isFinite(playerRef.currentTime) && playerRef.currentTime > 0
+							? playerRef.currentTime
+							: currentTimeRef.current;
+					pendingResumeRef.current = {
+						position: position > 0 ? position : 0,
+						shouldPlay: wantPlayingRef.current,
+					};
+				}
 				if (errorTimeoutRef.current) {
 					clearTimeout(errorTimeoutRef.current);
 				}
@@ -214,8 +226,9 @@ export default function Controls({
 					wantPlayingRef.current = true;
 				}
 				if (name === "pause") {
-					// load()/errors pause the element; keep play intent during renew.
-					if (!renewing && !pendingResumeRef.current) {
+					// load()/errors pause the element; keep play intent during renew
+					// or when a resume was already stashed from an error event.
+					if (!renewing && !pendingResumeRef.current && !playerRef.error) {
 						wantPlayingRef.current = false;
 					}
 				}
@@ -529,6 +542,12 @@ export default function Controls({
 	};
 	const pause = () => {
 		wantPlayingRef.current = false;
+		if (pendingResumeRef.current) {
+			pendingResumeRef.current = {
+				...pendingResumeRef.current,
+				shouldPlay: false,
+			};
+		}
 		clearPlayPending();
 		playerRef.pause();
 	};
