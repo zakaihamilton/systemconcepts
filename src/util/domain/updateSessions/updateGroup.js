@@ -27,6 +27,7 @@ import { cleanupBundledGroup, cleanupMergedGroup } from "./cleanup";
 import {
 	getCombinedYearFingerprint,
 	getMetadataFileFingerprint,
+	getYearFingerprint,
 	normalizeMetadataPayload,
 	serializeMetadataFingerprint,
 } from "./fingerprints";
@@ -90,32 +91,121 @@ function isCandidateSessionId(id) {
 	return /^\d{4}-\d{2}-\d{2} .+/.test(String(id || "").trim());
 }
 
-function getMissingSessionIds(yearItems, cachedYearSessions, yearName) {
+function hasMediaFiles(files) {
+	return (files || []).some(
+		(file) =>
+			isAudioFile(file.name) ||
+			isVideoFile(file.name) ||
+			isImageFile(file.name),
+	);
+}
+
+function getListingSessionFingerprints(yearItems, yearName) {
 	const wasabiFilesMap = groupFilesBySessionId(yearItems, yearName);
+	const fingerprints = Object.create(null);
+	for (const [id, files] of Object.entries(wasabiFilesMap)) {
+		if (!isCandidateSessionId(id) || !hasMediaFiles(files)) {
+			continue;
+		}
+		fingerprints[id] = JSON.stringify(getYearFingerprint(files));
+	}
+	return fingerprints;
+}
+
+function getMissingSessionIds(yearItems, cachedYearSessions, yearName) {
+	const listingFingerprints = getListingSessionFingerprints(
+		yearItems,
+		yearName,
+	);
 	const cachedIds = new Set(
 		(cachedYearSessions || [])
 			.map((session) => session.id || session.name)
 			.filter(Boolean),
 	);
-	const missingIds = [];
-	for (const [id, files] of Object.entries(wasabiFilesMap)) {
-		if (!isCandidateSessionId(id)) {
-			continue;
-		}
-		const hasMedia = (files || []).some(
-			(file) =>
-				isAudioFile(file.name) ||
-				isVideoFile(file.name) ||
-				isImageFile(file.name),
-		);
-		if (!hasMedia) {
-			continue;
-		}
-		if (!cachedIds.has(id)) {
-			missingIds.push(id);
+	return Object.keys(listingFingerprints)
+		.filter((id) => !cachedIds.has(id))
+		.sort((a, b) => a.localeCompare(b));
+}
+
+/**
+ * When the year listing fingerprint changes but local sessions already exist,
+ * only rematerialize sessions whose media set is new or changed — not the
+ * entire year (which left large groups stuck at 0/1 Years).
+ */
+function getSessionIdsNeedingRefresh(
+	yearItems,
+	cachedYearSessions,
+	yearName,
+	previousSessionFingerprints,
+) {
+	const listingFingerprints = getListingSessionFingerprints(
+		yearItems,
+		yearName,
+	);
+	const cachedById = new Map();
+	for (const session of cachedYearSessions || []) {
+		const id = session.id || session.name;
+		if (id) {
+			cachedById.set(id, session);
 		}
 	}
-	return missingIds.sort((a, b) => a.localeCompare(b));
+	const previous = previousSessionFingerprints || {};
+	const wasabiFilesMap = groupFilesBySessionId(yearItems, yearName);
+	const ids = [];
+	for (const [id, listingFp] of Object.entries(listingFingerprints)) {
+		const cached = cachedById.get(id);
+		if (!cached) {
+			ids.push(id);
+			continue;
+		}
+		if (Object.prototype.hasOwnProperty.call(previous, id)) {
+			if (previous[id] !== listingFp) {
+				ids.push(id);
+			}
+			continue;
+		}
+		// Legacy year caches lack per-session fingerprints; fall back to
+		// comparing stored file names so we still pick up newly added media.
+		// Sessions without a stored file list are treated as unchanged so we
+		// do not rematerialize the entire year on the first incremental run.
+		if (!cached.files || cached.files.length === 0) {
+			continue;
+		}
+		const wasabiFiles = wasabiFilesMap[id] || [];
+		const listingNames = wasabiFiles
+			.map((file) => file.name)
+			.sort()
+			.join("\0");
+		const cachedNames = [...cached.files].sort().join("\0");
+		if (listingNames !== cachedNames) {
+			ids.push(id);
+		}
+	}
+	return ids.sort((a, b) => a.localeCompare(b));
+}
+
+function mergeListingSessions(
+	listingSessionIds,
+	cachedYearSessions,
+	refreshedSessions,
+) {
+	const cachedById = new Map();
+	for (const session of cachedYearSessions || []) {
+		const id = session.id || session.name;
+		if (id) {
+			cachedById.set(id, session);
+		}
+	}
+	const refreshedById = new Map();
+	for (const session of refreshedSessions || []) {
+		const id = session.id || session.name;
+		if (id) {
+			refreshedById.set(id, session);
+		}
+	}
+	return listingSessionIds
+		.map((id) => refreshedById.get(id) || cachedById.get(id))
+		.filter(Boolean);
 }
 
 function buildMetadataLookup(map) {
@@ -228,6 +318,7 @@ async function writeYearCache(
 	fingerprint,
 	metadataFingerprint,
 	metadata,
+	sessionFingerprints = null,
 ) {
 	try {
 		const path = getYearCachePath(groupName, yearName);
@@ -238,6 +329,7 @@ async function writeYearCache(
 				fingerprint,
 				metadataFingerprint: serializeMetadataFingerprint(metadataFingerprint),
 				metadata: normalizeMetadataPayload(metadata),
+				sessionFingerprints: sessionFingerprints || {},
 				updatedAt: Date.now(),
 			}),
 		);
@@ -466,10 +558,26 @@ async function getYearMetadata(
 		);
 		return normalizeMetadataPayload(metadata);
 	} catch (err) {
+		const timedOut = /timed out/i.test(String(err?.message || err));
 		structuredLogger.warn(
-			`[UpdateGroup] Aggregated metadata fetch failed for ${name}/${year.name}; falling back to legacy metadata reads`,
+			`[UpdateGroup] Aggregated metadata fetch failed for ${name}/${year.name}; ${
+				timedOut
+					? "skipping legacy fallback after timeout"
+					: "falling back to legacy metadata reads"
+			}`,
 			err,
 		);
+		if (timedOut) {
+			// Legacy reads (especially zip) have no timeouts and can hang forever
+			// after a metadata timeout — prefer cached/empty metadata instead.
+			const cached = await loadCachedYearMetadata(
+				name,
+				year.name,
+				isMerged,
+				isBundled,
+			);
+			return cached || normalizeMetadataPayload({});
+		}
 		return await getLegacyMetadata(
 			year,
 			name,
@@ -687,6 +795,13 @@ export async function updateGroupProcess(
 						(s) => s.id === targetSessionId || s.name === targetSessionId,
 					);
 
+				const listingSessionFingerprints = getListingSessionFingerprints(
+					yearItems,
+					year.name,
+				);
+				const listingSessionIds = Object.keys(listingSessionFingerprints).sort(
+					(a, b) => a.localeCompare(b),
+				);
 				const missingSessionIds = getMissingSessionIds(
 					yearItems,
 					cachedYearSessions,
@@ -716,16 +831,30 @@ export async function updateGroupProcess(
 					return;
 				}
 
-				// When the listing fingerprint is unchanged but local cache is
-				// missing media sessions, only materialize those IDs instead of
-				// reprocessing the entire year (which hung large groups at 0/1).
-				const shouldOnlyFillMissing =
+				// Prefer incremental rematerialization whenever we already have local
+				// sessions. A changed year fingerprint (new Wasabi media) used to force
+				// a full-year rebuild and hang large groups before any progress painted.
+				const shouldRefreshIncrementally =
 					!forceUpdate &&
 					!isTargetInThisYear &&
 					!recentCutoff &&
-					fingerprintMatches &&
-					missingSessionIds.length > 0 &&
 					hasCachedSessions;
+				const incrementalSessionIds = shouldRefreshIncrementally
+					? getSessionIdsNeedingRefresh(
+							yearItems,
+							cachedYearSessions,
+							year.name,
+							cachedYear?.sessionFingerprints,
+						)
+					: null;
+
+				UpdateSessionsStore.update((s) => {
+					s.status[itemIndex].phase = "metadata";
+					s.status[itemIndex].year = year.name;
+					s.status[itemIndex].sessionProgress = 0;
+					s.status[itemIndex].sessionCount = 0;
+					s.status = [...s.status];
+				});
 
 				const metadata = await getYearMetadata(
 					year,
@@ -758,8 +887,8 @@ export async function updateGroupProcess(
 				).sort((a, b) => a.localeCompare(b));
 				const shouldRefreshOnlyRecentSessions =
 					recentCutoff && cachedYearSessions && cachedYearSessions.length > 0;
-				let sessionIds = shouldOnlyFillMissing
-					? missingSessionIds
+				let sessionIds = shouldRefreshIncrementally
+					? incrementalSessionIds
 					: shouldRefreshOnlyRecentSessions
 						? sortedIds.filter((id) => {
 								const sessionDate = getSessionDate(id);
@@ -767,9 +896,9 @@ export async function updateGroupProcess(
 							})
 						: sortedIds;
 
-				if (shouldOnlyFillMissing) {
+				if (shouldRefreshIncrementally) {
 					addSyncLog(
-						`[${name}/${year.name}] Adding ${missingSessionIds.length} missing session(s).`,
+						`[${name}/${year.name}] Refreshing ${sessionIds.length} changed session(s) (of ${listingSessionIds.length}).`,
 						"info",
 					);
 				} else if (recentCutoff && !shouldRefreshOnlyRecentSessions) {
@@ -780,6 +909,7 @@ export async function updateGroupProcess(
 				}
 
 				UpdateSessionsStore.update((s) => {
+					s.status[itemIndex].phase = "sessions";
 					s.status[itemIndex].sessionProgress = 0;
 					s.status[itemIndex].sessionCount = sessionIds.length;
 					s.status = [...s.status];
@@ -979,8 +1109,14 @@ export async function updateGroupProcess(
 				).filter(Boolean);
 
 				const sessionsToPersist =
-					shouldRefreshOnlyRecentSessions || shouldOnlyFillMissing
-						? mergeSessionsById(cachedYearSessions, yearSessions)
+					shouldRefreshOnlyRecentSessions || shouldRefreshIncrementally
+						? shouldRefreshIncrementally
+							? mergeListingSessions(
+									listingSessionIds,
+									cachedYearSessions,
+									yearSessions,
+								)
+							: mergeSessionsById(cachedYearSessions, yearSessions)
 						: yearSessions;
 
 				if (isMerged || isBundled) {
@@ -1031,6 +1167,7 @@ export async function updateGroupProcess(
 						summaries: metadata.summaries,
 						transcriptions: metadata.transcriptions,
 					},
+					listingSessionFingerprints,
 				);
 			} catch (err) {
 				structuredLogger.error(err);
@@ -1044,6 +1181,7 @@ export async function updateGroupProcess(
 					s.status[itemIndex].progress++;
 					s.status[itemIndex].sessionProgress = 0;
 					s.status[itemIndex].sessionCount = 0;
+					s.status[itemIndex].phase = null;
 					s.status = [...s.status];
 				});
 			}
