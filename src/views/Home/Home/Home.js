@@ -128,7 +128,7 @@ function SessionContent({ translations }) {
 	const { useRecentHistory } = require("@util/domain/history");
 	const { SessionsStore, useSessions } = require("@util/domain/sessions");
 	const { useSyncFeature } = require("@sync/sync");
-	const { SyncActiveStore } = require("@sync/syncState");
+	const { SyncActiveStore, UpdateSessionsStore } = require("@sync/syncState");
 	const [sessions, loading] = useSessions([], {
 		filterSessions: false,
 		showToolbar: false,
@@ -142,6 +142,9 @@ function SessionContent({ translations }) {
 	const needsSessionReload = SyncActiveStore.useState(
 		(state) => state.needsSessionReload,
 	);
+	const updateSessionsBusy = UpdateSessionsStore.useState(
+		(state) => state.busy,
+	);
 	const sessionsLoading = loading || sessions === null;
 	const continueWatchingLoading = sessionsLoading || historyLoading;
 	const delayedSessionLoading = useDelayedLoading(sessionsLoading);
@@ -153,7 +156,7 @@ function SessionContent({ translations }) {
 		continueWatchingLoading && delayedContinueWatchingLoading;
 
 	useEffect(() => {
-		if (!needsSessionReload || syncBusy) return;
+		if (!needsSessionReload || syncBusy || updateSessionsBusy) return;
 
 		SessionsStore.update((state) => {
 			// Keep the current cards visible while useSessions refreshes the data.
@@ -164,7 +167,7 @@ function SessionContent({ translations }) {
 		SyncActiveStore.update((state) => {
 			state.needsSessionReload = false;
 		});
-	}, [needsSessionReload, syncBusy]);
+	}, [needsSessionReload, syncBusy, updateSessionsBusy]);
 	const openScheduleView = (viewMode) => {
 		const { ScheduleStore } = require("@views/Schedule/Schedule");
 		if (typeof window !== "undefined") {

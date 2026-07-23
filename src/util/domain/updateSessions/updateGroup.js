@@ -103,7 +103,9 @@ function groupFilesBySessionId(files, yearName) {
 }
 
 function isCandidateSessionId(id) {
-	return /^\d{4}-\d{2}-\d{2} /.test(String(id || ""));
+	// Keep this aligned with createSessionItem's date/name parse so listing
+	// entries that can never become sessions do not force endless reprocessing.
+	return /^\d{4}-\d{2}-\d{2} .+/.test(String(id || "").trim());
 }
 
 function listingHasMissingSessions(yearItems, cachedYearSessions, yearName) {

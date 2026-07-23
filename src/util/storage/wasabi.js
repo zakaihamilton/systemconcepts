@@ -14,26 +14,29 @@ let wasabiBucket = null;
 export async function getWasabi() {
 	if (wasabiClient) return { client: wasabiClient, bucket: wasabiBucket };
 	const unlock = await lockMutex({ id: "wasabi" });
-	if (!wasabiClient) {
-		if (!process.env.WASABI_URL) {
-			throw new Error("WASABI_URL not defined");
+	try {
+		if (!wasabiClient) {
+			if (!process.env.WASABI_URL) {
+				throw new Error("WASABI_URL not defined");
+			}
+			const wasabiUri = new URL(process.env.WASABI_URL);
+			wasabiBucket = wasabiUri.pathname.replace("/", "");
+			wasabiClient = new S3Client({
+				endpoint: `https://${wasabiUri.host}`,
+				region: wasabiUri.searchParams.get("region") || "us-east-1",
+				credentials: {
+					accessKeyId: decodeURIComponent(wasabiUri.username),
+					secretAccessKey: decodeURIComponent(wasabiUri.password),
+				},
+				forcePathStyle: true,
+				requestChecksumCalculation: "WHEN_REQUIRED",
+				responseChecksumValidation: "WHEN_REQUIRED",
+			});
 		}
-		const wasabiUri = new URL(process.env.WASABI_URL);
-		wasabiBucket = wasabiUri.pathname.replace("/", "");
-		wasabiClient = new S3Client({
-			endpoint: `https://${wasabiUri.host}`,
-			region: wasabiUri.searchParams.get("region") || "us-east-1",
-			credentials: {
-				accessKeyId: decodeURIComponent(wasabiUri.username),
-				secretAccessKey: decodeURIComponent(wasabiUri.password),
-			},
-			forcePathStyle: true,
-			requestChecksumCalculation: "WHEN_REQUIRED",
-			responseChecksumValidation: "WHEN_REQUIRED",
-		});
+		return { client: wasabiClient, bucket: wasabiBucket };
+	} finally {
+		unlock();
 	}
-	unlock();
-	return { client: wasabiClient, bucket: wasabiBucket };
 }
 
 function normalizePath(path) {
