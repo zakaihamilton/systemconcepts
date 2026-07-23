@@ -89,12 +89,12 @@ describe("Audio Component", () => {
 	it("renews the url on media errors and reports a load failure after three attempts", () => {
 		const renewUrl = jest.fn();
 		const onLoadError = jest.fn();
-		const { container } = render(
+		const { container, rerender } = render(
 			<Audio
 				show={true}
 				name="Test Audio"
 				group="testgroup"
-				path="https://media.example/test.m4a"
+				path="https://media.example/test.m4a?sig=1"
 				renewUrl={renewUrl}
 				onLoadError={onLoadError}
 			/>,
@@ -102,12 +102,63 @@ describe("Audio Component", () => {
 		const video = container.querySelector("video");
 
 		fireEvent.error(video);
+		// Simulate a renewed signed URL arriving between attempts.
+		rerender(
+			<Audio
+				show={true}
+				name="Test Audio"
+				group="testgroup"
+				path="https://media.example/test.m4a?sig=2"
+				renewUrl={renewUrl}
+				onLoadError={onLoadError}
+			/>,
+		);
 		fireEvent.error(video);
+		rerender(
+			<Audio
+				show={true}
+				name="Test Audio"
+				group="testgroup"
+				path="https://media.example/test.m4a?sig=3"
+				renewUrl={renewUrl}
+				onLoadError={onLoadError}
+			/>,
+		);
 		fireEvent.error(video);
+		rerender(
+			<Audio
+				show={true}
+				name="Test Audio"
+				group="testgroup"
+				path="https://media.example/test.m4a?sig=4"
+				renewUrl={renewUrl}
+				onLoadError={onLoadError}
+			/>,
+		);
 		fireEvent.error(video);
 
 		expect(renewUrl).toHaveBeenCalledTimes(3);
 		expect(onLoadError).toHaveBeenCalledTimes(1);
+	});
+
+	it("ignores duplicate errors while a renew is already in flight", () => {
+		const renewUrl = jest.fn();
+		const { container } = render(
+			<Audio
+				show={true}
+				name="Test Audio"
+				group="testgroup"
+				path="https://media.example/test.m4a"
+				renewUrl={renewUrl}
+			/>,
+		);
+		const video = container.querySelector("video");
+
+		fireEvent.error(video);
+		fireEvent.error(video);
+		fireEvent.error(video);
+
+		expect(renewUrl).toHaveBeenCalledTimes(1);
 	});
 
 	it("clears recovery state after metadata loads", () => {

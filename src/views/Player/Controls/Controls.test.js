@@ -263,12 +263,25 @@ describe("Controls Component", () => {
 
 	it("shows error alert after delayed error event and allows reload", () => {
 		jest.useFakeTimers();
-		render(<Controls show playerRef={mockPlayer} />);
+		const renewUrl = jest.fn();
+		render(<Controls show playerRef={mockPlayer} renewUrl={renewUrl} />);
 		act(() => {
 			eventListeners.error();
 			jest.advanceTimersByTime(2000);
 		});
 		expect(screen.getByText("Playback error")).toBeInTheDocument();
+		fireEvent.click(screen.getByTestId("button-Reload"));
+		expect(renewUrl).toHaveBeenCalled();
+		expect(mockPlayer.load).not.toHaveBeenCalled();
+	});
+
+	it("falls back to load when reload has no renewUrl", () => {
+		jest.useFakeTimers();
+		render(<Controls show playerRef={mockPlayer} />);
+		act(() => {
+			eventListeners.error();
+			jest.advanceTimersByTime(2000);
+		});
 		fireEvent.click(screen.getByTestId("button-Reload"));
 		expect(mockPlayer.load).toHaveBeenCalled();
 	});
@@ -360,6 +373,82 @@ describe("Controls Component", () => {
 		rerender(<Controls show playerRef={mockPlayer} path="/b.mp3" />);
 		expect(mockPlayer.load).toHaveBeenCalled();
 		expect(mockPlayer.pause).toHaveBeenCalled();
+	});
+
+	it("preserves position and resumes when the signed URL renews", () => {
+		mockPlayer.currentTime = 42;
+		mockPlayer.paused = false;
+		const { rerender } = render(
+			<Controls
+				show
+				playerRef={mockPlayer}
+				path="https://media.example/a?sig=1"
+				renewing
+			/>,
+		);
+		mockPlayer.pause.mockClear();
+		mockPlayer.load.mockClear();
+		mockPlayer.play.mockClear();
+
+		rerender(
+			<Controls
+				show
+				playerRef={mockPlayer}
+				path="https://media.example/a?sig=2"
+				renewing
+			/>,
+		);
+
+		expect(mockPlayer.load).toHaveBeenCalled();
+		// Must not treat URL renew as a session stop/restart.
+		expect(mockPlayer.currentTime).toBe(42);
+		expect(mockPlayer.pause).not.toHaveBeenCalled();
+
+		act(() => {
+			eventListeners.loadedmetadata();
+		});
+		expect(mockPlayer.currentTime).toBe(42);
+
+		act(() => {
+			eventListeners.canplay();
+		});
+		expect(mockPlayer.play).toHaveBeenCalled();
+	});
+
+	it("reloads via renewUrl and resumes after a playback error", () => {
+		jest.useFakeTimers();
+		const renewUrl = jest.fn();
+		mockPlayer.currentTime = 55;
+		const { rerender } = render(
+			<Controls
+				show
+				playerRef={mockPlayer}
+				path="https://media.example/a?sig=1"
+				renewUrl={renewUrl}
+			/>,
+		);
+		act(() => {
+			eventListeners.timeupdate();
+			eventListeners.error();
+			jest.advanceTimersByTime(2000);
+		});
+		fireEvent.click(screen.getByTestId("button-Reload"));
+		expect(renewUrl).toHaveBeenCalled();
+
+		rerender(
+			<Controls
+				show
+				playerRef={mockPlayer}
+				path="https://media.example/a?sig=2"
+				renewUrl={renewUrl}
+			/>,
+		);
+		act(() => {
+			eventListeners.loadedmetadata();
+			eventListeners.canplay();
+		});
+		expect(mockPlayer.currentTime).toBe(55);
+		expect(mockPlayer.play).toHaveBeenCalled();
 	});
 
 	it("handles play rejection", async () => {

@@ -51,6 +51,7 @@ export default function Controls({
 	groupName,
 	sessionDate,
 	renewing,
+	renewUrl,
 	variant,
 }) {
 	const progressRef = useRef(null);
@@ -67,6 +68,10 @@ export default function Controls({
 	const [playPending, setPlayPending] = useState(false);
 	const playPendingTimeoutRef = useRef(null);
 	const playRequestedRef = useRef(false);
+	// When a signed playing URL is renewed, preserve position + resume playback
+	// instead of treating the new URL as a brand-new session.
+	const pendingResumeRef = useRef(null);
+	const currentTimeRef = useRef(0);
 	const clearPlayPending = useCallback(() => {
 		if (playPendingTimeoutRef.current) {
 			clearTimeout(playPendingTimeoutRef.current);
@@ -118,7 +123,30 @@ export default function Controls({
 		stateRef.current = { visible, show, metadata, path };
 	}, [visible, show, metadata, path]);
 
+	useEffect(() => {
+		currentTimeRef.current = currentTime;
+	}, [currentTime]);
+
 	const lastUpdateTimeRef = useRef(0);
+
+	const beginPlay = useCallback(() => {
+		// Do not flash a spinner for the usual immediate start. If playback has not
+		// started shortly, show the pending state so slower signed URLs/buffering
+		// still have clear feedback.
+		if (playPendingTimeoutRef.current) {
+			clearTimeout(playPendingTimeoutRef.current);
+			playPendingTimeoutRef.current = null;
+		}
+		playRequestedRef.current = true;
+		playPendingTimeoutRef.current = setTimeout(() => {
+			playPendingTimeoutRef.current = null;
+			setPlayPending(true);
+		}, PLAY_LOADING_DELAY_MS);
+		playerRef.play().catch((err) => {
+			clearPlayPending();
+			structuredLogger.error(err);
+		});
+	}, [playerRef, clearPlayPending]);
 
 	useEffect(() => {
 		const clearPendingError = () => {
@@ -170,6 +198,7 @@ export default function Controls({
 				if (name === "playing") {
 					clearPlayPending();
 					setLoadedPath(stateRef.current.path);
+					pendingResumeRef.current = null;
 				}
 				if (name === "error") {
 					clearPlayPending();
@@ -184,8 +213,27 @@ export default function Controls({
 			// forever, even though its Play button is usable.
 			if (name === "canplay") {
 				setLoading(false);
+				const resume = pendingResumeRef.current;
+				if (resume?.shouldPlay) {
+					pendingResumeRef.current = {
+						...resume,
+						shouldPlay: false,
+					};
+					beginPlay();
+				}
 			}
 			if (name === "loadedmetadata") {
+				const resume = pendingResumeRef.current;
+				if (
+					resume &&
+					Number.isFinite(resume.position) &&
+					resume.position > 0
+				) {
+					playerRef.currentTime = resume.position; // eslint-disable-line react-hooks/immutability
+					setCurrentTime(resume.position);
+					currentTimeRef.current = resume.position;
+					return;
+				}
 				if (!metadataKey) return; // Skip if metadataKey not ready
 				const currentMetadata = metadataKey
 					? stateRef.current.metadata?.[metadataKey] || {}
@@ -247,7 +295,7 @@ export default function Controls({
 				playerRef.removeEventListener(name, callback),
 			);
 		};
-	}, [playerRef, metadataKey, renewing, clearPlayPending]);
+	}, [playerRef, metadataKey, renewing, clearPlayPending, beginPlay]);
 
 	useEffect(() => {
 		if (renewing && errorTimeoutRef.current) {
@@ -462,18 +510,7 @@ export default function Controls({
 		},
 	};
 	const play = () => {
-		// Do not flash a spinner for the usual immediate start. If playback has not
-		// started shortly, show the pending state so slower signed URLs/buffering
-		// still have clear feedback.
-		playRequestedRef.current = true;
-		playPendingTimeoutRef.current = setTimeout(() => {
-			playPendingTimeoutRef.current = null;
-			setPlayPending(true);
-		}, PLAY_LOADING_DELAY_MS);
-		playerRef.play().catch((err) => {
-			clearPlayPending();
-			structuredLogger.error(err);
-		});
+		beginPlay();
 	};
 	const pause = () => {
 		clearPlayPending();
@@ -481,21 +518,64 @@ export default function Controls({
 	};
 	const stop = useCallback(() => {
 		clearPlayPending();
+		pendingResumeRef.current = null;
 		playerRef.pause();
 		playerRef.currentTime = 0; // eslint-disable-line react-hooks/immutability
 		setCurrentTime(0);
 	}, [playerRef, clearPlayPending]);
+
+	const reloadMedia = useCallback(() => {
+		const position =
+			Number.isFinite(playerRef.currentTime) && playerRef.currentTime > 0
+				? playerRef.currentTime
+				: currentTimeRef.current;
+		pendingResumeRef.current = {
+			position: position > 0 ? position : 0,
+			shouldPlay: true,
+		};
+		setError(null);
+		if (renewUrl) {
+			renewUrl();
+			return;
+		}
+		playerRef.load();
+	}, [playerRef, renewUrl]);
 
 	const prevPath = useRef(path);
 	useEffect(() => {
 		if (prevPath.current === path) {
 			return;
 		}
+		const hadPreviousPath = !!prevPath.current;
 		prevPath.current = path;
+
+		// A new signed URL for the same session arrives while renewing/recovering.
+		// Preserve position and resume instead of stopping at 0.
+		if (hadPreviousPath && path && (renewing || pendingResumeRef.current)) {
+			const position =
+				Number.isFinite(playerRef.currentTime) && playerRef.currentTime > 0
+					? playerRef.currentTime
+					: currentTimeRef.current;
+			const stashed = pendingResumeRef.current?.position;
+			pendingResumeRef.current = {
+				position:
+					Number.isFinite(stashed) && stashed > 0
+						? stashed
+						: position > 0
+							? position
+							: 0,
+				shouldPlay: pendingResumeRef.current?.shouldPlay ?? true,
+			};
+			playerRef.load();
+			setLoadedPath(null);
+			return;
+		}
+
+		pendingResumeRef.current = null;
 		stop();
 		playerRef.load();
 		setLoadedPath(null);
-	}, [path, playerRef, stop]);
+	}, [path, playerRef, stop, renewing]);
 
 	return (
 		<>
@@ -508,7 +588,7 @@ export default function Controls({
 					action={
 						<Button
 							variant="contained"
-							onClick={() => playerRef.load()}
+							onClick={reloadMedia}
 							size="small"
 						>
 							{translations.RELOAD}
@@ -570,7 +650,7 @@ export default function Controls({
 						<PlayerButton
 							icon={<ReplayIcon />}
 							name={translations.RELOAD}
-							onClick={() => playerRef.load()}
+							onClick={reloadMedia}
 							variant={variant}
 						/>
 					)}

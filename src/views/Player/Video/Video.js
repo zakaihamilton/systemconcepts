@@ -5,6 +5,8 @@ import { PlayerStore } from "../Player";
 import Toolbar from "../Toolbar";
 import styles from "./Video.module.css";
 
+const MAX_RENEW_ATTEMPTS = 3;
+
 export default function Video({
 	show,
 	metadataPath,
@@ -25,27 +27,46 @@ export default function Video({
 	const ref = useRef();
 	const { style, className, ...videoProps } = props;
 	const [playerRef, setPlayerRef] = useState(null);
-	const [errorCount, setErrorCount] = useState(0);
 	const [recovering, setRecovering] = useState(false);
+	const errorCountRef = useRef(0);
+	const renewInFlightRef = useRef(false);
 	const reportedLoadError = useRef(false);
 
 	const onError = () => {
-		if (errorCount < 3) {
+		// Ignore duplicate errors from the dying source while a renew is in flight.
+		if (renewInFlightRef.current || renewing) {
+			return;
+		}
+		if (errorCountRef.current < MAX_RENEW_ATTEMPTS) {
 			structuredLogger.debug("Video error, renewing URL...");
+			renewInFlightRef.current = true;
 			setRecovering(true);
-			renewUrl();
-			setErrorCount((count) => count + 1);
+			errorCountRef.current += 1;
+			renewUrl?.();
 		} else if (!reportedLoadError.current) {
 			reportedLoadError.current = true;
+			setRecovering(false);
 			onLoadError?.();
 		}
 	};
 
 	const clearRecovery = () => {
+		renewInFlightRef.current = false;
 		setRecovering(false);
-		setErrorCount(0);
+		errorCountRef.current = 0;
 		reportedLoadError.current = false;
 	};
+
+	useEffect(() => {
+		// A new signed URL arrived — allow subsequent errors to renew again.
+		renewInFlightRef.current = false;
+	}, [path]);
+
+	useEffect(() => {
+		if (!renewing) {
+			renewInFlightRef.current = false;
+		}
+	}, [renewing]);
 
 	useEffect(() => {
 		setPlayerRef(ref.current);
@@ -92,6 +113,7 @@ export default function Video({
 						sessionName={name}
 						groupName={group}
 						renewing={renewing || recovering}
+						renewUrl={renewUrl}
 						variant="video"
 					/>
 				)}

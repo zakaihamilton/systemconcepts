@@ -10,6 +10,8 @@ import { PlayerStore } from "../Player";
 import Toolbar from "../Toolbar";
 import styles from "./Audio.module.css";
 
+const MAX_RENEW_ATTEMPTS = 3;
+
 export default function Audio({
 	show,
 	metadataPath,
@@ -32,28 +34,47 @@ export default function Audio({
 	const ref = useRef();
 	const [playerRef, setPlayerRef] = useState(null);
 	const [duration, setDuration] = useState(0);
-	const [errorCount, setErrorCount] = useState(0);
 	const [recovering, setRecovering] = useState(false);
 	const [loadedPath, setLoadedPath] = useState(null);
+	const errorCountRef = useRef(0);
+	const renewInFlightRef = useRef(false);
 	const reportedLoadError = useRef(false);
 
 	const onError = () => {
-		if (errorCount < 3) {
+		// Ignore duplicate errors from the dying source while a renew is in flight.
+		if (renewInFlightRef.current || renewing) {
+			return;
+		}
+		if (errorCountRef.current < MAX_RENEW_ATTEMPTS) {
 			structuredLogger.debug("Audio error, renewing URL...");
+			renewInFlightRef.current = true;
 			setRecovering(true);
-			renewUrl();
-			setErrorCount((count) => count + 1);
+			errorCountRef.current += 1;
+			renewUrl?.();
 		} else if (!reportedLoadError.current) {
 			reportedLoadError.current = true;
+			setRecovering(false);
 			onLoadError?.();
 		}
 	};
 
 	const clearRecovery = () => {
+		renewInFlightRef.current = false;
 		setRecovering(false);
-		setErrorCount(0);
+		errorCountRef.current = 0;
 		reportedLoadError.current = false;
 	};
+
+	useEffect(() => {
+		// A new signed URL arrived — allow subsequent errors to renew again.
+		renewInFlightRef.current = false;
+	}, [path]);
+
+	useEffect(() => {
+		if (!renewing) {
+			renewInFlightRef.current = false;
+		}
+	}, [renewing]);
 
 	useEffect(() => {
 		setPlayerRef(ref.current);
@@ -136,7 +157,8 @@ export default function Audio({
 				<div
 					className={clsx(
 						styles.card,
-						(renewing || !duration || loadedPath !== path) && styles.loading,
+						(renewing || recovering || !duration || loadedPath !== path) &&
+							styles.loading,
 					)}
 					style={{ "--group-color": color }}
 				>
@@ -182,6 +204,7 @@ export default function Audio({
 					groupName={group}
 					sessionDate={date}
 					renewing={renewing || recovering}
+					renewUrl={renewUrl}
 				/>
 			)}
 			{playerRef && (
