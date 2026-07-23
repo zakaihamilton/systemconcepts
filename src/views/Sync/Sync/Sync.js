@@ -3,7 +3,7 @@ import { registerToolbar, useToolbar } from "@components/Toolbar";
 import CachedIcon from "@icons/svg/Cached.svg";
 import ContentCopyIcon from "@icons/svg/ContentCopy.svg";
 import UpdateIcon from "@icons/svg/Update.svg";
-import { clearBundleCache, useSyncFeature } from "@sync/sync";
+import { resetLocalCacheForFullSync, useSyncFeature } from "@sync/sync";
 import { SyncActiveStore } from "@sync/syncState";
 import Box from "@ui/Box";
 import Button from "@ui/Button";
@@ -129,7 +129,7 @@ export default function Sync() {
 
 	const fullSync = async () => {
 		try {
-			await clearBundleCache();
+			await resetLocalCacheForFullSync();
 			setConfirmFullSync(false);
 			await sync();
 		} catch (err) {

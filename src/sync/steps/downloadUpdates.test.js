@@ -4,7 +4,10 @@ import { readCompressedFileRaw } from "../bundle";
 import { addSyncLog } from "../logs";
 import { SyncActiveStore } from "../syncState";
 import { moveFolderToTrash } from "../trash";
-import { downloadUpdates } from "./downloadUpdates";
+import {
+	beginFreshLocalWriteGeneration,
+	downloadUpdates,
+} from "./downloadUpdates";
 
 beforeAll(() => {
 	global.TextEncoder = TextEncoder;
@@ -127,6 +130,33 @@ describe("downloadUpdates", () => {
 		await sync;
 
 		expect(storage.writeFile).toHaveBeenCalledTimes(3);
+	});
+
+	it("does not wait for a previous database generation's stuck write", async () => {
+		readCompressedFileRaw.mockResolvedValue('{"sessions":[]}');
+		storage.writeFile.mockImplementationOnce(() => new Promise(() => {}));
+
+		void downloadUpdates(
+			[],
+			[{ path: "/old.json", version: "1" }],
+			"local/sync",
+			"aws/sync",
+		);
+		await new Promise((resolve) => setTimeout(resolve, 0));
+
+		beginFreshLocalWriteGeneration();
+		const freshSync = await downloadUpdates(
+			[],
+			[{ path: "/fresh.json", version: "1" }],
+			"local/sync",
+			"aws/sync",
+		);
+
+		expect(freshSync.complete).toBe(true);
+		expect(storage.writeFile).toHaveBeenCalledWith(
+			"/local/sync/fresh.json",
+			expect.any(String),
+		);
 	});
 
 	it("treats a confirmed 404 as missing and cleans it out of the remote manifest", async () => {

@@ -4,6 +4,7 @@ import { logger as structuredLogger } from "@util/api/logger";
 import storage from "@util/storage/storage";
 import { SYNC_CONFIG } from "./config";
 import { addSyncLog } from "./logs";
+import { beginFreshLocalWriteGeneration } from "./steps/downloadUpdates";
 import { SyncActiveStore } from "./syncState";
 import { clearLegacySyncStorage, clearUserSyncStorage } from "./userStorage";
 
@@ -36,4 +37,30 @@ export async function clearBundleCache({
 	} catch (error) {
 		structuredLogger.error("[Sync] Error clearing cache:", error);
 	}
+}
+
+/**
+ * Reset the entire LightningFS cache before a user-requested Full Sync.
+ * @param {{userId?: string}} options
+ */
+export async function resetLocalCacheForFullSync(options = {}) {
+	const { userId } = options;
+	addSyncLog("Starting Full Sync with a fresh local database…", "warning");
+	await storage.resetLocalFileSystem();
+	beginFreshLocalWriteGeneration();
+	clearUserSyncStorage(userId);
+	clearLegacySyncStorage();
+	SyncActiveStore.update((state) => {
+		state.lastSynced = 0;
+		state.lastSyncTime = 0;
+		state.lastDuration = 0;
+		state.counter = 0;
+		state.busy = false;
+		state.phase = null;
+		state.logs = [];
+	});
+	addSyncLog(
+		"✓ Fresh local database ready; downloading all remote files",
+		"success",
+	);
 }

@@ -21,6 +21,7 @@ jest.mock("@isomorphic-git/lightning-fs", () =>
 
 let localStorage;
 let clear;
+let resetLocalFileSystem;
 const originalProcessBrowser = process.browser;
 
 beforeAll(() => {
@@ -29,6 +30,7 @@ beforeAll(() => {
 	const mod = require("@storage/local");
 	localStorage = mod.default;
 	clear = mod.clear;
+	resetLocalFileSystem = mod.resetLocalFileSystem;
 });
 
 afterAll(() => {
@@ -574,5 +576,48 @@ describe("clear", () => {
 		const promise = clear();
 		request.onblocked();
 		await expect(promise).resolves.toBeUndefined();
+	});
+});
+
+describe("resetLocalFileSystem", () => {
+	it("switches all writes to a fresh database before deleting the previous one", async () => {
+		const originalIndexedDb = global.indexedDB;
+		const request = {};
+		global.indexedDB = {
+			deleteDatabase: jest.fn(() => request),
+		};
+		const LightningFS = require("@isomorphic-git/lightning-fs");
+		const freshFsPromises = Object.fromEntries(
+			Object.keys(mockFsPromises).map((name) => [name, jest.fn()]),
+		);
+		freshFsPromises.stat.mockResolvedValue({ type: "dir" });
+		freshFsPromises.writeFile.mockResolvedValue(undefined);
+		LightningFS.mockImplementationOnce(() => ({ promises: freshFsPromises }));
+		const initialCalls = LightningFS.mock.calls.length;
+		mockFsPromises.writeFile.mockReturnValue(new Promise(() => {}));
+		void localStorage.writeFile("old/file.json", "old");
+
+		try {
+			const databaseName = await resetLocalFileSystem();
+
+			expect(databaseName).toMatch(/^systemconcepts-fs-/);
+			expect(LightningFS).toHaveBeenCalledTimes(initialCalls + 1);
+			expect(LightningFS).toHaveBeenLastCalledWith(databaseName);
+			expect(freshFsPromises.stat).toHaveBeenCalledWith("/");
+			await expect(
+				localStorage.writeFile("fresh/file.json", "fresh"),
+			).resolves.toBe(undefined);
+			expect(freshFsPromises.writeFile).toHaveBeenCalledWith(
+				"/fresh/file.json",
+				"fresh",
+				"utf8",
+			);
+			expect(window.localStorage.getItem("local_active_database")).toBe(
+				databaseName,
+			);
+			expect(global.indexedDB.deleteDatabase).toHaveBeenCalledTimes(1);
+		} finally {
+			global.indexedDB = originalIndexedDb;
+		}
 	});
 });

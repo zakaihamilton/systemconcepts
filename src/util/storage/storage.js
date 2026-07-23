@@ -194,8 +194,14 @@ const storageMethods = Object.fromEntries(
 		{
 			name: "getSize",
 		},
+		{
+			name: "resetLocalFileSystem",
+		},
 	].map((item) => {
 		const { name } = item;
+		if (name === "resetLocalFileSystem") {
+			return [name, () => callMethod(item, "local")];
+		}
 		return [
 			name,
 			(...args) => {
@@ -614,4 +620,5 @@ export default {
 	moveFile,
 	moveFolder,
 	getRecursiveList,
+	resetLocalFileSystem: () => storageMethods.resetLocalFileSystem(),
 };

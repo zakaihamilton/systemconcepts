@@ -1,5 +1,5 @@
 import { SyncContext } from "@components/Sync";
-import { clearBundleCache } from "@sync/sync";
+import { resetLocalCacheForFullSync } from "@sync/sync";
 import { fireEvent, render } from "@testing-library/react";
 import { useTranslations } from "@util/domain/translations";
 import { setPath } from "@util/domain/views";
@@ -38,15 +38,15 @@ describe("FullSync Component", () => {
 		expect(getByText("Do full sync?")).toBeInTheDocument();
 	});
 
-	it("calls clearBundleCache and updateSync when full sync is clicked", async () => {
-		clearBundleCache.mockResolvedValue(true);
+	it("starts on a fresh database and then syncs when full sync is clicked", async () => {
+		resetLocalCacheForFullSync.mockResolvedValue(undefined);
 		const { getByRole } = render(
 			<SyncContext.Provider value={{ updateSync: mockUpdateSync }}>
 				<FullSync />
 			</SyncContext.Provider>,
 		);
 		fireEvent.click(getByRole("button", { name: "Full Sync" }));
-		expect(clearBundleCache).toHaveBeenCalled();
+		expect(resetLocalCacheForFullSync).toHaveBeenCalled();
 		await React.act(async () => {});
 		expect(mockUpdateSync).toHaveBeenCalledWith(false);
 		expect(setPath).toHaveBeenCalledWith("sync");

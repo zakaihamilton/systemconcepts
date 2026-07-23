@@ -4,7 +4,55 @@ const FS = process.browser && require("@isomorphic-git/lightning-fs");
 
 import { isBinaryFile, makePath } from "@util/data/path";
 
-const fs = process.browser && new FS("systemconcepts-fs");
+const BASE_DATABASE_NAME = "systemconcepts-fs";
+const ACTIVE_DATABASE_KEY = "local_active_database";
+
+function getStoredDatabaseName() {
+	if (typeof window === "undefined") return BASE_DATABASE_NAME;
+	return localStorage.getItem(ACTIVE_DATABASE_KEY) || BASE_DATABASE_NAME;
+}
+
+let activeDatabaseName = getStoredDatabaseName();
+let fs = process.browser && new FS(activeDatabaseName);
+
+function createDatabaseName() {
+	return `${BASE_DATABASE_NAME}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function deleteDatabaseBestEffort(databaseName) {
+	if (typeof indexedDB === "undefined" || !databaseName) return;
+	try {
+		const request = indexedDB.deleteDatabase(databaseName);
+		request.onerror = () =>
+			structuredLogger.warn(
+				`[Local Storage] Could not delete previous database ${databaseName}`,
+				request.error,
+			);
+	} catch (error) {
+		structuredLogger.warn(
+			`[Local Storage] Could not delete previous database ${databaseName}`,
+			error,
+		);
+	}
+}
+
+/** Start Full Sync on an empty LightningFS database without waiting on the old one. */
+export async function resetLocalFileSystem() {
+	if (!fs) throw new Error("Local filesystem is unavailable");
+	const previousDatabaseName = activeDatabaseName;
+	const nextDatabaseName = createDatabaseName();
+	const nextFs = new FS(nextDatabaseName);
+
+	// Force initialization now, before the sync pipeline begins its first write.
+	await nextFs.promises.stat("/");
+	fs = nextFs;
+	activeDatabaseName = nextDatabaseName;
+	if (typeof window !== "undefined") {
+		localStorage.setItem(ACTIVE_DATABASE_KEY, nextDatabaseName);
+	}
+	deleteDatabaseBestEffort(previousDatabaseName);
+	return nextDatabaseName;
+}
 
 async function getListing(path, options = {}) {
 	const { useCount, strict = false } = options;
@@ -220,7 +268,7 @@ export async function clear() {
 		return;
 	}
 	return new Promise((resolve, reject) => {
-		const req = indexedDB.deleteDatabase("systemconcepts-fs");
+		const req = indexedDB.deleteDatabase(activeDatabaseName);
 		req.onsuccess = () => resolve();
 		req.onerror = () => reject(req.error);
 		req.onblocked = () => resolve();
@@ -277,4 +325,5 @@ export default {
 		return 0;
 	},
 	getRecursiveList,
+	resetLocalFileSystem,
 };

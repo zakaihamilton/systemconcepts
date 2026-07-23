@@ -3,7 +3,7 @@ export {
 	AUTO_SYNC_INTERVAL_MS,
 	AUTO_SYNC_JITTER_MS,
 } from "./autoSync";
-export { clearBundleCache } from "./cache";
+export { clearBundleCache, resetLocalCacheForFullSync } from "./cache";
 export { getReadOnlyManifestFreshness } from "./freshnessService";
 export { useSync, useSyncFeature } from "./hooks";
 export { addSyncLog } from "./logs";

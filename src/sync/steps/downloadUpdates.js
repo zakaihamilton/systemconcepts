@@ -17,7 +17,19 @@ import { SyncActiveStore } from "../syncState";
 import { createSyncTrashId, moveFolderToTrash } from "../trash";
 
 const LOCAL_WRITE_TIMEOUT_MS = 30_000;
-const LOCAL_WRITE_MUTEX_ID = "sync_lightningfs_write";
+let localWriteGeneration = 0;
+
+function localWriteMutexId(id) {
+	return `sync_lightningfs_write:${localWriteGeneration}:${id}`;
+}
+
+/**
+ * Detach a Full Sync from queued writes that belong to the previous
+ * LightningFS database generation.
+ */
+export function beginFreshLocalWriteGeneration() {
+	localWriteGeneration += 1;
+}
 
 function withTimeout(promise, ms, message) {
 	let timeoutId;
@@ -31,7 +43,9 @@ function withTimeout(promise, ms, message) {
 
 async function writeLocalFile(localFilePath, contentToWrite, fileBasename) {
 	addSyncLog(`[${fileBasename}] Waiting for local write slot…`, "verbose");
-	const unlock = await lockMutex({ id: LOCAL_WRITE_MUTEX_ID });
+	const unlock = await lockMutex({
+		id: localWriteMutexId("serialized"),
+	});
 	try {
 		addSyncLog(`[${fileBasename}] Writing local file…`, "verbose");
 		await withTimeout(
@@ -104,7 +118,7 @@ async function downloadFile(
 
 		// For binary files, skip all JSON processing and write directly
 		if (isBinary) {
-			const unlock = await lockMutex({ id: localFilePath });
+			const unlock = await lockMutex({ id: localWriteMutexId(localFilePath) });
 			try {
 				// AWS returns binary files as base64 strings, convert back to binary
 				// Note: content is a base64 string from AWS, need to convert to binary for local storage
@@ -196,7 +210,7 @@ async function downloadFile(
 			}
 		}
 
-		const unlock = await lockMutex({ id: localFilePath });
+		const unlock = await lockMutex({ id: localWriteMutexId(localFilePath) });
 		try {
 			// Check if file has changed locally since sync started
 			// This prevents overwriting newer local changes with older remote files
@@ -357,7 +371,7 @@ export async function downloadUpdates(
 			);
 			if (updates.length > 0) {
 				const manifestPath = makePath(localPath, FILES_MANIFEST);
-				const unlock = await lockMutex({ id: manifestPath });
+				const unlock = await lockMutex({ id: localWriteMutexId(manifestPath) });
 				try {
 					await storage.writeFile(
 						manifestPath,
@@ -466,7 +480,7 @@ export async function downloadUpdates(
 
 		// Write updated manifest to disk
 		const manifestPath = makePath(localPath, FILES_MANIFEST);
-		const unlock = await lockMutex({ id: manifestPath });
+		const unlock = await lockMutex({ id: localWriteMutexId(manifestPath) });
 		try {
 			await storage.writeFile(
 				manifestPath,

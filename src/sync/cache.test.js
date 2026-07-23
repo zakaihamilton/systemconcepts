@@ -1,12 +1,12 @@
 import storage from "@util/storage/storage";
-import { clearBundleCache } from "./cache";
+import { clearBundleCache, resetLocalCacheForFullSync } from "./cache";
 import { SYNC_CONFIG } from "./config";
 import { SyncActiveStore } from "./syncState";
 import { clearLegacySyncStorage, clearUserSyncStorage } from "./userStorage";
 
 jest.mock("@util/storage/storage", () => ({
 	__esModule: true,
-	default: { deleteFolder: jest.fn() },
+	default: { deleteFolder: jest.fn(), resetLocalFileSystem: jest.fn() },
 }));
 
 jest.mock("./logs", () => ({ addSyncLog: jest.fn() }));
@@ -21,6 +21,7 @@ describe("clearBundleCache", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
 		storage.deleteFolder.mockResolvedValue(undefined);
+		storage.resetLocalFileSystem.mockResolvedValue("systemconcepts-fs-fresh");
 		SyncActiveStore.update((state) => {
 			state.lastSynced = 123;
 			state.lastSyncTime = 123;
@@ -64,5 +65,48 @@ describe("clearBundleCache", () => {
 		storage.deleteFolder.mockRejectedValue(new Error("disk error"));
 
 		await expect(clearBundleCache()).resolves.toBeUndefined();
+	});
+});
+
+describe("resetLocalCacheForFullSync", () => {
+	beforeEach(() => {
+		jest.clearAllMocks();
+		storage.resetLocalFileSystem.mockResolvedValue("systemconcepts-fs-fresh");
+		SyncActiveStore.update((state) => {
+			state.lastSynced = 123;
+			state.lastSyncTime = 123;
+			state.lastDuration = 5;
+			state.counter = 3;
+			state.busy = true;
+			state.phase = "Main";
+			state.logs = [{ message: "old" }];
+		});
+	});
+
+	it("switches to a fresh database without touching the current filesystem", async () => {
+		await resetLocalCacheForFullSync({ userId: "user-1" });
+
+		expect(storage.resetLocalFileSystem).toHaveBeenCalledTimes(1);
+		expect(storage.deleteFolder).not.toHaveBeenCalled();
+		expect(clearUserSyncStorage).toHaveBeenCalledWith("user-1");
+		expect(clearLegacySyncStorage).toHaveBeenCalledTimes(1);
+
+		expect(SyncActiveStore.getRawState()).toMatchObject({
+			lastSynced: 0,
+			lastSyncTime: 0,
+			lastDuration: 0,
+			counter: 0,
+			busy: false,
+			phase: null,
+		});
+	});
+
+	it("does not continue to the sync pipeline when a fresh database cannot start", async () => {
+		const error = new Error("fresh database failed");
+		storage.resetLocalFileSystem.mockRejectedValue(error);
+
+		await expect(resetLocalCacheForFullSync()).rejects.toBe(error);
+		expect(clearUserSyncStorage).not.toHaveBeenCalled();
+		expect(clearLegacySyncStorage).not.toHaveBeenCalled();
 	});
 });

@@ -57,6 +57,12 @@ function hoursAgo(hours) {
 	return Date.now() - hours * 60 * 60 * 1000;
 }
 
+function todayAtNoon() {
+	const date = new Date();
+	date.setHours(12, 0, 0, 0);
+	return date.getTime();
+}
+
 function daysAgo(days) {
 	const d = new Date();
 	d.setDate(d.getDate() - days);
@@ -156,7 +162,7 @@ describe("HistoryView", () => {
 				group: "alpha",
 				date: "2024-01-01",
 				name: "Today Session",
-				timestamp: hoursAgo(1),
+				timestamp: todayAtNoon(),
 			},
 			{
 				group: "beta",

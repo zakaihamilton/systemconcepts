@@ -33,6 +33,7 @@ function makeDevice(id, overrides = {}) {
 		copyFolder: jest.fn().mockResolvedValue(undefined),
 		copyFile: jest.fn().mockResolvedValue(undefined),
 		getSize: jest.fn().mockResolvedValue(0),
+		resetLocalFileSystem: jest.fn().mockResolvedValue(undefined),
 		...overrides,
 	};
 }
@@ -43,6 +44,15 @@ beforeEach(() => {
 });
 
 describe("callMethod", () => {
+	it("dispatches a filesystem reset directly to the local device", async () => {
+		const device = makeDevice("local");
+		storageDevices.push(device);
+
+		await storage.resetLocalFileSystem();
+
+		expect(device.resetLocalFileSystem).toHaveBeenCalledWith("/");
+	});
+
 	it("returns null when the device is not found", async () => {
 		await expect(
 			callMethod({ name: "readFile" }, "missing/file"),

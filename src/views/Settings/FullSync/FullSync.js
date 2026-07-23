@@ -1,5 +1,5 @@
 import { SyncContext } from "@components/Sync";
-import { clearBundleCache } from "@sync/sync";
+import { resetLocalCacheForFullSync } from "@sync/sync";
 import Button from "@ui/Button";
 import Typography from "@ui/Typography";
 import { logger as structuredLogger } from "@util/api/logger";
@@ -14,15 +14,10 @@ export default function FullSync() {
 
 	const reset = async () => {
 		try {
-			const success = await clearBundleCache();
-			if (!success) {
-				structuredLogger.error("Failed to clear cache completely");
-				// Still try to sync even if clear had issues
-			}
+			await resetLocalCacheForFullSync();
 
 			setPath("sync");
-			// Force a fresh sync after clearing
-			await updateSync(false); // Force full sync (not poll)
+			await updateSync(false);
 		} catch (err) {
 			structuredLogger.error("Failed to reset cache and sync", err);
 			// Still go back even on error so user isn't stuck

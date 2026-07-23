@@ -1,5 +1,5 @@
 import { SyncContext } from "@components/Sync";
-import { clearBundleCache, useSyncFeature } from "@sync/sync";
+import { resetLocalCacheForFullSync, useSyncFeature } from "@sync/sync";
 import { SyncActiveStore } from "@sync/syncState";
 import {
 	fireEvent,
@@ -17,7 +17,7 @@ import Sync from "./Sync.js";
 jest.mock("@util/domain/translations");
 jest.mock("@sync/sync", () => ({
 	useSyncFeature: jest.fn(),
-	clearBundleCache: jest.fn(),
+	resetLocalCacheForFullSync: jest.fn(),
 }));
 jest.mock("@util/browser/online");
 jest.mock("js-cookie");
@@ -181,7 +181,7 @@ describe("Sync View", () => {
 
 	it("opens full sync dialog and runs full sync", async () => {
 		const sync = jest.fn().mockResolvedValue(undefined);
-		clearBundleCache.mockResolvedValue(undefined);
+		resetLocalCacheForFullSync.mockResolvedValue(undefined);
 		useSyncFeature.mockReturnValue({
 			sync,
 			stop: jest.fn(),
@@ -201,7 +201,7 @@ describe("Sync View", () => {
 				name: "Full Sync",
 			}),
 		);
-		await waitFor(() => expect(clearBundleCache).toHaveBeenCalled());
+		await waitFor(() => expect(resetLocalCacheForFullSync).toHaveBeenCalled());
 		await waitFor(() => expect(sync).toHaveBeenCalled());
 	});
 
@@ -278,7 +278,7 @@ describe("Sync View", () => {
 	});
 
 	it("logs when full sync fails", async () => {
-		clearBundleCache.mockRejectedValue(new Error("cache fail"));
+		resetLocalCacheForFullSync.mockRejectedValue(new Error("cache fail"));
 		render(<Sync />);
 		fireEvent.click(screen.getAllByRole("button", { name: "Full Sync" })[0]);
 		fireEvent.click(
