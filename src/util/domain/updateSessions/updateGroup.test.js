@@ -1454,14 +1454,19 @@ describe("updateGroupProcess", () => {
 	});
 
 	it("warns when year cache write fails after processing", async () => {
+		jest.useFakeTimers();
 		storage.writeFile.mockRejectedValue(new Error("cache write fail"));
 
-		await updateGroupProcess("test", true, false);
+		const updatePromise = updateGroupProcess("test", true, false);
+		await updatePromise;
+		await jest.advanceTimersByTimeAsync(1000);
+		await Promise.resolve();
 
 		expect(logger.warn).toHaveBeenCalledWith(
 			expect.stringContaining("Failed to write year cache"),
 			expect.any(Error),
 		);
+		jest.useRealTimers();
 	});
 
 	it("infers missing years from session ids when warning about omitted years", async () => {

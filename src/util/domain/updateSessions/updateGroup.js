@@ -1184,21 +1184,32 @@ export async function updateGroupProcess(
 						});
 					}
 				}
-				// Year cache is an optimization — never block year completion on it.
-				void writeYearCache(
-					name,
-					year.name,
-					yearFingerprint,
-					metadataFingerprint,
-					{
-						items: metadataYearItems,
-						tags: metadata.tags,
-						durations: metadata.durations,
-						summaries: metadata.summaries,
-						transcriptions: metadata.transcriptions,
-					},
-					listingSessionFingerprints,
-				);
+				// Year cache is an optimization — wait for local FS to settle after
+				// the year write so lightning-fs is not contended.
+				void (async () => {
+					try {
+						await new Promise((resolve) => setTimeout(resolve, 800));
+						await writeYearCache(
+							name,
+							year.name,
+							yearFingerprint,
+							metadataFingerprint,
+							{
+								items: metadataYearItems,
+								tags: metadata.tags,
+								durations: metadata.durations,
+								summaries: metadata.summaries,
+								transcriptions: metadata.transcriptions,
+							},
+							listingSessionFingerprints,
+						);
+					} catch (err) {
+						structuredLogger.warn(
+							`[UpdateGroup] Deferred year cache write failed for ${name}/${year.name}`,
+							err,
+						);
+					}
+				})();
 			} catch (err) {
 				structuredLogger.error(err);
 				UpdateSessionsStore.update((s) => {
