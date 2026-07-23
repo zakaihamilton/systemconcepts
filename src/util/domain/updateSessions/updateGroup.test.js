@@ -237,6 +237,22 @@ describe("updateGroupProcess", () => {
 		expect(sessions[0].transcription).toBe(true);
 	});
 
+	it("skips legacy metadata fallback after a metadata timeout", async () => {
+		fetchSessionMetadata.mockRejectedValueOnce(
+			new Error("Timed out loading session metadata for test/2024"),
+		);
+
+		await updateGroupProcess("test", true);
+
+		expect(loadTags).not.toHaveBeenCalled();
+		expect(loadDurations).not.toHaveBeenCalled();
+		expect(logger.warn).toHaveBeenCalledWith(
+			expect.stringContaining("skipping legacy fallback after timeout"),
+			expect.any(Error),
+		);
+		expect(updateYearSync).toHaveBeenCalled();
+	});
+
 	it("uses cached metadata for non-forced updates without calling the aggregated endpoint", async () => {
 		const currentYear = String(new Date().getFullYear());
 		getListing.mockImplementation(async (path) => {
@@ -382,7 +398,7 @@ describe("updateGroupProcess", () => {
 			expect.anything(),
 		);
 		expect(addSyncLog).toHaveBeenCalledWith(
-			expect.stringContaining("Adding 1 missing session(s)."),
+			expect.stringContaining("Refreshing 1 changed session(s)"),
 			"info",
 		);
 		// Fingerprint matched — reuse cached metadata instead of refetching.
@@ -394,6 +410,113 @@ describe("updateGroupProcess", () => {
 			expect.arrayContaining([existingId, newId]),
 		);
 		expect(UpdateSessionsStore.getRawState().status[0].sessionCount).toBe(0);
+	});
+
+	it("only rematerializes changed sessions when year fingerprint changes", async () => {
+		const currentYear = String(new Date().getFullYear());
+		const existingId = `${currentYear}-07-17 Overview - Kabbalah & Suffering`;
+		const newId = `${currentYear}-07-23 Conclusion`;
+		const yearItems = [
+			{
+				name: `${existingId}.mp4`,
+				path: `wasabi/test/${currentYear}/${existingId}.mp4`,
+				stat: { type: "file", size: 10, mtimeMs: 1 },
+			},
+			{
+				name: `${newId}.mp4`,
+				path: `wasabi/test/${currentYear}/${newId}.mp4`,
+				stat: { type: "file", size: 20, mtimeMs: 2 },
+			},
+		];
+		const metadataFingerprint = [null, null, null, null];
+		const staleFingerprint = getCombinedYearFingerprint(
+			[yearItems[0]],
+			metadataFingerprint,
+		);
+		const localYearPath = `/local/sync/test/${currentYear}.json`;
+
+		getListing.mockImplementation(async (path) => {
+			if (path === "wasabi/test") {
+				return [
+					{
+						name: currentYear,
+						type: "dir",
+						path: `wasabi/test/${currentYear}`,
+					},
+				];
+			}
+			if (path === `wasabi/test/${currentYear}`) {
+				return yearItems;
+			}
+			return [];
+		});
+		storage.exists.mockImplementation(async (path) => path === localYearPath);
+		storage.readFile.mockImplementation(async (path) => {
+			if (path.includes(`.group-update-cache/test/${currentYear}.json`)) {
+				return JSON.stringify({
+					fingerprint: staleFingerprint,
+					metadataFingerprint: JSON.stringify(metadataFingerprint),
+					sessionFingerprints: {
+						[existingId]: JSON.stringify([
+							{
+								name: `${existingId}.mp4`,
+								type: "file",
+								size: 10,
+								mtimeMs: 1,
+							},
+						]),
+					},
+					metadata: {
+						items: [],
+						tags: {},
+						durations: {},
+						summaries: {},
+						transcriptions: {},
+					},
+				});
+			}
+			if (path === localYearPath) {
+				return JSON.stringify({
+					sessions: [
+						{
+							id: existingId,
+							name: existingId,
+							group: "test",
+							year: currentYear,
+							files: [`${existingId}.mp4`],
+							tags: ["keep"],
+						},
+					],
+				});
+			}
+			return "";
+		});
+		fetchSessionMetadata.mockResolvedValue({
+			items: [],
+			tags: {},
+			durations: {},
+			summaries: {},
+			transcriptions: {},
+		});
+		updateYearSync.mockResolvedValue({
+			counter: 1,
+			newCount: 1,
+			newSessions: [{ id: newId }],
+		});
+
+		await updateGroupProcess("test", false, false);
+
+		expect(addSyncLog).toHaveBeenCalledWith(
+			expect.stringContaining("Refreshing 1 changed session(s)"),
+			"info",
+		);
+		expect(updateYearSync).toHaveBeenCalledTimes(1);
+		const [, , sessions] = updateYearSync.mock.calls[0];
+		expect(sessions.map((session) => session.id).sort()).toEqual(
+			[existingId, newId].sort(),
+		);
+		const kept = sessions.find((session) => session.id === existingId);
+		expect(kept.tags).toEqual(["keep"]);
 	});
 
 	it("skips remote metadata fetch when year cache metadata fingerprint is unchanged", async () => {
@@ -2187,7 +2310,7 @@ describe("updateGroupProcess", () => {
 		await updateGroupProcess("test", false, false);
 
 		expect(addSyncLog).toHaveBeenCalledWith(
-			expect.stringContaining("Adding 1 missing session(s)."),
+			expect.stringContaining("Refreshing 1 changed session(s)"),
 			"info",
 		);
 		expect(updateYearSync).toHaveBeenCalled();

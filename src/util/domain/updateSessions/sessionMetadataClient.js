@@ -48,7 +48,12 @@ async function fetchTextFromUrl(url) {
 	if (!response.ok) {
 		throw new Error(`Failed to fetch metadata (${response.status})`);
 	}
-	return await response.text();
+	// Body reads can stall after headers; bound them separately.
+	return await withTimeout(
+		response.text(),
+		METADATA_FETCH_TIMEOUT_MS,
+		`Timed out reading metadata text body`,
+	);
 }
 
 async function fetchBinaryFromUrl(url) {
@@ -62,7 +67,11 @@ async function fetchBinaryFromUrl(url) {
 	if (!response.ok) {
 		throw new Error(`Failed to fetch metadata binary (${response.status})`);
 	}
-	return await response.arrayBuffer();
+	return await withTimeout(
+		response.arrayBuffer(),
+		METADATA_FETCH_TIMEOUT_MS,
+		`Timed out reading metadata binary body`,
+	);
 }
 
 async function fetchSessionMetadataViaPresign(group, year) {
@@ -123,7 +132,11 @@ async function fetchSessionMetadataViaProxy(group, year) {
 
 async function loadSessionMetadata(group, year) {
 	try {
-		return await fetchSessionMetadataViaPresign(group, year);
+		return await withTimeout(
+			fetchSessionMetadataViaPresign(group, year),
+			METADATA_FETCH_TIMEOUT_MS * 2,
+			`Timed out loading session metadata for ${group}/${year}`,
+		);
 	} catch (presignErr) {
 		structuredLogger.warn(
 			`[SessionMetadata] Presigned fetch failed for ${group}/${year}; falling back to session-metadata API`,
