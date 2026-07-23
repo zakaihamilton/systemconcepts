@@ -6,26 +6,43 @@ const STORE_NAME = "files";
 const DB_VERSION = 1;
 const OPFS_ROOT = "sync-years";
 const LEGACY_IDB_TIMEOUT_MS = 3_000;
+const OPFS_WRITE_TIMEOUT_MS = 45_000;
 
 /** Paths like /sync/american/2026.json or /sync/american/2026.json.tmp */
 const SYNC_YEAR_FILE_RE = /^\/sync\/([^/]+)\/(\d{4}\.json(?:\.tmp)?)$/;
 
 let dbPromise = null;
+let opfsWriteQueue = Promise.resolve();
 
-function withLegacyIdbTimeout(operation, work) {
+function withTimeout(promise, ms, message) {
 	let timeoutId;
 	return Promise.race([
-		work(),
+		promise,
 		new Promise((_, reject) => {
-			timeoutId = setTimeout(
-				() =>
-					reject(
-						new Error(`Legacy year-file IndexedDB ${operation} timed out`),
-					),
-				LEGACY_IDB_TIMEOUT_MS,
-			);
+			timeoutId = setTimeout(() => reject(new Error(message)), ms);
 		}),
 	]).finally(() => clearTimeout(timeoutId));
+}
+
+function withLegacyIdbTimeout(operation, work) {
+	return withTimeout(
+		work(),
+		LEGACY_IDB_TIMEOUT_MS,
+		`Legacy year-file IndexedDB ${operation} timed out`,
+	);
+}
+
+function queueOpfsWrite(operation, work) {
+	const run = () =>
+		withTimeout(
+			work(),
+			OPFS_WRITE_TIMEOUT_MS,
+			`OPFS year-file ${operation} timed out`,
+		);
+	const queued = opfsWriteQueue.then(run, run);
+	// Keep the queue usable after a quota or timeout failure.
+	opfsWriteQueue = queued.catch(() => {});
+	return queued;
 }
 
 async function tryLegacyIdb(operation, work, fallback) {
@@ -148,6 +165,20 @@ async function opfsListYearFilesInDir(dirPath) {
 			}
 		}
 		return names;
+	} catch {
+		return [];
+	}
+}
+
+async function opfsListYearGroups() {
+	try {
+		const root = await navigator.storage.getDirectory();
+		const yearsRoot = await root.getDirectoryHandle(OPFS_ROOT);
+		const groups = [];
+		for await (const [name, handle] of yearsRoot.entries()) {
+			if (handle.kind === "directory") groups.push(name);
+		}
+		return groups;
 	} catch {
 		return [];
 	}
@@ -283,6 +314,19 @@ async function idbListYearFilesInDir(dirPath) {
 		.filter((name) => /^\d{4}\.json$/.test(name));
 }
 
+async function idbListYearGroups() {
+	const keys = await runRequest("readonly", (store) =>
+		requestToPromise(store.getAllKeys()),
+	);
+	return [
+		...new Set(
+			(keys || [])
+				.map((key) => parseSyncYearPath(String(key))?.group)
+				.filter(Boolean),
+		),
+	];
+}
+
 /**
  * Backend used for the last write (for sync logs / diagnostics).
  * @type {"opfs" | "idb" | null}
@@ -293,7 +337,7 @@ export async function idbWriteSyncYearFile(path, content) {
 	const parsed = parseSyncYearPath(path);
 	if (!parsed) throw new Error(`Not a sync year file path: ${path}`);
 	if (opfsAvailable()) {
-		await opfsWrite(parsed.key, content);
+		await queueOpfsWrite("write", () => opfsWrite(parsed.key, content));
 		lastYearFileBackend = "opfs";
 		return;
 	}
@@ -334,7 +378,9 @@ export async function idbRenameSyncYearFile(from, to) {
 		throw new Error(`Invalid sync year rename: ${from} → ${to}`);
 	}
 	if (opfsAvailable()) {
-		await opfsRename(fromParsed.key, toParsed.key);
+		await queueOpfsWrite("rename", () =>
+			opfsRename(fromParsed.key, toParsed.key),
+		);
 		lastYearFileBackend = "opfs";
 		return;
 	}
@@ -357,6 +403,17 @@ export async function idbListSyncYearFilesInDir(dirPath) {
 		names.add(name);
 	}
 	return [...names].sort();
+}
+
+export async function idbListSyncYearGroups() {
+	const groups = new Set();
+	if (opfsAvailable()) {
+		for (const group of await opfsListYearGroups()) groups.add(group);
+	}
+	for (const key of await tryLegacyIdb("list groups", idbListYearGroups, [])) {
+		groups.add(key);
+	}
+	return [...groups].sort();
 }
 
 export async function clearSyncYearFilesDb() {

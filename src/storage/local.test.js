@@ -12,6 +12,7 @@ jest.mock("@storage/syncYearFiles", () => ({
 	idbWriteSyncYearFile: jest.fn().mockResolvedValue(undefined),
 	idbDeleteSyncYearFile: jest.fn().mockResolvedValue(undefined),
 	idbExistsSyncYearFile: jest.fn().mockResolvedValue(false),
+	idbListSyncYearGroups: jest.fn().mockResolvedValue([]),
 	idbRenameSyncYearFile: jest.fn().mockResolvedValue(undefined),
 	idbListSyncYearFilesInDir: jest.fn().mockResolvedValue([]),
 	clearSyncYearFilesDb: jest.fn().mockResolvedValue(undefined),
@@ -63,6 +64,7 @@ beforeEach(() => {
 	mockSyncYearFiles.idbWriteSyncYearFile.mockResolvedValue(undefined);
 	mockSyncYearFiles.idbDeleteSyncYearFile.mockResolvedValue(undefined);
 	mockSyncYearFiles.idbExistsSyncYearFile.mockResolvedValue(false);
+	mockSyncYearFiles.idbListSyncYearGroups.mockResolvedValue([]);
 	mockSyncYearFiles.idbRenameSyncYearFile.mockResolvedValue(undefined);
 	mockSyncYearFiles.idbListSyncYearFilesInDir.mockResolvedValue([]);
 	mockSyncYearFiles.clearSyncYearFilesDb.mockResolvedValue(undefined);
@@ -99,6 +101,21 @@ describe("getListing", () => {
 				type: "file",
 				name: "2026.json",
 				path: "/local/sync/american/2026.json",
+			}),
+		]);
+	});
+
+	it("lists OPFS-backed year groups as sync directories", async () => {
+		mockFsPromises.readdir.mockResolvedValueOnce([]);
+		mockSyncYearFiles.idbListSyncYearGroups.mockResolvedValueOnce(["american"]);
+
+		const items = await localStorage.getListing("/sync");
+
+		expect(items).toEqual([
+			expect.objectContaining({
+				type: "dir",
+				name: "american",
+				path: "/local/sync/american",
 			}),
 		]);
 	});

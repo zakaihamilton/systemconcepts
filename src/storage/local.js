@@ -7,6 +7,7 @@ import {
 	idbDeleteSyncYearFile,
 	idbExistsSyncYearFile,
 	idbListSyncYearFilesInDir,
+	idbListSyncYearGroups,
 	idbReadSyncYearFile,
 	idbRenameSyncYearFile,
 	idbWriteSyncYearFile,
@@ -70,6 +71,20 @@ async function getListing(path, options = {}) {
 
 	// Split-group year JSON lives in a dedicated IDB store (not lightning-fs).
 	try {
+		if (makePath(path) === "/sync") {
+			const existing = new Set(listing.map((item) => item.name));
+			for (const name of await idbListSyncYearGroups()) {
+				if (existing.has(name)) continue;
+				const itemPath = makePath(path, name);
+				listing.push({
+					type: "dir",
+					name,
+					mtimeMs: 0,
+					id: makePath("local", itemPath),
+					path: makePath("local", itemPath),
+				});
+			}
+		}
 		const yearNames = await idbListSyncYearFilesInDir(path);
 		const existing = new Set(listing.map((item) => item.name));
 		for (const name of yearNames) {

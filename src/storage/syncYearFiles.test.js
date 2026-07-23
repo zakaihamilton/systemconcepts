@@ -156,6 +156,7 @@ describe("syncYearFiles", () => {
 		expect(await api.idbListSyncYearFilesInDir("/sync/american")).toEqual([
 			"2026.json",
 		]);
+		expect(await api.idbListSyncYearGroups()).toEqual(["american"]);
 
 		await api.idbDeleteSyncYearFile(live);
 		expect(await api.idbExistsSyncYearFile(live)).toBe(false);
