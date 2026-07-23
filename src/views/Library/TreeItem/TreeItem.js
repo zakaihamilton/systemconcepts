@@ -29,9 +29,6 @@ const TreeItem = memo(function TreeItem({
 	const expansion = abbreviations[node.name];
 	const name = expansion ? expansion.eng : node.name;
 
-	// Use Store to track clicks across possible remounts
-	const clickedId = LibraryStore.useState((s) => s.clickedId);
-
 	const checkTruncation = useCallback(() => {
 		if (textRef.current) {
 			setIsTruncated(textRef.current.scrollWidth > textRef.current.clientWidth);
@@ -62,24 +59,58 @@ const TreeItem = memo(function TreeItem({
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [selectPath, node.id]);
 
-	// Center the selected item only if it wasn't manually clicked in the tree
+	// Scroll the selected item into the sidebar only if it wasn't manually clicked.
+	// Prefer scrolling the nearest overflow:auto/scroll ancestor instead of
+	// scrollIntoView, which can advance overflow:hidden ancestors and trap scroll.
+	// Only react to selectPath changes — do not re-scroll when clickedId later clears.
 	useEffect(() => {
-		if (selectPath === node.id && itemRef.current) {
-			if (clickedId === node.id) {
-				// Already visible via click or toggle, do not scroll
+		if (selectPath !== node.id || !itemRef.current) {
+			return;
+		}
+		const timer = setTimeout(() => {
+			const el = itemRef.current;
+			if (!el) return;
+
+			const { clickedId: currentClicked } = LibraryStore.getRawState();
+			if (currentClicked === node.id) {
+				LibraryStore.update((s) => {
+					if (s.selectPath === node.id) {
+						s.selectPath = null;
+					}
+				});
 				return;
 			}
-			const timer = setTimeout(() => {
-				if (itemRef.current) {
-					itemRef.current.scrollIntoView({
-						behavior: "smooth",
-						block: "center",
-					});
+
+			let scrollParent = el.parentElement;
+			while (scrollParent && scrollParent !== document.body) {
+				const { overflowY } = window.getComputedStyle(scrollParent);
+				if (overflowY === "auto" || overflowY === "scroll") {
+					break;
 				}
-			}, 500);
-			return () => clearTimeout(timer);
-		}
-	}, [selectPath, node.id, clickedId]);
+				scrollParent = scrollParent.parentElement;
+			}
+
+			if (scrollParent && scrollParent !== document.body) {
+				const parentRect = scrollParent.getBoundingClientRect();
+				const elRect = el.getBoundingClientRect();
+				const elCenter = elRect.top + elRect.height / 2;
+				const parentCenter = parentRect.top + parentRect.height / 2;
+				scrollParent.scrollTo({
+					top: scrollParent.scrollTop + (elCenter - parentCenter),
+					behavior: "smooth",
+				});
+			} else {
+				el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+			}
+
+			LibraryStore.update((s) => {
+				if (s.selectPath === node.id) {
+					s.selectPath = null;
+				}
+			});
+		}, 500);
+		return () => clearTimeout(timer);
+	}, [selectPath, node.id]);
 
 	const handleToggle = useCallback(
 		(e) => {

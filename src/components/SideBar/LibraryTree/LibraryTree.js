@@ -186,8 +186,12 @@ export default function LibraryTree({ closeDrawer, isMobile }) {
 				});
 
 				LibraryStore.update((s) => {
+					const pathChanged = s.selectedId !== tag._id;
 					s.selectedId = tag._id;
-					s.selectPath = urlPath;
+					// Only request sidebar scroll when the selected article changes
+					if (pathChanged) {
+						s.selectPath = urlPath;
+					}
 					s.expandedNodes = [...new Set([...s.expandedNodes, ...parentIds])];
 					if (paragraphId) {
 						s.scrollToParagraph = paragraphId;

@@ -15,6 +15,7 @@ jest.mock("../Store", () => {
 				typeof selector === "function" ? selector(state) : state,
 			),
 			update: jest.fn((updater) => updater(state)),
+			getRawState: jest.fn(() => state),
 			__state: state,
 		},
 	};
@@ -130,7 +131,47 @@ describe("TreeItem", () => {
 		act(() => {
 			jest.advanceTimersByTime(600);
 		});
-		expect(scrollIntoView).toHaveBeenCalled();
+		expect(scrollIntoView).toHaveBeenCalledWith({
+			behavior: "smooth",
+			block: "nearest",
+		});
+		expect(LibraryStore.__state.selectPath).toBeNull();
+	});
+
+	it("scrolls the overflow parent instead of using scrollIntoView", () => {
+		LibraryStore.__state.selectPath = "leaf-1";
+		LibraryStore.__state.clickedId = null;
+		const scrollIntoView = jest.fn();
+		Element.prototype.scrollIntoView = scrollIntoView;
+		const scrollTo = jest.fn();
+
+		const { container } = render(
+			<div
+				data-testid="scroll-parent"
+				style={{ overflowY: "auto", height: 100 }}
+			>
+				<TreeItem
+					node={{ id: "leaf-1", _id: "leaf-1", name: "Leaf" }}
+					onSelect={onSelect}
+				/>
+			</div>,
+		);
+		const scrollParent = container.querySelector('[data-testid="scroll-parent"]');
+		Object.defineProperty(scrollParent, "scrollTo", { value: scrollTo });
+		jest.spyOn(window, "getComputedStyle").mockImplementation((el) => {
+			if (el === scrollParent) {
+				return { overflowY: "auto" };
+			}
+			return { overflowY: "visible" };
+		});
+
+		act(() => {
+			jest.advanceTimersByTime(600);
+		});
+		expect(scrollTo).toHaveBeenCalled();
+		expect(scrollIntoView).not.toHaveBeenCalled();
+		expect(LibraryStore.__state.selectPath).toBeNull();
+		window.getComputedStyle.mockRestore();
 	});
 
 	it("uses abbreviation expansion for the display name", () => {
