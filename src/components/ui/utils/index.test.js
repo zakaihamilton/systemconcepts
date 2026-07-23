@@ -148,6 +148,17 @@ describe("ui utils", () => {
 		);
 	});
 
+	it("Collapse opens without a height cap so tall content stays scrollable", () => {
+		render(
+			<Collapse in timeout="auto">
+				<span>tall</span>
+			</Collapse>,
+		);
+		const root = screen.getByText("tall").parentElement;
+		expect(root.style.maxHeight).toBe("none");
+		expect(root.style.overflow).toBe("visible");
+	});
+
 	it("Slide supports each direction when closed", () => {
 		const { rerender } = render(
 			<Slide in={false} direction="up">

@@ -80,13 +80,18 @@ export function Collapse({
 		return null;
 	}
 
+	// When open, do not cap height or keep overflow:hidden — a fixed max-height
+	// (e.g. 1000px) turns this into a scroll container that scrollIntoView can
+	// advance, trapping users who cannot scroll overflow:hidden back up.
+	const duration = typeof timeout === "number" ? timeout : 300;
+
 	return (
 		<div
 			style={{
-				maxHeight: inProp ? "1000px" : 0,
+				maxHeight: inProp ? "none" : 0,
 				opacity: inProp ? 1 : 0,
-				overflow: "hidden",
-				transition: `max-height ${timeout}ms ease, opacity ${timeout}ms ease`,
+				overflow: inProp ? "visible" : "hidden",
+				transition: `max-height ${duration}ms ease, opacity ${duration}ms ease`,
 			}}
 		>
 			{children}
