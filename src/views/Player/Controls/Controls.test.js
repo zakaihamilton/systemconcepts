@@ -587,7 +587,8 @@ describe("Controls Component", () => {
 			setMetadata,
 		]);
 		mockPlayer.currentTime = 0;
-		mockPlayer.readyState = 1;
+		// Avoid the metadata effect seeking to the bookmark before renew starts.
+		mockPlayer.readyState = 0;
 		const { rerender } = render(
 			<Controls
 				show
@@ -603,6 +604,8 @@ describe("Controls Component", () => {
 			eventListeners.playing();
 			eventListeners.error();
 		});
+		expect(mockPlayer.currentTime).toBe(0);
+		mockPlayer.readyState = 1;
 		rerender(
 			<Controls
 				show
