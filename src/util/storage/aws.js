@@ -365,8 +365,20 @@ export async function list({
 
 	const items = [];
 	let continuationToken = undefined;
+	const seenTokens = new Set();
+	let pages = 0;
+	const MAX_LIST_PAGES = 1000;
 
 	do {
+		if (continuationToken) {
+			if (seenTokens.has(continuationToken)) {
+				break;
+			}
+			seenTokens.add(continuationToken);
+		}
+		if (++pages > MAX_LIST_PAGES) {
+			break;
+		}
 		const listParams = {
 			Bucket: bucket,
 			Delimiter: "/",

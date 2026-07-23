@@ -313,4 +313,24 @@ describe("fetchSessionMetadata", () => {
 			expect.any(Object),
 		);
 	});
+
+	it("times out hung metadata URL fetches", async () => {
+		jest.useFakeTimers();
+		try {
+			fetchJSON.mockImplementation(
+				() =>
+					new Promise(() => {
+						/* never resolves */
+					}),
+			);
+
+			const pending = fetchSessionMetadata("test", "2024", "fp-timeout", true);
+			const expectation = expect(pending).rejects.toThrow(/Timed out/);
+			// Presign times out, then the proxy fallback times out.
+			await jest.advanceTimersByTimeAsync(120_000);
+			await expectation;
+		} finally {
+			jest.useRealTimers();
+		}
+	});
 });

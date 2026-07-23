@@ -3,11 +3,20 @@ import { logger as structuredLogger } from "@util/api/logger";
 import { aggregateSessionMetadataFromSources } from "./metadataAggregator";
 
 const SESSION_METADATA_CACHE_TTL_MS = 5 * 60 * 1000;
+const METADATA_FETCH_TIMEOUT_MS = 60 * 1000;
 const metadataCache = new Map();
 const pendingRequests = new Map();
 
 function getCacheKey(group, year, metadataFingerprint) {
 	return `${group}/${year}/${metadataFingerprint || "unknown"}`;
+}
+
+function withTimeout(promise, ms, message) {
+	let timeoutId;
+	const timeout = new Promise((_, reject) => {
+		timeoutId = setTimeout(() => reject(new Error(message)), ms);
+	});
+	return Promise.race([promise, timeout]).finally(() => clearTimeout(timeoutId));
 }
 
 export function clearSessionMetadataCache() {
@@ -30,7 +39,11 @@ export function seedSessionMetadataCache(
 
 async function fetchTextFromUrl(url) {
 	if (!url) return null;
-	const response = await fetch(url, { method: "GET" });
+	const response = await withTimeout(
+		fetch(url, { method: "GET" }),
+		METADATA_FETCH_TIMEOUT_MS,
+		`Timed out fetching metadata text`,
+	);
 	if (response.status === 404) return null;
 	if (!response.ok) {
 		throw new Error(`Failed to fetch metadata (${response.status})`);
@@ -40,7 +53,11 @@ async function fetchTextFromUrl(url) {
 
 async function fetchBinaryFromUrl(url) {
 	if (!url) return null;
-	const response = await fetch(url, { method: "GET" });
+	const response = await withTimeout(
+		fetch(url, { method: "GET" }),
+		METADATA_FETCH_TIMEOUT_MS,
+		`Timed out fetching metadata binary`,
+	);
 	if (response.status === 404) return null;
 	if (!response.ok) {
 		throw new Error(`Failed to fetch metadata binary (${response.status})`);
@@ -53,10 +70,14 @@ async function fetchSessionMetadataViaPresign(group, year) {
 		group,
 		year: String(year),
 	});
-	const payload = await fetchJSON(`/api/aws_download?${params.toString()}`, {
-		method: "GET",
-		cache: "no-store",
-	});
+	const payload = await withTimeout(
+		fetchJSON(`/api/aws_download?${params.toString()}`, {
+			method: "GET",
+			cache: "no-store",
+		}),
+		METADATA_FETCH_TIMEOUT_MS,
+		`Timed out requesting metadata URLs for ${group}/${year}`,
+	);
 	if (payload?.err) {
 		throw new Error(payload.err);
 	}
@@ -90,10 +111,14 @@ async function fetchSessionMetadataViaProxy(group, year) {
 		group,
 		year: String(year),
 	});
-	return await fetchJSON(`/api/session-metadata?${params.toString()}`, {
-		method: "GET",
-		cache: "no-store",
-	});
+	return await withTimeout(
+		fetchJSON(`/api/session-metadata?${params.toString()}`, {
+			method: "GET",
+			cache: "no-store",
+		}),
+		METADATA_FETCH_TIMEOUT_MS,
+		`Timed out fetching session metadata for ${group}/${year}`,
+	);
 }
 
 async function loadSessionMetadata(group, year) {
