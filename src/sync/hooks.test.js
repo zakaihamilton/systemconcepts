@@ -94,11 +94,35 @@ describe("useSync automatic scheduler", () => {
 
 	it("does not sync while another sync is active", () => {
 		jest.spyOn(Date, "now").mockReturnValue(12 * 60 * 1000);
+		SyncActiveStore.getRawState.mockReturnValue({
+			busy: true,
+			autoSync: true,
+			counter: 0,
+			lastSyncTime: 0,
+		});
 		SyncActiveStore.useState.mockImplementation((selector) =>
 			selector({ busy: true, autoSync: true, counter: 0, lastSyncTime: 0 }),
 		);
 		render(<Scheduler />);
 		expect(requestSync).not.toHaveBeenCalled();
+	});
+
+	it("does not restart sync when busy flips after an incomplete attempt", () => {
+		const { shouldRunInitialAutoSync } = require("./autoSync");
+		shouldRunInitialAutoSync.mockReturnValue(true);
+		jest.spyOn(Date, "now").mockReturnValue(12 * 60 * 1000);
+
+		const view = render(<Scheduler />);
+		expect(requestSync).toHaveBeenCalledTimes(1);
+
+		// Simulate the scheduler re-rendering when SyncActiveStore.busy clears
+		// after an incomplete sync. checkSync must not be recreated from that
+		// busy transition, or Update Sessions / sync would loop forever.
+		SyncActiveStore.useState.mockImplementation((selector) =>
+			selector({ busy: false, autoSync: true, counter: 0, lastSyncTime: 0 }),
+		);
+		view.rerender(<Scheduler />);
+		expect(requestSync).toHaveBeenCalledTimes(1);
 	});
 
 	it("does not sync while offline or signed out", () => {

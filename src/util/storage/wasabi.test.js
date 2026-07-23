@@ -98,6 +98,26 @@ describe("getWasabi", () => {
 		await expect(freshGetWasabi()).rejects.toThrow("WASABI_URL not defined");
 	});
 
+	it("releases the wasabi mutex when client initialization fails", async () => {
+		delete process.env.WASABI_URL;
+		let freshGetWasabi;
+		jest.isolateModules(() => {
+			// eslint-disable-next-line global-require
+			freshGetWasabi = require("@util/storage/wasabi").getWasabi;
+		});
+
+		await expect(freshGetWasabi()).rejects.toThrow("WASABI_URL not defined");
+
+		process.env.WASABI_URL =
+			"https://access-key:secret-key@s3.wasabisys.com/my-bucket?region=us-east-2";
+		await expect(freshGetWasabi()).resolves.toEqual(
+			expect.objectContaining({
+				bucket: "my-bucket",
+				client: expect.any(Object),
+			}),
+		);
+	});
+
 	it("caches the client across calls", async () => {
 		const first = await getWasabi();
 		const second = await getWasabi();

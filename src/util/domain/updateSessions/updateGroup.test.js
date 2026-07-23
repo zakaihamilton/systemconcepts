@@ -1695,6 +1695,10 @@ describe("updateGroupProcess", () => {
 				`${currentYear}-05-06 Metadata Only.txt`,
 				`wasabi/test/${currentYear}/${currentYear}-05-06 Metadata Only.txt`,
 			),
+			file(
+				`${currentYear}-05-07 .mp4`,
+				`wasabi/test/${currentYear}/${currentYear}-05-07 .mp4`,
+			),
 			file(`${sessionId}.txt`, `wasabi/test/${currentYear}/${sessionId}.txt`),
 			file(`${sessionId}.mp4`, `wasabi/test/${currentYear}/${sessionId}.mp4`),
 		];

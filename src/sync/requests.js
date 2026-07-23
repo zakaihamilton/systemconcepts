@@ -33,9 +33,13 @@ export async function requestSync(forceReload) {
 	try {
 		const result = await performSync(forceReload);
 		if (!result?.completed) {
+			// Still advance lastSyncTime so auto-sync backs off to its normal
+			// interval instead of treating every incomplete attempt as "due now".
+			const endTime = Date.now();
 			SyncActiveStore.update((current) => {
 				current.busy = false;
 				current.phase = null;
+				current.lastSyncTime = endTime;
 			});
 			return result;
 		}
@@ -50,8 +54,10 @@ export async function requestSync(forceReload) {
 			current.counter++;
 		});
 	} catch {
+		const endTime = Date.now();
 		SyncActiveStore.update((current) => {
 			current.busy = false;
+			current.lastSyncTime = endTime;
 		});
 	}
 }

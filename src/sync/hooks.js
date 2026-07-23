@@ -56,15 +56,21 @@ export function useSync(options = {}) {
 
 	const checkSync = useCallback(() => {
 		if (!active || !online || !isSignedIn || !isVisible || !autoSync) return;
+		// Read busy flags from the stores at call time. Depending on React
+		// `busy` here recreated this callback whenever a sync finished, which
+		// immediately re-ran the schedule effect and could restart sync in a
+		// tight loop when the previous attempt was incomplete (lastSyncTime /
+		// version left unchanged so shouldRunInitialAutoSync stayed true).
+		const syncState = SyncActiveStore.getRawState();
 		const sessionsBusy = UpdateSessionsStore.getRawState().busy;
-		const elapsed = Date.now() - SyncActiveStore.getRawState().lastSyncTime;
+		const elapsed = Date.now() - syncState.lastSyncTime;
 		const isDue =
 			shouldRunInitialAutoSync() ||
 			elapsed >= AUTO_SYNC_INTERVAL_MS + getAutoSyncJitter();
-		if (isDue && !busy && !sessionsBusy) {
+		if (isDue && !syncState.busy && !sessionsBusy) {
 			requestSync(false);
 		}
-	}, [active, online, isSignedIn, isVisible, autoSync, busy]);
+	}, [active, online, isSignedIn, isVisible, autoSync]);
 
 	useEffect(() => {
 		if (!schedule) return;

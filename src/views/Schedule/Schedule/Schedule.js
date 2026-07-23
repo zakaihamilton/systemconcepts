@@ -9,7 +9,7 @@ import RestoreIcon from "@icons/svg/Restore.svg";
 import ViewDayIcon from "@icons/svg/ViewDay.svg";
 import ViewStreamIcon from "@icons/svg/ViewStream.svg";
 import ViewWeekIcon from "@icons/svg/ViewWeek.svg";
-import { SyncActiveStore } from "@sync/syncState";
+import { SyncActiveStore, UpdateSessionsStore } from "@sync/syncState";
 import IconButton from "@ui/IconButton";
 import { useLocalStorage } from "@util/browser/store";
 import { useDeviceType } from "@util/browser/styles";
@@ -65,10 +65,11 @@ export default function SchedulePage() {
 		(s) => s.needsSessionReload,
 	);
 	const syncBusy = SyncActiveStore.useState((s) => s.busy);
+	const updateSessionsBusy = UpdateSessionsStore.useState((s) => s.busy);
 
 	useEffect(() => {
-		// Only reload after sync completes (not during)
-		if (needsSessionReload && !syncBusy) {
+		// Only reload after sync/update-sessions completes (not during)
+		if (needsSessionReload && !syncBusy && !updateSessionsBusy) {
 			// Trigger a refresh while retaining the current list, so navigating to
 			// another view does not briefly render an empty page.
 			SessionsStore.update((s) => {
@@ -79,7 +80,7 @@ export default function SchedulePage() {
 				s.needsSessionReload = false;
 			});
 		}
-	}, [needsSessionReload, syncBusy]);
+	}, [needsSessionReload, syncBusy, updateSessionsBusy]);
 
 	const viewOptions = [
 		{

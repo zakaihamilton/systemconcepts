@@ -25,6 +25,10 @@ jest.mock("@sync/syncState", () => ({
 		useState: jest.fn().mockReturnValue(false),
 		update: jest.fn(),
 	},
+	UpdateSessionsStore: {
+		useState: jest.fn().mockReturnValue(false),
+		update: jest.fn(),
+	},
 }));
 jest.mock("@views/Player/Player", () => ({
 	PlayerStore: {

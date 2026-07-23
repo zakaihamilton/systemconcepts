@@ -106,7 +106,7 @@ describe("requestSync", () => {
 		expect(state.lastSynced).toBeGreaterThan(0);
 	});
 
-	it("clears busy/phase without persisting when the sync is incomplete", async () => {
+	it("clears busy/phase and backs off lastSyncTime when the sync is incomplete", async () => {
 		performSync.mockResolvedValue({ completed: false, reason: "incomplete" });
 
 		const result = await requestSync(false);
@@ -116,13 +116,17 @@ describe("requestSync", () => {
 		const state = SyncActiveStore.getRawState();
 		expect(state.busy).toBe(false);
 		expect(state.phase).toBeNull();
+		expect(state.lastSyncTime).toBeGreaterThan(0);
+		expect(state.counter).toBe(0);
 	});
 
-	it("clears the busy flag if performSync throws", async () => {
+	it("clears the busy flag and backs off lastSyncTime if performSync throws", async () => {
 		performSync.mockRejectedValue(new Error("pipeline exploded"));
 
 		await requestSync(false);
 
-		expect(SyncActiveStore.getRawState().busy).toBe(false);
+		const state = SyncActiveStore.getRawState();
+		expect(state.busy).toBe(false);
+		expect(state.lastSyncTime).toBeGreaterThan(0);
 	});
 });
