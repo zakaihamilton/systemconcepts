@@ -101,6 +101,7 @@ function tagsToJson(path, tags) {
 describe("Library View", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
+		window.location.hash = "";
 		usePathItems.mockReturnValue(["library"]);
 		Cookies.get.mockReturnValue("visitor");
 		storage.exists.mockResolvedValue(false);
@@ -539,11 +540,31 @@ describe("Library View", () => {
 			LibraryStore.getRawState.mockReturnValue({
 				lastViewedArticle: { _id: "t1" },
 			});
+			window.location.hash = "#library";
 			usePathItems.mockReturnValue(["library"]);
 			render(<Library />);
 			await waitFor(() => {
 				expect(screen.getByTestId("article-selected")).toHaveTextContent("t1");
 			});
+		});
+
+		it("does not restore lastViewedArticle when the live URL is a deep link", async () => {
+			const { LibraryStore } = require("../Store");
+			LibraryStore.getRawState.mockReturnValue({
+				lastViewedArticle: { _id: "t1" },
+			});
+			// Stale path items (e.g. from a briefly restored store hash) while the
+			// address bar still points at a specific article.
+			window.location.hash = "#library/id/5c665fb30551dbb6a6615a92";
+			usePathItems.mockReturnValue(["library"]);
+			render(<Library />);
+			await waitFor(() => {
+				expect(screen.getByTestId("article")).toBeInTheDocument();
+			});
+			// Allow any deferred onSelect timers to run if the guard failed.
+			await new Promise((resolve) => setTimeout(resolve, 0));
+			expect(screen.getByTestId("article-selected")).toHaveTextContent("");
+			expect(setPath).not.toHaveBeenCalled();
 		});
 
 		it("handles paragraph suffix on an id path", async () => {

@@ -51,6 +51,23 @@ describe("useLocalStorage (store)", () => {
 		expect(store.getRawState()).toEqual({ theme: "dark", _loaded: true });
 	});
 
+	it("does not restore omitted fields such as a stale navigation hash", () => {
+		window.localStorage.setItem(
+			"main-store-hash",
+			JSON.stringify({
+				hash: "#library",
+				fontSize: "18",
+			}),
+		);
+		const store = new Store({ fontSize: "16" });
+		renderHook(() => useLocalStorage("main-store-hash", store, ["fontSize"]));
+		expect(store.getRawState()).toEqual({
+			fontSize: "18",
+			_loaded: true,
+		});
+		expect(store.getRawState().hash).toBeUndefined();
+	});
+
 	it("loads all persisted fields when no field filter is given", () => {
 		window.localStorage.setItem(
 			"my-store-all",

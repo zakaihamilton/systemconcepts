@@ -93,3 +93,20 @@ test("preserves research and media hash navigation", async ({ page }) => {
 	});
 	await expect(page).toHaveURL(/#session\?group=demo/);
 });
+
+test("preserves library article deep-link hashes on load", async ({ page }) => {
+	await page.addInitScript(() => {
+		window.localStorage.setItem(
+			"MainStore",
+			JSON.stringify({
+				hash: "#library",
+				fontSize: "16",
+				showSideBar: true,
+			}),
+		);
+	});
+	await page.goto("/#library/id/5c665fb30551dbb6a6615a92");
+	await expect(page).toHaveURL(/#library\/id\/5c665fb30551dbb6a6615a92$/);
+	const hash = await page.evaluate(() => window.location.hash);
+	expect(hash).toBe("#library/id/5c665fb30551dbb6a6615a92");
+});

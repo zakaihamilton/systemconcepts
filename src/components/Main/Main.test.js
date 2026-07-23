@@ -1,9 +1,10 @@
 import { useSync } from "@sync/sync";
 import { render } from "@testing-library/react";
 import { useResize } from "@util/browser/size";
+import { useLocalStorage } from "@util/browser/store";
 import { useDeviceType } from "@util/browser/styles";
 import { useLanguage } from "@util/domain/language";
-import Main, { MainStore } from "./index.js";
+import Main, { MAIN_STORE_PERSISTED_FIELDS, MainStore } from "./index.js";
 
 jest.mock("@util/browser/size");
 jest.mock("@util/domain/language");
@@ -31,6 +32,7 @@ describe("Main Component", () => {
 			s.direction = "ltr";
 			s.showSideBar = true;
 			s.libraryExpanded = false;
+			s.hash = undefined;
 		});
 	});
 
@@ -49,6 +51,16 @@ describe("Main Component", () => {
 		expect(useSync).toHaveBeenCalledWith({ schedule: true });
 	});
 
+	it("persists MainStore UI prefs without the navigation hash", () => {
+		render(<Main />);
+		expect(useLocalStorage).toHaveBeenCalledWith(
+			"MainStore",
+			MainStore,
+			MAIN_STORE_PERSISTED_FIELDS,
+		);
+		expect(MAIN_STORE_PERSISTED_FIELDS).not.toContain("hash");
+	});
+
 	it("sets html dir attribute based on language", () => {
 		useLanguage.mockReturnValue("heb");
 		render(<Main />);
@@ -61,5 +73,13 @@ describe("Main Component", () => {
 		window.location.hash = "#test";
 		render(<Main />);
 		expect(MainStore.getRawState().hash).toBe("#test");
+	});
+
+	it("keeps deep-link hashes from the address bar on mount", () => {
+		window.location.hash = "#library/id/5c665fb30551dbb6a6615a92";
+		render(<Main />);
+		expect(MainStore.getRawState().hash).toBe(
+			"#library/id/5c665fb30551dbb6a6615a92",
+		);
 	});
 });

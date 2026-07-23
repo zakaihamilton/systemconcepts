@@ -5,7 +5,7 @@ import { useDeviceType } from "@util/browser/styles";
 import { useLanguage } from "@util/domain/language";
 import clsx from "clsx";
 import { Store } from "pullstate";
-import { useEffect } from "react";
+import { useEffect, useLayoutEffect } from "react";
 import Bookmarks from "../Bookmarks";
 import Head from "../Head";
 import Page from "../Page";
@@ -25,7 +25,27 @@ export const MainStoreDefaults = {
 	libraryExpanded: false,
 };
 
+// Persist UI prefs only. The URL hash is the source of truth for navigation —
+// restoring a stale hash from localStorage can clobber deep links like
+// #library/id/<articleId> on startup.
+export const MAIN_STORE_PERSISTED_FIELDS = [
+	"fontSize",
+	"direction",
+	"language",
+	"showSideBar",
+	"showDrawer",
+	"speedToolbar",
+	"showLibrarySideBar",
+	"libraryExpanded",
+];
+
 export const MainStore = new Store(MainStoreDefaults);
+
+function syncHashFromWindow() {
+	MainStore.update((s) => {
+		s.hash = window.location.hash;
+	});
+}
 
 export default function Main() {
 	// Keep automatic sync alive independently of the currently open route.
@@ -34,12 +54,16 @@ export default function Main() {
 	const language = useLanguage();
 	const isMobile = useDeviceType() !== "desktop";
 	const { direction, showSideBar, libraryExpanded } = MainStore.useState();
-	useLocalStorage("MainStore", MainStore);
+	useLocalStorage("MainStore", MainStore, MAIN_STORE_PERSISTED_FIELDS);
+
+	// Read the URL hash before paint so deep links win over any transient store
+	// state and the first painted route matches the address bar.
+	useLayoutEffect(() => {
+		syncHashFromWindow();
+	}, []);
 
 	useEffect(() => {
-		MainStore.update((s) => {
-			s.hash = window.location.hash;
-		});
+		syncHashFromWindow();
 		window.onhashchange = function () {
 			MainStore.update((s) => {
 				if (s.hash !== window.location.hash) {
