@@ -86,12 +86,16 @@
 	}
 }
 
+/* Positions the zoom control; kept outside Tooltip so the anchor box matches the badge. */
 .paragraphNumber {
 	position: absolute;
 	right: 8px;
 	top: 8px;
-	height: 28px;
 	z-index: 5;
+}
+
+.paragraphNumberButton {
+	height: 28px;
 	cursor: pointer;
 	font-weight: 800;
 	color: var(--primary-main);
@@ -212,6 +216,7 @@
 	}
 
 	.paragraphNumber,
+	.paragraphNumberButton,
 	.paragraphBadge {
 		display: none !important;
 	}

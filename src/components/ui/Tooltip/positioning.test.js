@@ -1,5 +1,6 @@
 import {
 	clampToViewport,
+	getAnchorRect,
 	getTooltipBox,
 	getTooltipPosition,
 } from "./positioning";
@@ -62,5 +63,57 @@ describe("tooltip positioning", () => {
 			top: 268,
 			left: 80,
 		});
+	});
+
+	it("uses the child rect when the trigger wrapper has collapsed", () => {
+		const childRect = {
+			top: 40,
+			left: 300,
+			right: 328,
+			bottom: 68,
+			width: 28,
+			height: 28,
+		};
+		const anchor = {
+			getBoundingClientRect: () => ({
+				top: 200,
+				left: 120,
+				right: 120,
+				bottom: 200,
+				width: 0,
+				height: 0,
+			}),
+			firstElementChild: {
+				getBoundingClientRect: () => childRect,
+			},
+		};
+
+		expect(getAnchorRect(anchor)).toEqual(childRect);
+	});
+
+	it("keeps the trigger rect when the wrapper still has size", () => {
+		const anchorRect = {
+			top: 10,
+			left: 20,
+			right: 60,
+			bottom: 40,
+			width: 40,
+			height: 30,
+		};
+		const anchor = {
+			getBoundingClientRect: () => anchorRect,
+			firstElementChild: {
+				getBoundingClientRect: () => ({
+					top: 0,
+					left: 0,
+					right: 10,
+					bottom: 10,
+					width: 10,
+					height: 10,
+				}),
+			},
+		};
+
+		expect(getAnchorRect(anchor)).toEqual(anchorRect);
 	});
 });

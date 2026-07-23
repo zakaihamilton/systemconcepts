@@ -231,18 +231,20 @@ export default React.memo(function Markdown({
 						data-paragraph-index={paragraphIndex}
 					>
 						<TextRenderer>{children}</TextRenderer>
-						<Tooltip title={translations?.ZOOM} placement="top" arrow>
-							<span
-								className={styles.paragraphNumber}
-								onClick={(e) => {
-									e.stopPropagation();
-									handleParagraphZoom(children, paragraphIndex);
-								}}
-								style={{ cursor: "pointer" }}
-							>
-								{paragraphIndex !== undefined ? paragraphIndex : ""}
-							</span>
-						</Tooltip>
+						<span className={styles.paragraphNumber}>
+							<Tooltip title={translations?.ZOOM} placement="top" arrow>
+								<span
+									className={styles.paragraphNumberButton}
+									onClick={(e) => {
+										e.stopPropagation();
+										handleParagraphZoom(children, paragraphIndex);
+									}}
+									style={{ cursor: "pointer" }}
+								>
+									{paragraphIndex !== undefined ? paragraphIndex : ""}
+								</span>
+							</Tooltip>
+						</span>
 					</Box>
 				);
 			}
@@ -268,24 +270,26 @@ export default React.memo(function Markdown({
 						data-paragraph-text={paragraphText}
 					>
 						<TextRenderer>{children}</TextRenderer>
-						<Tooltip title={translations?.ZOOM} placement="top" arrow>
-							<span
-								data-prevent-select="true"
-								className={clsx(
-									styles.paragraphNumber,
-									paragraphSelected && styles.selected,
-								)}
-								onMouseEnter={() => setHoveringNumber(true)}
-								onMouseLeave={() => setHoveringNumber(false)}
-								onClick={(e) => {
-									e.stopPropagation();
-									const number = node?.properties?.dataParagraphIndex;
-									handleParagraphZoom(children, number);
-								}}
-							>
-								{paragraphIndex !== undefined ? paragraphIndex : ""}
-							</span>
-						</Tooltip>
+						<span className={styles.paragraphNumber}>
+							<Tooltip title={translations?.ZOOM} placement="top" arrow>
+								<span
+									data-prevent-select="true"
+									className={clsx(
+										styles.paragraphNumberButton,
+										paragraphSelected && styles.selected,
+									)}
+									onMouseEnter={() => setHoveringNumber(true)}
+									onMouseLeave={() => setHoveringNumber(false)}
+									onClick={(e) => {
+										e.stopPropagation();
+										const number = node?.properties?.dataParagraphIndex;
+										handleParagraphZoom(children, number);
+									}}
+								>
+									{paragraphIndex !== undefined ? paragraphIndex : ""}
+								</span>
+							</Tooltip>
+						</span>
 					</Box>
 					{isLastParagraph && (
 						<Box className={styles.endOfArticle}>
