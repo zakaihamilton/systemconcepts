@@ -181,11 +181,21 @@ export default function Library() {
 			pathItems.length === 1 &&
 			pathItems[0] === "library"
 		) {
+			// If MainStore.hash is briefly stale (e.g. "#library") while the live
+			// URL still has #library/id/<id>, do not restore lastViewedArticle —
+			// that would overwrite the deep link via setPath.
+			const windowPath = (window.location.hash || "")
+				.replace(/^#/, "")
+				.split("/")
+				.filter(Boolean);
+			if (windowPath.length > 1) {
+				return;
+			}
 			// If we're on the root library page, restore the last viewed article
 			const { lastViewedArticle } = LibraryStore.getRawState();
 			if (lastViewedArticle) {
 				const tag = tags.find((t) => t._id === lastViewedArticle._id);
-				if (tag) {
+				if (tag && (!selectedTag || tag._id !== selectedTag._id)) {
 					setTimeout(() => onSelect(tag), 0);
 				}
 			}
