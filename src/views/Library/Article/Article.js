@@ -616,7 +616,7 @@ function Article({
 		);
 	}
 
-	if (!content) return null;
+	if (!content && !selectedTag) return null;
 
 	return (
 		<Box

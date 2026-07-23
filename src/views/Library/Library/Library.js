@@ -1,3 +1,4 @@
+import { MainStore } from "@components/Main";
 import { registerToolbar } from "@components/Toolbar";
 import { LIBRARY_LOCAL_PATH } from "@sync/constants";
 import { SyncActiveStore } from "@sync/syncState";
@@ -26,18 +27,20 @@ export default function Library() {
 	const storeTags = LibraryStore.useState((s) => s.tags);
 	const [localTags, setLocalTags] = useState([]);
 	const tags = storeTags?.length ? storeTags : localTags;
-	const setTags = useCallback(
-		(nextTags) => {
-			const base = storeTags?.length ? storeTags : localTags;
+	// Keep setTags identity stable. Depending on storeTags/localTags here recreated
+	// loadTags on every successful read and retriggered the mount effect in a loop.
+	const setTags = useCallback((nextTags) => {
+		setLocalTags((prevLocal) => {
+			const storeTagsNow = LibraryStore.getRawState().tags;
+			const base = storeTagsNow?.length ? storeTagsNow : prevLocal;
 			const resolved =
 				typeof nextTags === "function" ? nextTags(base) : nextTags;
-			setLocalTags(resolved);
 			LibraryStore.update((s) => {
 				s.tags = resolved;
 			});
-		},
-		[storeTags, localTags],
-	);
+			return resolved;
+		});
+	}, []);
 	const [content, setContent] = useState(null);
 	const [selectedTag, setSelectedTag] = useState(null);
 	const [loading, setLoading] = useState(false);
@@ -45,6 +48,7 @@ export default function Library() {
 	const [editDialogOpen, setEditDialogOpen] = useState(false);
 	const [editContentDialogOpen, setEditContentDialogOpen] = useState(false);
 	const [customOrder, setCustomOrder] = useState({});
+	const storeSelectedId = LibraryStore.useState((s) => s.selectedId);
 	const libraryUpdateCounter = SyncActiveStore.useState(
 		(s) => s.libraryUpdateCounter,
 	);
@@ -63,9 +67,71 @@ export default function Library() {
 		return hierarchy;
 	}, []);
 
+	const findTagById = useCallback(
+		(id) => {
+			if (!id) return null;
+			const needle = String(id);
+			return tags.find((t) => String(t._id) === needle) || null;
+		},
+		[tags],
+	);
+
+	const selectTagFromIdPart = useCallback(
+		(idPart) => {
+			if (!idPart) return { tag: null, paragraphId: null };
+			const colonIndex = idPart.lastIndexOf(":");
+			const id = colonIndex !== -1 ? idPart.substring(0, colonIndex) : idPart;
+			const possibleParagraph =
+				colonIndex !== -1 ? idPart.substring(colonIndex + 1) : null;
+			let paragraphId = null;
+			if (possibleParagraph && !isNaN(parseInt(possibleParagraph, 10))) {
+				paragraphId = parseInt(possibleParagraph, 10);
+			}
+			return { tag: findTagById(id), paragraphId };
+		},
+		[findTagById],
+	);
+
+	const applySelectedTag = useCallback(
+		(tag, paragraphId = null) => {
+			if (!tag) return;
+			if (!selectedTag || String(tag._id) !== String(selectedTag._id)) {
+				setLoading(true);
+				setContent(null);
+				setSelectedTag(tag);
+				LibraryStore.update((s) => {
+					s.lastViewedArticle = tag;
+					s.selectedId = tag._id;
+					if (paragraphId) {
+						s.scrollToParagraph = paragraphId;
+					}
+				});
+			} else if (paragraphId) {
+				LibraryStore.update((s) => {
+					s.scrollToParagraph = paragraphId;
+				});
+			}
+		},
+		[selectedTag],
+	);
+
+	// When the sidebar resolves a deep link first, mirror that selection into the
+	// article pane even if our path effect has not caught up yet.
+	useEffect(() => {
+		if (!storeSelectedId || !tags.length) return;
+		if (selectedTag && String(selectedTag._id) === String(storeSelectedId)) {
+			return;
+		}
+		const tag = findTagById(storeSelectedId);
+		if (!tag) return;
+		setLoading(true);
+		setContent(null);
+		setSelectedTag(tag);
+	}, [storeSelectedId, tags, selectedTag, findTagById]);
+
 	const onSelect = useCallback(
 		(tag) => {
-			if (!selectedTag || tag._id !== selectedTag._id) {
+			if (!selectedTag || String(tag._id) !== String(selectedTag._id)) {
 				setLoading(true);
 				setContent(null);
 			}
@@ -88,18 +154,7 @@ export default function Library() {
 			let paragraphId = null;
 
 			if (pathItems[1] === "id") {
-				const idPart = pathItems[2];
-				if (idPart) {
-					const colonIndex = idPart.lastIndexOf(":");
-					const id =
-						colonIndex !== -1 ? idPart.substring(0, colonIndex) : idPart;
-					const possibleParagraph =
-						colonIndex !== -1 ? idPart.substring(colonIndex + 1) : null;
-					if (possibleParagraph && !isNaN(parseInt(possibleParagraph, 10))) {
-						paragraphId = parseInt(possibleParagraph, 10);
-					}
-					tag = tags.find((t) => t._id === id);
-				}
+				({ tag, paragraphId } = selectTagFromIdPart(pathItems[2]));
 			} else {
 				const urlPath = pathItems.slice(1).join("|");
 				// Try explicit match first
@@ -114,26 +169,9 @@ export default function Library() {
 						const possibleParagraph = lastPart.slice(lastSepIndex + 1);
 						if (!isNaN(parseInt(possibleParagraph, 10))) {
 							paragraphId = parseInt(possibleParagraph, 10);
-							// Try matching removing the suffix, or treating suffix as just tag number if it was replaced
-							// Scenario 1: Suffix REPLACED tag number. Base matches?
-							// Scenario 2: Suffix APPENDED?
-
-							// We will iterate tags and see if any hierarchy matches the URL base
-							// But finding "base" is tricky if we don't know if original had number suffix.
-
-							// Let's assume URL replaces tag number with paragraph number (as per Markdown.js logic)
-							// So we look for tag where hierarchy WITHOUT number suffix matches URL base part.
-
-							// Simpler strategy: Iterate all tags. For each, generate hierarchy.
-							// Check if URL matches hierarchy but replacing last suffix with paragraph ID.
-
 							tag = tags.find((t) => {
 								const h = getTagHierarchy(t);
 								const hStr = h.join("|");
-
-								// Check if current URL matches this tag's hierarchy EXCEPT for the last number
-								// urlPath: ...|Chapter One:33
-								// tagPath: ...|Chapter One:9
 
 								const urlLastSep = urlPath.lastIndexOf(":");
 								const urlBase =
@@ -142,7 +180,6 @@ export default function Library() {
 										: urlPath;
 
 								if (hStr === urlPath) return true;
-								// Check if the tag matches the URL base (i.e. URL has extra paragraph suffix that tag doesn't have)
 								if (hStr === urlBase) return true;
 
 								const tagLastSep = hStr.lastIndexOf(":");
@@ -157,50 +194,59 @@ export default function Library() {
 				}
 			}
 
-			if (tag && (!selectedTag || tag._id !== selectedTag._id)) {
-				setLoading(true);
-				setContent(null);
-				setSelectedTag(tag);
-				// Remember the last viewed article
-				LibraryStore.update((s) => {
-					s.lastViewedArticle = tag;
-					s.selectedId = tag._id;
-					if (paragraphId) {
-						s.scrollToParagraph = paragraphId;
-					}
-				});
-			} else if (tag && paragraphId) {
-				// Tag already selected, but ensure we scroll if needed (e.g. navigating between paragraphs? No, that's hash)
-				// But on Refresh, we might need to set it.
-				LibraryStore.update((s) => {
-					s.scrollToParagraph = paragraphId;
-				});
-			}
+			applySelectedTag(tag, paragraphId);
 		} else if (
 			tags.length > 0 &&
 			pathItems.length === 1 &&
 			pathItems[0] === "library"
 		) {
-			// If MainStore.hash is briefly stale (e.g. "#library") while the live
-			// URL still has #library/id/<id>, do not restore lastViewedArticle —
-			// that would overwrite the deep link via setPath.
+			// MainStore.hash can briefly lag behind the address bar. Prefer the live
+			// URL so #library/id/<id> still selects the article.
 			const windowPath = (window.location.hash || "")
 				.replace(/^#/, "")
 				.split("/")
-				.filter(Boolean);
-			if (windowPath.length > 1) {
+				.filter(Boolean)
+				.map((item) => {
+					try {
+						return decodeURIComponent(item);
+					} catch {
+						return item;
+					}
+				});
+			if (
+				windowPath[0] === "library" &&
+				windowPath[1] === "id" &&
+				windowPath[2]
+			) {
+				MainStore.update((s) => {
+					s.hash = window.location.hash;
+				});
+				const { tag, paragraphId } = selectTagFromIdPart(windowPath[2]);
+				applySelectedTag(tag, paragraphId);
 				return;
 			}
 			// If we're on the root library page, restore the last viewed article
 			const { lastViewedArticle } = LibraryStore.getRawState();
 			if (lastViewedArticle) {
-				const tag = tags.find((t) => t._id === lastViewedArticle._id);
-				if (tag && (!selectedTag || tag._id !== selectedTag._id)) {
+				const tag = findTagById(lastViewedArticle._id);
+				if (
+					tag &&
+					(!selectedTag || String(tag._id) !== String(selectedTag._id))
+				) {
 					setTimeout(() => onSelect(tag), 0);
 				}
 			}
 		}
-	}, [tags, pathItems, getTagHierarchy, onSelect, selectedTag]);
+	}, [
+		tags,
+		pathItems,
+		getTagHierarchy,
+		onSelect,
+		selectedTag,
+		selectTagFromIdPart,
+		applySelectedTag,
+		findTagById,
+	]);
 
 	const loadTags = useCallback(async () => {
 		try {
@@ -262,12 +308,12 @@ export default function Library() {
 
 			let item = null;
 			if (Array.isArray(data)) {
-				item = data.find((i) => i._id === selectedTag._id);
-			} else if (data._id === selectedTag._id) {
+				item = data.find((i) => String(i._id) === String(selectedTag._id));
+			} else if (String(data._id) === String(selectedTag._id)) {
 				item = data;
 			}
 
-			const contentText = item ? item.text : "Content not found in file.";
+			const contentText = item ? item.text || "" : "Content not found in file.";
 			setContent(contentText);
 		} catch (err) {
 			structuredLogger.error("Failed to load content:", err);
@@ -573,7 +619,9 @@ export default function Library() {
 
 	const currentIndex = useMemo(() => {
 		if (!selectedTag || sortedTags.length === 0) return -1;
-		return sortedTags.findIndex((tag) => tag._id === selectedTag._id);
+		return sortedTags.findIndex(
+			(tag) => String(tag._id) === String(selectedTag._id),
+		);
 	}, [selectedTag, sortedTags]);
 
 	const prevArticle = currentIndex > 0 && sortedTags[currentIndex - 1];
