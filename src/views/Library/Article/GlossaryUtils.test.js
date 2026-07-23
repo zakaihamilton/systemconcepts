@@ -49,6 +49,19 @@ describe("GlossaryUtils", () => {
 			expect(shouldSkipGlossaryTerm("Over", text, start)).toBe(false);
 		});
 
+		it("skips Av as the Hebrew month so it is not rewritten to Coarse", () => {
+			const text = "The fast of the 9th of Av";
+			const start = text.indexOf("Av");
+			expect(shouldSkipGlossaryTerm("Av", text, start)).toBe(true);
+			expect(shouldSkipGlossaryTerm("av", "in av this year", 3)).toBe(true);
+		});
+
+		it("keeps Av when followed by a confirming gloss", () => {
+			const text = "the Av (Coarse) of the kli";
+			const start = text.indexOf("Av");
+			expect(shouldSkipGlossaryTerm("Av", text, start)).toBe(false);
+		});
+
 		it("skips lowercase or and sentence-initial Or", () => {
 			expect(shouldSkipGlossaryTerm("or", "this or that", 5)).toBe(true);
 			expect(shouldSkipGlossaryTerm("Or", "Or something else", 0)).toBe(true);
@@ -127,6 +140,16 @@ describe("GlossaryUtils", () => {
 		it("keeps Over when explicitly glossed", () => {
 			const terms = scanForTerms("Then Over (Crosses) the boundary");
 			expect(terms.some((t) => t.term === "over")).toBe(true);
+		});
+
+		it("skips Av in month phrases like 9th of Av", () => {
+			const terms = scanForTerms("The fast of the 9th of Av");
+			expect(terms.every((t) => t.term !== "av")).toBe(true);
+		});
+
+		it("keeps Av when explicitly glossed as Coarse", () => {
+			const terms = scanForTerms("the Av (Coarse) of the kli");
+			expect(terms.some((t) => t.term === "av")).toBe(true);
 		});
 
 		it("sorts terms alphabetically", () => {
