@@ -39,7 +39,7 @@ import {
 	loadTranscriptions,
 } from "./metadata";
 import { fetchSessionMetadata } from "./sessionMetadataClient";
-import { getListing, updateYearSync } from "./utils";
+import { getListing, updateYearSync, yieldToMain } from "./utils";
 
 const prefix = "wasabi/";
 const GROUP_UPDATE_CACHE_PATH = makePath(
@@ -323,6 +323,7 @@ async function writeYearCache(
 	try {
 		const path = getYearCachePath(groupName, yearName);
 		await storage.createFolderPath(path);
+		await yieldToMain();
 		await storage.writeFile(
 			path,
 			JSON.stringify({
@@ -1119,6 +1120,14 @@ export async function updateGroupProcess(
 							: mergeSessionsById(cachedYearSessions, yearSessions)
 						: yearSessions;
 
+				// Persist can take a long time for large years; surface it so the UI
+				// does not look stuck at N/N sessions with an empty year bar.
+				UpdateSessionsStore.update((s) => {
+					s.status[itemIndex].phase = "persisting";
+					s.status = [...s.status];
+				});
+				await yieldToMain();
+
 				if (isMerged || isBundled) {
 					// Always persist the full year view: fill-missing / recent
 					// refreshes only process a subset, so push the merged result.
@@ -1268,7 +1277,7 @@ export async function updateGroupProcess(
 		}
 
 		if (hasChanges) {
-			// 2. Write ONE merged file
+			// 2. Write ONE merged file (compact JSON — pretty-print freezes large groups)
 			const localGroupPath = makePath(LOCAL_SYNC_PATH, `${name}.json`);
 			const groupData = {
 				version: 1,
@@ -1276,12 +1285,13 @@ export async function updateGroupProcess(
 				date: Date.now(),
 				sessions: uniqueSessions,
 			};
-			await writeCompressedFile(localGroupPath, groupData);
+			await yieldToMain();
+			const jsonString = JSON.stringify(groupData);
+			await writeCompressedFile(localGroupPath, jsonString);
 
 			// Update local manifest immediately so useSessions can see it
 			try {
-				const content = await storage.readFile(localGroupPath);
-				const info = await getFileInfo(content);
+				const info = await getFileInfo(jsonString);
 				const manifestPath = makePath(LOCAL_SYNC_PATH, FILES_MANIFEST);
 				const relPath = localGroupPath.substring(
 					makePath(LOCAL_SYNC_PATH).length,

@@ -60,6 +60,7 @@ jest.mock("./utils", () => ({
 	getListing: jest.fn(),
 	updateBundleFile: jest.fn(),
 	updateYearSync: jest.fn(),
+	yieldToMain: jest.fn(() => Promise.resolve()),
 }));
 
 function file(name, path) {
@@ -815,12 +816,15 @@ describe("updateGroupProcess", () => {
 
 		expect(writeCompressedFile).toHaveBeenCalledWith(
 			expect.stringMatching(/\/local\/sync\/test\.json$/),
-			expect.objectContaining({
-				sessions: expect.arrayContaining([
-					expect.objectContaining({ id: oldSession.id }),
-					expect.objectContaining({ id: "2024-05-05 Test Session" }),
-				]),
-			}),
+			expect.any(String),
+		);
+		const [, mergedJson] = writeCompressedFile.mock.calls[0];
+		const mergedData = JSON.parse(mergedJson);
+		expect(mergedData.sessions).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({ id: oldSession.id }),
+				expect.objectContaining({ id: "2024-05-05 Test Session" }),
+			]),
 		);
 		expect(addSyncLog).toHaveBeenCalledWith(
 			expect.stringContaining("omitted locally stored years (2022)"),
@@ -1718,7 +1722,11 @@ describe("updateGroupProcess", () => {
 		});
 
 		await updateGroupProcess("test", true, false, true, false);
-		const writtenSessions = writeCompressedFile.mock.calls.at(-1)[1].sessions;
+		const writtenPayload = writeCompressedFile.mock.calls.at(-1)[1];
+		const writtenSessions =
+			typeof writtenPayload === "string"
+				? JSON.parse(writtenPayload).sessions
+				: writtenPayload.sessions;
 
 		jest.clearAllMocks();
 		storage.exists.mockImplementation(async (path) =>

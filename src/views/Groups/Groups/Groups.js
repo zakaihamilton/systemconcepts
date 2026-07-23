@@ -411,8 +411,18 @@ export default function Groups() {
 		const variant = statusItem.progress !== -1 ? "determinate" : undefined;
 		const tooltip = statusItem.index + " / " + statusItem.count;
 
-		const percentage =
-			statusItem.count > 0 ? (statusItem.progress / statusItem.count) * 100 : 0;
+		let percentage = 0;
+		if (statusItem.phase === "persisting") {
+			percentage = 100;
+		} else if (
+			(statusItem.phase === "sessions" || statusItem.phase === "metadata") &&
+			statusItem.sessionCount > 0
+		) {
+			percentage =
+				((statusItem.sessionProgress || 0) / statusItem.sessionCount) * 100;
+		} else if (statusItem.count > 0) {
+			percentage = (statusItem.progress / statusItem.count) * 100;
+		}
 
 		const iconWidget = (
 			<ItemMenu

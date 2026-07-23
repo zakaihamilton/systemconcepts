@@ -667,9 +667,43 @@ export default function ProgressDialog() {
 	);
 }
 
+function getItemProgressPercent(item) {
+	if (item.phase === "persisting") {
+		return 100;
+	}
+	if (
+		(item.phase === "sessions" || item.phase === "metadata") &&
+		item.sessionCount > 0
+	) {
+		return ((item.sessionProgress || 0) / item.sessionCount) * 100;
+	}
+	if (item.count > 0) {
+		return (item.progress / item.count) * 100;
+	}
+	return 0;
+}
+
+function getItemProgressLabel(item, translations) {
+	if (item.phase === "metadata") {
+		return translations.LOADING_METADATA || "Loading metadata…";
+	}
+	if (item.phase === "persisting") {
+		const yearPrefix = item.year ? `${item.year} - ` : "";
+		return (
+			yearPrefix +
+			(translations.SAVING_SESSIONS || "Saving sessions…")
+		);
+	}
+	if (item.sessionCount > 0 && item.progress < item.count) {
+		const yearPrefix = item.year ? `${item.year} - ` : "";
+		return `${yearPrefix}${item.sessionProgress || 0} / ${item.sessionCount} sessions`;
+	}
+	return `${item.progress} / ${item.count} ${translations.YEARS}`;
+}
+
 function ProgressItem({ item, translations, expanded, onToggle }) {
 	const hasErrors = item.errors && item.errors.length > 0;
-	const progress = item.count > 0 ? (item.progress / item.count) * 100 : 0;
+	const progress = getItemProgressPercent(item);
 	const isDone = item.count > 0 && item.progress === item.count;
 	const hasNewSessions = item.newSessions && item.newSessions.length > 0;
 
@@ -734,12 +768,7 @@ function ProgressItem({ item, translations, expanded, onToggle }) {
 							)}
 							<div style={{ flex: 1 }} />
 							<span className={styles.progressDetails}>
-								{item.year && `${item.year} - `}
-								{item.phase === "metadata"
-									? translations.LOADING_METADATA || "Loading metadata…"
-									: item.sessionCount > 0 && item.progress < item.count
-										? `${item.sessionProgress || 0} / ${item.sessionCount} sessions`
-										: `${item.progress} / ${item.count} ${translations.YEARS}`}
+								{getItemProgressLabel(item, translations)}
 							</span>
 						</div>
 					</div>
