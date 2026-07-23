@@ -1,3 +1,4 @@
+import { addSyncLog } from "@sync/logs";
 import { UpdateSessionsStore } from "@sync/syncState";
 import { logger as structuredLogger } from "@util/api/logger";
 import pLimit from "@util/data/p-limit";
@@ -6,22 +7,36 @@ import { useCallback, useMemo } from "react";
 import { updateGroupProcess } from "./updateGroup";
 import { getListing, updateBundleFile } from "./utils";
 
+async function runUpdateSessions(label, work) {
+	UpdateSessionsStore.update((s) => {
+		s.busy = true;
+		s.start = new Date().getTime();
+	});
+	addSyncLog(`Update Sessions started (${label}).`, "info");
+	try {
+		const result = await work();
+		addSyncLog(`Update Sessions finished (${label}).`, "success");
+		return result;
+	} catch (err) {
+		addSyncLog(
+			`Update Sessions failed (${label}): ${err.message || err}`,
+			"error",
+		);
+		throw err;
+	} finally {
+		UpdateSessionsStore.update((s) => {
+			s.busy = false;
+		});
+	}
+}
+
 export function useUpdateSessions(groups) {
 	const { busy, status, start } = UpdateSessionsStore.useState();
 	const prefix = makePath("aws/sessions") + "/";
 
-	// We pass getListing logic here or reuse the one in utils if it fits,
-	// but the original code had getListing instance.
-	// Actually the logic in original was just storage.getListing with a check.
-	// Our utils.getListing is exactly that.
-
 	const updateSessions = useCallback(
-		async (includeDisabled) => {
-			UpdateSessionsStore.update((s) => {
-				s.busy = true;
-				s.start = new Date().getTime();
-			});
-			try {
+		async (includeDisabled) =>
+			runUpdateSessions("current year", async () => {
 				let items = [];
 				try {
 					items = await getListing(prefix);
@@ -49,6 +64,10 @@ export function useUpdateSessions(groups) {
 						);
 					})
 					.filter(Boolean);
+				addSyncLog(
+					`Updating ${promises.length} group(s) for current year…`,
+					"info",
+				);
 				const results = await Promise.all(promises);
 				const bundledSessions = results
 					.filter((r) => r && Array.isArray(r))
@@ -57,22 +76,13 @@ export function useUpdateSessions(groups) {
 					await updateBundleFile(bundledSessions);
 				}
 				return results;
-			} finally {
-				UpdateSessionsStore.update((s) => {
-					s.busy = false;
-				});
-			}
-		},
+			}),
 		[groups, prefix],
 	);
 
 	const updateAllSessions = useCallback(
-		async (includeDisabled) => {
-			UpdateSessionsStore.update((s) => {
-				s.busy = true;
-				s.start = new Date().getTime();
-			});
-			try {
+		async (includeDisabled) =>
+			runUpdateSessions("all years", async () => {
 				let items = [];
 				try {
 					items = await getListing(prefix);
@@ -100,6 +110,10 @@ export function useUpdateSessions(groups) {
 						);
 					})
 					.filter(Boolean);
+				addSyncLog(
+					`Updating ${promises.length} group(s) for all years…`,
+					"info",
+				);
 				const results = await Promise.all(promises);
 				const bundledSessions = results
 					.filter((r) => r && Array.isArray(r))
@@ -108,22 +122,13 @@ export function useUpdateSessions(groups) {
 					await updateBundleFile(bundledSessions);
 				}
 				return results;
-			} finally {
-				UpdateSessionsStore.update((s) => {
-					s.busy = false;
-				});
-			}
-		},
+			}),
 		[groups, prefix],
 	);
 
 	const updateAllMetadataCurrentYear = useCallback(
-		async (includeDisabled) => {
-			UpdateSessionsStore.update((s) => {
-				s.busy = true;
-				s.start = new Date().getTime();
-			});
-			try {
+		async (includeDisabled) =>
+			runUpdateSessions("metadata (current year)", async () => {
 				let items = [];
 				try {
 					items = await getListing(prefix);
@@ -146,12 +151,15 @@ export function useUpdateSessions(groups) {
 						if (!includeDisabled && isDisabled) {
 							return null;
 						}
-						// Passing updateAll=false and forceUpdate=true
 						return limit(() =>
 							updateGroupProcess(item.name, false, true, isMerged, isBundled),
 						);
 					})
 					.filter(Boolean);
+				addSyncLog(
+					`Updating ${promises.length} group(s) for metadata (current year)…`,
+					"info",
+				);
 				const results = await Promise.all(promises);
 				const bundledSessions = results
 					.filter((r) => r && Array.isArray(r))
@@ -160,22 +168,13 @@ export function useUpdateSessions(groups) {
 					await updateBundleFile(bundledSessions);
 				}
 				return results;
-			} finally {
-				UpdateSessionsStore.update((s) => {
-					s.busy = false;
-				});
-			}
-		},
+			}),
 		[groups, prefix],
 	);
 
 	const updateRecentSessions = useCallback(
-		async (includeDisabled) => {
-			UpdateSessionsStore.update((s) => {
-				s.busy = true;
-				s.start = new Date().getTime();
-			});
-			try {
+		async (includeDisabled) =>
+			runUpdateSessions("recent (30 days)", async () => {
 				let items = [];
 				try {
 					items = await getListing(prefix);
@@ -185,29 +184,30 @@ export function useUpdateSessions(groups) {
 				if (!items) return;
 
 				const limit = pLimit(4);
-				const results = await Promise.all(
-					items
-						.map((item) => {
-							const groupInfo = groups.find(
-								(group) => group.name === item.name,
-							);
-							if (!groupInfo || (!includeDisabled && groupInfo.disabled)) {
-								return null;
-							}
-							return limit(() =>
-								updateGroupProcess(
-									item.name,
-									false,
-									true,
-									groupInfo.merged ?? groupInfo.disabled,
-									groupInfo.bundled,
-									null,
-									30,
-								),
-							);
-						})
-						.filter(Boolean),
+				const groupPromises = items
+					.map((item) => {
+						const groupInfo = groups.find((group) => group.name === item.name);
+						if (!groupInfo || (!includeDisabled && groupInfo.disabled)) {
+							return null;
+						}
+						return limit(() =>
+							updateGroupProcess(
+								item.name,
+								false,
+								true,
+								groupInfo.merged ?? groupInfo.disabled,
+								groupInfo.bundled,
+								null,
+								30,
+							),
+						);
+					})
+					.filter(Boolean);
+				addSyncLog(
+					`Updating ${groupPromises.length} group(s) for recent (30 days)…`,
+					"info",
 				);
+				const results = await Promise.all(groupPromises);
 				const bundledSessions = results
 					.filter((result) => Array.isArray(result))
 					.flat();
@@ -215,22 +215,13 @@ export function useUpdateSessions(groups) {
 					await updateBundleFile(bundledSessions);
 				}
 				return results;
-			} finally {
-				UpdateSessionsStore.update((s) => {
-					s.busy = false;
-				});
-			}
-		},
+			}),
 		[groups, prefix],
 	);
 
 	const updateSpecificGroup = useCallback(
-		async (name, updateAll, forceUpdate, targetSessionId = null) => {
-			UpdateSessionsStore.update((s) => {
-				s.busy = true;
-				s.start = new Date().getTime();
-			});
-			try {
+		async (name, updateAll, forceUpdate, targetSessionId = null) =>
+			runUpdateSessions(`group ${name}`, async () => {
 				const groupInfo = groups.find((g) => g.name === name);
 				const isMerged = groupInfo?.merged ?? groupInfo?.disabled;
 				const isBundled = groupInfo?.bundled;
@@ -246,12 +237,7 @@ export function useUpdateSessions(groups) {
 					await updateBundleFile(result);
 				}
 				return result;
-			} finally {
-				UpdateSessionsStore.update((s) => {
-					s.busy = false;
-				});
-			}
-		},
+			}),
 		[groups],
 	);
 

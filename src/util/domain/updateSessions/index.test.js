@@ -4,6 +4,9 @@ import { useUpdateSessions } from "./index";
 import { updateGroupProcess } from "./updateGroup";
 import { getListing, updateBundleFile } from "./utils";
 
+jest.mock("@sync/logs", () => ({
+	addSyncLog: jest.fn(),
+}));
 jest.mock("@util/api/logger", () => ({
 	logger: {
 		debug: jest.fn(),

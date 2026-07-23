@@ -340,7 +340,9 @@ async function writeYearCache(
 					items: slimItems,
 					tags: metadata?.tags,
 					durations: metadata?.durations,
-					summaries: metadata?.summaries,
+					// Omit summaries — they dominate cache size and hang IndexedDB writes.
+					// Fresh metadata fetch / summary.path cover display needs.
+					summaries: {},
 					transcriptions: metadata?.transcriptions,
 				}),
 				sessionFingerprints: sessionFingerprints || {},
@@ -1140,6 +1142,10 @@ export async function updateGroupProcess(
 					s.status = [...s.status];
 				});
 				await yieldToMain();
+				addSyncLog(
+					`[${name}/${year.name}] Persisting ${sessionsToPersist.length} session(s)…`,
+					"info",
+				);
 
 				if (isMerged || isBundled) {
 					// Always persist the full year view: fill-missing / recent

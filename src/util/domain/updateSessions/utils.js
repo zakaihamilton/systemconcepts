@@ -1,6 +1,7 @@
 import { writeCompressedFile } from "@sync/bundle";
 import { FILES_MANIFEST, LOCAL_SYNC_PATH } from "@sync/constants";
 import { getFileInfo } from "@sync/hash";
+import { addSyncLog } from "@sync/logs";
 import { updateManifestEntry } from "@sync/manifest";
 import { lockMutex } from "@sync/mutex";
 import { logger as structuredLogger } from "@util/api/logger";
@@ -13,8 +14,9 @@ const EMPTY_YEAR_SYNC_RESULT = Object.freeze({
 	newSessions: [],
 });
 
-const WRITE_TIMEOUT_MS = 45_000;
-const MANIFEST_TIMEOUT_MS = 15_000;
+const WRITE_TIMEOUT_MS = 30_000;
+const LOCK_TIMEOUT_MS = 10_000;
+const STRINGIFY_CHUNK = 25;
 
 /** Let React paint status updates before heavy sync work blocks the main thread. */
 export function yieldToMain() {
@@ -50,12 +52,15 @@ function slimFileRef(file) {
 }
 
 /**
- * Drop listing-stat noise from media refs before persisting. Full wasabi/aws
- * listing objects inflate year files enough to hang IndexedDB writes.
+ * Drop listing-stat noise and inline summary bodies before persisting.
+ * summaryText is reloaded on demand via summary.path (see Session view /
+ * loadParagraphs). Keeping it in year files freezes stringify/IndexedDB on
+ * large groups.
  */
 export function slimSessionForPersist(session) {
 	if (!session || typeof session !== "object") return session;
 	const slim = { ...session };
+	delete slim.summaryText;
 	if (slim.audio) slim.audio = slimFileRef(slim.audio);
 	if (slim.video) slim.video = slimFileRef(slim.video);
 	if (slim.image) slim.image = slimFileRef(slim.image);
@@ -83,6 +88,26 @@ function normalizeYearSessions(sessions) {
 		.map((s) => slimSessionForPersist({ name: s.id, ...s }));
 }
 
+/**
+ * Stringify a large array in chunks, yielding between chunks so UI timers and
+ * write timeouts can run. A single JSON.stringify of 500+ sessions with media
+ * metadata blocks the main thread long enough that "Saving sessions…" never
+ * advances.
+ */
+export async function stringifyJsonArrayChunked(items, onProgress) {
+	if (!items.length) return "[]";
+	let json = "[";
+	for (let i = 0; i < items.length; i++) {
+		if (i > 0) json += ",";
+		json += JSON.stringify(items[i]);
+		if ((i + 1) % STRINGIFY_CHUNK === 0 || i + 1 === items.length) {
+			onProgress?.(i + 1, items.length);
+			await yieldToMain();
+		}
+	}
+	return `${json}]`;
+}
+
 async function updateLocalManifestForSyncFile(localPath, content) {
 	const info = await getFileInfo(content);
 	const manifestPath = makePath(LOCAL_SYNC_PATH, FILES_MANIFEST);
@@ -93,7 +118,11 @@ async function updateLocalManifestForSyncFile(localPath, content) {
 		size: info.size,
 		version: Date.now().toString(),
 	};
-	const unlock = await lockMutex({ id: manifestPath });
+	const unlock = await withTimeout(
+		lockMutex({ id: manifestPath }),
+		LOCK_TIMEOUT_MS,
+		`Timed out locking manifest for ${relPath}`,
+	);
 	try {
 		await updateManifestEntry(manifestPath, entry);
 	} finally {
@@ -102,11 +131,8 @@ async function updateLocalManifestForSyncFile(localPath, content) {
 }
 
 /**
- * Persist a split-group year file.
- *
- * Avoids re-reading the existing year JSON (already loaded earlier in the
- * update pipeline) — that second IndexedDB read + equality stringify was
- * freezing Update Sessions on large groups after "Saving sessions…".
+ * Persist a split-group year file without re-reading disk or blocking the UI
+ * on a single giant JSON.stringify / IndexedDB write.
  */
 export async function updateYearSync(
 	groupName,
@@ -118,10 +144,22 @@ export async function updateYearSync(
 		return { ...EMPTY_YEAR_SYNC_RESULT };
 	}
 	const localPath = makePath(LOCAL_SYNC_PATH, groupName, `${year}.json`);
-	const unlock = await lockMutex({ id: localPath });
+	let unlock = null;
 	try {
+		addSyncLog(
+			`[${groupName}/${year}] Saving ${sessions.length} session(s)…`,
+			"info",
+		);
 		await yieldToMain();
+
+		unlock = await withTimeout(
+			lockMutex({ id: localPath }),
+			LOCK_TIMEOUT_MS,
+			`Timed out waiting to save ${groupName}/${year}`,
+		);
+
 		const normalizedSessions = normalizeYearSessions(sessions);
+		await yieldToMain();
 
 		const previous = Array.isArray(previousSessions) ? previousSessions : [];
 		const existingIds = new Set(previous.map((s) => s.name || s.id));
@@ -130,13 +168,30 @@ export async function updateYearSync(
 		);
 		const newCount = newSessions.length;
 
-		await yieldToMain();
-		const sessionsJson = JSON.stringify(normalizedSessions);
+		addSyncLog(
+			`[${groupName}/${year}] Serializing ${normalizedSessions.length} session(s)…`,
+			"verbose",
+		);
+		const sessionsJson = await stringifyJsonArrayChunked(
+			normalizedSessions,
+			(done, total) => {
+				if (done === total || done % 100 === 0) {
+					addSyncLog(
+						`[${groupName}/${year}] Serialized ${done}/${total}…`,
+						"verbose",
+					);
+				}
+			},
+		);
 		const counter = Date.now();
 		const jsonString = `{"version":${counter},"group":${JSON.stringify(
 			groupName,
 		)},"year":${JSON.stringify(year)},"sessions":${sessionsJson},"counter":${counter}}`;
 
+		addSyncLog(
+			`[${groupName}/${year}] Writing ${(jsonString.length / 1024).toFixed(0)}KB…`,
+			"info",
+		);
 		await yieldToMain();
 		await withTimeout(
 			writeCompressedFile(localPath, jsonString),
@@ -144,35 +199,47 @@ export async function updateYearSync(
 			`Timed out writing year sync ${groupName}/${year}`,
 		);
 
-		try {
-			await withTimeout(
-				updateLocalManifestForSyncFile(localPath, jsonString),
-				MANIFEST_TIMEOUT_MS,
-				`Timed out updating manifest for ${groupName}/${year}`,
-			);
-		} catch (err) {
+		// Manifest update must not block year completion.
+		void updateLocalManifestForSyncFile(localPath, jsonString).catch((err) => {
 			structuredLogger.warn(
 				`[Sync] Failed to update manifest for ${localPath}`,
 				err,
 			);
-		}
+			addSyncLog(
+				`[${groupName}/${year}] Manifest update failed: ${err.message || err}`,
+				"warning",
+			);
+		});
 
+		addSyncLog(
+			`[${groupName}/${year}] ✓ Saved (${newCount} new).`,
+			"success",
+		);
 		return { counter, newCount, newSessions };
 	} catch (err) {
 		structuredLogger.error(
 			`[Sync] Error updating year sync ${groupName}/${year}:`,
 			err,
 		);
+		addSyncLog(
+			`[${groupName}/${year}] Save failed: ${err.message || err}`,
+			"error",
+		);
 		return { ...EMPTY_YEAR_SYNC_RESULT };
 	} finally {
-		unlock();
+		if (typeof unlock === "function") unlock();
 	}
 }
 
 export async function updateBundleFile(newSessions) {
 	const bundlePath = makePath(LOCAL_SYNC_PATH, "bundle.json");
-	const unlock = await lockMutex({ id: bundlePath });
+	let unlock = null;
 	try {
+		unlock = await withTimeout(
+			lockMutex({ id: bundlePath }),
+			LOCK_TIMEOUT_MS,
+			"Timed out waiting to save bundle.json",
+		);
 		let allSessions = [];
 
 		try {
@@ -208,23 +275,17 @@ export async function updateBundleFile(newSessions) {
 			"Timed out writing bundle.json",
 		);
 
-		try {
-			await withTimeout(
-				updateLocalManifestForSyncFile(bundlePath, jsonString),
-				MANIFEST_TIMEOUT_MS,
-				"Timed out updating manifest for bundle.json",
-			);
-		} catch (err) {
+		void updateLocalManifestForSyncFile(bundlePath, jsonString).catch((err) => {
 			structuredLogger.warn(
 				`[Sync] Failed to update manifest for ${bundlePath}`,
 				err,
 			);
-		}
+		});
 
 		structuredLogger.debug(
 			`[Sync] Updated bundle.json with ${newSessions.length} new sessions. Total: ${allSessions.length}`,
 		);
 	} finally {
-		unlock();
+		if (typeof unlock === "function") unlock();
 	}
 }

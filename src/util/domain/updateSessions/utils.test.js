@@ -1,5 +1,6 @@
 import { writeCompressedFile } from "@sync/bundle";
 import { getFileInfo } from "@sync/hash";
+import { addSyncLog } from "@sync/logs";
 import { updateManifestEntry } from "@sync/manifest";
 import { lockMutex } from "@sync/mutex";
 import { logger } from "@util/api/logger";
@@ -7,6 +8,7 @@ import storage from "@util/storage/storage";
 import {
 	getListing,
 	slimSessionForPersist,
+	stringifyJsonArrayChunked,
 	updateBundleFile,
 	updateYearSync,
 } from "./utils";
@@ -16,6 +18,9 @@ jest.mock("@sync/bundle", () => ({
 }));
 jest.mock("@sync/hash", () => ({
 	getFileInfo: jest.fn(),
+}));
+jest.mock("@sync/logs", () => ({
+	addSyncLog: jest.fn(),
 }));
 jest.mock("@sync/manifest", () => ({
 	updateManifestEntry: jest.fn(),
@@ -59,9 +64,10 @@ describe("getListing", () => {
 });
 
 describe("slimSessionForPersist", () => {
-	it("keeps only name/path on media refs", () => {
+	it("keeps only name/path on media refs and drops summaryText", () => {
 		const slim = slimSessionForPersist({
 			id: "2024-01-01 Talk",
+			summaryText: "huge body",
 			audio: {
 				name: "a.m4a",
 				path: "wasabi/g/a.m4a",
@@ -71,9 +77,22 @@ describe("slimSessionForPersist", () => {
 			image: { name: "a.jpg", path: "wasabi/g/a.jpg", mode: 0o644 },
 			summary: { name: "a.md", path: "aws/a.md", extra: true },
 		});
+		expect(slim.summaryText).toBeUndefined();
 		expect(slim.audio).toEqual({ name: "a.m4a", path: "wasabi/g/a.m4a" });
 		expect(slim.image).toEqual({ name: "a.jpg", path: "wasabi/g/a.jpg" });
 		expect(slim.summary).toEqual({ name: "a.md", path: "aws/a.md" });
+	});
+});
+
+describe("stringifyJsonArrayChunked", () => {
+	it("stringifies arrays and reports progress", async () => {
+		const progress = jest.fn();
+		const json = await stringifyJsonArrayChunked(
+			[{ id: 1 }, { id: 2 }],
+			progress,
+		);
+		expect(JSON.parse(json)).toEqual([{ id: 1 }, { id: 2 }]);
+		expect(progress).toHaveBeenCalled();
 	});
 });
 
@@ -115,10 +134,13 @@ describe("updateYearSync", () => {
 		]);
 		expect(result.newCount).toBe(2);
 		expect(result.newSessions).toHaveLength(2);
-		expect(getFileInfo).toHaveBeenCalledWith(jsonString);
-		expect(updateManifestEntry).toHaveBeenCalledWith(
-			"/local/sync/files.json",
-			expect.objectContaining({ path: "/test/2024.json", hash: "hash1" }),
+		expect(addSyncLog).toHaveBeenCalledWith(
+			expect.stringContaining("Saving 2 session(s)"),
+			"info",
+		);
+		expect(addSyncLog).toHaveBeenCalledWith(
+			expect.stringContaining("✓ Saved"),
+			"success",
 		);
 		expect(storage.readFile).not.toHaveBeenCalled();
 		expect(storage.exists).not.toHaveBeenCalled();
@@ -148,42 +170,29 @@ describe("updateYearSync", () => {
 			expect.stringContaining("Error updating year sync"),
 			expect.any(Error),
 		);
-	});
-
-	it("warns but does not fail when updating the manifest after write fails", async () => {
-		updateManifestEntry.mockRejectedValueOnce(new Error("manifest failed"));
-
-		const result = await updateYearSync("test", "2024", [{ id: "a-session" }]);
-
-		expect(writeCompressedFile).toHaveBeenCalled();
-		expect(result.newCount).toBe(1);
-		expect(logger.warn).toHaveBeenCalledWith(
-			expect.stringContaining("Failed to update manifest"),
-			expect.any(Error),
+		expect(addSyncLog).toHaveBeenCalledWith(
+			expect.stringContaining("Save failed"),
+			"error",
 		);
 	});
 
-	it("locks the year file and manifest while persisting", async () => {
+	it("locks the year file while persisting", async () => {
 		const yearUnlock = jest.fn();
-		const manifestUnlock = jest.fn();
-		lockMutex
-			.mockResolvedValueOnce(yearUnlock)
-			.mockResolvedValueOnce(manifestUnlock);
+		lockMutex.mockResolvedValueOnce(yearUnlock);
 
 		await updateYearSync("test", "2024", [{ id: "a-session" }]);
 
 		expect(lockMutex).toHaveBeenCalledWith({
 			id: "/local/sync/test/2024.json",
 		});
-		expect(lockMutex).toHaveBeenCalledWith({ id: "/local/sync/files.json" });
 		expect(yearUnlock).toHaveBeenCalled();
-		expect(manifestUnlock).toHaveBeenCalled();
 	});
 
-	it("slims media refs in the persisted payload", async () => {
+	it("slims media refs and omits summaryText in the persisted payload", async () => {
 		await updateYearSync("test", "2024", [
 			{
 				id: "a-session",
+				summaryText: "should not persist",
 				audio: {
 					name: "a.m4a",
 					path: "wasabi/a.m4a",
@@ -195,6 +204,7 @@ describe("updateYearSync", () => {
 
 		const [, jsonString] = writeCompressedFile.mock.calls[0];
 		const data = JSON.parse(jsonString);
+		expect(data.sessions[0].summaryText).toBeUndefined();
 		expect(data.sessions[0].audio).toEqual({
 			name: "a.m4a",
 			path: "wasabi/a.m4a",
@@ -264,18 +274,6 @@ describe("updateBundleFile", () => {
 		).rejects.toThrow("read failed");
 		expect(logger.error).toHaveBeenCalledWith(
 			expect.stringContaining("Failed to read existing bundle"),
-			expect.any(Error),
-		);
-	});
-
-	it("warns but does not throw when updating the manifest fails", async () => {
-		storage.exists.mockResolvedValue(false);
-		updateManifestEntry.mockRejectedValueOnce(new Error("manifest failed"));
-
-		await updateBundleFile([{ id: "s1", group: "test" }]);
-
-		expect(logger.warn).toHaveBeenCalledWith(
-			expect.stringContaining("Failed to update manifest"),
 			expect.any(Error),
 		);
 	});

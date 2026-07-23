@@ -321,7 +321,7 @@ export default function ProgressDialog() {
 							label={
 								<span className={styles.tabLabel}>
 									<UploadIcon className={styles.tabIcon} />
-									{translations.SYNC_LOG || "Sync Log"}
+									{translations.LOG || translations.SYNC_LOG || "Log"}
 									{syncing && <span className={styles.logBadge} />}
 								</span>
 							}
