@@ -1,9 +1,11 @@
 import {
 	abbreviationPattern,
 	getStyleInfo,
+	hasConfirmingGlossaryParenthetical,
 	PHASE_COLORS,
 	replaceAbbreviations,
 	scanForTerms,
+	shouldSkipGlossaryTerm,
 	termPattern,
 } from "./GlossaryUtils";
 
@@ -30,6 +32,56 @@ describe("GlossaryUtils", () => {
 
 		it("leaves unmatched text alone", () => {
 			expect(replaceAbbreviations("plain text")).toBe("plain text");
+		});
+	});
+
+	describe("shouldSkipGlossaryTerm", () => {
+		it("skips English over so it is not rewritten to Crosses", () => {
+			const text = "The bridge goes over the river";
+			const start = text.indexOf("over");
+			expect(shouldSkipGlossaryTerm("over", text, start)).toBe(true);
+			expect(shouldSkipGlossaryTerm("Over", text, start)).toBe(true);
+		});
+
+		it("keeps Over when followed by a confirming gloss", () => {
+			const text = "Then Over (Crosses) the boundary";
+			const start = text.indexOf("Over");
+			expect(shouldSkipGlossaryTerm("Over", text, start)).toBe(false);
+		});
+
+		it("skips lowercase or and sentence-initial Or", () => {
+			expect(shouldSkipGlossaryTerm("or", "this or that", 5)).toBe(true);
+			expect(shouldSkipGlossaryTerm("Or", "Or something else", 0)).toBe(true);
+			expect(shouldSkipGlossaryTerm("Or", "Yes. Or no.", 5)).toBe(true);
+		});
+
+		it("keeps mid-sentence capitalized Or as a glossary term", () => {
+			const text = "the Or of Atzilut";
+			const start = text.indexOf("Or");
+			expect(shouldSkipGlossaryTerm("Or", text, start)).toBe(false);
+		});
+
+		it("does not skip non-ambiguous Hebrew transliterations", () => {
+			const text = "Aviut of the kli";
+			expect(shouldSkipGlossaryTerm("Aviut", text, 0)).toBe(false);
+			expect(shouldSkipGlossaryTerm("kli", text, text.indexOf("kli"))).toBe(
+				false,
+			);
+		});
+
+		it("detects confirming parenthetical glosses", () => {
+			expect(
+				hasConfirmingGlossaryParenthetical("Over (Crosses)", 4, "Over", {
+					en: "Crosses",
+					trans: "Over",
+				}),
+			).toBe(true);
+			expect(
+				hasConfirmingGlossaryParenthetical("over the river", 4, "over", {
+					en: "Crosses",
+					trans: "Over",
+				}),
+			).toBe(false);
 		});
 	});
 
@@ -65,6 +117,16 @@ describe("GlossaryUtils", () => {
 		it("skips Or after sentence punctuation", () => {
 			const terms = scanForTerms("Yes. Or no.");
 			expect(terms.every((t) => t.term !== "or")).toBe(true);
+		});
+
+		it("skips English over in prose", () => {
+			const terms = scanForTerms("The light passes over the screen");
+			expect(terms.every((t) => t.term !== "over")).toBe(true);
+		});
+
+		it("keeps Over when explicitly glossed", () => {
+			const terms = scanForTerms("Then Over (Crosses) the boundary");
+			expect(terms.some((t) => t.term === "over")).toBe(true);
 		});
 
 		it("sorts terms alphabetically", () => {

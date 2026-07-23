@@ -12,7 +12,7 @@ import React, {
 } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkBreaks from "remark-breaks";
-import { termPattern } from "../GlossaryUtils";
+import { shouldSkipGlossaryTerm, termPattern } from "../GlossaryUtils";
 import Zoom from "../Zoom";
 import { normalizeMarkdownContent } from "./content";
 import { useGlossaryTextRenderer } from "./GlossaryTextRenderer";
@@ -145,17 +145,8 @@ export default React.memo(function Markdown({
 		const getSpokenText = (text) => {
 			if (!text) return text;
 			return text.replace(termPattern, (match, _capture, offset, string) => {
-				// Skip lowercase 'or'
-				if (match === "or") {
+				if (shouldSkipGlossaryTerm(match, string, offset)) {
 					return match;
-				}
-				// Skip 'Or' at the start of a sentence
-				if (match === "Or") {
-					const isStartOfSentence =
-						offset === 0 || /[\.\!\?]\s+$/.test(string.slice(0, offset));
-					if (isStartOfSentence) {
-						return match;
-					}
 				}
 				const lowerMatch = match.toLowerCase();
 				const entry = glossary[lowerMatch];

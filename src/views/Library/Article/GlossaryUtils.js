@@ -24,6 +24,115 @@ export const abbreviationPattern = new RegExp(
 	"gi",
 );
 
+/**
+ * Glossary keys that collide with ordinary English words (or common particles
+ * that appear as whole words in English prose). Matching these rewrites
+ * English meaning — e.g. "over" → "Crosses" (עובר).
+ */
+export const AMBIGUOUS_ENGLISH_GLOSSARY_KEYS = new Set([
+	"over",
+	"or",
+	"al",
+	"ha",
+	"ve",
+	"lo",
+	"et",
+	"de",
+	"ba",
+	"mat",
+	"kar",
+	"ra",
+	"ot",
+	"dam",
+	"bet",
+	"bat",
+	"sod",
+	"death",
+	"hey",
+	"adam",
+	"ima",
+	"din",
+	"lev",
+	"ayin",
+	"peh",
+	"ani",
+	"meod",
+	"yam",
+	"ir",
+	"har",
+	"ish",
+	"tam",
+	"bor",
+	"sof",
+]);
+
+/**
+ * Ambiguous keys that may be intentional Hebrew transliterations when
+ * Capitalized mid-sentence (e.g. "the Or of Atzilut"). Lowercase and
+ * sentence-initial Capitalized forms are still treated as English.
+ */
+export const CAPITALIZED_MID_SENTENCE_GLOSSARY_KEYS = new Set([
+	"or",
+	"adam",
+	"ima",
+	"din",
+	"lev",
+	"ayin",
+	"peh",
+	"ani",
+]);
+
+export function hasConfirmingGlossaryParenthetical(
+	text,
+	end,
+	term,
+	glossaryEntry,
+) {
+	if (!text || typeof text !== "string") return false;
+	const parentheticalMatch = /^\s*\(([^)]+)\)/.exec(text.slice(end));
+	if (!parentheticalMatch) return false;
+	const content = parentheticalMatch[1].trim().toLowerCase();
+	const mainText = (
+		glossaryEntry?.en ||
+		glossaryEntry?.trans ||
+		term
+	).toLowerCase();
+	return content === mainText || content === term.toLowerCase();
+}
+
+function isStartOfSentence(text, start) {
+	return start === 0 || /[.!?]\s+$/.test(text.slice(0, start));
+}
+
+/**
+ * Skip glossary matches that are ordinary English prose, not Hebrew
+ * transliterations. Confirmed glosses like `Over (Crosses)` are kept.
+ */
+export function shouldSkipGlossaryTerm(term, text, start) {
+	if (!term || typeof term !== "string") return false;
+
+	const lower = term.toLowerCase();
+	if (!AMBIGUOUS_ENGLISH_GLOSSARY_KEYS.has(lower)) {
+		return false;
+	}
+
+	const end = start + term.length;
+	const entry = glossary[lower];
+	if (hasConfirmingGlossaryParenthetical(text, end, term, entry)) {
+		return false;
+	}
+
+	if (CAPITALIZED_MID_SENTENCE_GLOSSARY_KEYS.has(lower)) {
+		if (term === lower) {
+			return true;
+		}
+		return isStartOfSentence(text, start);
+	}
+
+	// Other ambiguous keys: never treat bare English forms as glossary terms
+	return true;
+}
+
 export function replaceAbbreviations(text) {
 	if (!text || typeof text !== "string") return text;
 	return text.replace(abbreviationPattern, (match) => {
@@ -74,17 +183,8 @@ export function scanForTerms(text) {
 			const term = match[0];
 			const start = match.index;
 
-			// Skip lowercase 'or'
-			if (term === "or") {
+			if (shouldSkipGlossaryTerm(term, cleanText, start)) {
 				continue;
-			}
-			// Skip 'Or' at the start of a sentence
-			if (term === "Or") {
-				const isStartOfSentence =
-					start === 0 || /[\.\!\?]\s+$/.test(cleanText.slice(0, start));
-				if (isStartOfSentence) {
-					continue;
-				}
 			}
 
 			const lowerTerm = term.toLowerCase();
