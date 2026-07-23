@@ -133,10 +133,18 @@ test("loads a library article from a deep link when local tags exist", async ({
 		),
 	});
 	await page.evaluate(async () => {
-		const LightningFS = window.LightningFS;
+		type LightningFSConstructor = new (name: string) => {
+			promises: {
+				mkdir: (path: string) => Promise<void>;
+				writeFile: (path: string, data: string) => Promise<void>;
+			};
+		};
+		const LightningFS = (
+			window as unknown as { LightningFS: LightningFSConstructor }
+		).LightningFS;
 		const fs = new LightningFS("systemconcepts-fs");
 		const pfs = fs.promises;
-		const ensureDir = async (dirPath) => {
+		const ensureDir = async (dirPath: string) => {
 			const parts = dirPath.split("/").filter(Boolean);
 			let cur = "";
 			for (const part of parts) {
