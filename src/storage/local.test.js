@@ -255,6 +255,14 @@ describe("createFolders", () => {
 });
 
 describe("createFolderPath", () => {
+	it("bypasses lightning-fs for dedicated sync year files and temp files", async () => {
+		await localStorage.createFolderPath("/sync/american/2026.json");
+		await localStorage.createFolderPath("/sync/american/2026.json.tmp");
+
+		expect(mockFsPromises.stat).not.toHaveBeenCalled();
+		expect(mockFsPromises.mkdir).not.toHaveBeenCalled();
+	});
+
 	it("creates only the missing intermediate folders", async () => {
 		mockFsPromises.stat.mockImplementation((path) => {
 			if (path === "/root") return Promise.resolve({ type: "dir" });

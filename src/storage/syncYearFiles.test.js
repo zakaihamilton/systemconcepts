@@ -251,5 +251,22 @@ describe("syncYearFiles", () => {
 		expect(await api.idbListSyncYearFilesInDir("/sync/american")).toEqual([
 			"2026.json",
 		]);
+
+		// A healthy OPFS value must not depend on the legacy database being
+		// available. This mirrors browsers with a stalled old IDB transaction.
+		global.indexedDB = { open: () => ({}) };
+		expect(await api.idbReadSyncYearFile("/sync/american/2026.json")).toBe(
+			'{"a":1}',
+		);
+
+		files.delete("2026.json");
+		jest.useFakeTimers();
+		try {
+			const legacyRead = api.idbReadSyncYearFile("/sync/american/2026.json");
+			await jest.advanceTimersByTimeAsync(3_000);
+			await expect(legacyRead).resolves.toBeNull();
+		} finally {
+			jest.useRealTimers();
+		}
 	});
 });

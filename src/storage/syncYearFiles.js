@@ -1,14 +1,44 @@
+import { logger as structuredLogger } from "@util/api/logger";
 import { makePath } from "@util/data/path";
 
 const DB_NAME = "systemconcepts-sync-years";
 const STORE_NAME = "files";
 const DB_VERSION = 1;
 const OPFS_ROOT = "sync-years";
+const LEGACY_IDB_TIMEOUT_MS = 3_000;
 
 /** Paths like /sync/american/2026.json or /sync/american/2026.json.tmp */
 const SYNC_YEAR_FILE_RE = /^\/sync\/([^/]+)\/(\d{4}\.json(?:\.tmp)?)$/;
 
 let dbPromise = null;
+
+function withLegacyIdbTimeout(operation, work) {
+	let timeoutId;
+	return Promise.race([
+		work(),
+		new Promise((_, reject) => {
+			timeoutId = setTimeout(
+				() =>
+					reject(
+						new Error(`Legacy year-file IndexedDB ${operation} timed out`),
+					),
+				LEGACY_IDB_TIMEOUT_MS,
+			);
+		}),
+	]).finally(() => clearTimeout(timeoutId));
+}
+
+async function tryLegacyIdb(operation, work, fallback) {
+	try {
+		return await withLegacyIdbTimeout(operation, work);
+	} catch (err) {
+		structuredLogger.warn(
+			`[Sync] Legacy year-file IndexedDB ${operation} unavailable; continuing without it`,
+			err,
+		);
+		return fallback;
+	}
+}
 
 export function isSyncYearFilePath(path) {
 	return SYNC_YEAR_FILE_RE.test(makePath(path));
@@ -278,11 +308,7 @@ export async function idbReadSyncYearFile(path) {
 		const fromOpfs = await opfsRead(parsed.key);
 		if (fromOpfs != null) return fromOpfs;
 	}
-	try {
-		return await idbRead(parsed.key);
-	} catch {
-		return null;
-	}
+	return tryLegacyIdb("read", () => idbRead(parsed.key), null);
 }
 
 export async function idbDeleteSyncYearFile(path) {
@@ -291,22 +317,14 @@ export async function idbDeleteSyncYearFile(path) {
 	if (opfsAvailable()) {
 		await opfsDelete(parsed.key);
 	}
-	try {
-		await idbDelete(parsed.key);
-	} catch {
-		/* ignore legacy idb miss */
-	}
+	await tryLegacyIdb("delete", () => idbDelete(parsed.key), undefined);
 }
 
 export async function idbExistsSyncYearFile(path) {
 	const parsed = parseSyncYearPath(path);
 	if (!parsed) return false;
 	if (opfsAvailable() && (await opfsExists(parsed.key))) return true;
-	try {
-		return await idbExists(parsed.key);
-	} catch {
-		return false;
-	}
+	return tryLegacyIdb("exists", () => idbExists(parsed.key), false);
 }
 
 export async function idbRenameSyncYearFile(from, to) {
@@ -331,12 +349,12 @@ export async function idbListSyncYearFilesInDir(dirPath) {
 			names.add(name);
 		}
 	}
-	try {
-		for (const name of await idbListYearFilesInDir(dirPath)) {
-			names.add(name);
-		}
-	} catch {
-		/* ignore */
+	for (const name of await tryLegacyIdb(
+		"list",
+		() => idbListYearFilesInDir(dirPath),
+		[],
+	)) {
+		names.add(name);
 	}
 	return [...names].sort();
 }

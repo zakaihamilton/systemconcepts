@@ -112,6 +112,10 @@ async function createFolders(prefix, folders) {
 
 async function createFolderPath(path, isFolder = false) {
 	path = makePath(path);
+	// Split year files live in the dedicated OPFS/IndexedDB store.  Do not
+	// create their parent folders in lightning-fs: a wedged lightning-fs
+	// transaction would otherwise block sync before the dedicated writer runs.
+	if (isSyncYearFilePath(path)) return;
 	const parts = path.split("/");
 	let partIndex = parts.length - 1;
 	for (; partIndex > 1; partIndex--) {

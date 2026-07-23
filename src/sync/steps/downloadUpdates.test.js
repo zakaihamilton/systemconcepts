@@ -72,6 +72,37 @@ describe("downloadUpdates", () => {
 		expect(result.manifest[0].path).toBe("/alpha.json");
 	});
 
+	it("completes a mixed groups and split-year download batch", async () => {
+		readCompressedFileRaw.mockResolvedValue('{"sessions":[]}');
+		const remoteManifest = [
+			{ path: "/groups.json", version: "1" },
+			...Array.from({ length: 6 }, (_, index) => ({
+				path: `/group-${index}/2026.json`,
+				version: "1",
+			})),
+		];
+
+		const result = await downloadUpdates(
+			[],
+			remoteManifest,
+			"local/sync",
+			"aws/sync",
+		);
+
+		expect(result).toEqual(
+			expect.objectContaining({
+				hasChanges: true,
+				complete: true,
+				counts: { attempted: 7, succeeded: 7, failed: 0 },
+			}),
+		);
+		expect(storage.createFolderPath).toHaveBeenCalledTimes(7);
+		expect(storage.writeFile).toHaveBeenCalledWith(
+			"/local/sync/files.json",
+			expect.any(String),
+		);
+	});
+
 	it("treats a confirmed 404 as missing and cleans it out of the remote manifest", async () => {
 		readCompressedFileRaw.mockResolvedValue(null);
 
