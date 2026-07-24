@@ -214,7 +214,7 @@ export function decodeBinaryIndex(compressedData) {
 	} else if (compressedData instanceof Uint8Array) {
 		inputData = compressedData;
 	} else if (Array.isArray(compressedData)) {
-		// lightning-fs sometimes returns binary data as a regular Array
+		// Accept legacy array-form binary data from older local caches.
 		inputData = new Uint8Array(compressedData);
 	} else if (typeof compressedData === "string") {
 		// If it's a string (was read incorrectly as text), try to convert

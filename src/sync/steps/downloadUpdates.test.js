@@ -4,10 +4,7 @@ import { readCompressedFileRaw } from "../bundle";
 import { addSyncLog } from "../logs";
 import { SyncActiveStore } from "../syncState";
 import { moveFolderToTrash } from "../trash";
-import {
-	beginFreshLocalWriteGeneration,
-	downloadUpdates,
-} from "./downloadUpdates";
+import { downloadUpdates } from "./downloadUpdates";
 
 beforeAll(() => {
 	global.TextEncoder = TextEncoder;
@@ -106,7 +103,7 @@ describe("downloadUpdates", () => {
 		);
 	});
 
-	it("serializes local writes while downloads are processed in parallel", async () => {
+	it("writes independent downloaded files in parallel", async () => {
 		readCompressedFileRaw.mockResolvedValue('{"sessions":[]}');
 		let releaseFirstWrite;
 		const firstWrite = new Promise((resolve) => {
@@ -125,38 +122,11 @@ describe("downloadUpdates", () => {
 		);
 		await new Promise((resolve) => setTimeout(resolve, 0));
 
-		expect(storage.writeFile).toHaveBeenCalledTimes(1);
+		expect(storage.writeFile).toHaveBeenCalledTimes(2);
 		releaseFirstWrite();
 		await sync;
 
 		expect(storage.writeFile).toHaveBeenCalledTimes(3);
-	});
-
-	it("does not wait for a previous database generation's stuck write", async () => {
-		readCompressedFileRaw.mockResolvedValue('{"sessions":[]}');
-		storage.writeFile.mockImplementationOnce(() => new Promise(() => {}));
-
-		void downloadUpdates(
-			[],
-			[{ path: "/old.json", version: "1" }],
-			"local/sync",
-			"aws/sync",
-		);
-		await new Promise((resolve) => setTimeout(resolve, 0));
-
-		beginFreshLocalWriteGeneration();
-		const freshSync = await downloadUpdates(
-			[],
-			[{ path: "/fresh.json", version: "1" }],
-			"local/sync",
-			"aws/sync",
-		);
-
-		expect(freshSync.complete).toBe(true);
-		expect(storage.writeFile).toHaveBeenCalledWith(
-			"/local/sync/fresh.json",
-			expect.any(String),
-		);
 	});
 
 	it("treats a confirmed 404 as missing and cleans it out of the remote manifest", async () => {

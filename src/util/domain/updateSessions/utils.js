@@ -17,9 +17,8 @@ const EMPTY_YEAR_SYNC_RESULT = Object.freeze({
 const WRITE_TIMEOUT_MS = 20_000;
 const LOCK_TIMEOUT_MS = 10_000;
 const STRINGIFY_CHUNK = 25;
-// lightning-fs persists to IndexedDB on a debounce and holds a global mutex
-// while flushing. Let it settle before competing session writes.
-const FS_SETTLE_MS = process.env.NODE_ENV === "test" ? 0 : 750;
+// Yield briefly between large IndexedDB operations so the UI can paint.
+const FS_SETTLE_MS = process.env.NODE_ENV === "test" ? 0 : 50;
 
 /** Let React paint status updates before heavy sync work blocks the main thread. */
 export function yieldToMain() {

@@ -197,19 +197,9 @@ const storageMethods = Object.fromEntries(
 		{
 			name: "resetLocalFileSystem",
 		},
-		{
-			name: "startLocalFileSystemKeepAlive",
-		},
-		{
-			name: "stopLocalFileSystemKeepAlive",
-		},
 	].map((item) => {
 		const { name } = item;
-		if (
-			name === "resetLocalFileSystem" ||
-			name === "startLocalFileSystemKeepAlive" ||
-			name === "stopLocalFileSystemKeepAlive"
-		) {
+		if (name === "resetLocalFileSystem") {
 			return [name, () => callMethod(item, "local")];
 		}
 		return [
@@ -631,8 +621,4 @@ export default {
 	moveFolder,
 	getRecursiveList,
 	resetLocalFileSystem: () => storageMethods.resetLocalFileSystem(),
-	startLocalFileSystemKeepAlive: () =>
-		storageMethods.startLocalFileSystemKeepAlive(),
-	stopLocalFileSystemKeepAlive: () =>
-		storageMethods.stopLocalFileSystemKeepAlive(),
 };

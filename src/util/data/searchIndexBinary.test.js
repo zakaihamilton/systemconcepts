@@ -175,7 +175,7 @@ describe("decodeBinaryIndex", () => {
 		expect(decoded.f).toEqual(["file"]);
 	});
 
-	it("accepts plain Array input (lightning-fs style)", () => {
+	it("accepts legacy plain Array binary input", () => {
 		const encoded = encodeBinaryIndex({
 			v: 5,
 			timestamp: 99,

@@ -1,347 +1,376 @@
-import { logger as structuredLogger } from "@util/api/logger";
-
-const FS = process.browser && require("@isomorphic-git/lightning-fs");
-
 import { isBinaryFile, makePath } from "@util/data/path";
 
-const BASE_DATABASE_NAME = "systemconcepts-fs";
-const ACTIVE_DATABASE_KEY = "local_active_database";
-const FRESH_DATABASE_PROBE_PATH = "/.full-sync-ready";
-const FRESH_DATABASE_TIMEOUT_MS = 5_000;
-const FULL_SYNC_KEEP_ALIVE_MS = 250;
+const DATABASE_NAME = "systemconcepts-local-files";
+const DATABASE_VERSION = 2;
+const FILE_STORE = "files";
+const METADATA_STORE = "metadata";
+const LEGACY_DATABASE_NAME = "systemconcepts-fs";
+const LEGACY_ACTIVE_DATABASE_KEY = "local_active_database";
 
-function getStoredDatabaseName() {
-	if (typeof window === "undefined") return BASE_DATABASE_NAME;
-	return localStorage.getItem(ACTIVE_DATABASE_KEY) || BASE_DATABASE_NAME;
+let databasePromise = null;
+
+function filesystemError(code, path) {
+	const error = new Error(`${code}: ${path}`);
+	error.code = code;
+	return error;
 }
 
-let activeDatabaseName = getStoredDatabaseName();
-let fs = process.browser && new FS(activeDatabaseName);
-let fullSyncKeepAliveTimer = null;
-let fullSyncKeepAliveInFlight = false;
-
-function createDatabaseName() {
-	return `${BASE_DATABASE_NAME}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-}
-
-function withTimeout(promise, ms, message) {
-	let timeoutId;
-	const timeout = new Promise((_, reject) => {
-		timeoutId = setTimeout(() => reject(new Error(message)), ms);
+function requestResult(request) {
+	return new Promise((resolve, reject) => {
+		request.onsuccess = () => resolve(request.result);
+		request.onerror = () => reject(request.error);
 	});
-	return Promise.race([promise, timeout]).finally(() =>
-		clearTimeout(timeoutId),
-	);
 }
 
-async function verifyFreshDatabase(nextFs) {
-	await nextFs.promises.stat("/");
-	await nextFs.promises.writeFile(FRESH_DATABASE_PROBE_PATH, "", "utf8");
-	await nextFs.promises.unlink(FRESH_DATABASE_PROBE_PATH);
+function transactionComplete(transaction) {
+	return new Promise((resolve, reject) => {
+		transaction.oncomplete = () => resolve();
+		transaction.onabort = () => reject(transaction.error);
+		transaction.onerror = () => reject(transaction.error);
+	});
 }
 
-function deleteDatabaseBestEffort(databaseName) {
-	if (typeof indexedDB === "undefined" || !databaseName) return;
-	try {
-		const request = indexedDB.deleteDatabase(databaseName);
-		request.onerror = () =>
-			structuredLogger.warn(
-				`[Local Storage] Could not delete previous database ${databaseName}`,
-				request.error,
-			);
-	} catch (error) {
-		structuredLogger.warn(
-			`[Local Storage] Could not delete previous database ${databaseName}`,
-			error,
-		);
+function getDatabase() {
+	if (typeof indexedDB === "undefined") {
+		return Promise.reject(new Error("IndexedDB is unavailable"));
 	}
+	if (!databasePromise) {
+		databasePromise = new Promise((resolve, reject) => {
+			const request = indexedDB.open(DATABASE_NAME, DATABASE_VERSION);
+			request.onupgradeneeded = () => {
+				const database = request.result;
+				const transaction = request.transaction;
+				const files = database.objectStoreNames.contains(FILE_STORE)
+					? transaction.objectStore(FILE_STORE)
+					: database.createObjectStore(FILE_STORE, { keyPath: "path" });
+				const metadata = database.objectStoreNames.contains(METADATA_STORE)
+					? transaction.objectStore(METADATA_STORE)
+					: database.createObjectStore(METADATA_STORE, { keyPath: "path" });
+
+				// Version 1 stored metadata and content together. Copy only the
+				// metadata so future listings never clone file bodies.
+				if (
+					request.oldVersion < 2 &&
+					database.objectStoreNames.contains("entries")
+				) {
+					const legacyEntries = transaction.objectStore("entries");
+					legacyEntries.openCursor().onsuccess = (event) => {
+						const cursor = event.target.result;
+						if (!cursor) return;
+						const { content, ...entry } = cursor.value;
+						metadata.put(entry);
+						if (entry.type === "file") files.put({ path: entry.path, content });
+						cursor.continue();
+					};
+				}
+			};
+			request.onsuccess = () => resolve(request.result);
+			request.onerror = () => {
+				databasePromise = null;
+				reject(request.error);
+			};
+		});
+	}
+	return databasePromise;
 }
 
-/** Keep LightningFS from releasing and reacquiring its IndexedDB lock mid-sync. */
-export function startLocalFileSystemKeepAlive() {
-	stopLocalFileSystemKeepAlive();
-	const tick = async () => {
-		if (!fs || fullSyncKeepAliveInFlight) return;
-		fullSyncKeepAliveInFlight = true;
-		try {
-			await fs.promises.stat("/");
-		} catch (error) {
-			structuredLogger.warn("[Local Storage] Keep-alive failed", error);
-		} finally {
-			fullSyncKeepAliveInFlight = false;
-		}
+async function withStores(mode, callback) {
+	const database = await getDatabase();
+	const transaction = database.transaction([FILE_STORE, METADATA_STORE], mode);
+	const stores = {
+		files: transaction.objectStore(FILE_STORE),
+		metadata: transaction.objectStore(METADATA_STORE),
 	};
-	void tick();
-	fullSyncKeepAliveTimer = setInterval(() => void tick(), FULL_SYNC_KEEP_ALIVE_MS);
-}
-
-export function stopLocalFileSystemKeepAlive() {
-	if (fullSyncKeepAliveTimer !== null) {
-		clearInterval(fullSyncKeepAliveTimer);
-		fullSyncKeepAliveTimer = null;
+	const completed = transactionComplete(transaction);
+	try {
+		const result = await callback(stores);
+		await completed;
+		return result;
+	} catch (error) {
+		try {
+			transaction.abort();
+		} catch {
+			// The transaction may already have completed.
+		}
+		await completed.catch(() => {});
+		throw error;
 	}
 }
 
-/** Start Full Sync on an empty LightningFS database without waiting on the old one. */
-export async function resetLocalFileSystem() {
-	if (!fs) throw new Error("Local filesystem is unavailable");
-	const previousDatabaseName = activeDatabaseName;
-	const nextDatabaseName = createDatabaseName();
-	// LightningFS otherwise performs an unawaited initial stat() in its
-	// constructor. Starting our readiness probe at the same time races its
-	// IndexedDB/navigator-lock initialization and can leave later writes waiting
-	// forever. We explicitly run the probe below instead.
-	const nextFs = new FS(nextDatabaseName, { defer: true });
+function parentPaths(path) {
+	const parts = makePath(path).split("/").filter(Boolean);
+	const parents = [];
+	for (let index = 1; index < parts.length; index++) {
+		parents.push(`/${parts.slice(0, index).join("/")}`);
+	}
+	return parents;
+}
 
-	// Verify an actual IndexedDB write before beginning a remote download run.
-	await withTimeout(
-		verifyFreshDatabase(nextFs),
-		FRESH_DATABASE_TIMEOUT_MS,
-		`Timed out preparing fresh LightningFS database after ${FRESH_DATABASE_TIMEOUT_MS / 1000}s`,
+function entrySize(content) {
+	if (typeof content === "string") return new Blob([content]).size;
+	if (content instanceof ArrayBuffer) return content.byteLength;
+	if (ArrayBuffer.isView(content)) return content.byteLength;
+	return new Blob([content]).size;
+}
+
+async function ensureParents(metadata, path) {
+	for (const parentPath of parentPaths(path)) {
+		const existing = await requestResult(metadata.get(parentPath));
+		if (!existing) {
+			metadata.put({
+				path: parentPath,
+				type: "dir",
+				mtimeMs: Date.now(),
+				size: 0,
+			});
+		}
+	}
+}
+
+async function getEntries() {
+	return withStores("readonly", ({ metadata }) =>
+		requestResult(metadata.getAll()),
 	);
-	fs = nextFs;
-	activeDatabaseName = nextDatabaseName;
-	startLocalFileSystemKeepAlive();
-	if (typeof window !== "undefined") {
-		localStorage.setItem(ACTIVE_DATABASE_KEY, nextDatabaseName);
-	}
-	deleteDatabaseBestEffort(previousDatabaseName);
-	return nextDatabaseName;
+}
+
+async function getMetadata(path) {
+	return withStores("readonly", ({ metadata }) =>
+		requestResult(metadata.get(makePath(path))),
+	);
 }
 
 async function getListing(path, options = {}) {
-	const { useCount, strict = false } = options;
-	let listing = [];
-	let names = [];
-	try {
-		names = await fs.promises.readdir(path);
-	} catch (error) {
-		if (strict && error?.code !== "ENOENT") throw error;
-		return [];
+	const root = makePath(path);
+	const prefix = root === "/" ? "/" : `${root}/`;
+	const children = new Map();
+	const entries = await getEntries();
+	if (
+		options.strict &&
+		root !== "/" &&
+		!entries.some(
+			(entry) => entry.path === root || entry.path.startsWith(prefix),
+		)
+	) {
+		throw filesystemError("ENOENT", root);
 	}
-	for (const name of names) {
-		const item = {};
-		const itemPath = makePath(path, name);
-		try {
-			const itemStat = await fs.promises.stat(itemPath);
-			const isDir =
-				itemStat.type === "dir" ||
-				(itemStat.isDirectory && itemStat.isDirectory());
-			item.type = isDir ? "dir" : "file";
-			if (useCount && isDir) {
-				const children = await fs.promises.readdir(itemPath);
-				let count = 0;
-				for (const name of children) {
-					const childStat = await fs.promises.stat(makePath(itemPath, name));
-					const childIsDir =
-						childStat.type === "dir" ||
-						(childStat.isDirectory && childStat.isDirectory());
-					if (childIsDir) {
-						count++;
-					}
-				}
-				item.count = count;
-			}
-			Object.assign(item, itemStat);
-			let mtimeMs = itemStat.mtimeMs;
-			if (typeof itemStat.mtime === "object" && itemStat.mtime.getTime) {
-				mtimeMs = itemStat.mtime.getTime();
-			} else if (typeof itemStat.mtime === "number") {
-				mtimeMs = itemStat.mtime;
-			}
-			item.mtimeMs = mtimeMs || 0;
-			item.id = item.path = makePath("local", itemPath);
-			item.name = name;
-			listing.push(item);
-		} catch (err) {
-			if (strict) throw err;
-			structuredLogger.error(err);
+	for (const entry of entries) {
+		if (entry.path === root || !entry.path.startsWith(prefix)) continue;
+		const remainder = entry.path.slice(prefix.length);
+		const [name, ...nested] = remainder.split("/");
+		const childPath = makePath(root, name);
+		const isDirectory = nested.length > 0 || entry.type === "dir";
+		const previous = children.get(childPath);
+		children.set(childPath, {
+			path: childPath,
+			name,
+			type: isDirectory ? "dir" : "file",
+			size: isDirectory ? 0 : entry.size || 0,
+			mtimeMs: previous?.mtimeMs || entry.mtimeMs || 0,
+		});
+	}
+	return [...children.values()].map((entry) => {
+		let count;
+		if (options.useCount && entry.type === "dir") {
+			const childPrefix = `${entry.path}/`;
+			count = new Set(
+				entries
+					.filter((candidate) => candidate.path.startsWith(childPrefix))
+					.filter((candidate) => {
+						const remainder = candidate.path.slice(childPrefix.length);
+						return remainder.includes("/") || candidate.type === "dir";
+					})
+					.map(
+						(candidate) =>
+							candidate.path.slice(childPrefix.length).split("/")[0],
+					),
+			).size;
 		}
-	}
-
-	return listing;
+		return {
+			...entry,
+			id: makePath("local", entry.path),
+			path: makePath("local", entry.path),
+			count,
+		};
+	});
 }
 
 async function createFolder(path) {
 	path = makePath(path);
-	try {
-		if (!(await exists(path))) {
-			await fs.promises.mkdir(path);
+	if (path === "/") return;
+	await withStores("readwrite", async ({ metadata }) => {
+		const existing = await requestResult(metadata.get(path));
+		if (existing) {
+			if (existing.type !== "dir") throw filesystemError("EEXIST", path);
+			return;
 		}
-	} catch (err) {
-		if (err.code !== "EEXIST" && !err.message.includes("EEXIST")) {
-			throw err;
-		}
-	}
+		await ensureParents(metadata, path);
+		metadata.put({ path, type: "dir", mtimeMs: Date.now(), size: 0 });
+	});
 }
 
 async function createFolders(prefix, folders) {
-	for (const path of folders) {
-		await createFolder(prefix + path);
-	}
+	for (const path of folders) await createFolder(makePath(prefix, path));
 }
 
 async function createFolderPath(path, isFolder = false) {
 	path = makePath(path);
-	const parts = path.split("/");
-	let partIndex = parts.length - 1;
-	for (; partIndex > 1; partIndex--) {
-		const subPath = parts.slice(0, partIndex).join("/");
-		if (await exists(subPath)) {
-			break;
-		}
-	}
-	for (partIndex++; partIndex < parts.length + !!isFolder; partIndex++) {
-		const subPath = parts.slice(0, partIndex).join("/");
-		await createFolder(subPath);
-	}
+	const target = isFolder ? path : path.slice(0, path.lastIndexOf("/")) || "/";
+	if (target !== "/") await createFolder(target);
 }
 
 async function deleteFolder(root) {
 	root = makePath(root);
-	let lastError = null;
-
-	for (let i = 0; i < 10; i++) {
-		let names = [];
-		try {
-			names = await fs.promises.readdir(root);
-		} catch (err) {
-			if (err.code === "ENOENT") {
-				return;
-			}
-			throw err;
-		}
-
-		if (names.length > 0) {
-			for (const name of names) {
-				const path = [root, name].filter(Boolean).join("/");
-				try {
-					const stat = await fs.promises.stat(path);
-					const isDir =
-						stat.type === "dir" || (stat.isDirectory && stat.isDirectory());
-					if (isDir) {
-						await deleteFolder(path);
-					} else {
-						await deleteFile(path);
-					}
-				} catch (err) {
-					if (err.code !== "ENOENT") {
-						structuredLogger.error(err);
-					}
-				}
+	const prefix = root === "/" ? "/" : `${root}/`;
+	await withStores("readwrite", async ({ files, metadata }) => {
+		for (const entry of await requestResult(metadata.getAll())) {
+			if (
+				root === "/" ||
+				entry.path === root ||
+				entry.path.startsWith(prefix)
+			) {
+				metadata.delete(entry.path);
+				files.delete(entry.path);
 			}
 		}
-
-		try {
-			await fs.promises.rmdir(root);
-			return;
-		} catch (err) {
-			if (err.code === "ENOENT") {
-				return;
-			}
-			if (err.code === "ENOTEMPTY" || err.message.includes("ENOTEMPTY")) {
-				try {
-					const names = await fs.promises.readdir(root);
-					if (names.length === 0) {
-						return;
-					}
-				} catch {
-					// ignore
-				}
-				lastError = err;
-				await new Promise((resolve) => setTimeout(resolve, 100));
-				continue;
-			}
-			throw err;
-		}
-	}
-	if (lastError) {
-		throw lastError;
-	}
+	});
 }
 
 async function deleteFile(path) {
 	path = makePath(path);
-	await fs.promises.unlink(path);
+	await withStores("readwrite", async ({ files, metadata }) => {
+		const entry = await requestResult(metadata.get(path));
+		if (!entry || entry.type !== "file") throw filesystemError("ENOENT", path);
+		metadata.delete(path);
+		files.delete(path);
+	});
 }
 
 async function rename(from, to) {
 	from = makePath(from);
 	to = makePath(to);
-	await fs.promises.rename(from, to);
+	const prefix = `${from}/`;
+	await withStores("readwrite", async ({ files, metadata }) => {
+		const entries = (await requestResult(metadata.getAll())).filter(
+			(entry) => entry.path === from || entry.path.startsWith(prefix),
+		);
+		if (entries.length === 0) throw filesystemError("ENOENT", from);
+		const fileContents = new Map();
+		for (const entry of entries) {
+			if (entry.type === "file") {
+				fileContents.set(
+					entry.path,
+					await requestResult(files.get(entry.path)),
+				);
+			}
+		}
+		await ensureParents(metadata, to);
+		for (const entry of entries) {
+			metadata.delete(entry.path);
+			files.delete(entry.path);
+		}
+		for (const entry of entries) {
+			const path =
+				entry.path === from ? to : `${to}${entry.path.slice(from.length)}`;
+			metadata.put({ ...entry, path, mtimeMs: Date.now() });
+			if (entry.type === "file") {
+				files.put({ path, content: fileContents.get(entry.path)?.content });
+			}
+		}
+	});
 }
 
 async function readFile(path) {
 	path = makePath(path);
-	try {
-		if (isBinaryFile(path)) {
-			return await fs.promises.readFile(path);
-		}
-		return await fs.promises.readFile(path, "utf8");
-	} catch (err) {
-		if (err.code !== "ENOENT" && !err.message.includes("ENOENT")) {
-			throw err;
-		}
-		return null;
-	}
+	return withStores("readonly", async ({ files, metadata }) => {
+		const entry = await requestResult(metadata.get(path));
+		if (!entry) return null;
+		if (entry.type !== "file") throw filesystemError("EISDIR", path);
+		const file = await requestResult(files.get(path));
+		return file?.content ?? null;
+	});
 }
 
 async function readFiles(prefix, files) {
-	let results = {};
-	for (const name of files) {
-		results[name] = await readFile(prefix + name);
-	}
+	const results = {};
+	for (const name of files)
+		results[name] = await readFile(makePath(prefix, name));
 	return results;
 }
 
-async function writeFile(path, body) {
+async function writeFile(path, content) {
 	path = makePath(path);
-	if (isBinaryFile(path)) {
-		return await fs.promises.writeFile(path, body);
-	}
-	return await fs.promises.writeFile(path, body, "utf8");
+	await withStores("readwrite", async ({ files, metadata }) => {
+		await ensureParents(metadata, path);
+		files.put({ path, content });
+		metadata.put({
+			path,
+			type: "file",
+			binary: isBinaryFile(path),
+			size: entrySize(content),
+			mtimeMs: Date.now(),
+		});
+	});
 }
 
 async function writeFiles(prefix, files) {
-	for (const path in files) {
-		await writeFile(prefix + path, files[path]);
-	}
+	for (const path in files)
+		await writeFile(makePath(prefix, path), files[path]);
 }
 
 async function exists(path) {
 	path = makePath(path);
-	let exists = false;
+	if (path === "/") return true;
+	if (await getMetadata(path)) return true;
+	return (await getEntries()).some((entry) =>
+		entry.path.startsWith(`${path}/`),
+	);
+}
+
+function deleteDatabaseBestEffort(name) {
+	if (!name || name === DATABASE_NAME || typeof indexedDB === "undefined") {
+		return;
+	}
 	try {
-		const stat = await fs.promises.stat(path);
-		exists = stat !== null;
-	} catch {}
-	return exists;
+		indexedDB.deleteDatabase(name);
+	} catch {
+		// Browser storage cleanup is best effort; an open old tab can block it.
+	}
+}
+
+function clearLegacyLightningFs() {
+	if (typeof localStorage === "undefined") {
+		deleteDatabaseBestEffort(LEGACY_DATABASE_NAME);
+		return;
+	}
+	const activeDatabaseName = localStorage.getItem(LEGACY_ACTIVE_DATABASE_KEY);
+	deleteDatabaseBestEffort(LEGACY_DATABASE_NAME);
+	deleteDatabaseBestEffort(activeDatabaseName);
+	localStorage.removeItem(LEGACY_ACTIVE_DATABASE_KEY);
+}
+
+/** Clear the native local store before a user-requested Full Sync. */
+export async function resetLocalFileSystem() {
+	await withStores("readwrite", ({ files, metadata }) => {
+		files.clear();
+		metadata.clear();
+	});
+	clearLegacyLightningFs();
+	return DATABASE_NAME;
 }
 
 export async function clear() {
-	if (typeof indexedDB === "undefined") {
-		return;
-	}
-	return new Promise((resolve, reject) => {
-		const req = indexedDB.deleteDatabase(activeDatabaseName);
-		req.onsuccess = () => resolve();
-		req.onerror = () => reject(req.error);
-		req.onblocked = () => resolve();
-	});
+	if (typeof indexedDB === "undefined") return;
+	await resetLocalFileSystem();
 }
 
 async function getRecursiveList(path, options = {}) {
-	let listing = [];
-	const items = await getListing(path, options);
-	for (const item of items) {
+	const listing = [];
+	for (const item of await getListing(path, options)) {
+		listing.push(item);
 		if (item.type === "dir") {
-			// item.path is in format "/local/sync/subfolder"
-			// We need to pass just the filesystem path: "/sync/subfolder" (keep leading /)
-			const pathWithoutDevice = item.path.replace(/^\/local/, "");
-			const children = await getRecursiveList(pathWithoutDevice, options);
-			listing.push(...children);
-		} else {
-			listing.push(item);
+			listing.push(
+				...(await getRecursiveList(item.path.replace(/^\/local/, ""), options)),
+			);
 		}
 	}
 	return listing;
@@ -359,28 +388,17 @@ export default {
 	readFiles,
 	writeFile,
 	writeFiles,
-	async exists(path) {
-		return exists(path);
-	},
+	exists,
 	async getSize() {
-		if (
-			typeof navigator !== "undefined" &&
-			navigator.storage &&
-			navigator.storage.estimate
-		) {
+		if (typeof navigator !== "undefined" && navigator.storage?.estimate) {
 			const estimate = await navigator.storage.estimate();
-			structuredLogger.debug(
-				`[Local Storage] getSize - estimate usage: ${estimate.usage}, quota: ${estimate.quota}`,
-			);
-			return estimate.usage;
+			return estimate.usage || 0;
 		}
-		structuredLogger.debug(
-			`[Local Storage] getSize - navigator.storage.estimate not available`,
+		return (await getEntries()).reduce(
+			(total, entry) => total + (entry.size || 0),
+			0,
 		);
-		return 0;
 	},
 	getRecursiveList,
 	resetLocalFileSystem,
-	startLocalFileSystemKeepAlive,
-	stopLocalFileSystemKeepAlive,
 };

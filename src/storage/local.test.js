@@ -1,31 +1,41 @@
+import { deserialize, serialize } from "v8";
+
+if (!global.structuredClone) {
+	global.structuredClone = (value) => deserialize(serialize(value));
+}
+
+import "fake-indexeddb/auto";
+
 import { logger as structuredLogger } from "@util/api/logger";
 
 jest.mock("@util/api/logger", () => ({
 	logger: { debug: jest.fn(), warn: jest.fn(), error: jest.fn() },
 }));
 
-const mockFsPromises = {
-	readdir: jest.fn(),
-	stat: jest.fn(),
-	mkdir: jest.fn(),
-	rmdir: jest.fn(),
-	unlink: jest.fn(),
-	rename: jest.fn(),
-	readFile: jest.fn(),
-	writeFile: jest.fn(),
-};
-
-jest.mock("@isomorphic-git/lightning-fs", () =>
-	jest.fn().mockImplementation(() => ({ promises: mockFsPromises })),
-);
-
 let localStorage;
 let clear;
 let resetLocalFileSystem;
 const originalProcessBrowser = process.browser;
 
+function openDatabase(name) {
+	return new Promise((resolve, reject) => {
+		const request = indexedDB.open(name);
+		request.onsuccess = () => resolve(request.result);
+		request.onerror = () => reject(request.error);
+	});
+}
+
+function readRecord(store, path) {
+	return new Promise((resolve, reject) => {
+		const request = store.get(path);
+		request.onsuccess = () => resolve(request.result);
+		request.onerror = () => reject(request.error);
+	});
+}
+
 beforeAll(() => {
 	process.browser = true;
+	jest.resetModules();
 	// eslint-disable-next-line global-require
 	const mod = require("@storage/local");
 	localStorage = mod.default;
@@ -37,595 +47,181 @@ afterAll(() => {
 	process.browser = originalProcessBrowser;
 });
 
-beforeEach(() => {
+beforeEach(async () => {
 	jest.clearAllMocks();
-	Object.values(mockFsPromises).forEach((fn) => fn.mockReset());
+	await resetLocalFileSystem();
 });
 
-describe("getListing", () => {
-	it("returns an empty array when the directory does not exist", async () => {
-		mockFsPromises.readdir.mockRejectedValue(
-			Object.assign(new Error("missing"), { code: "ENOENT" }),
+describe("native IndexedDB local storage", () => {
+	it("writes text files, creates parent directories, and lists virtual folders", async () => {
+		await localStorage.writeFile("/sync/american/2024.json", '{"sessions":[]}');
+
+		expect(await localStorage.readFile("/sync/american/2024.json")).toBe(
+			'{"sessions":[]}',
 		);
-
-		await expect(localStorage.getListing("/missing")).resolves.toEqual([]);
-	});
-
-	it("throws in strict mode for non-ENOENT readdir errors", async () => {
-		const err = Object.assign(new Error("boom"), { code: "EACCES" });
-		mockFsPromises.readdir.mockRejectedValue(err);
-
-		await expect(
-			localStorage.getListing("/root", { strict: true }),
-		).rejects.toBe(err);
-	});
-
-	it("lists files and directories with normalized stats", async () => {
-		mockFsPromises.readdir.mockResolvedValueOnce(["file.txt", "sub"]);
-		mockFsPromises.stat.mockImplementation((path) => {
-			if (path === "/root/file.txt") {
-				return Promise.resolve({ type: "file", mtimeMs: 100 });
-			}
-			if (path === "/root/sub") {
-				return Promise.resolve({ type: "dir", mtimeMs: 200 });
-			}
-			return Promise.resolve({ type: "file" });
-		});
-
-		const items = await localStorage.getListing("/root");
-
-		expect(items).toHaveLength(2);
-		const file = items.find((item) => item.name === "file.txt");
-		const dir = items.find((item) => item.name === "sub");
-		expect(file.type).toBe("file");
-		expect(file.id).toBe("/local/root/file.txt");
-		expect(dir.type).toBe("dir");
-		expect(dir.path).toBe("/local/root/sub");
-	});
-
-	it("derives mtimeMs from a Date-like mtime", async () => {
-		mockFsPromises.readdir.mockResolvedValueOnce(["file.txt"]);
-		const mtime = { getTime: () => 12345 };
-		mockFsPromises.stat.mockResolvedValue({ type: "file", mtime });
-
-		const [item] = await localStorage.getListing("/root");
-
-		expect(item.mtimeMs).toBe(12345);
-	});
-
-	it("derives mtimeMs from a numeric mtime and defaults to zero otherwise", async () => {
-		mockFsPromises.readdir.mockResolvedValueOnce(["a.txt", "b.txt"]);
-		mockFsPromises.stat.mockImplementation((path) => {
-			if (path === "/root/a.txt") {
-				return Promise.resolve({ type: "file", mtime: 999 });
-			}
-			return Promise.resolve({ type: "file" });
-		});
-
-		const items = await localStorage.getListing("/root");
-
-		expect(items.find((i) => i.name === "a.txt").mtimeMs).toBe(999);
-		expect(items.find((i) => i.name === "b.txt").mtimeMs).toBe(0);
-	});
-
-	it("uses isDirectory() when the type field is absent", async () => {
-		mockFsPromises.readdir.mockResolvedValueOnce(["sub"]);
-		mockFsPromises.stat.mockResolvedValue({
-			isDirectory: () => true,
-			mtimeMs: 1,
-		});
-
-		const [item] = await localStorage.getListing("/root");
-
-		expect(item.type).toBe("dir");
-	});
-
-	it("counts child directories when useCount is requested", async () => {
-		mockFsPromises.readdir.mockImplementation((path) => {
-			if (path === "/root") return Promise.resolve(["sub"]);
-			if (path === "/root/sub") return Promise.resolve(["a", "b", "c"]);
-			return Promise.resolve([]);
-		});
-		mockFsPromises.stat.mockImplementation((path) => {
-			if (path === "/root/sub") return Promise.resolve({ type: "dir" });
-			if (path === "/root/sub/a") return Promise.resolve({ type: "dir" });
-			if (path === "/root/sub/b") return Promise.resolve({ type: "file" });
-			if (path === "/root/sub/c") return Promise.resolve({ type: "dir" });
-			return Promise.resolve({ type: "file" });
-		});
-
-		const [item] = await localStorage.getListing("/root", { useCount: true });
-
-		expect(item.count).toBe(2);
-	});
-
-	it("swallows per-item stat errors unless strict", async () => {
-		mockFsPromises.readdir.mockResolvedValueOnce(["broken.txt"]);
-		const err = new Error("stat failed");
-		mockFsPromises.stat.mockRejectedValue(err);
-
-		const items = await localStorage.getListing("/root");
-
-		expect(items).toEqual([]);
-		expect(structuredLogger.error).toHaveBeenCalledWith(err);
-	});
-
-	it("throws per-item stat errors when strict", async () => {
-		mockFsPromises.readdir.mockResolvedValueOnce(["broken.txt"]);
-		const err = new Error("stat failed");
-		mockFsPromises.stat.mockRejectedValue(err);
-
-		await expect(
-			localStorage.getListing("/root", { strict: true }),
-		).rejects.toBe(err);
-	});
-});
-
-describe("createFolder", () => {
-	it("creates the folder when it does not already exist", async () => {
-		mockFsPromises.stat.mockRejectedValue(new Error("missing"));
-		mockFsPromises.mkdir.mockResolvedValue(undefined);
-
-		await localStorage.createFolder("/root/new");
-
-		expect(mockFsPromises.mkdir).toHaveBeenCalledWith("/root/new");
-	});
-
-	it("does not create the folder when it already exists", async () => {
-		mockFsPromises.stat.mockResolvedValue({ type: "dir" });
-
-		await localStorage.createFolder("/root/existing");
-
-		expect(mockFsPromises.mkdir).not.toHaveBeenCalled();
-	});
-
-	it("ignores EEXIST errors", async () => {
-		mockFsPromises.stat.mockRejectedValue(new Error("missing"));
-		mockFsPromises.mkdir.mockRejectedValue(
-			Object.assign(new Error("exists"), { code: "EEXIST" }),
-		);
-
-		await expect(
-			localStorage.createFolder("/root/new"),
-		).resolves.toBeUndefined();
-	});
-
-	it("re-throws unrelated mkdir errors", async () => {
-		mockFsPromises.stat.mockRejectedValue(new Error("missing"));
-		const err = Object.assign(new Error("disk full"), { code: "ENOSPC" });
-		mockFsPromises.mkdir.mockRejectedValue(err);
-
-		await expect(localStorage.createFolder("/root/new")).rejects.toBe(err);
-	});
-});
-
-describe("createFolders", () => {
-	it("creates every folder under the given prefix", async () => {
-		mockFsPromises.stat.mockRejectedValue(new Error("missing"));
-		mockFsPromises.mkdir.mockResolvedValue(undefined);
-
-		await localStorage.createFolders("/root/", ["a", "b"]);
-
-		expect(mockFsPromises.mkdir).toHaveBeenCalledWith("/root/a");
-		expect(mockFsPromises.mkdir).toHaveBeenCalledWith("/root/b");
-	});
-});
-
-describe("createFolderPath", () => {
-	it("creates only the missing intermediate folders", async () => {
-		mockFsPromises.stat.mockImplementation((path) => {
-			if (path === "/root") return Promise.resolve({ type: "dir" });
-			return Promise.reject(new Error("missing"));
-		});
-		mockFsPromises.mkdir.mockResolvedValue(undefined);
-
-		await localStorage.createFolderPath("/root/sub/file.txt");
-
-		expect(mockFsPromises.mkdir).toHaveBeenCalledWith("/root/sub");
-		expect(mockFsPromises.mkdir).not.toHaveBeenCalledWith("/root");
-	});
-
-	it("creates the final segment as a folder when isFolder is true", async () => {
-		mockFsPromises.stat.mockRejectedValue(new Error("missing"));
-		mockFsPromises.mkdir.mockResolvedValue(undefined);
-
-		await localStorage.createFolderPath("/root/sub", true);
-
-		expect(mockFsPromises.mkdir).toHaveBeenCalledWith("/root/sub");
-	});
-});
-
-describe("deleteFolder", () => {
-	it("returns silently when the folder does not exist", async () => {
-		mockFsPromises.readdir.mockRejectedValue(
-			Object.assign(new Error("missing"), { code: "ENOENT" }),
-		);
-
-		await expect(localStorage.deleteFolder("/root")).resolves.toBeUndefined();
-	});
-
-	it("re-throws unexpected readdir errors", async () => {
-		const err = Object.assign(new Error("boom"), { code: "EACCES" });
-		mockFsPromises.readdir.mockRejectedValue(err);
-
-		await expect(localStorage.deleteFolder("/root")).rejects.toBe(err);
-	});
-
-	it("recursively deletes files and subfolders before removing itself", async () => {
-		mockFsPromises.readdir.mockImplementation((path) => {
-			if (path === "/root") return Promise.resolve(["file.txt", "sub"]);
-			if (path === "/root/sub") return Promise.resolve([]);
-			return Promise.resolve([]);
-		});
-		mockFsPromises.stat.mockImplementation((path) => {
-			if (path === "/root/sub") return Promise.resolve({ type: "dir" });
-			return Promise.resolve({ type: "file" });
-		});
-		mockFsPromises.unlink.mockResolvedValue(undefined);
-		mockFsPromises.rmdir.mockResolvedValue(undefined);
-
-		await localStorage.deleteFolder("/root");
-
-		expect(mockFsPromises.unlink).toHaveBeenCalledWith("/root/file.txt");
-		expect(mockFsPromises.rmdir).toHaveBeenCalledWith("/root/sub");
-		expect(mockFsPromises.rmdir).toHaveBeenCalledWith("/root");
-	});
-
-	it("logs but continues when deleting a child entry fails", async () => {
-		mockFsPromises.readdir.mockResolvedValueOnce(["file.txt"]);
-		mockFsPromises.stat.mockRejectedValue(
-			Object.assign(new Error("gone"), { code: "EACCES" }),
-		);
-		mockFsPromises.rmdir.mockResolvedValue(undefined);
-
-		await localStorage.deleteFolder("/root");
-
-		expect(structuredLogger.error).toHaveBeenCalled();
-		expect(mockFsPromises.rmdir).toHaveBeenCalledWith("/root");
-	});
-
-	it("returns when rmdir reports the folder is already gone", async () => {
-		mockFsPromises.readdir.mockResolvedValue([]);
-		mockFsPromises.rmdir.mockRejectedValue(
-			Object.assign(new Error("gone"), { code: "ENOENT" }),
-		);
-
-		await expect(localStorage.deleteFolder("/root")).resolves.toBeUndefined();
-	});
-
-	it("re-throws unexpected rmdir errors", async () => {
-		mockFsPromises.readdir.mockResolvedValue([]);
-		const err = Object.assign(new Error("busy"), { code: "EBUSY" });
-		mockFsPromises.rmdir.mockRejectedValue(err);
-
-		await expect(localStorage.deleteFolder("/root")).rejects.toBe(err);
-	});
-
-	it("retries on ENOTEMPTY and eventually succeeds", async () => {
-		jest.useFakeTimers();
-		try {
-			mockFsPromises.readdir
-				.mockResolvedValueOnce([]) // initial children listing
-				.mockResolvedValueOnce(["still-here.txt"]) // ENOTEMPTY recheck: not actually empty yet
-				.mockResolvedValue([]); // next iteration's children listing
-			const notEmptyErr = Object.assign(new Error("not empty"), {
-				code: "ENOTEMPTY",
-			});
-			mockFsPromises.rmdir
-				.mockRejectedValueOnce(notEmptyErr)
-				.mockResolvedValueOnce(undefined);
-
-			const promise = localStorage.deleteFolder("/root");
-			await jest.advanceTimersByTimeAsync(150);
-			await promise;
-
-			expect(mockFsPromises.rmdir).toHaveBeenCalledTimes(2);
-		} finally {
-			jest.useRealTimers();
-		}
-	});
-
-	it("throws the last ENOTEMPTY error after exhausting retries", async () => {
-		jest.useFakeTimers();
-		try {
-			mockFsPromises.readdir.mockResolvedValue(["stubborn.txt"]);
-			mockFsPromises.stat.mockResolvedValue({ type: "file" });
-			mockFsPromises.unlink.mockResolvedValue(undefined);
-			const notEmptyErr = Object.assign(new Error("not empty"), {
-				code: "ENOTEMPTY",
-			});
-			mockFsPromises.rmdir.mockRejectedValue(notEmptyErr);
-
-			const expectation = expect(
-				localStorage.deleteFolder("/root"),
-			).rejects.toBe(notEmptyErr);
-			await jest.advanceTimersByTimeAsync(2000);
-			await expectation;
-		} finally {
-			jest.useRealTimers();
-		}
-	});
-});
-
-describe("deleteFile", () => {
-	it("unlinks the normalized path", async () => {
-		mockFsPromises.unlink.mockResolvedValue(undefined);
-
-		await localStorage.deleteFile("root/file.txt");
-
-		expect(mockFsPromises.unlink).toHaveBeenCalledWith("/root/file.txt");
-	});
-});
-
-describe("rename", () => {
-	it("renames via fs.promises.rename", async () => {
-		mockFsPromises.rename.mockResolvedValue(undefined);
-
-		await localStorage.rename("root/old.txt", "root/new.txt");
-
-		expect(mockFsPromises.rename).toHaveBeenCalledWith(
-			"/root/old.txt",
-			"/root/new.txt",
-		);
-	});
-});
-
-describe("readFile", () => {
-	it("reads binary files without an encoding argument", async () => {
-		mockFsPromises.readFile.mockResolvedValue(Buffer.from("binary"));
-
-		await localStorage.readFile("root/image.png");
-
-		expect(mockFsPromises.readFile).toHaveBeenCalledWith("/root/image.png");
-	});
-
-	it("reads text files with utf8 encoding", async () => {
-		mockFsPromises.readFile.mockResolvedValue("text");
-
-		const result = await localStorage.readFile("root/file.txt");
-
-		expect(mockFsPromises.readFile).toHaveBeenCalledWith(
-			"/root/file.txt",
-			"utf8",
-		);
-		expect(result).toBe("text");
-	});
-
-	it("returns null when the file does not exist", async () => {
-		mockFsPromises.readFile.mockRejectedValue(
-			Object.assign(new Error("missing"), { code: "ENOENT" }),
-		);
-
-		await expect(localStorage.readFile("root/missing.txt")).resolves.toBe(null);
-	});
-
-	it("re-throws unexpected read errors", async () => {
-		const err = Object.assign(new Error("boom"), { code: "EACCES" });
-		mockFsPromises.readFile.mockRejectedValue(err);
-
-		await expect(localStorage.readFile("root/file.txt")).rejects.toBe(err);
-	});
-});
-
-describe("readFiles", () => {
-	it("reads every requested file relative to the prefix", async () => {
-		mockFsPromises.readFile.mockImplementation((path) =>
-			Promise.resolve(`content:${path}`),
-		);
-
-		const results = await localStorage.readFiles("root/", ["a.txt", "b.txt"]);
-
-		expect(results).toEqual({
-			"a.txt": "content:/root/a.txt",
-			"b.txt": "content:/root/b.txt",
-		});
-	});
-});
-
-describe("writeFile", () => {
-	it("writes binary files without an encoding argument", async () => {
-		await localStorage.writeFile("root/image.png", "data");
-
-		expect(mockFsPromises.writeFile).toHaveBeenCalledWith(
-			"/root/image.png",
-			"data",
-		);
-	});
-
-	it("writes text files with utf8 encoding", async () => {
-		await localStorage.writeFile("root/file.txt", "data");
-
-		expect(mockFsPromises.writeFile).toHaveBeenCalledWith(
-			"/root/file.txt",
-			"data",
-			"utf8",
-		);
-	});
-});
-
-describe("writeFiles", () => {
-	it("writes every file relative to the prefix", async () => {
-		await localStorage.writeFiles("root/", {
-			"a.txt": "one",
-			"b.txt": "two",
-		});
-
-		expect(mockFsPromises.writeFile).toHaveBeenCalledWith(
-			"/root/a.txt",
-			"one",
-			"utf8",
-		);
-		expect(mockFsPromises.writeFile).toHaveBeenCalledWith(
-			"/root/b.txt",
-			"two",
-			"utf8",
-		);
-	});
-});
-
-describe("exists", () => {
-	it("resolves true when stat succeeds", async () => {
-		mockFsPromises.stat.mockResolvedValue({ type: "file" });
-
-		await expect(localStorage.exists("root/file.txt")).resolves.toBe(true);
-	});
-
-	it("resolves false when stat throws", async () => {
-		mockFsPromises.stat.mockRejectedValue(new Error("missing"));
-
-		await expect(localStorage.exists("root/missing.txt")).resolves.toBe(false);
-	});
-});
-
-describe("getSize", () => {
-	const originalNavigator = global.navigator;
-
-	afterEach(() => {
-		Object.defineProperty(global, "navigator", {
-			value: originalNavigator,
-			configurable: true,
-			writable: true,
-		});
-	});
-
-	it("returns the storage estimate usage when available", async () => {
-		Object.defineProperty(global, "navigator", {
-			value: {
-				storage: {
-					estimate: jest.fn().mockResolvedValue({ usage: 123, quota: 999 }),
-				},
-			},
-			configurable: true,
-			writable: true,
-		});
-
-		await expect(localStorage.getSize()).resolves.toBe(123);
-		expect(structuredLogger.debug).toHaveBeenCalled();
-	});
-
-	it("returns zero when storage estimation is unavailable", async () => {
-		Object.defineProperty(global, "navigator", {
-			value: {},
-			configurable: true,
-			writable: true,
-		});
-
-		await expect(localStorage.getSize()).resolves.toBe(0);
-	});
-});
-
-describe("getRecursiveList", () => {
-	it("flattens nested directories into a single file listing", async () => {
-		mockFsPromises.readdir.mockImplementation((path) => {
-			if (path === "/root") return Promise.resolve(["file.txt", "sub"]);
-			if (path === "/root/sub") return Promise.resolve(["nested.txt"]);
-			return Promise.resolve([]);
-		});
-		mockFsPromises.stat.mockImplementation((path) => {
-			if (path === "/root/sub") return Promise.resolve({ type: "dir" });
-			return Promise.resolve({ type: "file" });
-		});
-
-		const result = await localStorage.getRecursiveList("/root");
-
-		expect(result.map((item) => item.name).sort()).toEqual([
-			"file.txt",
-			"nested.txt",
+		expect(await localStorage.exists("/sync")).toBe(true);
+		expect(await localStorage.exists("/sync/american")).toBe(true);
+		expect(await localStorage.getListing("/sync")).toEqual([
+			expect.objectContaining({
+				id: "/local/sync/american",
+				name: "american",
+				path: "/local/sync/american",
+				type: "dir",
+			}),
 		]);
 	});
-});
 
-describe("clear", () => {
-	it("resolves immediately when indexedDB is unavailable", async () => {
-		const original = global.indexedDB;
-		delete global.indexedDB;
+	it("preserves binary file data", async () => {
+		const content = new Uint8Array([1, 2, 3, 255]);
+		await localStorage.writeFile("/images/test.bin", content);
 
-		await expect(clear()).resolves.toBeUndefined();
-
-		global.indexedDB = original;
+		const stored = await localStorage.readFile("/images/test.bin");
+		expect(Array.from(new Uint8Array(stored))).toEqual([1, 2, 3, 255]);
 	});
 
-	it("resolves when the delete request succeeds", async () => {
-		const request = {};
-		global.indexedDB = {
-			deleteDatabase: jest.fn(() => request),
-		};
-
-		const promise = clear();
-		request.onsuccess();
-		await expect(promise).resolves.toBeUndefined();
-	});
-
-	it("rejects when the delete request errors", async () => {
-		const request = { error: new Error("delete failed") };
-		global.indexedDB = {
-			deleteDatabase: jest.fn(() => request),
-		};
-
-		const promise = clear();
-		request.onerror();
-		await expect(promise).rejects.toBe(request.error);
-	});
-
-	it("resolves when the delete request is blocked", async () => {
-		const request = {};
-		global.indexedDB = {
-			deleteDatabase: jest.fn(() => request),
-		};
-
-		const promise = clear();
-		request.onblocked();
-		await expect(promise).resolves.toBeUndefined();
-	});
-});
-
-describe("resetLocalFileSystem", () => {
-	it("switches all writes to a fresh database before deleting the previous one", async () => {
-		const originalIndexedDb = global.indexedDB;
-		const request = {};
-		global.indexedDB = {
-			deleteDatabase: jest.fn(() => request),
-		};
-		const LightningFS = require("@isomorphic-git/lightning-fs");
-		const freshFsPromises = Object.fromEntries(
-			Object.keys(mockFsPromises).map((name) => [name, jest.fn()]),
+	it("keeps file bodies out of metadata listings", async () => {
+		await localStorage.writeFile("/sync/large.json", "content");
+		const database = await openDatabase("systemconcepts-local-files");
+		const transaction = database.transaction(["files", "metadata"], "readonly");
+		const metadata = await readRecord(
+			transaction.objectStore("metadata"),
+			"/sync/large.json",
 		);
-		freshFsPromises.stat.mockResolvedValue({ type: "dir" });
-		freshFsPromises.writeFile.mockResolvedValue(undefined);
-		LightningFS.mockImplementationOnce(() => ({ promises: freshFsPromises }));
-		const initialCalls = LightningFS.mock.calls.length;
-		mockFsPromises.writeFile.mockReturnValue(new Promise(() => {}));
-		void localStorage.writeFile("old/file.json", "old");
+		const file = await readRecord(
+			transaction.objectStore("files"),
+			"/sync/large.json",
+		);
+		database.close();
 
+		expect(metadata).not.toHaveProperty("content");
+		expect(file).toEqual({ path: "/sync/large.json", content: "content" });
+	});
+
+	it("supports explicit empty folders and nested folder creation", async () => {
+		await localStorage.createFolderPath("/one/two/three", true);
+
+		expect(await localStorage.exists("/one")).toBe(true);
+		expect(await localStorage.exists("/one/two/three")).toBe(true);
+		expect(await localStorage.getListing("/one/two")).toEqual([
+			expect.objectContaining({ name: "three", type: "dir" }),
+		]);
+	});
+
+	it("preserves strict listings and directory counts", async () => {
+		await localStorage.writeFile("/library/a/one.json", "one");
+		await localStorage.writeFile("/library/b/two.json", "two");
+
+		await expect(
+			localStorage.getListing("/missing", { strict: true }),
+		).rejects.toMatchObject({
+			code: "ENOENT",
+		});
+		expect(
+			await localStorage.getListing("/library", { useCount: true }),
+		).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({ name: "a", type: "dir", count: 0 }),
+				expect.objectContaining({ name: "b", type: "dir", count: 0 }),
+			]),
+		);
+	});
+
+	it("renames complete folder trees", async () => {
+		await localStorage.writeFile("/drafts/a.json", "a");
+		await localStorage.writeFile("/drafts/nested/b.json", "b");
+
+		await localStorage.rename("/drafts", "/published");
+
+		expect(await localStorage.readFile("/drafts/a.json")).toBeNull();
+		expect(await localStorage.readFile("/published/a.json")).toBe("a");
+		expect(await localStorage.readFile("/published/nested/b.json")).toBe("b");
+	});
+
+	it("deletes a folder tree and reports missing files", async () => {
+		await localStorage.writeFile("/cache/a.json", "a");
+		await localStorage.writeFile("/cache/nested/b.json", "b");
+
+		await localStorage.deleteFolder("/cache");
+
+		expect(await localStorage.exists("/cache")).toBe(false);
+		expect(await localStorage.readFile("/cache/a.json")).toBeNull();
+		await expect(
+			localStorage.deleteFile("/cache/a.json"),
+		).rejects.toMatchObject({
+			code: "ENOENT",
+		});
+	});
+
+	it("handles sequential writes separated by the old idle timeout", async () => {
+		await localStorage.writeFile("/sync/first.json", "first");
+		await new Promise((resolve) => setTimeout(resolve, 550));
+		await localStorage.writeFile("/sync/second.json", "second");
+
+		expect(await localStorage.readFile("/sync/second.json")).toBe("second");
+	});
+
+	it("clears the store for a full sync", async () => {
+		await localStorage.writeFile("/sync/data.json", "data");
+		const databaseName = await resetLocalFileSystem();
+
+		expect(databaseName).toBe("systemconcepts-local-files");
+		expect(await localStorage.getRecursiveList("/")).toEqual([]);
+	});
+
+	it("forgets the legacy active LightningFS database during a full sync", async () => {
+		window.localStorage.setItem(
+			"local_active_database",
+			"systemconcepts-fs-old",
+		);
+
+		await resetLocalFileSystem();
+
+		expect(window.localStorage.getItem("local_active_database")).toBeNull();
+	});
+
+	it("clears safely when requested directly", async () => {
+		await localStorage.writeFile("/sync/data.json", "data");
+		await clear();
+
+		expect(await localStorage.exists("/sync/data.json")).toBe(false);
+	});
+
+	it("uses the browser storage estimate when available", async () => {
+		const originalNavigator = global.navigator;
+		Object.defineProperty(global, "navigator", {
+			configurable: true,
+			value: {
+				storage: { estimate: jest.fn().mockResolvedValue({ usage: 42 }) },
+			},
+		});
 		try {
-			const databaseName = await resetLocalFileSystem();
-
-			expect(databaseName).toMatch(/^systemconcepts-fs-/);
-			expect(LightningFS).toHaveBeenCalledTimes(initialCalls + 1);
-			expect(LightningFS).toHaveBeenLastCalledWith(databaseName, {
-				defer: true,
-			});
-			expect(freshFsPromises.stat).toHaveBeenCalledWith("/");
-			await expect(
-				localStorage.writeFile("fresh/file.json", "fresh"),
-			).resolves.toBe(undefined);
-			expect(freshFsPromises.writeFile).toHaveBeenCalledWith(
-				"/.full-sync-ready",
-				"",
-				"utf8",
-			);
-			expect(freshFsPromises.unlink).toHaveBeenCalledWith("/.full-sync-ready");
-			expect(freshFsPromises.writeFile).toHaveBeenCalledWith(
-				"/fresh/file.json",
-				"fresh",
-				"utf8",
-			);
-			expect(window.localStorage.getItem("local_active_database")).toBe(
-				databaseName,
-			);
-			expect(global.indexedDB.deleteDatabase).toHaveBeenCalledTimes(1);
+			expect(await localStorage.getSize()).toBe(42);
 		} finally {
-			global.indexedDB = originalIndexedDb;
+			Object.defineProperty(global, "navigator", {
+				configurable: true,
+				value: originalNavigator,
+			});
 		}
 	});
+
+	it("returns a calculated size when the estimate API is unavailable", async () => {
+		await localStorage.writeFile("/sync/data.json", "hello");
+		const originalNavigator = global.navigator;
+		Object.defineProperty(global, "navigator", {
+			configurable: true,
+			value: {},
+		});
+		try {
+			expect(await localStorage.getSize()).toBe(5);
+		} finally {
+			Object.defineProperty(global, "navigator", {
+				configurable: true,
+				value: originalNavigator,
+			});
+		}
+	});
+});
+
+afterAll(() => {
+	expect(structuredLogger.error).not.toHaveBeenCalled();
 });

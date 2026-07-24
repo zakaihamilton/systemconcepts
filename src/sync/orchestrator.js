@@ -194,7 +194,6 @@ export function createSyncOrchestrator(overrides = {}) {
 			});
 			throw error;
 		} finally {
-			dependencies.storage?.stopLocalFileSystemKeepAlive?.();
 			if (typeof unlock === "function") unlock();
 			if (dependencies.isMutexLocked({ id: "sync_process" })) {
 				const lock = dependencies.getMutex({ id: "sync_process" });
