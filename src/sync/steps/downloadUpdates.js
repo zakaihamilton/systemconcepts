@@ -7,7 +7,7 @@ import {
 	FILES_MANIFEST,
 	LOCAL_SYNC_PATH,
 	SYNC_BASE_PATH,
-	SYNC_BATCH_SIZE,
+	SYNC_DOWNLOAD_BATCH_SIZE,
 } from "../constants";
 import { getFileInfo } from "../hash";
 import { addSyncLog } from "../logs";
@@ -400,13 +400,13 @@ export async function downloadUpdates(
 		}
 
 		// Download in parallel batches
-		for (let i = 0; i < toDownload.length; i += SYNC_BATCH_SIZE) {
+		for (let i = 0; i < toDownload.length; i += SYNC_DOWNLOAD_BATCH_SIZE) {
 			// Check for cancellation
 			if (SyncActiveStore.getRawState().stopping) {
 				addSyncLog("Download stopped by user", "warning");
 				break;
 			}
-			const batch = toDownload.slice(i, i + SYNC_BATCH_SIZE);
+			const batch = toDownload.slice(i, i + SYNC_DOWNLOAD_BATCH_SIZE);
 			const progress = Math.min(i + batch.length, toDownload.length);
 			const percent = Math.round((progress / toDownload.length) * 100);
 
