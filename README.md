@@ -60,6 +60,8 @@ yarn build
 yarn start
 ```
 
+To inspect production webpack bundle sizes, run `yarn analyze`. Reports are written to `.next/analyze/` (`client.html`, `nodejs.html`, and `edge.html`) without opening a browser.
+
 ## Verification
 
 Linting uses Biome (`biome check .`). Type checking uses `tsc --noEmit`.
