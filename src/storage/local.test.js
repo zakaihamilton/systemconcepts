@@ -107,9 +107,56 @@ describe("native IndexedDB local storage", () => {
 		]);
 	});
 
+	it("treats root and existing directories as idempotent folder creations", async () => {
+		await localStorage.createFolder("/");
+		await localStorage.createFolder("/existing");
+		await localStorage.createFolder("/existing");
+		await localStorage.createFolderPath("/root-file.json");
+
+		expect(await localStorage.exists("/")).toBe(true);
+		expect(await localStorage.getListing("/")).toEqual([
+			expect.objectContaining({ name: "existing", type: "dir" }),
+		]);
+	});
+
+	it("rejects folder creation over an existing file and file reads of folders", async () => {
+		await localStorage.writeFile("/conflict", "file");
+		await localStorage.createFolder("/directory");
+
+		await expect(localStorage.createFolder("/conflict")).rejects.toMatchObject({
+			code: "EEXIST",
+		});
+		await expect(localStorage.readFile("/directory")).rejects.toMatchObject({
+			code: "EISDIR",
+		});
+	});
+
+	it("supports batched folder and file operations", async () => {
+		await localStorage.createFolders("/batch", ["one", "two/nested"]);
+		await localStorage.writeFiles("/batch", {
+			"one/a.json": "a",
+			"two/b.json": "b",
+		});
+
+		expect(
+			await localStorage.readFiles("/batch", [
+				"one/a.json",
+				"two/b.json",
+				"missing.json",
+			]),
+		).toEqual({
+			"one/a.json": "a",
+			"two/b.json": "b",
+			"missing.json": null,
+		});
+		expect(await localStorage.exists("/batch/two/nested")).toBe(true);
+	});
+
 	it("preserves strict listings and directory counts", async () => {
 		await localStorage.writeFile("/library/a/one.json", "one");
+		await localStorage.writeFile("/library/a/empty.json", "");
 		await localStorage.writeFile("/library/b/two.json", "two");
+		await localStorage.createFolder("/library/a/nested");
 
 		await expect(
 			localStorage.getListing("/missing", { strict: true }),
@@ -120,8 +167,23 @@ describe("native IndexedDB local storage", () => {
 			await localStorage.getListing("/library", { useCount: true }),
 		).toEqual(
 			expect.arrayContaining([
-				expect.objectContaining({ name: "a", type: "dir", count: 0 }),
+				expect.objectContaining({ name: "a", type: "dir", count: 1 }),
 				expect.objectContaining({ name: "b", type: "dir", count: 0 }),
+			]),
+		);
+		expect(await localStorage.getListing("/library/a")).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					name: "one.json",
+					type: "file",
+					size: 3,
+				}),
+				expect.objectContaining({
+					name: "empty.json",
+					type: "file",
+					size: 0,
+				}),
+				expect.objectContaining({ name: "nested", type: "dir" }),
 			]),
 		);
 	});
@@ -137,10 +199,18 @@ describe("native IndexedDB local storage", () => {
 		expect(await localStorage.readFile("/published/nested/b.json")).toBe("b");
 	});
 
+	it("reports a missing rename source", async () => {
+		await expect(
+			localStorage.rename("/missing", "/destination"),
+		).rejects.toMatchObject({ code: "ENOENT" });
+	});
+
 	it("deletes a folder tree and reports missing files", async () => {
 		await localStorage.writeFile("/cache/a.json", "a");
 		await localStorage.writeFile("/cache/nested/b.json", "b");
 
+		await localStorage.deleteFile("/cache/a.json");
+		expect(await localStorage.readFile("/cache/a.json")).toBeNull();
 		await localStorage.deleteFolder("/cache");
 
 		expect(await localStorage.exists("/cache")).toBe(false);
@@ -150,6 +220,22 @@ describe("native IndexedDB local storage", () => {
 		).rejects.toMatchObject({
 			code: "ENOENT",
 		});
+	});
+
+	it("deletes every entry when the root folder is removed", async () => {
+		await localStorage.writeFile("/one/a.json", "a");
+		await localStorage.writeFile("/two/b.json", "b");
+
+		await localStorage.deleteFolder("/");
+
+		expect(await localStorage.getListing("/")).toEqual([]);
+	});
+
+	it("records the byte length of ArrayBuffer and Blob-compatible content", async () => {
+		await localStorage.writeFile("/binary/raw.bin", new ArrayBuffer(7));
+		await localStorage.writeFile("/binary/blob.bin", new Blob(["hello"]));
+
+		expect(await localStorage.getSize()).toBe(12);
 	});
 
 	it("handles sequential writes separated by the old idle timeout", async () => {
@@ -166,6 +252,18 @@ describe("native IndexedDB local storage", () => {
 
 		expect(databaseName).toBe("systemconcepts-local-files");
 		expect(await localStorage.getRecursiveList("/")).toEqual([]);
+	});
+
+	it("flattens files and folders into a recursive listing", async () => {
+		await localStorage.writeFile("/sync/nested/data.json", "data");
+
+		expect(await localStorage.getRecursiveList("/")).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({ name: "sync", type: "dir" }),
+				expect.objectContaining({ name: "nested", type: "dir" }),
+				expect.objectContaining({ name: "data.json", type: "file" }),
+			]),
+		);
 	});
 
 	it("forgets the legacy active LightningFS database during a full sync", async () => {
@@ -191,11 +289,17 @@ describe("native IndexedDB local storage", () => {
 		Object.defineProperty(global, "navigator", {
 			configurable: true,
 			value: {
-				storage: { estimate: jest.fn().mockResolvedValue({ usage: 42 }) },
+				storage: {
+					estimate: jest
+						.fn()
+						.mockResolvedValueOnce({ usage: 42 })
+						.mockResolvedValueOnce({}),
+				},
 			},
 		});
 		try {
 			expect(await localStorage.getSize()).toBe(42);
+			expect(await localStorage.getSize()).toBe(0);
 		} finally {
 			Object.defineProperty(global, "navigator", {
 				configurable: true,
