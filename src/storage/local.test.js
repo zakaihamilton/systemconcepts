@@ -608,6 +608,12 @@ describe("resetLocalFileSystem", () => {
 				localStorage.writeFile("fresh/file.json", "fresh"),
 			).resolves.toBe(undefined);
 			expect(freshFsPromises.writeFile).toHaveBeenCalledWith(
+				"/.full-sync-ready",
+				"",
+				"utf8",
+			);
+			expect(freshFsPromises.unlink).toHaveBeenCalledWith("/.full-sync-ready");
+			expect(freshFsPromises.writeFile).toHaveBeenCalledWith(
 				"/fresh/file.json",
 				"fresh",
 				"utf8",

@@ -46,7 +46,10 @@ export async function clearBundleCache({
 export async function resetLocalCacheForFullSync(options = {}) {
 	const { userId } = options;
 	addSyncLog("Starting Full Sync with a fresh local database…", "warning");
-	await storage.resetLocalFileSystem();
+	const databaseName = await storage.resetLocalFileSystem();
+	structuredLogger.info("[Sync] Switched to fresh LightningFS database", {
+		databaseName,
+	});
 	beginFreshLocalWriteGeneration();
 	clearUserSyncStorage(userId);
 	clearLegacySyncStorage();

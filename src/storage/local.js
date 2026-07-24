@@ -6,6 +6,8 @@ import { isBinaryFile, makePath } from "@util/data/path";
 
 const BASE_DATABASE_NAME = "systemconcepts-fs";
 const ACTIVE_DATABASE_KEY = "local_active_database";
+const FRESH_DATABASE_PROBE_PATH = "/.full-sync-ready";
+const FRESH_DATABASE_TIMEOUT_MS = 5_000;
 
 function getStoredDatabaseName() {
 	if (typeof window === "undefined") return BASE_DATABASE_NAME;
@@ -17,6 +19,22 @@ let fs = process.browser && new FS(activeDatabaseName);
 
 function createDatabaseName() {
 	return `${BASE_DATABASE_NAME}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function withTimeout(promise, ms, message) {
+	let timeoutId;
+	const timeout = new Promise((_, reject) => {
+		timeoutId = setTimeout(() => reject(new Error(message)), ms);
+	});
+	return Promise.race([promise, timeout]).finally(() =>
+		clearTimeout(timeoutId),
+	);
+}
+
+async function verifyFreshDatabase(nextFs) {
+	await nextFs.promises.stat("/");
+	await nextFs.promises.writeFile(FRESH_DATABASE_PROBE_PATH, "", "utf8");
+	await nextFs.promises.unlink(FRESH_DATABASE_PROBE_PATH);
 }
 
 function deleteDatabaseBestEffort(databaseName) {
@@ -43,8 +61,12 @@ export async function resetLocalFileSystem() {
 	const nextDatabaseName = createDatabaseName();
 	const nextFs = new FS(nextDatabaseName);
 
-	// Force initialization now, before the sync pipeline begins its first write.
-	await nextFs.promises.stat("/");
+	// Verify an actual IndexedDB write before beginning a remote download run.
+	await withTimeout(
+		verifyFreshDatabase(nextFs),
+		FRESH_DATABASE_TIMEOUT_MS,
+		`Timed out preparing fresh LightningFS database after ${FRESH_DATABASE_TIMEOUT_MS / 1000}s`,
+	);
 	fs = nextFs;
 	activeDatabaseName = nextDatabaseName;
 	if (typeof window !== "undefined") {
