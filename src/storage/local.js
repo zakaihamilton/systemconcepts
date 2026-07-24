@@ -59,7 +59,11 @@ export async function resetLocalFileSystem() {
 	if (!fs) throw new Error("Local filesystem is unavailable");
 	const previousDatabaseName = activeDatabaseName;
 	const nextDatabaseName = createDatabaseName();
-	const nextFs = new FS(nextDatabaseName);
+	// LightningFS otherwise performs an unawaited initial stat() in its
+	// constructor. Starting our readiness probe at the same time races its
+	// IndexedDB/navigator-lock initialization and can leave later writes waiting
+	// forever. We explicitly run the probe below instead.
+	const nextFs = new FS(nextDatabaseName, { defer: true });
 
 	// Verify an actual IndexedDB write before beginning a remote download run.
 	await withTimeout(

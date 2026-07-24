@@ -602,7 +602,9 @@ describe("resetLocalFileSystem", () => {
 
 			expect(databaseName).toMatch(/^systemconcepts-fs-/);
 			expect(LightningFS).toHaveBeenCalledTimes(initialCalls + 1);
-			expect(LightningFS).toHaveBeenLastCalledWith(databaseName);
+			expect(LightningFS).toHaveBeenLastCalledWith(databaseName, {
+				defer: true,
+			});
 			expect(freshFsPromises.stat).toHaveBeenCalledWith("/");
 			await expect(
 				localStorage.writeFile("fresh/file.json", "fresh"),
