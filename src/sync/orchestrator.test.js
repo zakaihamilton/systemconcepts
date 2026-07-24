@@ -54,9 +54,6 @@ function makeDependencies(overrides = {}) {
 		lockMutex: jest.fn().mockResolvedValue(unlock),
 		isMutexLocked: jest.fn().mockReturnValue(false),
 		getMutex: jest.fn(),
-		storage: {
-			stopLocalFileSystemKeepAlive: jest.fn(),
-		},
 		unlock,
 		...overrides,
 	};
@@ -112,21 +109,8 @@ describe("sync orchestration recovery", () => {
 		);
 
 		expect(dependencies.unlock).toHaveBeenCalledTimes(1);
-		expect(
-			dependencies.storage.stopLocalFileSystemKeepAlive,
-		).toHaveBeenCalledTimes(1);
 		expect(SyncActiveStore.getRawState().phase).toBeNull();
 		expect(UpdateSessionsStore.getRawState().busy).toBe(false);
-	});
-
-	it("stops local filesystem keep-alive after a successful sync", async () => {
-		const dependencies = makeDependencies();
-
-		await createSyncOrchestrator(dependencies)(false);
-
-		expect(
-			dependencies.storage.stopLocalFileSystemKeepAlive,
-		).toHaveBeenCalledTimes(1);
 	});
 
 	it("rejects expired authentication and releases the mutex", async () => {
