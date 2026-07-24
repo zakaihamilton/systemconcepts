@@ -8,6 +8,7 @@ const BASE_DATABASE_NAME = "systemconcepts-fs";
 const ACTIVE_DATABASE_KEY = "local_active_database";
 const FRESH_DATABASE_PROBE_PATH = "/.full-sync-ready";
 const FRESH_DATABASE_TIMEOUT_MS = 5_000;
+const FULL_SYNC_KEEP_ALIVE_MS = 250;
 
 function getStoredDatabaseName() {
 	if (typeof window === "undefined") return BASE_DATABASE_NAME;
@@ -16,6 +17,8 @@ function getStoredDatabaseName() {
 
 let activeDatabaseName = getStoredDatabaseName();
 let fs = process.browser && new FS(activeDatabaseName);
+let fullSyncKeepAliveTimer = null;
+let fullSyncKeepAliveInFlight = false;
 
 function createDatabaseName() {
 	return `${BASE_DATABASE_NAME}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -54,6 +57,31 @@ function deleteDatabaseBestEffort(databaseName) {
 	}
 }
 
+/** Keep LightningFS from releasing and reacquiring its IndexedDB lock mid-sync. */
+export function startLocalFileSystemKeepAlive() {
+	stopLocalFileSystemKeepAlive();
+	const tick = async () => {
+		if (!fs || fullSyncKeepAliveInFlight) return;
+		fullSyncKeepAliveInFlight = true;
+		try {
+			await fs.promises.stat("/");
+		} catch (error) {
+			structuredLogger.warn("[Local Storage] Keep-alive failed", error);
+		} finally {
+			fullSyncKeepAliveInFlight = false;
+		}
+	};
+	void tick();
+	fullSyncKeepAliveTimer = setInterval(() => void tick(), FULL_SYNC_KEEP_ALIVE_MS);
+}
+
+export function stopLocalFileSystemKeepAlive() {
+	if (fullSyncKeepAliveTimer !== null) {
+		clearInterval(fullSyncKeepAliveTimer);
+		fullSyncKeepAliveTimer = null;
+	}
+}
+
 /** Start Full Sync on an empty LightningFS database without waiting on the old one. */
 export async function resetLocalFileSystem() {
 	if (!fs) throw new Error("Local filesystem is unavailable");
@@ -73,6 +101,7 @@ export async function resetLocalFileSystem() {
 	);
 	fs = nextFs;
 	activeDatabaseName = nextDatabaseName;
+	startLocalFileSystemKeepAlive();
 	if (typeof window !== "undefined") {
 		localStorage.setItem(ACTIVE_DATABASE_KEY, nextDatabaseName);
 	}
@@ -352,4 +381,6 @@ export default {
 	},
 	getRecursiveList,
 	resetLocalFileSystem,
+	startLocalFileSystemKeepAlive,
+	stopLocalFileSystemKeepAlive,
 };
