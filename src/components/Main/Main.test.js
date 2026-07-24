@@ -34,6 +34,7 @@ describe("Main Component", () => {
 			s.libraryExpanded = false;
 			s.hash = undefined;
 		});
+		window.location.hash = "";
 	});
 
 	it("renders core components", () => {
@@ -49,6 +50,14 @@ describe("Main Component", () => {
 	it("starts the app-wide auto-sync scheduler", () => {
 		render(<Main />);
 		expect(useSync).toHaveBeenCalledWith({ schedule: true });
+	});
+
+	it("does not auto-sync when the window opens directly on the Sync page", () => {
+		window.location.hash = "#sync";
+
+		render(<Main />);
+
+		expect(useSync).toHaveBeenCalledWith({ schedule: false });
 	});
 
 	it("persists MainStore UI prefs without the navigation hash", () => {

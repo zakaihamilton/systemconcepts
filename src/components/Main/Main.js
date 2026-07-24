@@ -5,7 +5,7 @@ import { useDeviceType } from "@util/browser/styles";
 import { useLanguage } from "@util/domain/language";
 import clsx from "clsx";
 import { Store } from "pullstate";
-import { useEffect, useLayoutEffect } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import Bookmarks from "../Bookmarks";
 import Head from "../Head";
 import Page from "../Page";
@@ -47,9 +47,16 @@ function syncHashFromWindow() {
 	});
 }
 
+function openedOnSyncPage() {
+	if (typeof window === "undefined") return false;
+	return window.location.hash.replace(/^#/, "").split("/")[0] === "sync";
+}
+
 export default function Main() {
-	// Keep automatic sync alive independently of the currently open route.
-	useSync({ schedule: true });
+	const openedOnSyncPageRef = useRef(openedOnSyncPage());
+	// Opening Sync is an explicit, manual workflow. Do not start a normal sync
+	// against an existing local database before the user can choose Full Sync.
+	useSync({ schedule: !openedOnSyncPageRef.current });
 	const _counter = useResize();
 	const language = useLanguage();
 	const isMobile = useDeviceType() !== "desktop";
