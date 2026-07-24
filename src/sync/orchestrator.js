@@ -3,6 +3,7 @@
 import { fetchJSON } from "@util/api/fetch";
 import { logger as structuredLogger } from "@util/api/logger";
 import { roleAuth } from "@util/auth/roles";
+import storage from "@util/storage/storage";
 import Cookies from "js-cookie";
 import { SYNC_CONFIG } from "./config";
 import {
@@ -23,6 +24,7 @@ const defaultDependencies = {
 	logger: structuredLogger,
 	addSyncLog,
 	configs: SYNC_CONFIG,
+	storage,
 	getReadOnlyManifestFreshness,
 	persistManifestSignature,
 	executeSyncPipeline,
