@@ -126,62 +126,83 @@ test("loads a library article from a deep link when local tags exist", async ({
 	});
 
 	await page.goto("/");
-	await page.addScriptTag({
-		path: require("node:path").join(
-			process.cwd(),
-			"node_modules/@isomorphic-git/lightning-fs/dist/lightning-fs.min.js",
-		),
-	});
 	await page.evaluate(async () => {
-		type LightningFSConstructor = new (
-			name: string,
-		) => {
-			promises: {
-				mkdir: (path: string) => Promise<void>;
-				writeFile: (path: string, data: string) => Promise<void>;
-			};
-		};
-		const LightningFS = (
-			window as unknown as { LightningFS: LightningFSConstructor }
-		).LightningFS;
-		const fs = new LightningFS("systemconcepts-fs");
-		const pfs = fs.promises;
-		const ensureDir = async (dirPath: string) => {
-			const parts = dirPath.split("/").filter(Boolean);
-			let cur = "";
-			for (const part of parts) {
-				cur += `/${part}`;
-				try {
-					await pfs.mkdir(cur);
-				} catch {
-					// exists
+		const DATABASE_NAME = "systemconcepts-local-files";
+		const DATABASE_VERSION = 2;
+		const FILE_STORE = "files";
+		const METADATA_STORE = "metadata";
+
+		const db = await new Promise<IDBDatabase>((resolve, reject) => {
+			const req = indexedDB.open(DATABASE_NAME, DATABASE_VERSION);
+			req.onupgradeneeded = () => {
+				const database = req.result;
+				if (!database.objectStoreNames.contains(FILE_STORE)) {
+					database.createObjectStore(FILE_STORE, { keyPath: "path" });
 				}
-			}
-		};
+				if (!database.objectStoreNames.contains(METADATA_STORE)) {
+					database.createObjectStore(METADATA_STORE, { keyPath: "path" });
+				}
+			};
+			req.onsuccess = () => resolve(req.result);
+			req.onerror = () => reject(req.error);
+		});
+
+		const tx = db.transaction([FILE_STORE, METADATA_STORE], "readwrite");
+		const filesStore = tx.objectStore(FILE_STORE);
+		const metaStore = tx.objectStore(METADATA_STORE);
+
 		const articleId = "5c665fb30551dbb6a6615a92";
-		await ensureDir("/library/articles");
-		await pfs.writeFile(
-			"/library/tags.json",
-			JSON.stringify([
-				{
-					_id: articleId,
-					book: "Test Book",
-					chapter: "Chapter One",
-					article: "Deep Link Article",
-					number: 1,
-					path: "articles/test.json",
-				},
-			]),
-		);
-		await pfs.writeFile(
-			"/library/articles/test.json",
-			JSON.stringify([
-				{
-					_id: articleId,
-					text: "Hello from deep-linked article body.",
-				},
-			]),
-		);
+		const tagsData = JSON.stringify([
+			{
+				_id: articleId,
+				book: "Test Book",
+				chapter: "Chapter One",
+				article: "Deep Link Article",
+				number: 1,
+				path: "articles/test.json",
+			},
+		]);
+		const articleData = JSON.stringify([
+			{
+				_id: articleId,
+				text: "Hello from deep-linked article body.",
+			},
+		]);
+
+		const now = Date.now();
+		metaStore.put({ path: "/library", type: "dir", mtimeMs: now, size: 0 });
+		metaStore.put({
+			path: "/library/articles",
+			type: "dir",
+			mtimeMs: now,
+			size: 0,
+		});
+
+		metaStore.put({
+			path: "/library/tags.json",
+			type: "file",
+			binary: false,
+			size: new Blob([tagsData]).size,
+			mtimeMs: now,
+		});
+		filesStore.put({ path: "/library/tags.json", content: tagsData });
+
+		metaStore.put({
+			path: "/library/articles/test.json",
+			type: "file",
+			binary: false,
+			size: new Blob([articleData]).size,
+			mtimeMs: now,
+		});
+		filesStore.put({
+			path: "/library/articles/test.json",
+			content: articleData,
+		});
+
+		await new Promise<void>((resolve, reject) => {
+			tx.oncomplete = () => resolve();
+			tx.onerror = () => reject(tx.error);
+		});
 	});
 
 	await page.goto("/#library/id/5c665fb30551dbb6a6615a92");
