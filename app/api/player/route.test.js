@@ -11,13 +11,9 @@ import {
 	getWasabi,
 	metadataInfo as wasabiMetadataInfo,
 } from "@util/storage/wasabi";
-import { unstable_cache } from "next/cache";
 import { GET } from "./route";
 
 jest.mock("@aws-sdk/s3-request-presigner", () => ({ getSignedUrl: jest.fn() }));
-jest.mock("next/cache", () => ({
-	unstable_cache: jest.fn((callback) => callback),
-}));
 jest.mock("@util/auth/session", () => ({
 	getSessionUser: jest.fn(),
 	getAuthErrorStatus: jest.fn(() => 403),
@@ -116,14 +112,18 @@ describe("/api/player transcript URLs", () => {
 		});
 	});
 
-	it("caches signed metadata for only thirty minutes", async () => {
-		await GET(request());
+	it("generates a new signed media URL for every request", async () => {
+		getSignedUrl
+			.mockResolvedValueOnce("https://wasabi.example/first")
+			.mockResolvedValueOnce("https://wasabi.example/first-download")
+			.mockResolvedValueOnce("https://wasabi.example/renewed")
+			.mockResolvedValueOnce("https://wasabi.example/renewed-download");
 
-		expect(unstable_cache).toHaveBeenCalledWith(
-			expect.any(Function),
-			expect.any(Array),
-			{ revalidate: 30 * 60 },
-		);
+		const first = await GET(request());
+		const renewed = await GET(request());
+
+		expect((await first.json()).path).toBe("https://wasabi.example/first");
+		expect((await renewed.json()).path).toBe("https://wasabi.example/renewed");
 	});
 
 	it("streams media through the local function instead of exposing a signed URL", async () => {
