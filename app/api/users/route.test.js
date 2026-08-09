@@ -1,5 +1,5 @@
 import { roleAuth } from "@util/auth/roles";
-import { getSessionUser } from "@util/auth/session";
+import { getSessionUser, revokeAllSessions } from "@util/auth/session";
 import { findRecord, handleRequest } from "@util/storage/mongo";
 import { hash as bcryptHash } from "bcryptjs";
 import { DELETE, PUT } from "./route";
@@ -97,5 +97,57 @@ describe("/api/users authorization and import handling", () => {
 			date: "date",
 			utc: 123,
 		});
+	});
+
+	it("allows a user to update their own account without exposing auth fields", async () => {
+		roleAuth.mockReturnValue(false);
+		findRecord.mockResolvedValue({
+			id: "attacker",
+			hash: "old-hash",
+			salt: 10,
+			role: "student",
+			credentials: [],
+			resetToken: "reset",
+			resetTokenExpiry: 123,
+			date: "date",
+			utc: 123,
+		});
+		bcryptHash.mockResolvedValue("new-hash");
+
+		const body = { id: "attacker", role: "student", password: "new-password" };
+		const response = await PUT(request({ method: "PUT", body }));
+
+		expect(response.status).toBe(200);
+		expect(body).toMatchObject({
+			id: "attacker",
+			role: "student",
+			hash: "old-hash",
+			salt: 10,
+		});
+		expect(body.password).toBeUndefined();
+	});
+
+	it("hashes passwords and revokes sessions during nested admin imports", async () => {
+		roleAuth.mockReturnValue(true);
+		findRecord.mockResolvedValue({
+			id: "user",
+			hash: "old-hash",
+			salt: 10,
+			credentials: [],
+			date: "date",
+			utc: 123,
+		});
+		bcryptHash.mockResolvedValue("new-hash");
+
+		const body = {
+			users: [null, { id: "user", password: "new-password", rssToken: "old" }],
+		};
+		await PUT(request({ method: "PUT", id: "", body }));
+
+		expect(bcryptHash).toHaveBeenCalledWith("new-password", 10);
+		expect(revokeAllSessions).toHaveBeenCalledWith("user");
+		expect(body.users[1]).toMatchObject({ id: "user", hash: "new-hash" });
+		expect(body.users[1].password).toBeUndefined();
+		expect(body.users[1].rssToken).toBeUndefined();
 	});
 });

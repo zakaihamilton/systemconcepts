@@ -1,4 +1,4 @@
-import { getTrustedClientIp } from "./requestSecurity";
+import { assertSameOrigin, getTrustedClientIp } from "./requestSecurity";
 
 describe("getTrustedClientIp", () => {
 	it("prefers an explicitly resolved IP", () => {
@@ -17,5 +17,48 @@ describe("getTrustedClientIp", () => {
 			}),
 		).toBe("198.51.100.4");
 		expect(getTrustedClientIp({ headers: new Headers() })).toBe("unknown");
+		expect(getTrustedClientIp()).toBe("unknown");
+	});
+});
+
+describe("assertSameOrigin", () => {
+	const originalNodeEnv = process.env.NODE_ENV;
+
+	afterEach(() => {
+		process.env.NODE_ENV = originalNodeEnv;
+	});
+
+	it("skips origin validation in tests", () => {
+		expect(() =>
+			assertSameOrigin({
+				url: "http://localhost/api",
+				headers: { get: () => null },
+			}),
+		).not.toThrow();
+	});
+
+	it("accepts a matching origin outside test mode", () => {
+		process.env.NODE_ENV = "production";
+
+		expect(() =>
+			assertSameOrigin({
+				url: "http://localhost/api",
+				headers: { get: () => "http://localhost" },
+			}),
+		).not.toThrow();
+	});
+
+	it("rejects missing and mismatched origins outside test mode", () => {
+		process.env.NODE_ENV = "production";
+
+		const request = (origin) => ({
+			url: "http://localhost/api",
+			headers: { get: () => origin },
+		});
+
+		expect(() => assertSameOrigin(request(null))).toThrow("INVALID_ORIGIN");
+		expect(() => assertSameOrigin(request("https://attacker.example"))).toThrow(
+			"INVALID_ORIGIN",
+		);
 	});
 });
