@@ -103,35 +103,22 @@ describe("/api/users authorization and import handling", () => {
 		});
 	});
 
-	it("allows a user to update their own account without exposing auth fields", async () => {
+	it("rejects a user update that attempts to change their role", async () => {
 		getAuthErrorStatus.mockReturnValue(403);
 		getSessionUser.mockResolvedValue({ id: "attacker", role: "student" });
 		roleAuth.mockReturnValue(false);
-		handleRequest.mockResolvedValue({});
 		findRecord.mockResolvedValue({
 			id: "attacker",
 			hash: "old-hash",
 			salt: 10,
 			role: "student",
-			credentials: [],
-			resetToken: "reset",
-			resetTokenExpiry: 123,
-			date: "date",
-			utc: 123,
 		});
-		bcryptHash.mockResolvedValue("new-hash");
 
-		const body = { id: "attacker", role: "student", password: "new-password" };
+		const body = { id: "attacker", role: "admin" };
 		const response = await PUT(request({ method: "PUT", body }));
 
-		expect(response.status).toBe(200);
-		expect(body).toMatchObject({
-			id: "attacker",
-			role: "student",
-			hash: "old-hash",
-			salt: 10,
-		});
-		expect(body.password).toBeUndefined();
+		expect(response.status).toBe(403);
+		expect(handleRequest).not.toHaveBeenCalled();
 	});
 
 	it("hashes passwords and revokes sessions during nested admin imports", async () => {
