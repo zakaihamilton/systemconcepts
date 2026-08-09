@@ -2,7 +2,11 @@ import { logger as structuredLogger } from "@util/api/logger";
 import { getSafeError } from "@util/api/safeError";
 import { assertSameOrigin } from "@util/auth/requestSecurity";
 import { roleAuth } from "@util/auth/roles";
-import { getAuthErrorStatus, getSessionUser } from "@util/auth/session";
+import {
+	getAuthErrorStatus,
+	getSessionUser,
+	revokeAllSessions,
+} from "@util/auth/session";
 import { findRecord, handleRequest } from "@util/storage/mongo";
 import { hash as bcryptHash } from "bcryptjs";
 import crypto from "crypto";
@@ -46,22 +50,45 @@ async function handleUsers(request) {
 				body.resetTokenExpiry = record.resetTokenExpiry;
 				body.date = record.date;
 				body.utc = record.utc;
+				delete body.password;
+			} else if (request.method === "DELETE") {
+				const records = Array.isArray(body) ? body : [body];
+				if (
+					!records.length ||
+					records.some((record) => !record || record.id !== id)
+				)
+					throw "ACCESS_DENIED";
 			}
 		} else if (request.method === "PUT") {
-			const parsedId = queryId ? decodeURIComponent(queryId) : body && body.id;
-			const record = parsedId
-				? await findRecord({ query: { id: parsedId }, collectionName })
-				: null;
-			if (record) {
-				if (body.password) {
-					body.hash = await bcryptHash(body.password, 10);
-					delete body.password;
-				} else {
-					body.hash = record.hash;
+			const records = Array.isArray(body)
+				? body
+				: body && Array.isArray(body[collectionName])
+					? body[collectionName]
+					: [body];
+			for (const record of records) {
+				if (!record || typeof record.id !== "string") continue;
+				const existing = await findRecord({
+					query: { id: record.id },
+					collectionName,
+				});
+				if (record.password) {
+					record.hash = await bcryptHash(record.password, 10);
+					delete record.password;
+					if (existing) await revokeAllSessions(record.id);
+				} else if (existing?.hash) {
+					record.hash = existing.hash;
+				} else if (!record.hash) {
+					throw "PASSWORD_REQUIRED";
 				}
-				body.salt = record.salt;
-				body.date = record.date;
-				body.utc = record.utc;
+				if (existing) {
+					record.salt = existing.salt;
+					record.credentials = existing.credentials;
+					record.resetToken = existing.resetToken;
+					record.resetTokenExpiry = existing.resetTokenExpiry;
+					record.date = existing.date;
+					record.utc = existing.utc;
+				}
+				delete record.rssToken;
 			}
 		}
 

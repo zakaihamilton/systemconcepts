@@ -168,8 +168,6 @@ export async function uploadFile({
 		Bucket: bucket,
 		Key: key,
 		Body: fileStream,
-		// Note: Check if your bucket blocks public ACLs. If so, remove the line below.
-		ACL: "public-read",
 	};
 	return await s3.send(new PutObjectCommand(uploadParams));
 }
@@ -224,7 +222,6 @@ export async function uploadData({
 		Bucket: bucket,
 		Key: key,
 		Body: data,
-		ACL: "public-read",
 	};
 	return await s3.send(new PutObjectCommand(uploadParams));
 }

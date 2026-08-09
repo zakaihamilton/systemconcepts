@@ -38,6 +38,12 @@ describe("apiCache", () => {
 		);
 	});
 
+	it("returns a cache miss when the object cannot be read", async () => {
+		downloadData.mockRejectedValue(new Error("not found"));
+
+		await expect(readApiCache("sessions", "missing")).resolves.toBeNull();
+	});
+
 	it("purges all objects under api-cache/", async () => {
 		const send = jest
 			.fn()
@@ -49,5 +55,27 @@ describe("apiCache", () => {
 
 		await expect(purgeApiCache()).resolves.toBe(1);
 		expect(send).toHaveBeenCalledTimes(2);
+	});
+
+	it("returns zero when the cache is empty", async () => {
+		const send = jest.fn().mockResolvedValue({});
+		getS3.mockResolvedValue({ send });
+
+		await expect(purgeApiCache()).resolves.toBe(0);
+		expect(send).toHaveBeenCalledTimes(1);
+	});
+
+	it("paginates and ignores objects without keys", async () => {
+		const send = jest
+			.fn()
+			.mockResolvedValueOnce({
+				Contents: [{}, { Key: "api-cache/sessions/a.json.gz" }],
+				NextContinuationToken: "next-page",
+			})
+			.mockResolvedValueOnce({ Contents: [] });
+		getS3.mockResolvedValue({ send });
+
+		await expect(purgeApiCache()).resolves.toBe(1);
+		expect(send).toHaveBeenCalledTimes(3);
 	});
 });

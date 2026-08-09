@@ -41,4 +41,44 @@ describe("removeDeletedFiles", () => {
 			"warning",
 		);
 	});
+
+	it("skips deletion when the remote manifest is missing", async () => {
+		const localManifest = [{ path: "/bundle.json" }];
+		const remoteManifest = [];
+
+		const result = await removeDeletedFiles(localManifest, remoteManifest);
+
+		expect(result).toEqual({ manifest: localManifest, hasChanges: false });
+		expect(addSyncLog).toHaveBeenCalledWith(
+			"Remote manifest missing/empty - skipping deletion for safety",
+			"warning",
+		);
+	});
+
+	it("skips deletion when the remote manifest came from a listing", async () => {
+		const localManifest = [{ path: "/bundle.json" }];
+		const remoteManifest = [{ path: "/bundle.json" }];
+		remoteManifest.loadedFromManifest = false;
+
+		await removeDeletedFiles(localManifest, remoteManifest);
+
+		expect(addSyncLog).toHaveBeenCalledWith(
+			"Remote manifest generated from listing - skipping deletion for safety",
+			"warning",
+		);
+	});
+
+	it("reports when every local file remains in the remote manifest", async () => {
+		const localManifest = [{ path: "/bundle.json" }];
+		const remoteManifest = [{ path: "/bundle.json" }];
+		remoteManifest.loadedFromManifest = true;
+
+		const result = await removeDeletedFiles(localManifest, remoteManifest);
+
+		expect(result).toEqual({ manifest: localManifest, hasChanges: false });
+		expect(addSyncLog).toHaveBeenCalledWith(
+			"✓ No deleted files to remove",
+			"info",
+		);
+	});
 });
