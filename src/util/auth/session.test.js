@@ -1,4 +1,9 @@
-import { deleteRecord, findRecord, insertRecord } from "@util/storage/mongo";
+import {
+	deleteRecord,
+	findRecord,
+	getCollection,
+	insertRecord,
+} from "@util/storage/mongo";
 import crypto from "crypto";
 import {
 	AUTHENTICATION_REQUIRED,
@@ -6,6 +11,7 @@ import {
 	createSession,
 	getAuthErrorStatus,
 	getSessionUser,
+	revokeAllSessions,
 	revokeSession,
 	SESSION_COOKIE,
 	SESSION_MARKER_COOKIE,
@@ -15,6 +21,7 @@ import {
 jest.mock("@util/storage/mongo", () => ({
 	deleteRecord: jest.fn(),
 	findRecord: jest.fn(),
+	getCollection: jest.fn(),
 	insertRecord: jest.fn(),
 }));
 
@@ -135,6 +142,22 @@ describe("revokeSession", () => {
 		expect(deleteRecord).toHaveBeenCalledWith({
 			collectionName: "auth_sessions",
 			query: { id: digest("token") },
+		});
+	});
+});
+
+describe("revokeAllSessions", () => {
+	it("deletes every session for the normalized user id", async () => {
+		const deleteMany = jest.fn();
+		getCollection.mockResolvedValue({ deleteMany });
+
+		await revokeAllSessions("User@Example.com");
+
+		expect(getCollection).toHaveBeenCalledWith({
+			collectionName: "auth_sessions",
+		});
+		expect(deleteMany).toHaveBeenCalledWith({
+			userId: "user@example.com",
 		});
 	});
 });

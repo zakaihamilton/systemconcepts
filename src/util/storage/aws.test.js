@@ -257,7 +257,7 @@ describe("downloadFile", () => {
 });
 
 describe("uploadData / downloadData", () => {
-	it("uploads raw data with a public-read ACL", async () => {
+	it("uploads raw data without making the object public", async () => {
 		sendMock.mockResolvedValue({});
 
 		await uploadData({ path: "/data.json", data: "{}" });
@@ -266,9 +266,9 @@ describe("uploadData / downloadData", () => {
 			expect.objectContaining({
 				Key: "data.json",
 				Body: "{}",
-				ACL: "public-read",
 			}),
 		);
+		expect(sendMock.mock.calls[0][0]).not.toHaveProperty("ACL");
 	});
 
 	it("downloads text content", async () => {

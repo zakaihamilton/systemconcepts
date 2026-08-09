@@ -18,6 +18,7 @@ import {
 	createSession,
 	getAuthErrorStatus,
 	getSessionUser,
+	revokeAllSessions,
 	revokeSession,
 	setSessionCookies,
 } from "@util/auth/session";
@@ -137,6 +138,7 @@ export async function POST(request) {
 				password: newPassword,
 				api: "password-reset",
 			});
+			await revokeAllSessions(user.id);
 			const session = await createSession(user.id);
 			const response = NextResponse.json({ role: user.role || "visitor" });
 			setSessionCookies(response, session, user);
@@ -163,6 +165,7 @@ export async function POST(request) {
 				password: newPassword,
 				api: "password-change",
 			});
+			await revokeAllSessions(updatedUser.id);
 			const session = await createSession(updatedUser.id);
 			const response = NextResponse.json({
 				role: updatedUser.role || "visitor",

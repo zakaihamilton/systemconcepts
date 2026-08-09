@@ -11,11 +11,9 @@ describe("native service worker", () => {
 		expect(worker).toContain('cache.add("/~offline")');
 		expect(worker).toContain('url.pathname === "/api/player"');
 		expect(worker).toContain('url.pathname === "/api/sessions"');
-		expect(worker).toContain(
-			'url.pathname === "/api/aws" || url.pathname === "/api/wasabi"',
-		);
 		expect(worker).toContain("staleWhileRevalidate(request, SESSION_CACHE)");
-		expect(worker).toContain("staleWhileRevalidate(request, MEDIA_CACHE)");
+		expect(worker).toContain("no-store");
+		expect(worker).not.toContain("MEDIA_CACHE");
 	});
 
 	it("does not depend on generated Workbox runtime code", () => {

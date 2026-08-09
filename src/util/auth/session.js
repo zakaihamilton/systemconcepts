@@ -1,4 +1,9 @@
-import { deleteRecord, findRecord, insertRecord } from "@util/storage/mongo";
+import {
+	deleteRecord,
+	findRecord,
+	getCollection,
+	insertRecord,
+} from "@util/storage/mongo";
 import crypto from "crypto";
 
 export const SESSION_COOKIE = "session";
@@ -54,6 +59,12 @@ export async function revokeSession(request) {
 		collectionName: "auth_sessions",
 		query: { id: digest(token) },
 	});
+}
+
+export async function revokeAllSessions(userId) {
+	if (!userId) return;
+	const collection = await getCollection({ collectionName: "auth_sessions" });
+	await collection.deleteMany({ userId: userId.toLowerCase() });
 }
 
 export function setSessionCookies(response, session, user) {
