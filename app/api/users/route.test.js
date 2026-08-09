@@ -1,5 +1,9 @@
 import { roleAuth } from "@util/auth/roles";
-import { getSessionUser, revokeAllSessions } from "@util/auth/session";
+import {
+	getAuthErrorStatus,
+	getSessionUser,
+	revokeAllSessions,
+} from "@util/auth/session";
 import { findRecord, handleRequest } from "@util/storage/mongo";
 import { hash as bcryptHash } from "bcryptjs";
 import { DELETE, PUT } from "./route";
@@ -100,7 +104,10 @@ describe("/api/users authorization and import handling", () => {
 	});
 
 	it("allows a user to update their own account without exposing auth fields", async () => {
+		getAuthErrorStatus.mockReturnValue(403);
+		getSessionUser.mockResolvedValue({ id: "attacker", role: "student" });
 		roleAuth.mockReturnValue(false);
+		handleRequest.mockResolvedValue({});
 		findRecord.mockResolvedValue({
 			id: "attacker",
 			hash: "old-hash",
