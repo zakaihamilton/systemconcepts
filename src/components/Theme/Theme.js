@@ -1,4 +1,4 @@
-import { MainStore } from "@components/Main";
+import { MainStore } from "@components/Main/MainStore";
 import { useDirection } from "@util/data/direction";
 import { useEffect } from "react";
 import useDarkMode from "use-dark-mode";

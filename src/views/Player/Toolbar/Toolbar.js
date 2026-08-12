@@ -4,7 +4,7 @@ import SpeedIcon from "@icons/svg/Speed.svg";
 import { useDeviceType } from "@util/browser/styles";
 import { useTranslations } from "@util/domain/translations";
 import { useEffect, useState } from "react";
-import { PlayerStore } from "../Player";
+import { PlayerStore } from "../Store";
 
 registerToolbar("PlayerToolbar");
 

@@ -1,4 +1,4 @@
-import { MainStore } from "@components/Main";
+import { MainStore } from "@components/Main/MainStore";
 import { useToolbar } from "@components/Toolbar";
 import { render, waitFor } from "@testing-library/react";
 import { useTranslations } from "@util/domain/translations";
@@ -14,7 +14,7 @@ jest.mock("@util/domain/views", () => ({
 	getPagesFromHash: jest.fn(),
 }));
 jest.mock("@components/Toolbar");
-jest.mock("@components/Main", () => ({
+jest.mock("@components/Main/MainStore", () => ({
 	MainStore: {
 		useState: jest.fn(),
 	},

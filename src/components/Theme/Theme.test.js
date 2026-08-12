@@ -1,4 +1,4 @@
-import { MainStore } from "@components/Main";
+import { MainStore } from "@components/Main/MainStore";
 import { render } from "@testing-library/react";
 import { useDirection } from "@util/data/direction";
 import useDarkMode from "use-dark-mode";
@@ -6,7 +6,7 @@ import Theme from "./index.js";
 
 jest.mock("@util/data/direction");
 jest.mock("use-dark-mode");
-jest.mock("@components/Main", () => ({
+jest.mock("@components/Main/MainStore", () => ({
 	MainStore: {
 		useState: jest.fn(),
 	},

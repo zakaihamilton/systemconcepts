@@ -1,4 +1,4 @@
-import { MainStore } from "@components/Main";
+import { MainStore } from "@components/Main/MainStore";
 import Toolbar from "@components/Toolbar";
 import { ToolbarTooltipContext } from "@components/Toolbar/ToolbarContext";
 import MoreHorizIcon from "@icons/svg/MoreHoriz.svg";

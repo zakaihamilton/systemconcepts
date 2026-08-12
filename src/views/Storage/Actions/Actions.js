@@ -7,7 +7,7 @@ import { useTranslations } from "@util/domain/translations";
 import { importData } from "@util/storage/importExport";
 import storage from "@util/storage/storage";
 import SpeedDial from "@widgets/SpeedDial";
-import { StorageStore } from "../Storage";
+import { StorageStore } from "../Store";
 export function useActions(data) {
 	const { mode, type } = StorageStore.useState();
 	if (mode === "create") {

@@ -1,4 +1,4 @@
-import { MainStore } from "@components/Main";
+import { MainStore } from "@components/Main/MainStore";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
 import BookmarkIcon from "@icons/svg/Bookmark.svg";
 import { SYNC_CONFIG } from "@sync/config";

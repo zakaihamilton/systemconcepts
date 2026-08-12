@@ -4,7 +4,6 @@ import { useLocalStorage } from "@util/browser/store";
 import { useDeviceType } from "@util/browser/styles";
 import { useLanguage } from "@util/domain/language";
 import clsx from "clsx";
-import { Store } from "pullstate";
 import { useEffect, useLayoutEffect, useRef } from "react";
 import Bookmarks from "../Bookmarks";
 import Head from "../Head";
@@ -14,32 +13,7 @@ import Sync from "../Sync";
 import Title from "../Title";
 import styles from "./Main.module.css";
 
-export const MainStoreDefaults = {
-	fontSize: "16",
-	direction: "ltr",
-	language: "auto",
-	showSideBar: true,
-	showDrawer: false,
-	speedToolbar: "top",
-	showLibrarySideBar: true,
-	libraryExpanded: false,
-};
-
-// Persist UI prefs only. The URL hash is the source of truth for navigation —
-// restoring a stale hash from localStorage can clobber deep links like
-// #library/id/<articleId> on startup.
-export const MAIN_STORE_PERSISTED_FIELDS = [
-	"fontSize",
-	"direction",
-	"language",
-	"showSideBar",
-	"showDrawer",
-	"speedToolbar",
-	"showLibrarySideBar",
-	"libraryExpanded",
-];
-
-export const MainStore = new Store(MainStoreDefaults);
+import { MAIN_STORE_PERSISTED_FIELDS, MainStore } from "./MainStore";
 
 function syncHashFromWindow() {
 	MainStore.update((s) => {

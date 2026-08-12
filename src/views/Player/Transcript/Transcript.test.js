@@ -8,11 +8,11 @@ import {
 } from "@testing-library/react";
 import { useFetch } from "@util/api/fetch";
 import { useTranslations } from "@util/domain/translations";
-import { PlayerStore } from "../Player/index.js";
+import { PlayerStore } from "../Store";
 import Transcript from "./index.js";
 
 jest.mock("@util/domain/translations");
-jest.mock("../Player", () => ({
+jest.mock("../Store", () => ({
 	PlayerStore: {
 		useState: jest.fn(),
 	},

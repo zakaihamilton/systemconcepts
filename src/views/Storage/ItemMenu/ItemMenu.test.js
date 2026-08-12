@@ -2,7 +2,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { useTranslations } from "@util/domain/translations";
 import { exportData } from "@util/storage/importExport";
 import storage from "@util/storage/storage";
-import { StorageStore } from "../Storage";
+import { StorageStore } from "../Store";
 import ItemMenuWidget from "./index.js";
 
 jest.mock("@util/domain/translations");
@@ -10,7 +10,7 @@ jest.mock("@util/storage/storage");
 jest.mock("@util/storage/importExport", () => ({
 	exportData: jest.fn(),
 }));
-jest.mock("../Storage", () => ({
+jest.mock("../Store", () => ({
 	StorageStore: {
 		update: jest.fn(),
 	},

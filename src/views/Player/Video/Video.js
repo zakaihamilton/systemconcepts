@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import Controls from "../Controls";
-import { PlayerStore } from "../Player";
+import { PlayerStore } from "../Store";
 import Toolbar from "../Toolbar";
 import { useMediaUrlRenewal } from "../useMediaUrlRenewal";
 import styles from "./Video.module.css";

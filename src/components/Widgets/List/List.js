@@ -1,4 +1,4 @@
-import { MainStore } from "@components/Main";
+import { MainStore } from "@components/Main/MainStore";
 import ExpandLess from "@icons/svg/ExpandLess.svg";
 import ExpandMore from "@icons/svg/ExpandMore.svg";
 import Avatar from "@ui/Avatar";

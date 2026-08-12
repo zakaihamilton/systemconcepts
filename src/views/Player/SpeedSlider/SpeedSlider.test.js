@@ -1,15 +1,15 @@
 import { render } from "@testing-library/react";
 import { useTranslations } from "@util/domain/translations";
-import { PlayerStore } from "../Player/index.js";
+import { PlayerStore } from "../Store";
 import SpeedSlider from "./index.js";
 
 jest.mock("@util/domain/translations");
-jest.mock("../Player", () => ({
+jest.mock("../Store", () => ({
 	PlayerStore: {
 		useState: jest.fn(),
 	},
 }));
-jest.mock("@components/Main", () => ({
+jest.mock("@components/Main/MainStore", () => ({
 	MainStore: {
 		useState: jest.fn().mockReturnValue({ speedToolbar: "bottom" }),
 	},

@@ -1,4 +1,4 @@
-import { MainStore } from "@components/Main";
+import { MainStore } from "@components/Main/MainStore";
 import languages from "@data/languages";
 
 export function getBrowserLocale() {

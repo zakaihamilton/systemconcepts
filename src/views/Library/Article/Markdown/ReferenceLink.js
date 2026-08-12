@@ -6,9 +6,9 @@ import React, { useCallback } from "react";
 
 import { LibraryTagKeys } from "../../Icons";
 import { LibraryStore } from "../../Store";
-import { TextWithTerms } from "./GlossaryTextRenderer";
 import styles from "./Markdown.module.css";
 import { findArticleByReference } from "./referenceUtils";
+import { TextWithTerms } from "./TextWithTerms";
 
 const ReferenceLink = ({
 	text,

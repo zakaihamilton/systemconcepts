@@ -24,27 +24,13 @@ import { exportFile } from "@util/storage/importExport";
 import Download from "@widgets/Download";
 import StatusBar from "@widgets/StatusBar";
 import Cookies from "js-cookie";
-import { Store } from "pullstate";
 import { useCallback, useContext, useEffect } from "react";
 import Audio from "../Audio";
 import SpeedSlider from "../SpeedSlider";
+import { PlayerStore } from "../Store";
 import Transcript from "../Transcript";
 import Video from "../Video";
 import styles from "./Player.module.css";
-
-export const PlayerStore = new Store({
-	path: "",
-	mediaPath: "",
-	downloadUrl: "",
-	subtitles: "",
-	transcriptionUrl: "",
-	showSubtitles: true,
-	showDetails: true,
-	showSpeed: false,
-	hash: "",
-	player: null,
-	session: null,
-});
 
 registerToolbar("Player");
 
