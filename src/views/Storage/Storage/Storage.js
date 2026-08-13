@@ -17,37 +17,13 @@ import Row from "@widgets/Row";
 import StatusBar from "@widgets/StatusBar";
 import Table from "@widgets/Table";
 import Tooltip from "@widgets/Tooltip";
-import { Store } from "pullstate";
 import { useCallback, useEffect, useMemo } from "react";
 import Actions, { useActions } from "../Actions";
 import Destination from "../Destination";
 import Edit from "../Edit";
 import ItemMenu from "../ItemMenu";
+import { StorageStore, StorageStoreDefaults } from "../Store";
 import styles from "./Storage.module.css";
-export const StorageStoreDefaults = {
-	mode: "",
-	type: "",
-	name: "",
-	placeholder: "",
-	icon: null,
-	tooltip: null,
-	editing: false,
-	select: null,
-	counter: 1,
-	onDone: null,
-	onValidate: null,
-	item: null,
-	destination: "",
-	order: "desc",
-	offset: 0,
-	orderBy: "",
-	scrollOffset: 0,
-};
-
-export const StorageStore = new Store({
-	viewMode: "list",
-	...StorageStoreDefaults,
-});
 
 export default function Storage({ path = "" }) {
 	const isPhone = useDeviceType() === "phone";

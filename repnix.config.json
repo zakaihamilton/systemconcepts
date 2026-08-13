@@ -1,0 +1,12 @@
+{
+	"schemaVersion": 1,
+	"severityThreshold": "warning",
+	"execution": {
+		"jobs": 2,
+		"timeoutSeconds": 300
+	},
+	"baseline": {
+		"path": ".repnix-baseline.json",
+		"failOn": "new"
+	}
+}

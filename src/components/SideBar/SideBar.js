@@ -11,7 +11,7 @@ import { ResearchStore } from "@views/ResearchStore/ResearchStore";
 import List from "@widgets/List";
 import clsx from "clsx";
 import { useCallback, useEffect, useRef } from "react";
-import { MainStore } from "../Main";
+import { MainStore } from "../Main/MainStore";
 import LibraryTree from "./LibraryTree";
 import QuickAccess from "./QuickAccess";
 import styles from "./SideBar.module.css";

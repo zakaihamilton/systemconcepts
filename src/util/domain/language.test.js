@@ -1,4 +1,4 @@
-import { MainStore } from "@components/Main";
+import { MainStore } from "@components/Main/MainStore";
 import { render, waitFor } from "@testing-library/react";
 import {
 	getBrowserLocale,
@@ -7,7 +7,7 @@ import {
 	useRegionalLocale,
 } from "./language";
 
-jest.mock("@components/Main", () => {
+jest.mock("@components/Main/MainStore", () => {
 	const { Store } = require("pullstate");
 	return { MainStore: new Store({ language: "auto" }) };
 });

@@ -1,4 +1,4 @@
-import { MainStore } from "@components/Main";
+import { MainStore } from "@components/Main/MainStore";
 import { useLanguage } from "@util/domain/language";
 import { useTranslations } from "@util/domain/translations";
 import { useMemo } from "react";

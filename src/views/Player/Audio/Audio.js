@@ -6,7 +6,7 @@ import { formatDuration } from "@util/data/string";
 import clsx from "clsx";
 import { useEffect, useRef, useState } from "react";
 import Controls from "../Controls";
-import { PlayerStore } from "../Player";
+import { PlayerStore } from "../Store";
 import Toolbar from "../Toolbar";
 import { useMediaUrlRenewal } from "../useMediaUrlRenewal";
 import styles from "./Audio.module.css";

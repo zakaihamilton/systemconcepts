@@ -1,4 +1,4 @@
-import { MainStore } from "@components/Main";
+import { MainStore } from "@components/Main/MainStore";
 import SpeedDial, { SpeedDialAction, SpeedDialIcon } from "@ui/SpeedDial";
 import { useTranslations } from "@util/domain/translations";
 import { useState } from "react";

@@ -2,12 +2,12 @@ import { act, fireEvent, render } from "@testing-library/react";
 import { logger as structuredLogger } from "@util/api/logger";
 import { useDeviceType } from "@util/browser/styles";
 import { useDateFormatter } from "@util/data/locale";
-import { PlayerStore } from "../Player";
+import { PlayerStore } from "../Store";
 import Audio from "./index.js";
 
 jest.mock("../Controls", () => () => <div data-testid="controls" />);
 jest.mock("../Toolbar", () => () => <div data-testid="toolbar" />);
-jest.mock("../Player", () => ({
+jest.mock("../Store", () => ({
 	PlayerStore: {
 		update: jest.fn(),
 	},

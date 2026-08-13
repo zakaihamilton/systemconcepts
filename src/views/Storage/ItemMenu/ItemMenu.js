@@ -7,7 +7,7 @@ import { fileFolder, isBinaryFile, makePath } from "@util/data/path";
 import { useTranslations } from "@util/domain/translations";
 import { exportData } from "@util/storage/importExport";
 import storage from "@util/storage/storage";
-import { StorageStore } from "../Storage";
+import { StorageStore } from "../Store";
 export default function ItemMenuWidget({ item, readOnly }) {
 	const translations = useTranslations();
 

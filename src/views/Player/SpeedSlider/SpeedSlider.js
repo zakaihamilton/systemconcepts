@@ -3,8 +3,8 @@ import Slider from "@ui/Slider";
 import { useTranslations } from "@util/domain/translations";
 import clsx from "clsx";
 import React, { useEffect } from "react";
-import { MainStore } from "../../../components/Main";
-import { PlayerStore } from "../Player";
+import { MainStore } from "../../../components/Main/MainStore";
+import { PlayerStore } from "../Store";
 import styles from "./SpeedSlider.module.css";
 
 export default function SpeedSlider() {

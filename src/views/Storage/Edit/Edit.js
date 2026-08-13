@@ -2,7 +2,7 @@ import ClickAwayListener from "@ui/ClickAwayListener";
 import { useStoreState } from "@util/browser/store";
 import Input from "@widgets/Input";
 import { useCallback } from "react";
-import { StorageStore } from "../Storage";
+import { StorageStore } from "../Store";
 
 export default function EditWidget() {
 	const { icon, type, tooltip, onDone, onValidate, placeholder } =

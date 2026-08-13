@@ -4,14 +4,14 @@ import { useDeviceType } from "@util/browser/styles";
 import { useTranslations } from "@util/domain/translations";
 import { setHash, useActivePages, usePages } from "@util/domain/views";
 import { ResearchStore } from "@views/ResearchStore/ResearchStore";
-import { MainStore } from "../Main/index.js";
+import { MainStore } from "../Main/MainStore";
 import SideBar from "./index.js";
 
 jest.mock("@util/browser/styles");
 jest.mock("@util/domain/views");
 jest.mock("@components/Bookmarks");
 jest.mock("@util/domain/translations");
-jest.mock("../Main", () => ({
+jest.mock("../Main/MainStore", () => ({
 	MainStore: {
 		useState: jest.fn(),
 		update: jest.fn((updater) => {

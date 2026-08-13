@@ -1,4 +1,4 @@
-import { MainStore } from "@components/Main";
+import { MainStore } from "@components/Main/MainStore";
 import { useActivePages } from "@util/domain/views";
 import TabsWidget from "@widgets/Tabs";
 import { useCallback, useRef } from "react";

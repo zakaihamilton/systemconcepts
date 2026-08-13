@@ -1,4 +1,4 @@
-import { MainStore } from "@components/Main";
+import { MainStore } from "@components/Main/MainStore";
 import ViewTransition from "@components/ViewTransition";
 import pages from "@data/views";
 import { useSize } from "@util/browser/size";

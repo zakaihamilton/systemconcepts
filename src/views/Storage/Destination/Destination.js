@@ -11,8 +11,8 @@ import { logger as structuredLogger } from "@util/api/logger";
 import { useTranslations } from "@util/domain/translations";
 import storage from "@util/storage/storage";
 import Tooltip from "@widgets/Tooltip";
-import { StorageStore } from "../Storage";
 import StorageList from "../StorageList";
+import { StorageStore } from "../Store";
 import styles from "./Destination.module.css";
 export default function Destination({ path }) {
 	const translations = useTranslations();

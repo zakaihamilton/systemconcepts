@@ -10,7 +10,7 @@ import Progress from "@widgets/Progress";
 import Tooltip from "@widgets/Tooltip";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { PlayerStore } from "../Player";
+import { PlayerStore } from "../Store";
 import styles from "./Transcript.module.css";
 export default function Transcript({ show }) {
 	const translations = useTranslations();

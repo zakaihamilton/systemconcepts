@@ -3,7 +3,7 @@ import { useLanguage } from "@util/domain/language";
 import { useTranslations } from "@util/domain/translations";
 import { usePages } from "@util/domain/views";
 import useDarkMode from "use-dark-mode";
-import { MainStore } from "../../Main";
+import { MainStore } from "../../Main/MainStore";
 import QuickAccess from "./QuickAccess.js";
 
 jest.mock("use-dark-mode");
@@ -16,7 +16,7 @@ jest.mock("@util/domain/translations", () => ({
 jest.mock("@util/domain/views", () => ({
 	usePages: jest.fn(),
 }));
-jest.mock("../../Main", () => ({
+jest.mock("../../Main/MainStore", () => ({
 	MainStore: {
 		update: jest.fn((fn) => {
 			const state = { language: "eng" };
