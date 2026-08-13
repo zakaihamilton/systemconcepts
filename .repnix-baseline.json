@@ -1,0 +1,7045 @@
+{
+	"schemaVersion": 1,
+	"generatedAt": "2026-08-13T12:41:56.657Z",
+	"entries": [
+		{
+			"fingerprint": "4d4afd1b6e353d7091955eca",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-file",
+			"scope": ".",
+			"file": "jest.config.simple.js"
+		},
+		{
+			"fingerprint": "531b21aaea6240f30027a67a",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-file",
+			"scope": ".",
+			"file": "jest.svgr-compile.cjs"
+		},
+		{
+			"fingerprint": "50f7fec6561a7a10246227f8",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-file",
+			"scope": ".",
+			"file": "playwright.dev.config.ts"
+		},
+		{
+			"fingerprint": "4bade8c746bc236aa2e774c8",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-file",
+			"scope": ".",
+			"file": "runtimeCaching.js"
+		},
+		{
+			"fingerprint": "9a2abdacf01dc4963fb5a347",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-file",
+			"scope": ".",
+			"file": "public/fallback-ce627215c0e4a9af.js"
+		},
+		{
+			"fingerprint": "29ccdc86fe4a39b84922a910",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-file",
+			"scope": ".",
+			"file": "public/noflash.js"
+		},
+		{
+			"fingerprint": "a225db92bf243b3abd3cc9e3",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-file",
+			"scope": ".",
+			"file": "public/sw.js"
+		},
+		{
+			"fingerprint": "e5714c9e44c14647fc6634d7",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-file",
+			"scope": ".",
+			"file": "public/workbox-ad66f20e.js"
+		},
+		{
+			"fingerprint": "531131fe51be37d5d699582a",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-file",
+			"scope": ".",
+			"file": "src/components/ClientHead/index.js"
+		},
+		{
+			"fingerprint": "709f6ae216d38df3b8cabc72",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-file",
+			"scope": ".",
+			"file": "src/components/Icons/svgr.webpack.config.js"
+		},
+		{
+			"fingerprint": "38bcc9ffb8c5d3b50c5cbfe9",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-file",
+			"scope": ".",
+			"file": "src/util/api/contracts.ts"
+		},
+		{
+			"fingerprint": "eae5d648f20de9bbf4bfb0c9",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-file",
+			"scope": ".",
+			"file": "src/components/AppBar/AppTitle/index.js"
+		},
+		{
+			"fingerprint": "c887fbfca6b01f67a4a6f2ad",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-file",
+			"scope": ".",
+			"file": "src/components/AppBar/MenuIcon/index.js"
+		},
+		{
+			"fingerprint": "944aaffdd4dbc6a2fad47121",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-file",
+			"scope": ".",
+			"file": "src/components/ui/CssBaseline/index.js"
+		},
+		{
+			"fingerprint": "471b209247b45798058d7ba2",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-file",
+			"scope": ".",
+			"file": "src/components/ui/Grow/index.js"
+		},
+		{
+			"fingerprint": "03b8d476e420097cce602db9",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-file",
+			"scope": ".",
+			"file": "src/components/ui/MenuList/index.js"
+		},
+		{
+			"fingerprint": "a27816892d17a889bcce5355",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-file",
+			"scope": ".",
+			"file": "src/components/ui/Popper/index.js"
+		},
+		{
+			"fingerprint": "0e6b982d5a944eeb51401be2",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-file",
+			"scope": ".",
+			"file": "src/components/ui/Slide/index.js"
+		},
+		{
+			"fingerprint": "eb3d3008a6420b6875d584f2",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-file",
+			"scope": ".",
+			"file": "src/components/ui/SpeedDialAction/index.js"
+		},
+		{
+			"fingerprint": "a1d4b670ee957b39a3f30e8b",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-file",
+			"scope": ".",
+			"file": "src/components/ui/SpeedDialIcon/index.js"
+		},
+		{
+			"fingerprint": "580a080ef5647fde8c31f65f",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-file",
+			"scope": ".",
+			"file": "src/views/Article/Edit/Edit.js"
+		},
+		{
+			"fingerprint": "3b498f4c4241c3682627c15b",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-file",
+			"scope": ".",
+			"file": "src/views/Article/Edit/index.js"
+		},
+		{
+			"fingerprint": "8d9261d73544e379ab630db0",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-file",
+			"scope": ".",
+			"file": "src/views/Articles/ItemMenu/ItemMenu.js"
+		},
+		{
+			"fingerprint": "ce0acd25c8c5be73cd13dd9d",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-file",
+			"scope": ".",
+			"file": "src/views/Articles/ItemMenu/index.js"
+		},
+		{
+			"fingerprint": "76e20ad2ee4b6e1363010092",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-file",
+			"scope": ".",
+			"file": "src/views/Bookmarks/Bookmarks/index.js"
+		},
+		{
+			"fingerprint": "883d18cb212403109f3bd101",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-file",
+			"scope": ".",
+			"file": "src/views/Image/Image/index.js"
+		},
+		{
+			"fingerprint": "9b01c1d54545fc1cd86fe4c3",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-file",
+			"scope": ".",
+			"file": "src/views/Library/Tags/Tags.js"
+		},
+		{
+			"fingerprint": "5fcb781f21055233a6eccb85",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-file",
+			"scope": ".",
+			"file": "src/views/Library/Tags/index.js"
+		},
+		{
+			"fingerprint": "a493e03cc1815929ee7438a2",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-file",
+			"scope": ".",
+			"file": "src/views/Session/Session/index.js"
+		},
+		{
+			"fingerprint": "84eb9b9d93e95843deecedca",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-file",
+			"scope": ".",
+			"file": "src/views/Settings/Settings/index.js"
+		},
+		{
+			"fingerprint": "7e16496ed60791d63da8a167",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-file",
+			"scope": ".",
+			"file": "src/views/Tags/ItemMenu/ItemMenu.js"
+		},
+		{
+			"fingerprint": "233fff946395ba408be1f6d8",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-file",
+			"scope": ".",
+			"file": "src/views/Tags/ItemMenu/index.js"
+		},
+		{
+			"fingerprint": "865349bcf9f6cebc69a29e7b",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-file",
+			"scope": ".",
+			"file": "src/views/Sync/Sync/index.js"
+		},
+		{
+			"fingerprint": "cc41bf158ef48337f3654815",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-file",
+			"scope": ".",
+			"file": "src/views/Types/ItemMenu/ItemMenu.js"
+		},
+		{
+			"fingerprint": "59405e9f4e9cbe7957460241",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-file",
+			"scope": ".",
+			"file": "src/views/Types/ItemMenu/index.js"
+		},
+		{
+			"fingerprint": "fe8fbbdacec2febbe82078d1",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-dependency",
+			"scope": ".",
+			"file": "package.json",
+			"line": 30
+		},
+		{
+			"fingerprint": "db36b2041d90b0d42fbf8caa",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-dependency",
+			"scope": ".",
+			"file": "package.json",
+			"line": 38
+		},
+		{
+			"fingerprint": "01969b2efebc40ced84eeff3",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-dependency",
+			"scope": ".",
+			"file": "package.json",
+			"line": 54
+		},
+		{
+			"fingerprint": "872ee1fcea335f7d72c22549",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-dependency",
+			"scope": ".",
+			"file": "package.json",
+			"line": 61
+		},
+		{
+			"fingerprint": "39590e26c671e1a836e26358",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-dependency",
+			"scope": ".",
+			"file": "package.json",
+			"line": 79
+		},
+		{
+			"fingerprint": "e6a020a7609b74773aa75311",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-export",
+			"scope": ".",
+			"file": "src/components/ui/Card/index.js",
+			"line": 1
+		},
+		{
+			"fingerprint": "ef489adeb1e155a19f853055",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-export",
+			"scope": ".",
+			"file": "src/components/ui/Icon/index.js",
+			"line": 1
+		},
+		{
+			"fingerprint": "ef489adeb1e155a19f853055",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-export",
+			"scope": ".",
+			"file": "src/components/ui/Icon/index.js",
+			"line": 1
+		},
+		{
+			"fingerprint": "2f86f5e2b47868202d9eaebc",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-export",
+			"scope": ".",
+			"file": "src/components/ui/List/index.js",
+			"line": 3
+		},
+		{
+			"fingerprint": "ee440b79292a9907bfb30775",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-export",
+			"scope": ".",
+			"file": "src/components/ui/SpeedDial/index.js",
+			"line": 3
+		},
+		{
+			"fingerprint": "991d5f212508d28a5703f1ea",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-export",
+			"scope": ".",
+			"file": "src/components/ui/Table/index.js",
+			"line": 3
+		},
+		{
+			"fingerprint": "6963c8862d3880913de0e1f3",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-export",
+			"scope": ".",
+			"file": "src/components/ui/ToggleButtonGroup/index.js",
+			"line": 1
+		},
+		{
+			"fingerprint": "c75ffb8b33ac7422f1669498",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-export",
+			"scope": ".",
+			"file": "src/util/api/fetch.js",
+			"line": 7
+		},
+		{
+			"fingerprint": "823cbace697a994f5c6bdd06",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-export",
+			"scope": ".",
+			"file": "src/storage/local.js",
+			"line": 352
+		},
+		{
+			"fingerprint": "24f8744b306f880ae0df2b21",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-export",
+			"scope": ".",
+			"file": "src/sync/autoSync.js",
+			"line": 7
+		},
+		{
+			"fingerprint": "885ff711e933385c5744279e",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-export",
+			"scope": ".",
+			"file": "src/sync/libraryCounter.js",
+			"line": 10
+		},
+		{
+			"fingerprint": "5887911ac8327854cff8ab63",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-export",
+			"scope": ".",
+			"file": "src/sync/progressTracker.js",
+			"line": 26
+		},
+		{
+			"fingerprint": "b20e72993b3a60985f4f59c1",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-export",
+			"scope": ".",
+			"file": "src/util/domain/updateSessions/metadataAggregator.js",
+			"line": 38
+		},
+		{
+			"fingerprint": "72ac64456ee1883a96466c40",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-export",
+			"scope": ".",
+			"file": "src/util/api/api.js",
+			"line": 7
+		},
+		{
+			"fingerprint": "72ac64456ee1883a96466c40",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-export",
+			"scope": ".",
+			"file": "src/util/api/api.js",
+			"line": 7
+		},
+		{
+			"fingerprint": "e8c226aa2fbb313c33a3f3a1",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-export",
+			"scope": ".",
+			"file": "src/util/domain/sessionFeed.js",
+			"line": 17
+		},
+		{
+			"fingerprint": "0eb75b051bda075d8c469d11",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-export",
+			"scope": ".",
+			"file": "src/util/domain/sessionFeed.js",
+			"line": 101
+		},
+		{
+			"fingerprint": "e38ce1f040664c2f71df41db",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-export",
+			"scope": ".",
+			"file": "src/util/domain/sessionFeed.js",
+			"line": 117
+		},
+		{
+			"fingerprint": "fa7b4ec55da35e762c734731",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-export",
+			"scope": ".",
+			"file": "src/util/domain/sessionFeed.js",
+			"line": 249
+		},
+		{
+			"fingerprint": "50c1384d6b7620d5001abe43",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-export",
+			"scope": ".",
+			"file": "src/util/domain/sessionFeed.js",
+			"line": 288
+		},
+		{
+			"fingerprint": "edeee257649918658a4016d8",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-export",
+			"scope": ".",
+			"file": "src/sync/sync.js",
+			"line": 3
+		},
+		{
+			"fingerprint": "342943dc1bc5170730cb9468",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-export",
+			"scope": ".",
+			"file": "src/sync/sync.js",
+			"line": 4
+		},
+		{
+			"fingerprint": "06f3195bb616ac73d36c2fc2",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-export",
+			"scope": ".",
+			"file": "src/sync/sync.js",
+			"line": 7
+		},
+		{
+			"fingerprint": "28f0c03a2d60873f5532086d",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-export",
+			"scope": ".",
+			"file": "src/sync/sync.js",
+			"line": 10
+		},
+		{
+			"fingerprint": "36913e15a3936f0a8675aafc",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-export",
+			"scope": ".",
+			"file": "src/sync/sync.js",
+			"line": 11
+		},
+		{
+			"fingerprint": "36913e15a3936f0a8675aafc",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-export",
+			"scope": ".",
+			"file": "src/sync/sync.js",
+			"line": 11
+		},
+		{
+			"fingerprint": "a1472f2a250d924bd086d69e",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-export",
+			"scope": ".",
+			"file": "src/views/Schedule/Schedule/index.js",
+			"line": 2
+		},
+		{
+			"fingerprint": "8b6e5f3d1fff8459725f7682",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-export",
+			"scope": ".",
+			"file": "src/util/api/apiCache.js",
+			"line": 9
+		},
+		{
+			"fingerprint": "7ac47636fe345c8b7d3e407a",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-export",
+			"scope": ".",
+			"file": "src/util/api/apiCache.js",
+			"line": 10
+		},
+		{
+			"fingerprint": "22f4b05dce5276ffa87bc084",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-export",
+			"scope": ".",
+			"file": "src/util/api/apiCache.js",
+			"line": 11
+		},
+		{
+			"fingerprint": "0e6cda1cd149135f15409f6c",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-export",
+			"scope": ".",
+			"file": "src/util/api/apiCache.js",
+			"line": 12
+		},
+		{
+			"fingerprint": "03c2a82bdfb49a1eaa8126f0",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-export",
+			"scope": ".",
+			"file": "src/util/api/apiCache.js",
+			"line": 13
+		},
+		{
+			"fingerprint": "44c3819ab578aa5891f8a0b4",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-export",
+			"scope": ".",
+			"file": "src/util/api/apiCache.js",
+			"line": 14
+		},
+		{
+			"fingerprint": "a8232b6f5c98312d1989671f",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-export",
+			"scope": ".",
+			"file": "src/util/api/apiCache.js",
+			"line": 19
+		},
+		{
+			"fingerprint": "4666918ea214bc524ac023e2",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-export",
+			"scope": ".",
+			"file": "src/util/api/rssMediaToken.js",
+			"line": 107
+		},
+		{
+			"fingerprint": "9de779be1762173be66ec2c3",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-export",
+			"scope": ".",
+			"file": "src/util/data/color.js",
+			"line": 1
+		},
+		{
+			"fingerprint": "85353ff6e3e7a12d1a84eb6b",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-export",
+			"scope": ".",
+			"file": "src/util/domain/sessionCompaction.js",
+			"line": 132
+		},
+		{
+			"fingerprint": "7982b2a4677675706710d8b5",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-export",
+			"scope": ".",
+			"file": "src/sync/constants.js",
+			"line": 3
+		},
+		{
+			"fingerprint": "5b2faa9e07b36a6c6cf206e6",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-export",
+			"scope": ".",
+			"file": "src/components/Widgets/Tooltip/index.js",
+			"line": 1
+		},
+		{
+			"fingerprint": "d3723973a089630bc01d4651",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-export",
+			"scope": ".",
+			"file": "src/components/ui/Tooltip/positioning.js",
+			"line": 1
+		},
+		{
+			"fingerprint": "331ff830665d980176db9df6",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-export",
+			"scope": ".",
+			"file": "src/components/ui/Tooltip/positioning.js",
+			"line": 2
+		},
+		{
+			"fingerprint": "5df33550a956675e9b171cd1",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-export",
+			"scope": ".",
+			"file": "src/views/Library/Article/GlossaryUtils.js",
+			"line": 32
+		},
+		{
+			"fingerprint": "09eb6e5304808a3f1e2c21a2",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-export",
+			"scope": ".",
+			"file": "src/views/Library/Article/GlossaryUtils.js",
+			"line": 75
+		},
+		{
+			"fingerprint": "5eca032e4911241474254183",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-export",
+			"scope": ".",
+			"file": "src/views/Storage/Storage/index.js",
+			"line": 1
+		},
+		{
+			"fingerprint": "b92d55748c8064cc08c6e0fb",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-export",
+			"scope": ".",
+			"file": "src/views/Library/Article/Markdown/referenceUtils.js",
+			"line": 4
+		},
+		{
+			"fingerprint": "11ebeddf4b8328a9b9f02881",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-export",
+			"scope": ".",
+			"file": "src/views/Research/ResearchResultsList/index.js",
+			"line": 2
+		},
+		{
+			"fingerprint": "b94c553f06c7601e9f3d9596",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-export",
+			"scope": ".",
+			"file": "src/views/Library/Article/Markdown/Term/index.js",
+			"line": 1
+		},
+		{
+			"fingerprint": "ba9c1a79be82f0b06eaa0df8",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-export",
+			"scope": ".",
+			"file": "src/types/domain.ts",
+			"line": 1
+		},
+		{
+			"fingerprint": "c400fb936eae27332525ac64",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-export",
+			"scope": ".",
+			"file": "src/types/domain.ts",
+			"line": 17
+		},
+		{
+			"fingerprint": "e89051b07a97befe7a610c93",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-export",
+			"scope": ".",
+			"file": "src/types/domain.ts",
+			"line": 41
+		},
+		{
+			"fingerprint": "bac11b822a86b40dd3cd6efd",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-export",
+			"scope": ".",
+			"file": "src/types/domain.ts",
+			"line": 49
+		},
+		{
+			"fingerprint": "6668d9da39de18dec30efa29",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-export",
+			"scope": ".",
+			"file": "src/types/domain.ts",
+			"line": 59
+		},
+		{
+			"fingerprint": "7bb820b7daa4c89297c7fad1",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-export",
+			"scope": ".",
+			"file": "src/types/domain.ts",
+			"line": 68
+		},
+		{
+			"fingerprint": "91a50e145d7724aa55b1e742",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-export",
+			"scope": ".",
+			"file": "src/types/domain.ts",
+			"line": 74
+		},
+		{
+			"fingerprint": "eb10eea292fbdd063663b7cd",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "api/aws/route.js",
+			"line": 106
+		},
+		{
+			"fingerprint": "aa7c35fb3e802b143d0bec6e",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "api/aws/route.js",
+			"line": 117
+		},
+		{
+			"fingerprint": "b210f5335decc3f46fbfa8e6",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "api/aws_download/route.test.js",
+			"line": 4
+		},
+		{
+			"fingerprint": "b210f5335decc3f46fbfa8e6",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "api/aws_download/route.test.js",
+			"line": 4
+		},
+		{
+			"fingerprint": "d4337eb11da31a766e7c4f6c",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "api/aws_download/route.test.js",
+			"line": 14
+		},
+		{
+			"fingerprint": "11c9a019c570c3c660ea4a35",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "api/internal/api-cache/route.js",
+			"line": 9
+		},
+		{
+			"fingerprint": "d462f945c22333dab7684499",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "api/internal/rate-limit/route.js",
+			"line": 29
+		},
+		{
+			"fingerprint": "9a784ce5db9ef4f835f2aa83",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "api/internal/rate-limit/route.test.js",
+			"line": 19
+		},
+		{
+			"fingerprint": "60301d21da9229e9bd2fbace",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "api/internal/rate-limit/route.test.js",
+			"line": 43
+		},
+		{
+			"fingerprint": "a89fea412c519d628c635604",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "api/login/route.js",
+			"line": 143
+		},
+		{
+			"fingerprint": "a89fea412c519d628c635604",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "api/login/route.js",
+			"line": 143
+		},
+		{
+			"fingerprint": "93d409747307f30465c95159",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "api/passkey/route.js",
+			"line": 78
+		},
+		{
+			"fingerprint": "e4cedc85a5278b3db0a10554",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "api/passkey/route.test.js",
+			"line": 44
+		},
+		{
+			"fingerprint": "a24d05dcdfd50a48003e0305",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "api/personal/route.js",
+			"line": 43
+		},
+		{
+			"fingerprint": "7f9d7091a973c7e9723cbc1e",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "api/player/media/route.js",
+			"line": 13
+		},
+		{
+			"fingerprint": "45e4dfb839f0d7009abdbc16",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "api/player/route.test.js",
+			"line": 192
+		},
+		{
+			"fingerprint": "91ca8b63c094f3ac142584cc",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "api/player/route.test.js",
+			"line": 204
+		},
+		{
+			"fingerprint": "049dec1ee4c1208b9a7ccaec",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "api/rss/route.js",
+			"line": 32
+		},
+		{
+			"fingerprint": "049dec1ee4c1208b9a7ccaec",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "api/rss/route.js",
+			"line": 32
+		},
+		{
+			"fingerprint": "92bce731c2c9697a92bbf836",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "api/rss/route.test.js",
+			"line": 8
+		},
+		{
+			"fingerprint": "39a902569f07f0127016ec1b",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "api/rss/route.test.js",
+			"line": 38
+		},
+		{
+			"fingerprint": "1bc154786660117dfa2c8225",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "api/rss/route.test.js",
+			"line": 55
+		},
+		{
+			"fingerprint": "fa0295880c4b3cd5ed416608",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "api/rss/route.test.js",
+			"line": 56
+		},
+		{
+			"fingerprint": "fa0295880c4b3cd5ed416608",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "api/rss/route.test.js",
+			"line": 56
+		},
+		{
+			"fingerprint": "fa0295880c4b3cd5ed416608",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "api/rss/route.test.js",
+			"line": 56
+		},
+		{
+			"fingerprint": "fa0295880c4b3cd5ed416608",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "api/rss/route.test.js",
+			"line": 56
+		},
+		{
+			"fingerprint": "fa0295880c4b3cd5ed416608",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "api/rss/route.test.js",
+			"line": 56
+		},
+		{
+			"fingerprint": "fa0295880c4b3cd5ed416608",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "api/rss/route.test.js",
+			"line": 56
+		},
+		{
+			"fingerprint": "e0c0230c0a8e8a2e6e153d0d",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "api/rss/route.test.js",
+			"line": 57
+		},
+		{
+			"fingerprint": "8a549905a3e6d525e2d0964b",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "api/rss/s/route.js",
+			"line": 37
+		},
+		{
+			"fingerprint": "3a1ccdda26796b8aad1f5b50",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "api/rss/s/route.js",
+			"line": 102
+		},
+		{
+			"fingerprint": "27e64cf26813bcabac65fe3b",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "api/rss/s/route.js",
+			"line": 115
+		},
+		{
+			"fingerprint": "b8c9ea1671c7e2ae0da7258d",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "api/rss/s/route.js",
+			"line": 161
+		},
+		{
+			"fingerprint": "330cfb731e864de1c6e05c66",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "api/rss/verify/route.test.js",
+			"line": 10
+		},
+		{
+			"fingerprint": "330cfb731e864de1c6e05c66",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "api/rss/verify/route.test.js",
+			"line": 10
+		},
+		{
+			"fingerprint": "572cc328f42e0b6e855250a2",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "api/rss/verify/route.test.js",
+			"line": 25
+		},
+		{
+			"fingerprint": "70fc770790c3a465dcdb06e0",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "components/AppBar/MenuIcon/MenuIcon.js",
+			"line": 7
+		},
+		{
+			"fingerprint": "3a085416dc0365a1c7ac94e2",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "components/AppBar/MenuIcon/MenuIcon.test.js",
+			"line": 33
+		},
+		{
+			"fingerprint": "9a8fcc85654273044a17459a",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "components/Bookmarks/Bookmarks.test.js",
+			"line": 59
+		},
+		{
+			"fingerprint": "cd6b5e79ba341e5ad3d7a2c2",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "components/Breadcrumbs/Breadcrumbs.test.js",
+			"line": 121
+		},
+		{
+			"fingerprint": "5862539cc617bedd1f22c7fb",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "components/Breadcrumbs/Breadcrumbs.test.js",
+			"line": 255
+		},
+		{
+			"fingerprint": "44e1ea6f5ae69ce3346932ce",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "components/Page/Content/Content.test.js",
+			"line": 70
+		},
+		{
+			"fingerprint": "09d4d6f7e2a8005b6df63c45",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "components/Search/Search.test.js",
+			"line": 11
+		},
+		{
+			"fingerprint": "09d4d6f7e2a8005b6df63c45",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "components/Search/Search.test.js",
+			"line": 11
+		},
+		{
+			"fingerprint": "09d4d6f7e2a8005b6df63c45",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "components/Search/Search.test.js",
+			"line": 11
+		},
+		{
+			"fingerprint": "09d4d6f7e2a8005b6df63c45",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "components/Search/Search.test.js",
+			"line": 11
+		},
+		{
+			"fingerprint": "d464604c95ce1e007e1216bb",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "components/Search/Search.test.js",
+			"line": 67
+		},
+		{
+			"fingerprint": "6808ecc8d97dcb4b54a4085f",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "components/SideBar/LibraryTree/LibraryTree.js",
+			"line": 60
+		},
+		{
+			"fingerprint": "a268c4333e777870298d5bb4",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "components/SideBar/LibraryTree/LibraryTree.js",
+			"line": 76
+		},
+		{
+			"fingerprint": "3a43af198f939ed875417518",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "components/SideBar/LibraryTree/LibraryTree.js",
+			"line": 105
+		},
+		{
+			"fingerprint": "126edbd9af97b4a03cfd169a",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "components/SideBar/LibraryTree/LibraryTree.js",
+			"line": 141
+		},
+		{
+			"fingerprint": "8bc8a21434cfcc024fa38d9f",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "components/SideBar/LibraryTree/LibraryTree.js",
+			"line": 209
+		},
+		{
+			"fingerprint": "699a4522c7ce4ebeea39def0",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "components/SideBar/LibraryTree/LibraryTree.js",
+			"line": 218
+		},
+		{
+			"fingerprint": "3091f87e45ffd9a131db9bd7",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "components/SideBar/LibraryTree/LibraryTree.js",
+			"line": 240
+		},
+		{
+			"fingerprint": "2055e9aae1a9117e7b05481c",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "components/SideBar/LibraryTree/LibraryTree.js",
+			"line": 264
+		},
+		{
+			"fingerprint": "3ac2de1df0a74432d4802beb",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "components/SideBar/LibraryTree/LibraryTree.js",
+			"line": 274
+		},
+		{
+			"fingerprint": "b92c23054a39d39ed3dd647f",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "components/SideBar/LibraryTree/LibraryTree.js",
+			"line": 535
+		},
+		{
+			"fingerprint": "98a3b3925a5853e236f62daa",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "components/SideBar/LibraryTree/LibraryTree.test.js",
+			"line": 84
+		},
+		{
+			"fingerprint": "98a3b3925a5853e236f62daa",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "components/SideBar/LibraryTree/LibraryTree.test.js",
+			"line": 84
+		},
+		{
+			"fingerprint": "98a3b3925a5853e236f62daa",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "components/SideBar/LibraryTree/LibraryTree.test.js",
+			"line": 84
+		},
+		{
+			"fingerprint": "98a3b3925a5853e236f62daa",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "components/SideBar/LibraryTree/LibraryTree.test.js",
+			"line": 84
+		},
+		{
+			"fingerprint": "3144b30f862af6391344e5cb",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "components/SideBar/LibraryTree/LibraryTree.test.js",
+			"line": 182
+		},
+		{
+			"fingerprint": "c292cb141cba78a6329f7cc0",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "components/SideBar/LibraryTree/LibraryTree.test.js",
+			"line": 243
+		},
+		{
+			"fingerprint": "0d1c013364f8f067caca82b1",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "components/SideBar/SideBar.js",
+			"line": 84
+		},
+		{
+			"fingerprint": "5f094ac9f2e7c91e93f0077f",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "components/SideBar/SideBar.test.js",
+			"line": 239
+		},
+		{
+			"fingerprint": "5bea62c618b3a4cc2c2392af",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "components/Toolbar/Item/Item.module.css",
+			"line": 3
+		},
+		{
+			"fingerprint": "ede369f5ea335d25fe1d4834",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "components/Toolbar/Toolbar.menu.test.js",
+			"line": 19
+		},
+		{
+			"fingerprint": "3807e65c81953ec9ace2fb51",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "components/Toolbar/Toolbar.registry.test.js",
+			"line": 9
+		},
+		{
+			"fingerprint": "73a81b39d2aec4e9d303adf4",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "components/Virtualized/FixedSizeGrid/FixedSizeGrid.js",
+			"line": 114
+		},
+		{
+			"fingerprint": "73a81b39d2aec4e9d303adf4",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "components/Virtualized/FixedSizeGrid/FixedSizeGrid.js",
+			"line": 114
+		},
+		{
+			"fingerprint": "d3707c902d9e20ce7c022ee2",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "components/Virtualized/FixedSizeGrid/FixedSizeGrid.js",
+			"line": 120
+		},
+		{
+			"fingerprint": "631e9f040059c7105a616b50",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "components/Virtualized/FixedSizeList/FixedSizeList.js",
+			"line": 53
+		},
+		{
+			"fingerprint": "33275c86e816b77556d50a06",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "components/Virtualized/VariableSizeList/VariableSizeList.test.js",
+			"line": 55
+		},
+		{
+			"fingerprint": "24f0f183b6e492b14896e90b",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "components/Virtualized/VariableSizeList/VariableSizeList.test.js",
+			"line": 90
+		},
+		{
+			"fingerprint": "16a5c4719515d3106c8a051d",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "components/Widgets/Input/Input.module.css",
+			"line": 18
+		},
+		{
+			"fingerprint": "d712e261f5864b3ecbae975a",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "components/Widgets/Input/Input.test.js",
+			"line": 138
+		},
+		{
+			"fingerprint": "86b130e40b58a50727722451",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "components/Widgets/List/List.module.css",
+			"line": 95
+		},
+		{
+			"fingerprint": "10f357ab0cd600bca4fdbb5b",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "components/Widgets/StatusBar/StatusBar.test.js",
+			"line": 222
+		},
+		{
+			"fingerprint": "1f1a69a08f2896e38d5c7096",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "components/Widgets/Table/Item/Item.js",
+			"line": 43
+		},
+		{
+			"fingerprint": "e508d0c60b075cda9fef4438",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "components/Widgets/Table/Table.module.css",
+			"line": 47
+		},
+		{
+			"fingerprint": "8a3764525c43073d7dc1a147",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "components/Widgets/Table/Table.test.js",
+			"line": 19
+		},
+		{
+			"fingerprint": "44f50cadf58c90307b580ce6",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "components/Widgets/Table/Table.test.js",
+			"line": 26
+		},
+		{
+			"fingerprint": "b04e7c883f21a9dcc3ec9e89",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "components/Widgets/Table/Table.test.js",
+			"line": 408
+		},
+		{
+			"fingerprint": "313b2597d79f8c4d11a05bc6",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "components/Widgets/Table/Table.test.js",
+			"line": 418
+		},
+		{
+			"fingerprint": "7c0c844de477059f0a1c171b",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "components/Widgets/Table/Table.test.js",
+			"line": 442
+		},
+		{
+			"fingerprint": "392472a09df614c062441bbc",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "components/Widgets/Table/Table.test.js",
+			"line": 496
+		},
+		{
+			"fingerprint": "439a48a24ecd27ff8847ab2b",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "components/Widgets/Table/Table.test.js",
+			"line": 558
+		},
+		{
+			"fingerprint": "a0f028f77b16a55b4ab2ee6a",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "components/Widgets/Table/Table.test.js",
+			"line": 714
+		},
+		{
+			"fingerprint": "a0f028f77b16a55b4ab2ee6a",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "components/Widgets/Table/Table.test.js",
+			"line": 714
+		},
+		{
+			"fingerprint": "45764a62dc716cc699ab36a7",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "components/Widgets/Table/Table.test.js",
+			"line": 715
+		},
+		{
+			"fingerprint": "133efd774a0a4639fef1a46f",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "components/Widgets/Table/Table.test.js",
+			"line": 772
+		},
+		{
+			"fingerprint": "112afbe55abae7e279bd1f4a",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "components/Widgets/Table/Table.test.js",
+			"line": 781
+		},
+		{
+			"fingerprint": "bdd96cf275bd42bcdc83de12",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "components/Widgets/Table/views/TableTableView.js",
+			"line": 107
+		},
+		{
+			"fingerprint": "bdd96cf275bd42bcdc83de12",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "components/Widgets/Table/views/TableTableView.js",
+			"line": 107
+		},
+		{
+			"fingerprint": "fe9e74c86b797bc5d1003623",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "components/Widgets/Tabs/Tab/Tab.test.js",
+			"line": 14
+		},
+		{
+			"fingerprint": "1eeb36b3da3aba1851c24b79",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "components/Widgets/Tabs/Tabs.test.js",
+			"line": 8
+		},
+		{
+			"fingerprint": "d415ed35b5ee6e5ecc088f9d",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "components/Widgets/ToggleButtonGroup/ToggleButtonGroup.module.css",
+			"line": 14
+		},
+		{
+			"fingerprint": "ef647bcc2c5b217a048d29b6",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "components/ui/Icon/Icon.js",
+			"line": 32
+		},
+		{
+			"fingerprint": "163a764c3a8074b5bbff5f2e",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "css/colors.css",
+			"line": 41
+		},
+		{
+			"fingerprint": "4d4419ec7052d5c604ca3313",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "css/colors.css",
+			"line": 102
+		},
+		{
+			"fingerprint": "fb1f36f8424be8b3b6d9d6bc",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "data/languages/eng/articles.js",
+			"line": 424
+		},
+		{
+			"fingerprint": "adb6d08f0323d38fc0c085df",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "data/languages/eng/index.js",
+			"line": 1
+		},
+		{
+			"fingerprint": "adb6d08f0323d38fc0c085df",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "data/languages/eng/index.js",
+			"line": 1
+		},
+		{
+			"fingerprint": "381f816cd1b5b495439d61dd",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "storage/aws.js",
+			"line": 50
+		},
+		{
+			"fingerprint": "388d4a1c965ba5a6220ff319",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "storage/aws.js",
+			"line": 72
+		},
+		{
+			"fingerprint": "5830e3e715debd4040c51e40",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "storage/aws.test.js",
+			"line": 10
+		},
+		{
+			"fingerprint": "7a0c32a265540c25c7b9f0a9",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "storage/remote.js",
+			"line": 103
+		},
+		{
+			"fingerprint": "2539831674d0651b33614a18",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "storage/remote.js",
+			"line": 106
+		},
+		{
+			"fingerprint": "c4685e5c417f5330e20ce81f",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "storage/remote.js",
+			"line": 129
+		},
+		{
+			"fingerprint": "0279679634cf6d26b2a5e422",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "storage/remote.js",
+			"line": 195
+		},
+		{
+			"fingerprint": "1379fd98bf4241fe88b3a5f2",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "storage/remote.test.js",
+			"line": 194
+		},
+		{
+			"fingerprint": "aa636ed488062571491da00b",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "storage/wasabi.test.js",
+			"line": 131
+		},
+		{
+			"fingerprint": "a0ab56974fda75ba8f99878c",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "sync/bundle.test.js",
+			"line": 17
+		},
+		{
+			"fingerprint": "7673fe685201df3c31949069",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "sync/cache.js",
+			"line": 26
+		},
+		{
+			"fingerprint": "294407ee9f9a15616154d89c",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "sync/cache.test.js",
+			"line": 23
+		},
+		{
+			"fingerprint": "b5701977be055a3d24886586",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "sync/freshnessService.test.js",
+			"line": 30
+		},
+		{
+			"fingerprint": "6a4985cbc7a3d494ccfda84e",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "sync/freshnessService.test.js",
+			"line": 61
+		},
+		{
+			"fingerprint": "e15d25ea475b133e26d4235f",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "sync/libraryCounter.test.js",
+			"line": 9
+		},
+		{
+			"fingerprint": "e15d25ea475b133e26d4235f",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "sync/libraryCounter.test.js",
+			"line": 9
+		},
+		{
+			"fingerprint": "f3c7636a4740bdd56c29542a",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "sync/manifest.js",
+			"line": 22
+		},
+		{
+			"fingerprint": "b2765566e4d2ef35996fccd4",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "sync/pipeline.test.js",
+			"line": 131
+		},
+		{
+			"fingerprint": "bf946513f5632a72e555ab55",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "sync/steps/applyRemoteTombstones.js",
+			"line": 59
+		},
+		{
+			"fingerprint": "4f8fde8272aa65a30f7d38ec",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "sync/steps/applyRemoteTombstones.js",
+			"line": 61
+		},
+		{
+			"fingerprint": "b592c723023eeb31e74e1d46",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "sync/steps/downloadUpdates.js",
+			"line": 21
+		},
+		{
+			"fingerprint": "917d42bebdbbfe44f423bd26",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "sync/steps/downloadUpdates.test.js",
+			"line": 7
+		},
+		{
+			"fingerprint": "917d42bebdbbfe44f423bd26",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "sync/steps/downloadUpdates.test.js",
+			"line": 7
+		},
+		{
+			"fingerprint": "e787a7fc48eae426c6b93922",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "sync/steps/downloadUpdates.test.js",
+			"line": 192
+		},
+		{
+			"fingerprint": "5ac8c8841b052c1775d181ef",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "sync/steps/downloadUpdates.test.js",
+			"line": 194
+		},
+		{
+			"fingerprint": "d8dbdd18adc3cfe1708f0621",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "sync/steps/personal/migrateFromMongoDB.test.js",
+			"line": 112
+		},
+		{
+			"fingerprint": "88104bb2db8377bc1d6ca7aa",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "sync/steps/personal/migrateFromMongoDB.test.js",
+			"line": 137
+		},
+		{
+			"fingerprint": "88104bb2db8377bc1d6ca7aa",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "sync/steps/personal/migrateFromMongoDB.test.js",
+			"line": 137
+		},
+		{
+			"fingerprint": "df8db8763aefe583d8a23854",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "sync/steps/personal/migrateFromMongoDB.test.js",
+			"line": 167
+		},
+		{
+			"fingerprint": "11f323d31a760c7fddadad4c",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "sync/steps/personal/migrateFromMongoDB.test.js",
+			"line": 207
+		},
+		{
+			"fingerprint": "11f323d31a760c7fddadad4c",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "sync/steps/personal/migrateFromMongoDB.test.js",
+			"line": 207
+		},
+		{
+			"fingerprint": "c48f854ef516f1edaca9028f",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "sync/steps/personal/migrateFromMongoDB.test.js",
+			"line": 208
+		},
+		{
+			"fingerprint": "50e4b8af2944d9ffc54e3d70",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "sync/steps/personal/migrateFromMongoDB.test.js",
+			"line": 210
+		},
+		{
+			"fingerprint": "8389803a9338c1ebad3b54dd",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "sync/steps/personal/migrateFromMongoDB.test.js",
+			"line": 211
+		},
+		{
+			"fingerprint": "3fb08fc519bfc2706fd8850f",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "sync/steps/personal/migrateFromMongoDB.test.js",
+			"line": 215
+		},
+		{
+			"fingerprint": "fb334115398093c3e001acdd",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "sync/steps/personal/migrateFromMongoDB.test.js",
+			"line": 233
+		},
+		{
+			"fingerprint": "fb334115398093c3e001acdd",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "sync/steps/personal/migrateFromMongoDB.test.js",
+			"line": 233
+		},
+		{
+			"fingerprint": "0cbc14fb4d7c5134f441c383",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "sync/steps/personal/migrateFromMongoDB.test.js",
+			"line": 234
+		},
+		{
+			"fingerprint": "6aaff245435932949071f4a7",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "sync/steps/personal/migrateFromMongoDB.test.js",
+			"line": 257
+		},
+		{
+			"fingerprint": "f84670f70288fec5efe11e5e",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "sync/steps/syncManifest.js",
+			"line": 11
+		},
+		{
+			"fingerprint": "23ba48a31533cdfd0344b025",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "sync/steps/syncManifest.js",
+			"line": 44
+		},
+		{
+			"fingerprint": "28e5295ea7d80cb415b7f8e5",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "sync/steps/updateLocalManifest.test.js",
+			"line": 7
+		},
+		{
+			"fingerprint": "3830420f8dade0dd1c78af21",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "sync/steps/updateLocalManifest.test.js",
+			"line": 36
+		},
+		{
+			"fingerprint": "8787f75a7579700bd12ed7b3",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "sync/steps/updateLocalManifest.test.js",
+			"line": 161
+		},
+		{
+			"fingerprint": "2cfd58d325646649a09e028a",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "sync/steps/uploadManifest.js",
+			"line": 74
+		},
+		{
+			"fingerprint": "bc90c4d4cf7bac0dc74dda8e",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "sync/steps/uploadNewFiles.js",
+			"line": 1
+		},
+		{
+			"fingerprint": "a686946f32e89f3aba226d64",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "sync/steps/uploadNewFiles.js",
+			"line": 13
+		},
+		{
+			"fingerprint": "5751c8974f4404eabe0f83a7",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "sync/steps/uploadNewFiles.js",
+			"line": 24
+		},
+		{
+			"fingerprint": "d943e1f800d40622a055076c",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "sync/steps/uploadNewFiles.js",
+			"line": 62
+		},
+		{
+			"fingerprint": "39c47ed6863946f8a24cd112",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "sync/steps/uploadNewFiles.js",
+			"line": 90
+		},
+		{
+			"fingerprint": "7e0fa36f7da4c69f6d8eed61",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "sync/steps/uploadNewFiles.js",
+			"line": 135
+		},
+		{
+			"fingerprint": "9815d985ac52e8b5ed8e5123",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "sync/steps/uploadNewFiles.test.js",
+			"line": 24
+		},
+		{
+			"fingerprint": "aefbd57e7d7492f8b9a16bd8",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "sync/steps/uploadNewFiles.test.js",
+			"line": 66
+		},
+		{
+			"fingerprint": "f79c71196c93e0c2a916017c",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "sync/steps/uploadNewFiles.test.js",
+			"line": 83
+		},
+		{
+			"fingerprint": "b81af6f644f6f219da5bf66d",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "sync/steps/uploadNewFiles.test.js",
+			"line": 94
+		},
+		{
+			"fingerprint": "5e38dd7430ddccc263d8fd04",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "sync/steps/uploadNewFiles.test.js",
+			"line": 130
+		},
+		{
+			"fingerprint": "23771bf9e2d3c830c73b8576",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "sync/steps/uploadNewFiles.test.js",
+			"line": 140
+		},
+		{
+			"fingerprint": "2bec7c70aef314e9add9cb4a",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "sync/steps/uploadNewFiles.test.js",
+			"line": 152
+		},
+		{
+			"fingerprint": "b30679147a9c50bd8e57bc19",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "sync/steps/uploadNewFiles.test.js",
+			"line": 172
+		},
+		{
+			"fingerprint": "07e131fe66a4c43b1c70f322",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "sync/steps/uploadNewFiles.test.js",
+			"line": 209
+		},
+		{
+			"fingerprint": "82d98ae336c1936e32a8b5af",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "sync/trash.js",
+			"line": 18
+		},
+		{
+			"fingerprint": "c05a9b434a5beb1c7ccc4070",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/api/apiCacheKeys.js",
+			"line": 36
+		},
+		{
+			"fingerprint": "8b7a480a3f278fb394baa328",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/api/fetch.js",
+			"line": 86
+		},
+		{
+			"fingerprint": "c22cf37d75faae4f5e92fa6a",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/api/fetch.js",
+			"line": 100
+		},
+		{
+			"fingerprint": "cd28756bc60528430e547c0b",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/api/fetch.js",
+			"line": 118
+		},
+		{
+			"fingerprint": "846db3ae4295d29384f0a099",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/api/fetch.js",
+			"line": 144
+		},
+		{
+			"fingerprint": "bae5cb18042c0a3e28b8787e",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/api/fetch.js",
+			"line": 215
+		},
+		{
+			"fingerprint": "e9a149be87bf22e0d573a5e4",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/api/fetch.js",
+			"line": 228
+		},
+		{
+			"fingerprint": "6567b7c5cfbfe0a847244aac",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/api/fetch.js",
+			"line": 241
+		},
+		{
+			"fingerprint": "ccc43f92f9590d520460deca",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/api/fetch.test.js",
+			"line": 223
+		},
+		{
+			"fingerprint": "6517a3bc89450e48faa05fa6",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/auth/login.js",
+			"line": 22
+		},
+		{
+			"fingerprint": "294a935b8d523732847ef68e",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/auth/login.test.js",
+			"line": 12
+		},
+		{
+			"fingerprint": "81e3ae19c2edb914faea7fa5",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/auth/passkey.js",
+			"line": 207
+		},
+		{
+			"fingerprint": "0e62b0c36c6aaa3b40654c76",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/auth/passkey.test.js",
+			"line": 227
+		},
+		{
+			"fingerprint": "aa3c77b33ad3bdd5b144d1c1",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/browser/mediaSession.test.js",
+			"line": 155
+		},
+		{
+			"fingerprint": "aa3c77b33ad3bdd5b144d1c1",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/browser/mediaSession.test.js",
+			"line": 155
+		},
+		{
+			"fingerprint": "aa3c77b33ad3bdd5b144d1c1",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/browser/mediaSession.test.js",
+			"line": 155
+		},
+		{
+			"fingerprint": "1a089b81040910c30a979e12",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/browser/mediaSession.test.js",
+			"line": 486
+		},
+		{
+			"fingerprint": "f6e0a411197ad93472667c28",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/browser/mediaSession.test.js",
+			"line": 488
+		},
+		{
+			"fingerprint": "cc399506a0c5ddbe9d23a5a4",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/browser/size.test.js",
+			"line": 60
+		},
+		{
+			"fingerprint": "d6c592c7d7b1a8a96dc498e8",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/browser/size.test.js",
+			"line": 173
+		},
+		{
+			"fingerprint": "b4db39ca927aab49ba6549ca",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/browser/timers.js",
+			"line": 3
+		},
+		{
+			"fingerprint": "b06d65d9f9ed3c7131709d43",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/browser/timers.test.js",
+			"line": 57
+		},
+		{
+			"fingerprint": "742c929746ec616614d24c15",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/browser/touch.test.js",
+			"line": 9
+		},
+		{
+			"fingerprint": "44c5ea7fc685ea52b88f2ca7",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/browser/touch.test.js",
+			"line": 39
+		},
+		{
+			"fingerprint": "1f26aec4b384e5b314b5310b",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/data/date.test.js",
+			"line": 85
+		},
+		{
+			"fingerprint": "c83139d46efe302c87630973",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/groups.test.js",
+			"line": 136
+		},
+		{
+			"fingerprint": "fac7f86268d95717e32cae96",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/groups.test.js",
+			"line": 168
+		},
+		{
+			"fingerprint": "fac7f86268d95717e32cae96",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/groups.test.js",
+			"line": 168
+		},
+		{
+			"fingerprint": "3d50ce6089ed1872137b4c8f",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/history.test.js",
+			"line": 71
+		},
+		{
+			"fingerprint": "9966bcc878aeaacca5255520",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/history.test.js",
+			"line": 162
+		},
+		{
+			"fingerprint": "e14e833fe6e830999d12f8f0",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/loadParagraphs.js",
+			"line": 174
+		},
+		{
+			"fingerprint": "48eea521acdc3c05faa9864e",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/loadParagraphs.test.js",
+			"line": 33
+		},
+		{
+			"fingerprint": "48eea521acdc3c05faa9864e",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/loadParagraphs.test.js",
+			"line": 33
+		},
+		{
+			"fingerprint": "08fc643de1a9a80e6bb29a76",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/loadParagraphs.test.js",
+			"line": 97
+		},
+		{
+			"fingerprint": "f9921ba9750cf7d646adba0c",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/loadParagraphs.test.js",
+			"line": 227
+		},
+		{
+			"fingerprint": "f9921ba9750cf7d646adba0c",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/loadParagraphs.test.js",
+			"line": 227
+		},
+		{
+			"fingerprint": "f9921ba9750cf7d646adba0c",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/loadParagraphs.test.js",
+			"line": 227
+		},
+		{
+			"fingerprint": "f9921ba9750cf7d646adba0c",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/loadParagraphs.test.js",
+			"line": 227
+		},
+		{
+			"fingerprint": "f9921ba9750cf7d646adba0c",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/loadParagraphs.test.js",
+			"line": 227
+		},
+		{
+			"fingerprint": "3dcbe34da15605699350f4bc",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/loadParagraphs.test.js",
+			"line": 307
+		},
+		{
+			"fingerprint": "4a582cd892a5f9987b9ca31c",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/sessionFeed.js",
+			"line": 35
+		},
+		{
+			"fingerprint": "ec2f7c8f0c144dfe37c4ac26",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/sessionFeed.js",
+			"line": 60
+		},
+		{
+			"fingerprint": "8d1e04b1119c2c7d1e148a7f",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/sessionFeed.js",
+			"line": 78
+		},
+		{
+			"fingerprint": "760214525592c428a5bdadf2",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/sessionFeed.js",
+			"line": 122
+		},
+		{
+			"fingerprint": "79d8ea4d6b414edf60159b85",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/sessionFeed.js",
+			"line": 288
+		},
+		{
+			"fingerprint": "400ae63e1f2c014c93cf7ddc",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/sessionFeed.test.js",
+			"line": 269
+		},
+		{
+			"fingerprint": "e863a81cb1c7aea74dedcae8",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/sessionFeed.test.js",
+			"line": 305
+		},
+		{
+			"fingerprint": "3232f61b22934b983c75144b",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/sessionFeed.test.js",
+			"line": 395
+		},
+		{
+			"fingerprint": "04c5063657db010c9d0fb7ab",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/sessions.js",
+			"line": 347
+		},
+		{
+			"fingerprint": "c76e56aa1db1453c629407c4",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/sessions.js",
+			"line": 515
+		},
+		{
+			"fingerprint": "80da43c779627238d6436b05",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/sessions.js",
+			"line": 537
+		},
+		{
+			"fingerprint": "2ebdb7be65fc9c9df552e60a",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/sessions.test.js",
+			"line": 102
+		},
+		{
+			"fingerprint": "2ebdb7be65fc9c9df552e60a",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/sessions.test.js",
+			"line": 102
+		},
+		{
+			"fingerprint": "c7fa7a3083afc8817beaf973",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/sessions.test.js",
+			"line": 108
+		},
+		{
+			"fingerprint": "c6883676554b3cecff19e292",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/sessions.test.js",
+			"line": 124
+		},
+		{
+			"fingerprint": "581745ce1c3718f7bd50aedb",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/sessions.test.js",
+			"line": 166
+		},
+		{
+			"fingerprint": "cd4a5f8dc34b2faf3d6d94b8",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/sessions.test.js",
+			"line": 171
+		},
+		{
+			"fingerprint": "4af190e526d68b60922982d8",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/sessions.test.js",
+			"line": 184
+		},
+		{
+			"fingerprint": "aaafafb174259cdd3992d92b",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/sessions.test.js",
+			"line": 271
+		},
+		{
+			"fingerprint": "06598d1e5832258e22cdf145",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/sessions.test.js",
+			"line": 353
+		},
+		{
+			"fingerprint": "72ecce901727e33b804fed9b",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/sessions.test.js",
+			"line": 356
+		},
+		{
+			"fingerprint": "72ecce901727e33b804fed9b",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/sessions.test.js",
+			"line": 356
+		},
+		{
+			"fingerprint": "f50a8efc848860c716564601",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/sessions.test.js",
+			"line": 358
+		},
+		{
+			"fingerprint": "231947e27305df1db92c8a88",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/sessions.test.js",
+			"line": 359
+		},
+		{
+			"fingerprint": "f92798804bf7fdfc1712fd7a",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/sessions.test.js",
+			"line": 475
+		},
+		{
+			"fingerprint": "f92798804bf7fdfc1712fd7a",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/sessions.test.js",
+			"line": 475
+		},
+		{
+			"fingerprint": "f92798804bf7fdfc1712fd7a",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/sessions.test.js",
+			"line": 475
+		},
+		{
+			"fingerprint": "07cf482e973b8825b1a4f745",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/sessions.test.js",
+			"line": 519
+		},
+		{
+			"fingerprint": "0d54c3e66dee16ab14e2eb7f",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/sessions.test.js",
+			"line": 541
+		},
+		{
+			"fingerprint": "0d54c3e66dee16ab14e2eb7f",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/sessions.test.js",
+			"line": 541
+		},
+		{
+			"fingerprint": "0d54c3e66dee16ab14e2eb7f",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/sessions.test.js",
+			"line": 541
+		},
+		{
+			"fingerprint": "5d143122c4ce744e8c6b1ecd",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/sessions.test.js",
+			"line": 563
+		},
+		{
+			"fingerprint": "5d143122c4ce744e8c6b1ecd",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/sessions.test.js",
+			"line": 563
+		},
+		{
+			"fingerprint": "5d143122c4ce744e8c6b1ecd",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/sessions.test.js",
+			"line": 563
+		},
+		{
+			"fingerprint": "e2376474eb029f2c1b900f3c",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/cleanup.js",
+			"line": 15
+		},
+		{
+			"fingerprint": "7d796e83ca00b8b008d37f9c",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/cleanup.test.js",
+			"line": 4
+		},
+		{
+			"fingerprint": "bb04e2aad22c2ca26165eac7",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/cleanup.test.js",
+			"line": 6
+		},
+		{
+			"fingerprint": "b844653f8c1813c51b2b9b3e",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/cleanup.test.js",
+			"line": 10
+		},
+		{
+			"fingerprint": "2c34a6ba336191edaf2d153e",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/cleanup.test.js",
+			"line": 103
+		},
+		{
+			"fingerprint": "645a963be6b8fc88763df096",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/index.js",
+			"line": 39
+		},
+		{
+			"fingerprint": "645a963be6b8fc88763df096",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/index.js",
+			"line": 39
+		},
+		{
+			"fingerprint": "2885aced86535da865136509",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/index.js",
+			"line": 68
+		},
+		{
+			"fingerprint": "2885aced86535da865136509",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/index.js",
+			"line": 68
+		},
+		{
+			"fingerprint": "a49e18590baf686b11966bbe",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/metadata.js",
+			"line": 70
+		},
+		{
+			"fingerprint": "a49e18590baf686b11966bbe",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/metadata.js",
+			"line": 70
+		},
+		{
+			"fingerprint": "0a02a11a033cb51ad6901db5",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/metadata.js",
+			"line": 87
+		},
+		{
+			"fingerprint": "f82557a0db73572d4d8ad898",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/metadata.test.js",
+			"line": 39
+		},
+		{
+			"fingerprint": "f82557a0db73572d4d8ad898",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/metadata.test.js",
+			"line": 39
+		},
+		{
+			"fingerprint": "d075dcff59b04e798bb89bcf",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/metadata.test.js",
+			"line": 66
+		},
+		{
+			"fingerprint": "9545b4ac8714d04598b2fb0e",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/metadata.test.js",
+			"line": 114
+		},
+		{
+			"fingerprint": "7d358bbba409fe1e56ca018f",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/metadata.test.js",
+			"line": 273
+		},
+		{
+			"fingerprint": "9284e641523fe352d227d9e1",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/metadataAggregator.test.js",
+			"line": 29
+		},
+		{
+			"fingerprint": "2a64b5979da76ed50b3b911e",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/sessionMetadataClient.js",
+			"line": 11
+		},
+		{
+			"fingerprint": "61eb79bde771e291c13aee50",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/sessionMetadataClient.test.js",
+			"line": 93
+		},
+		{
+			"fingerprint": "29c7f55c43b9fcca5bcba93c",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/sessionMetadataClient.test.js",
+			"line": 132
+		},
+		{
+			"fingerprint": "84631e84bafc7b2c69b7abd7",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.js",
+			"line": 716
+		},
+		{
+			"fingerprint": "6c31c82bc08d55e9b97c6efb",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.js",
+			"line": 1169
+		},
+		{
+			"fingerprint": "fbe1de16bc8056514038a1bf",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.js",
+			"line": 1239
+		},
+		{
+			"fingerprint": "09ab4665f7ea2998c98e5071",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.js",
+			"line": 1245
+		},
+		{
+			"fingerprint": "c9afb724af8e6054913c74c9",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.js",
+			"line": 1261
+		},
+		{
+			"fingerprint": "096a9fbf175a17624473d8f5",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.js",
+			"line": 1276
+		},
+		{
+			"fingerprint": "ed4cbe607d789c705d972c4b",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 17
+		},
+		{
+			"fingerprint": "55a3ce1f93afc5eb526a5702",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 92
+		},
+		{
+			"fingerprint": "4a28967572dbe905251821d9",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 122
+		},
+		{
+			"fingerprint": "4a28967572dbe905251821d9",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 122
+		},
+		{
+			"fingerprint": "4a28967572dbe905251821d9",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 122
+		},
+		{
+			"fingerprint": "4a28967572dbe905251821d9",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 122
+		},
+		{
+			"fingerprint": "42c8f29715d5c1e0cf575a95",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 124
+		},
+		{
+			"fingerprint": "0ded1519a4497e67b4f02820",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 258
+		},
+		{
+			"fingerprint": "0ded1519a4497e67b4f02820",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 258
+		},
+		{
+			"fingerprint": "0ded1519a4497e67b4f02820",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 258
+		},
+		{
+			"fingerprint": "0ded1519a4497e67b4f02820",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 258
+		},
+		{
+			"fingerprint": "0ded1519a4497e67b4f02820",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 258
+		},
+		{
+			"fingerprint": "0ded1519a4497e67b4f02820",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 258
+		},
+		{
+			"fingerprint": "62639c8b29de0a6c10b4f3ea",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 325
+		},
+		{
+			"fingerprint": "62639c8b29de0a6c10b4f3ea",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 325
+		},
+		{
+			"fingerprint": "cdfc3f70f0a470777cb2ec11",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 329
+		},
+		{
+			"fingerprint": "3fa514865c1b7cc30c80ac5a",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 331
+		},
+		{
+			"fingerprint": "3fa514865c1b7cc30c80ac5a",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 331
+		},
+		{
+			"fingerprint": "3fa514865c1b7cc30c80ac5a",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 331
+		},
+		{
+			"fingerprint": "3fa514865c1b7cc30c80ac5a",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 331
+		},
+		{
+			"fingerprint": "81d61692b7b565d221219814",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 332
+		},
+		{
+			"fingerprint": "35532840ef681c1dd33e05db",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 348
+		},
+		{
+			"fingerprint": "35532840ef681c1dd33e05db",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 348
+		},
+		{
+			"fingerprint": "7e42c1f9cd42c06d73ff0edb",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 353
+		},
+		{
+			"fingerprint": "274da363b427a66b305f93ab",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 355
+		},
+		{
+			"fingerprint": "e988cfb8a7418f60ae44f5fc",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 358
+		},
+		{
+			"fingerprint": "811bc3213ceb3164ca31c45f",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 375
+		},
+		{
+			"fingerprint": "a99788f85cd5fcd151d12c87",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 524
+		},
+		{
+			"fingerprint": "ff23b893e02fb70a80b6d3ea",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 530
+		},
+		{
+			"fingerprint": "e72d0553431bec986f5c8b33",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 554
+		},
+		{
+			"fingerprint": "bb4b26aaf5a84f98b93e14eb",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 658
+		},
+		{
+			"fingerprint": "bb4b26aaf5a84f98b93e14eb",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 658
+		},
+		{
+			"fingerprint": "bb4b26aaf5a84f98b93e14eb",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 658
+		},
+		{
+			"fingerprint": "bb4b26aaf5a84f98b93e14eb",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 658
+		},
+		{
+			"fingerprint": "bb4b26aaf5a84f98b93e14eb",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 658
+		},
+		{
+			"fingerprint": "bb4b26aaf5a84f98b93e14eb",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 658
+		},
+		{
+			"fingerprint": "bb4b26aaf5a84f98b93e14eb",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 658
+		},
+		{
+			"fingerprint": "bb4b26aaf5a84f98b93e14eb",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 658
+		},
+		{
+			"fingerprint": "bb4b26aaf5a84f98b93e14eb",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 658
+		},
+		{
+			"fingerprint": "d565c3d8506f3abe083a9d38",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 701
+		},
+		{
+			"fingerprint": "d565c3d8506f3abe083a9d38",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 701
+		},
+		{
+			"fingerprint": "6bf01d9a5b6d63c3c0956dcb",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 712
+		},
+		{
+			"fingerprint": "29d721544a72c3f6c153438f",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 731
+		},
+		{
+			"fingerprint": "ddab7f1ce030d211222ddc56",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 741
+		},
+		{
+			"fingerprint": "a6f7370dfc9bd31ec847ee61",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 742
+		},
+		{
+			"fingerprint": "d030095a9ca604671d64b375",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 764
+		},
+		{
+			"fingerprint": "b41884c22983931519a68c5f",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 769
+		},
+		{
+			"fingerprint": "bf3780cb7e30f21c5a866a80",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 770
+		},
+		{
+			"fingerprint": "bf3780cb7e30f21c5a866a80",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 770
+		},
+		{
+			"fingerprint": "d6f30ad31d7c783ab0725590",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 771
+		},
+		{
+			"fingerprint": "4255a414bfe73869c7ac91cb",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 783
+		},
+		{
+			"fingerprint": "043219d78e23a994bf96c535",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 804
+		},
+		{
+			"fingerprint": "b1a2b4b3d71f3e9ec013ecc5",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 805
+		},
+		{
+			"fingerprint": "2b0c06ddff03ac716d8781b3",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 854
+		},
+		{
+			"fingerprint": "2b0c06ddff03ac716d8781b3",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 854
+		},
+		{
+			"fingerprint": "2b0c06ddff03ac716d8781b3",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 854
+		},
+		{
+			"fingerprint": "2b0c06ddff03ac716d8781b3",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 854
+		},
+		{
+			"fingerprint": "230bd698d367dd67fb9311bd",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 904
+		},
+		{
+			"fingerprint": "13269651a38823042f1e9a91",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 905
+		},
+		{
+			"fingerprint": "13269651a38823042f1e9a91",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 905
+		},
+		{
+			"fingerprint": "7270bcfdccb6d67a66ca279c",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 920
+		},
+		{
+			"fingerprint": "945b77442312c37140fd243b",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 1037
+		},
+		{
+			"fingerprint": "bccb76460c29e8e83703b03a",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 1048
+		},
+		{
+			"fingerprint": "186e92fad53ee63bf5c5371a",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 1075
+		},
+		{
+			"fingerprint": "1b797e2591d9499787691e54",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 1212
+		},
+		{
+			"fingerprint": "0082cb08a1b812d9f2a731f2",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 1335
+		},
+		{
+			"fingerprint": "513fa2673c75c5507a12aedb",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 1413
+		},
+		{
+			"fingerprint": "b73b09a97c5f4a0df7cb6c47",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 1527
+		},
+		{
+			"fingerprint": "8df6aa9b55e1651f07419c80",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 1540
+		},
+		{
+			"fingerprint": "28d370ce3ce8e879a4e3f0ff",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 1559
+		},
+		{
+			"fingerprint": "9c079f90ed5a2d529320b723",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 1637
+		},
+		{
+			"fingerprint": "9fab064003000957f936c2d3",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 1662
+		},
+		{
+			"fingerprint": "cdc3a6fb56aa5198be859ec4",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 1716
+		},
+		{
+			"fingerprint": "cdc3a6fb56aa5198be859ec4",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 1716
+		},
+		{
+			"fingerprint": "597dce693f8b7f7510248714",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 1719
+		},
+		{
+			"fingerprint": "9eee3f738220e3dedbabf092",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 1755
+		},
+		{
+			"fingerprint": "0817952b38b289b7a143e039",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 1846
+		},
+		{
+			"fingerprint": "108e4d3e26e05e65e27510cc",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 2069
+		},
+		{
+			"fingerprint": "8e0c4341a40b4d695214bb5a",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 2092
+		},
+		{
+			"fingerprint": "51a233ff60297409a13affbb",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 2118
+		},
+		{
+			"fingerprint": "d11830ed97ec45515fb36c58",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 2186
+		},
+		{
+			"fingerprint": "d11830ed97ec45515fb36c58",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 2186
+		},
+		{
+			"fingerprint": "6ec1c1ffcd64cfd50747f872",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 2413
+		},
+		{
+			"fingerprint": "6ec1c1ffcd64cfd50747f872",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 2413
+		},
+		{
+			"fingerprint": "b0a93b75278280fde1861447",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 2418
+		},
+		{
+			"fingerprint": "2a9bfe51fed8074c2a2e6c6f",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 2464
+		},
+		{
+			"fingerprint": "2a9bfe51fed8074c2a2e6c6f",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 2464
+		},
+		{
+			"fingerprint": "1726ec71e0a505084a5d3859",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 2563
+		},
+		{
+			"fingerprint": "d8501fb8b389211a5998fb0a",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 2947
+		},
+		{
+			"fingerprint": "0f64570a8ebbbf333b7a7b9a",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/updateGroup.test.js",
+			"line": 3038
+		},
+		{
+			"fingerprint": "85582c01d5b5e0a75cf1420d",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/views.js",
+			"line": 55
+		},
+		{
+			"fingerprint": "dd14932d39bd9c317396444e",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/views.test.js",
+			"line": 277
+		},
+		{
+			"fingerprint": "95dd09af5b9deb179e05d345",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/storage/aws.js",
+			"line": 243
+		},
+		{
+			"fingerprint": "233e830643f60c17904bb16e",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/storage/aws.js",
+			"line": 316
+		},
+		{
+			"fingerprint": "4606fbce05b44585b70926f2",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/storage/aws.js",
+			"line": 334
+		},
+		{
+			"fingerprint": "86a4a85b971228f6814b3c83",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/storage/aws.js",
+			"line": 361
+		},
+		{
+			"fingerprint": "9c2028b29051b64b094ea4d2",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/storage/aws.js",
+			"line": 392
+		},
+		{
+			"fingerprint": "0b63e93f9b4417005a123fe9",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/storage/aws.js",
+			"line": 444
+		},
+		{
+			"fingerprint": "9e4a411a134908fd72fc4dde",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/storage/aws.test.js",
+			"line": 24
+		},
+		{
+			"fingerprint": "8c20445046ca320de7b56c9b",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/storage/aws.test.js",
+			"line": 41
+		},
+		{
+			"fingerprint": "cc1d9c91ca8730e1636be9f1",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/storage/aws.test.js",
+			"line": 97
+		},
+		{
+			"fingerprint": "0b1c4ce6938da2775ea0fbce",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/storage/aws.test.js",
+			"line": 282
+		},
+		{
+			"fingerprint": "7df0ff8a6481aff9923ba2ad",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/storage/aws.test.js",
+			"line": 360
+		},
+		{
+			"fingerprint": "2b6a3c829baf92d95213e161",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/storage/aws.test.js",
+			"line": 374
+		},
+		{
+			"fingerprint": "dd3b6c44b8a94b4007a7d0ec",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/storage/aws.test.js",
+			"line": 396
+		},
+		{
+			"fingerprint": "fcbbeec2baee6b78fae535a9",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/storage/aws.test.js",
+			"line": 472
+		},
+		{
+			"fingerprint": "a2e7bff93fda0b7921d606dd",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/storage/aws.test.js",
+			"line": 621
+		},
+		{
+			"fingerprint": "fec626f9c03c62c134400140",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/storage/importExport.test.js",
+			"line": 17
+		},
+		{
+			"fingerprint": "688ff3128b571e1d01b72cf2",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/storage/importExport.test.js",
+			"line": 166
+		},
+		{
+			"fingerprint": "aebb7d3b5fbcc5f252ea781a",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/storage/mongo.test.js",
+			"line": 227
+		},
+		{
+			"fingerprint": "03edb2581e2b2360d4e6b5fc",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/storage/storage.js",
+			"line": 358
+		},
+		{
+			"fingerprint": "f3c620f861afa51b73c56bdc",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/storage/storage.test.js",
+			"line": 278
+		},
+		{
+			"fingerprint": "c64c0fc0b4aec5b7092bc402",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/storage/storage.test.js",
+			"line": 373
+		},
+		{
+			"fingerprint": "255fcf32d56347ca51e34bcb",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/storage/storage.test.js",
+			"line": 436
+		},
+		{
+			"fingerprint": "aab06de1be99a392e9416d73",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/storage/storage.test.js",
+			"line": 467
+		},
+		{
+			"fingerprint": "2ecf8907c4d15b1d3a39e2a1",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/storage/storage.test.js",
+			"line": 724
+		},
+		{
+			"fingerprint": "572d5779de14ee5f0ccce5a4",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/storage/storage.test.js",
+			"line": 790
+		},
+		{
+			"fingerprint": "f11889e4a592169753c3244c",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/storage/storage.test.js",
+			"line": 813
+		},
+		{
+			"fingerprint": "525b6b3b415bda6196a5c48f",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/storage/storage.test.js",
+			"line": 815
+		},
+		{
+			"fingerprint": "ed6e9847f9c88288fb617813",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/storage/wasabi.test.js",
+			"line": 90
+		},
+		{
+			"fingerprint": "dc29c25e95d3655a6455e12f",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/API/API/API.js",
+			"line": 56
+		},
+		{
+			"fingerprint": "967ba7f2aea7eccf93ac7fb7",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/API/API/API.js",
+			"line": 196
+		},
+		{
+			"fingerprint": "95aba5c9f6ec5ce9444eb0ce",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/API/API/API.module.css",
+			"line": 10
+		},
+		{
+			"fingerprint": "6b9f990ba2feac84292e2a33",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/API/API/API.module.css",
+			"line": 156
+		},
+		{
+			"fingerprint": "a466e8b36574ba94aacc34a9",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/API/API/API.test.js",
+			"line": 72
+		},
+		{
+			"fingerprint": "a466e8b36574ba94aacc34a9",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/API/API/API.test.js",
+			"line": 72
+		},
+		{
+			"fingerprint": "a466e8b36574ba94aacc34a9",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/API/API/API.test.js",
+			"line": 72
+		},
+		{
+			"fingerprint": "a466e8b36574ba94aacc34a9",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/API/API/API.test.js",
+			"line": 72
+		},
+		{
+			"fingerprint": "a466e8b36574ba94aacc34a9",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/API/API/API.test.js",
+			"line": 72
+		},
+		{
+			"fingerprint": "a466e8b36574ba94aacc34a9",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/API/API/API.test.js",
+			"line": 72
+		},
+		{
+			"fingerprint": "a466e8b36574ba94aacc34a9",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/API/API/API.test.js",
+			"line": 72
+		},
+		{
+			"fingerprint": "a466e8b36574ba94aacc34a9",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/API/API/API.test.js",
+			"line": 72
+		},
+		{
+			"fingerprint": "a466e8b36574ba94aacc34a9",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/API/API/API.test.js",
+			"line": 72
+		},
+		{
+			"fingerprint": "a466e8b36574ba94aacc34a9",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/API/API/API.test.js",
+			"line": 72
+		},
+		{
+			"fingerprint": "3c7372d5f4cd1abd2fa7cc16",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/API/API/API.test.js",
+			"line": 73
+		},
+		{
+			"fingerprint": "cccbce983d2f97fbff5a7284",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/API/API/API.test.js",
+			"line": 104
+		},
+		{
+			"fingerprint": "a383ae136b75ef4c517af690",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/API/API/API.test.js",
+			"line": 300
+		},
+		{
+			"fingerprint": "56bac7067db3b58b96851c8b",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/API/API/API.test.js",
+			"line": 314
+		},
+		{
+			"fingerprint": "4a233b68a10d4d9681c3dea4",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/API/API/API.test.js",
+			"line": 338
+		},
+		{
+			"fingerprint": "bf47e31335c19c6e2e6912a9",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Account/Account/Account.js",
+			"line": 286
+		},
+		{
+			"fingerprint": "1cc1fc4c8d1fe4ab84aa62ca",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Account/Account/Account.js",
+			"line": 294
+		},
+		{
+			"fingerprint": "a95039ed669a269e1289afc9",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Account/Account/Account.js",
+			"line": 319
+		},
+		{
+			"fingerprint": "e656e37bd761e4e423432761",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Account/Account/Account.module.css",
+			"line": 11
+		},
+		{
+			"fingerprint": "7e54f97d6c82090039ee134c",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Account/Account/Account.module.css",
+			"line": 18
+		},
+		{
+			"fingerprint": "1de326ecdf4d23c3de587f61",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Account/Account/Account.module.css",
+			"line": 25
+		},
+		{
+			"fingerprint": "986ca61981599133bff1133f",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Account/Account/Account.module.css",
+			"line": 79
+		},
+		{
+			"fingerprint": "0fe64a0d7e5d4696bb21aef0",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Account/Account/Account.module.css",
+			"line": 81
+		},
+		{
+			"fingerprint": "3e68a80835e6e6d64464ba48",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Account/Account/Account.module.css",
+			"line": 123
+		},
+		{
+			"fingerprint": "3d9fda544d31d6c0a56a225f",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Account/Account/Account.test.js",
+			"line": 103
+		},
+		{
+			"fingerprint": "3d9fda544d31d6c0a56a225f",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Account/Account/Account.test.js",
+			"line": 103
+		},
+		{
+			"fingerprint": "34b8f5fc59e975affa4e5224",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Account/Account/Account.test.js",
+			"line": 133
+		},
+		{
+			"fingerprint": "43c7581f43a206f672909e82",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Account/Account/Account.test.js",
+			"line": 134
+		},
+		{
+			"fingerprint": "d6765598604de198edf76589",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Account/Account/Account.test.js",
+			"line": 143
+		},
+		{
+			"fingerprint": "b4dcef1dab6b2fcbdeeea49a",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Account/Account/Account.test.js",
+			"line": 198
+		},
+		{
+			"fingerprint": "77c0dabb69be011c4bf1e61b",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Account/Account/Account.test.js",
+			"line": 224
+		},
+		{
+			"fingerprint": "77c0dabb69be011c4bf1e61b",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Account/Account/Account.test.js",
+			"line": 224
+		},
+		{
+			"fingerprint": "97b6266416bd35034882eacc",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Account/Account/Account.test.js",
+			"line": 230
+		},
+		{
+			"fingerprint": "d0160e6e0f21dcbf624664b0",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Account/Account/Account.test.js",
+			"line": 270
+		},
+		{
+			"fingerprint": "def7bdf23d5e2a006223c212",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Account/Account/Account.test.js",
+			"line": 275
+		},
+		{
+			"fingerprint": "def7bdf23d5e2a006223c212",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Account/Account/Account.test.js",
+			"line": 275
+		},
+		{
+			"fingerprint": "38552cb3d3097e9f85cf7e5e",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Account/Account/Account.test.js",
+			"line": 336
+		},
+		{
+			"fingerprint": "52960040a9dbb82955a001d5",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Article/Edit/Edit.js",
+			"line": 44
+		},
+		{
+			"fingerprint": "dcd28c7799b3aa7307daadee",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Articles/ItemMenu/ItemMenu.js",
+			"line": 1
+		},
+		{
+			"fingerprint": "dcd28c7799b3aa7307daadee",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Articles/ItemMenu/ItemMenu.js",
+			"line": 1
+		},
+		{
+			"fingerprint": "0968abb22f96b035014973f7",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Articles/ItemMenu/ItemMenu.js",
+			"line": 4
+		},
+		{
+			"fingerprint": "329b62cb5ce4b61f4f4a9788",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Bookmarks/Bookmarks/Bookmarks.js",
+			"line": 46
+		},
+		{
+			"fingerprint": "329b62cb5ce4b61f4f4a9788",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Bookmarks/Bookmarks/Bookmarks.js",
+			"line": 46
+		},
+		{
+			"fingerprint": "086ed18d6b55a2e29334f43b",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Bookmarks/Bookmarks/Bookmarks.test.js",
+			"line": 64
+		},
+		{
+			"fingerprint": "752f5aebd01ae148c67f8831",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Bookmarks/ItemMenu/ItemMenu.js",
+			"line": 3
+		},
+		{
+			"fingerprint": "1a27fa7f7bc6661105c0c87d",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/ChangePassword/ChangePassword/ChangePassword.js",
+			"line": 1
+		},
+		{
+			"fingerprint": "ce21855d938a0904605c7cb2",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/ChangePassword/ChangePassword/ChangePassword.js",
+			"line": 10
+		},
+		{
+			"fingerprint": "18cb88518d70b872bc818ede",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/ChangePassword/ChangePassword/ChangePassword.js",
+			"line": 27
+		},
+		{
+			"fingerprint": "1925fbfa80455af0bfbea06e",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/ChangePassword/ChangePassword/ChangePassword.js",
+			"line": 28
+		},
+		{
+			"fingerprint": "9d060dc3d606c8aa2de4b99c",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/ChangePassword/ChangePassword/ChangePassword.js",
+			"line": 32
+		},
+		{
+			"fingerprint": "235e4f5e513093d7f1c45e41",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/ChangePassword/ChangePassword/ChangePassword.js",
+			"line": 34
+		},
+		{
+			"fingerprint": "f825975eb431670119ddb985",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/ChangePassword/ChangePassword/ChangePassword.js",
+			"line": 73
+		},
+		{
+			"fingerprint": "8d31ccec998a867c900c36bb",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/ChangePassword/ChangePassword/ChangePassword.js",
+			"line": 84
+		},
+		{
+			"fingerprint": "fc076ff2a5e42cf2d91fc6d8",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/ChangePassword/ChangePassword/ChangePassword.js",
+			"line": 100
+		},
+		{
+			"fingerprint": "46b3d3cdfcef68612bc827bc",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/ChangePassword/ChangePassword/ChangePassword.js",
+			"line": 120
+		},
+		{
+			"fingerprint": "650548d3dfbc9fba0c000ce5",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/ChangePassword/ChangePassword/ChangePassword.js",
+			"line": 159
+		},
+		{
+			"fingerprint": "6be52ad60de18660aaf2a0f7",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/ChangePassword/ChangePassword/ChangePassword.js",
+			"line": 170
+		},
+		{
+			"fingerprint": "01861623a26fef56d1b22d8a",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/ChangePassword/ChangePassword/ChangePassword.js",
+			"line": 175
+		},
+		{
+			"fingerprint": "5dabde557f48c6317a41b404",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/ChangePassword/ChangePassword/ChangePassword.js",
+			"line": 176
+		},
+		{
+			"fingerprint": "b79e80dc1eb6a877ecb6d1ae",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/ChangePassword/ChangePassword/ChangePassword.test.js",
+			"line": 7
+		},
+		{
+			"fingerprint": "b79e80dc1eb6a877ecb6d1ae",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/ChangePassword/ChangePassword/ChangePassword.test.js",
+			"line": 7
+		},
+		{
+			"fingerprint": "12291bda3c6b336db64f54b9",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/ChangePassword/ChangePassword/ChangePassword.test.js",
+			"line": 19
+		},
+		{
+			"fingerprint": "9881db56ae7389fbd8519217",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/ChangePassword/ChangePassword/ChangePassword.test.js",
+			"line": 57
+		},
+		{
+			"fingerprint": "4bbaf80f6d0e8ede28cef089",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/ChangePassword/ChangePassword/ChangePassword.test.js",
+			"line": 81
+		},
+		{
+			"fingerprint": "4bbaf80f6d0e8ede28cef089",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/ChangePassword/ChangePassword/ChangePassword.test.js",
+			"line": 81
+		},
+		{
+			"fingerprint": "4bbaf80f6d0e8ede28cef089",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/ChangePassword/ChangePassword/ChangePassword.test.js",
+			"line": 81
+		},
+		{
+			"fingerprint": "2efdfd5b719f091be85d6edb",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/ChangePassword/ChangePassword/ChangePassword.test.js",
+			"line": 91
+		},
+		{
+			"fingerprint": "c9521c56bd5dc8ef2dfd7414",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/ChangePassword/ChangePassword/ChangePassword.test.js",
+			"line": 112
+		},
+		{
+			"fingerprint": "7f92472b35974ec5827e5109",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Editor/Editor/Editor.test.js",
+			"line": 147
+		},
+		{
+			"fingerprint": "5150bb4d753b368eb9d51e64",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/FontSizes/FontSizes/FontSizes.test.js",
+			"line": 3
+		},
+		{
+			"fingerprint": "1a8add0b2098396acddac479",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Groups/ColorPicker/ColorPicker.module.css",
+			"line": 163
+		},
+		{
+			"fingerprint": "81f6e45f492e0f62926d1505",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Groups/Groups/Groups.test.js",
+			"line": 106
+		},
+		{
+			"fingerprint": "c28d47dc7140057be9656135",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Groups/Groups/Groups.test.js",
+			"line": 142
+		},
+		{
+			"fingerprint": "4100c79fc4afe3df6b222b52",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Groups/Groups/Groups.test.js",
+			"line": 164
+		},
+		{
+			"fingerprint": "0d7cd8866725ee8a64eec699",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Groups/Groups/Groups.test.js",
+			"line": 168
+		},
+		{
+			"fingerprint": "1511bbf91be6a7382cca6ff9",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Groups/Groups/Groups.test.js",
+			"line": 170
+		},
+		{
+			"fingerprint": "f35e33583c57795ddbb374df",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Groups/Groups/Groups.test.js",
+			"line": 187
+		},
+		{
+			"fingerprint": "8ef2c37d0b29a4a078e5d6ef",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Groups/Groups/Groups.test.js",
+			"line": 188
+		},
+		{
+			"fingerprint": "b107ded1144796d8580e64cc",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Groups/Groups/Groups.test.js",
+			"line": 302
+		},
+		{
+			"fingerprint": "a48f932dbb3545b74de9da2d",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Groups/Groups/Groups.test.js",
+			"line": 474
+		},
+		{
+			"fingerprint": "438534b453cfe8f10fe345dc",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Groups/Groups/Groups.test.js",
+			"line": 480
+		},
+		{
+			"fingerprint": "02266d88f55d4e5dcb09a7f7",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Groups/Groups/Groups.test.js",
+			"line": 516
+		},
+		{
+			"fingerprint": "e11f36b3fe52d8b4e1fd95a7",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Groups/ItemMenu/ItemMenu.test.js",
+			"line": 10
+		},
+		{
+			"fingerprint": "56fed25e38e7b9b1c4607f83",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Groups/Statistics/Statistics.test.js",
+			"line": 28
+		},
+		{
+			"fingerprint": "f8778e184128f7691f1c467d",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Home/Home/Home.module.css",
+			"line": 80
+		},
+		{
+			"fingerprint": "bc0a4aa1ffbd531caafa14fb",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Home/Home/Home.test.js",
+			"line": 273
+		},
+		{
+			"fingerprint": "61d1dbb3922a73984d0d54af",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Image/Image/Image.test.js",
+			"line": 117
+		},
+		{
+			"fingerprint": "1e236892d8125ec4530ecb89",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Library/Article/Article.test.js",
+			"line": 356
+		},
+		{
+			"fingerprint": "4a9fe63e6b223b031cec85b3",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Library/Article/Article.test.js",
+			"line": 369
+		},
+		{
+			"fingerprint": "42b083bf6e59782869d11e09",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Library/Article/Article.test.js",
+			"line": 472
+		},
+		{
+			"fingerprint": "5bef72a86b4960c44ae0045f",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Library/Article/Article.test.js",
+			"line": 580
+		},
+		{
+			"fingerprint": "226b1607d1dc688feae4869c",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Library/Article/Article.test.js",
+			"line": 590
+		},
+		{
+			"fingerprint": "b6a165baf46a43ea40b0aa1e",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Library/Article/Article.test.js",
+			"line": 616
+		},
+		{
+			"fingerprint": "430d61c6d33472fcd6ccd29b",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Library/Article/ArticleTermsDialog/ArticleTermsDialog.js",
+			"line": 164
+		},
+		{
+			"fingerprint": "b271818fd9ab35505f5b4356",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Library/Article/ArticleTermsDialog/ArticleTermsDialog.module.css",
+			"line": 204
+		},
+		{
+			"fingerprint": "623cf1f43ca4db2e15e6c230",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Library/Article/Markdown/Markdown.js",
+			"line": 297
+		},
+		{
+			"fingerprint": "d2359c2e2b87e57ff067b00a",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Library/Article/Markdown/Markdown.module.css",
+			"line": 5
+		},
+		{
+			"fingerprint": "2c82d4b5ac626032ce6f5b04",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Library/Article/Markdown/Markdown.module.css",
+			"line": 14
+		},
+		{
+			"fingerprint": "af73f18639da03e0b0b5a727",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Library/Article/Markdown/Markdown.module.css",
+			"line": 98
+		},
+		{
+			"fingerprint": "2ec02c5ba57731f552f1eeab",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Library/Article/Player/Controls/Controls.module.css",
+			"line": 43
+		},
+		{
+			"fingerprint": "53fa30d28ce98275a6ba3024",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Library/EditContentDialog/EditContentDialog.js",
+			"line": 1
+		},
+		{
+			"fingerprint": "088ac4af25fed3020fe5610f",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Library/EditTagsDialog/EditTagsDialog.js",
+			"line": 105
+		},
+		{
+			"fingerprint": "ba1d1afa585290d19a8db32a",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Library/Library/Library.test.js",
+			"line": 141
+		},
+		{
+			"fingerprint": "67b3466c9f314aece9715001",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Library/Library/Library.test.js",
+			"line": 142
+		},
+		{
+			"fingerprint": "38f752ea24b6f33241889fbd",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Library/Library/Library.test.js",
+			"line": 165
+		},
+		{
+			"fingerprint": "12fb3ec94f193ecb43033b7c",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Library/Library/Library.test.js",
+			"line": 223
+		},
+		{
+			"fingerprint": "a2ceb1b661045cdf666e0c03",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Library/Library/Library.test.js",
+			"line": 468
+		},
+		{
+			"fingerprint": "0d78dedc27241ab830addd83",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Library/Library/Library.test.js",
+			"line": 487
+		},
+		{
+			"fingerprint": "cdbb173311fd94868913c546",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Library/Library/Library.test.js",
+			"line": 777
+		},
+		{
+			"fingerprint": "cdbb173311fd94868913c546",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Library/Library/Library.test.js",
+			"line": 777
+		},
+		{
+			"fingerprint": "cdbb173311fd94868913c546",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Library/Library/Library.test.js",
+			"line": 777
+		},
+		{
+			"fingerprint": "cdbb173311fd94868913c546",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Library/Library/Library.test.js",
+			"line": 777
+		},
+		{
+			"fingerprint": "cdbb173311fd94868913c546",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Library/Library/Library.test.js",
+			"line": 777
+		},
+		{
+			"fingerprint": "cdbb173311fd94868913c546",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Library/Library/Library.test.js",
+			"line": 777
+		},
+		{
+			"fingerprint": "cdbb173311fd94868913c546",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Library/Library/Library.test.js",
+			"line": 777
+		},
+		{
+			"fingerprint": "cdbb173311fd94868913c546",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Library/Library/Library.test.js",
+			"line": 777
+		},
+		{
+			"fingerprint": "cdbb173311fd94868913c546",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Library/Library/Library.test.js",
+			"line": 777
+		},
+		{
+			"fingerprint": "cdbb173311fd94868913c546",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Library/Library/Library.test.js",
+			"line": 777
+		},
+		{
+			"fingerprint": "d82fd91f1371943e9cdaaab7",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Library/Library/Library.test.js",
+			"line": 807
+		},
+		{
+			"fingerprint": "d82fd91f1371943e9cdaaab7",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Library/Library/Library.test.js",
+			"line": 807
+		},
+		{
+			"fingerprint": "155080a7a67708b87c7ac28b",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Library/Library/Library.test.js",
+			"line": 884
+		},
+		{
+			"fingerprint": "0619f8f2c3974a581f854ef3",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Library/Library/Library.test.js",
+			"line": 892
+		},
+		{
+			"fingerprint": "0619f8f2c3974a581f854ef3",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Library/Library/Library.test.js",
+			"line": 892
+		},
+		{
+			"fingerprint": "9d9b1767e2682fd759af5b93",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Library/Library/Library.test.js",
+			"line": 893
+		},
+		{
+			"fingerprint": "cb6dfb65e17921579e623449",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Library/Library/Library.test.js",
+			"line": 894
+		},
+		{
+			"fingerprint": "745897334844b164f3bf2756",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Library/Library/Library.test.js",
+			"line": 999
+		},
+		{
+			"fingerprint": "38f4f41b58bb32fb31d1d37f",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Library/Library/Library.test.js",
+			"line": 1091
+		},
+		{
+			"fingerprint": "955ee756b112ee04277790b5",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Library/TreeItem/TreeItem.test.js",
+			"line": 69
+		},
+		{
+			"fingerprint": "c085ae775da50ea8b2d5ee5d",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Library/TreeItem/TreeItem.test.js",
+			"line": 70
+		},
+		{
+			"fingerprint": "8c888e97586307ca78a92a85",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Library/TreeItem/TreeItem.test.js",
+			"line": 103
+		},
+		{
+			"fingerprint": "af1e42c00523625c52ccca6b",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Player/Audio/Audio.js",
+			"line": 44
+		},
+		{
+			"fingerprint": "2fde1125a04e0597eeb8d732",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Player/Audio/Audio.module.css",
+			"line": 85
+		},
+		{
+			"fingerprint": "51b9c24cba2691c5445a76f1",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Player/Audio/Audio.module.css",
+			"line": 92
+		},
+		{
+			"fingerprint": "3c7e3e17f37eea9da99d48f6",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Player/Audio/Audio.module.css",
+			"line": 131
+		},
+		{
+			"fingerprint": "a5dc7dee7d07684e466e66b7",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Player/Audio/Audio.module.css",
+			"line": 145
+		},
+		{
+			"fingerprint": "78c0fc60247611448f2cc3fd",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Player/Audio/Audio.test.js",
+			"line": 198
+		},
+		{
+			"fingerprint": "06877e4c3eaafb4ad3e568bf",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Player/Controls/Controls.js",
+			"line": 173
+		},
+		{
+			"fingerprint": "20bc6050a5294e540cd7932f",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Player/Controls/Controls.test.js",
+			"line": 154
+		},
+		{
+			"fingerprint": "fb217748d439f86b0ad0343e",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Player/Controls/Controls.test.js",
+			"line": 228
+		},
+		{
+			"fingerprint": "fb217748d439f86b0ad0343e",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Player/Controls/Controls.test.js",
+			"line": 228
+		},
+		{
+			"fingerprint": "9ee65a2b4d3b95e435bafc51",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Player/Controls/Controls.test.js",
+			"line": 440
+		},
+		{
+			"fingerprint": "26393942ef38529fa5cc64dd",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Player/Controls/Controls.test.js",
+			"line": 460
+		},
+		{
+			"fingerprint": "ad9b52518054590acb7014d7",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Player/Controls/Controls.test.js",
+			"line": 521
+		},
+		{
+			"fingerprint": "2598c12eadb0a8a26644eb48",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Player/Controls/Controls.test.js",
+			"line": 530
+		},
+		{
+			"fingerprint": "5126a747e891b7b237cac080",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Player/Player/Player.test.js",
+			"line": 161
+		},
+		{
+			"fingerprint": "552af187423d987548d5a1b6",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Player/Player/Player.test.js",
+			"line": 180
+		},
+		{
+			"fingerprint": "4f642974ac8831c1af3888e4",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Player/SpeedSlider/SpeedSlider.module.css",
+			"line": 118
+		},
+		{
+			"fingerprint": "5a397213681442f904c74f4d",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Player/Transcript/Transcript.test.js",
+			"line": 234
+		},
+		{
+			"fingerprint": "11cd42d9d4064bdb64284a03",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Player/useMediaUrlRenewal.test.js",
+			"line": 69
+		},
+		{
+			"fingerprint": "f8b6a7d0bc41e07784162e86",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Research/Research.test.js",
+			"line": 163
+		},
+		{
+			"fingerprint": "f8b6a7d0bc41e07784162e86",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Research/Research.test.js",
+			"line": 163
+		},
+		{
+			"fingerprint": "c4f0c6e68c650386bbff6335",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Research/Research.test.js",
+			"line": 240
+		},
+		{
+			"fingerprint": "9e4ab72c11c730d9e2cb5373",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Research/Research.test.js",
+			"line": 270
+		},
+		{
+			"fingerprint": "9e4ab72c11c730d9e2cb5373",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Research/Research.test.js",
+			"line": 270
+		},
+		{
+			"fingerprint": "9e4ab72c11c730d9e2cb5373",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Research/Research.test.js",
+			"line": 270
+		},
+		{
+			"fingerprint": "9e4ab72c11c730d9e2cb5373",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Research/Research.test.js",
+			"line": 270
+		},
+		{
+			"fingerprint": "5aab23a8ffc8de196fbdb5e7",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Research/Research.test.js",
+			"line": 279
+		},
+		{
+			"fingerprint": "11e91c348f370e714d136da1",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Research/Research.test.js",
+			"line": 345
+		},
+		{
+			"fingerprint": "11e91c348f370e714d136da1",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Research/Research.test.js",
+			"line": 345
+		},
+		{
+			"fingerprint": "11e91c348f370e714d136da1",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Research/Research.test.js",
+			"line": 345
+		},
+		{
+			"fingerprint": "11e91c348f370e714d136da1",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Research/Research.test.js",
+			"line": 345
+		},
+		{
+			"fingerprint": "f2c12434ec4e886db14424ef",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Research/Research.test.js",
+			"line": 384
+		},
+		{
+			"fingerprint": "f2c12434ec4e886db14424ef",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Research/Research.test.js",
+			"line": 384
+		},
+		{
+			"fingerprint": "8c81a8b3cba163fb39de7e26",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Research/Research.test.js",
+			"line": 664
+		},
+		{
+			"fingerprint": "eb6a8ed2590e6e3bfcb4af4a",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Research/Research.test.js",
+			"line": 709
+		},
+		{
+			"fingerprint": "0b00c905e126ed00aae0d275",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Research/Research.test.js",
+			"line": 807
+		},
+		{
+			"fingerprint": "f14c1cfd2bc02447ca1bc2de",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Research/Research.test.js",
+			"line": 857
+		},
+		{
+			"fingerprint": "2d0a5306cc109eeaca5b0f47",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Research/Research.test.js",
+			"line": 914
+		},
+		{
+			"fingerprint": "b92c7de81f7acdb753b7c822",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Research/Research.test.js",
+			"line": 969
+		},
+		{
+			"fingerprint": "9cf91bb19bfd1f7fc0c41f60",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Research/Research.test.js",
+			"line": 1008
+		},
+		{
+			"fingerprint": "54492f42faf856cdc613e65c",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Research/Research.test.js",
+			"line": 1010
+		},
+		{
+			"fingerprint": "c0ee58234c1172fac0bdbdfa",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Research/Research.test.js",
+			"line": 1032
+		},
+		{
+			"fingerprint": "c5a0b496989153753f465848",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Research/Research.test.js",
+			"line": 1190
+		},
+		{
+			"fingerprint": "87f34dd0cb1ed80dab6f6105",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Research/Research.test.js",
+			"line": 1207
+		},
+		{
+			"fingerprint": "02ae92c3b74f31933e871018",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Research/Research.test.js",
+			"line": 1413
+		},
+		{
+			"fingerprint": "0c07554c839aea0ce1faaff5",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Research/Research.test.js",
+			"line": 1477
+		},
+		{
+			"fingerprint": "c346f05fce11d5146d76f85f",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Research/Research.test.js",
+			"line": 1480
+		},
+		{
+			"fingerprint": "78b22725603cc8b4cfdcc6b6",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Research/Research.test.js",
+			"line": 1493
+		},
+		{
+			"fingerprint": "58f5ddd62d4dd024938e9d9b",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Research/Research.test.js",
+			"line": 1499
+		},
+		{
+			"fingerprint": "6ad87a087e9dbc104c2073f7",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Research/Research.test.js",
+			"line": 1512
+		},
+		{
+			"fingerprint": "830c30f97be22af2315663c4",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Research/Research.test.js",
+			"line": 1743
+		},
+		{
+			"fingerprint": "c6a1b42351e04d9482640350",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Research/Research.test.js",
+			"line": 1848
+		},
+		{
+			"fingerprint": "9e5bec7bd3f97361e1e6d946",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Research/ResearchResultsList/useResearchResultsList.js",
+			"line": 182
+		},
+		{
+			"fingerprint": "01cb00373f40d57cfbd96b78",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Research/runResearchSearch.js",
+			"line": 10
+		},
+		{
+			"fingerprint": "f88d002aa9eccb16d93b7042",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Research/runResearchSearch.test.js",
+			"line": 66
+		},
+		{
+			"fingerprint": "52d7cf7739ba0d066a5a2054",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Research/runResearchSearch.test.js",
+			"line": 204
+		},
+		{
+			"fingerprint": "4132ff25a168e98878338bb9",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Research/runResearchSearch.test.js",
+			"line": 382
+		},
+		{
+			"fingerprint": "4132ff25a168e98878338bb9",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Research/runResearchSearch.test.js",
+			"line": 382
+		},
+		{
+			"fingerprint": "e97e0e0afb7cb8feb6de56d3",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Research/runResearchSearch.test.js",
+			"line": 526
+		},
+		{
+			"fingerprint": "d498ebcd6a6251dc40a4cf45",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Research/runResearchSearch.test.js",
+			"line": 597
+		},
+		{
+			"fingerprint": "64065505e1c357e4ff268f69",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Research/runResearchSearch.test.js",
+			"line": 624
+		},
+		{
+			"fingerprint": "43054d54e9a00e073b243745",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Research/runResearchSearch.test.js",
+			"line": 803
+		},
+		{
+			"fingerprint": "a52a69759b28e331f50d1ed0",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/ResearchIndexer/buildSearchIndex.test.js",
+			"line": 104
+		},
+		{
+			"fingerprint": "a52a69759b28e331f50d1ed0",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/ResearchIndexer/buildSearchIndex.test.js",
+			"line": 104
+		},
+		{
+			"fingerprint": "a52a69759b28e331f50d1ed0",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/ResearchIndexer/buildSearchIndex.test.js",
+			"line": 104
+		},
+		{
+			"fingerprint": "a52a69759b28e331f50d1ed0",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/ResearchIndexer/buildSearchIndex.test.js",
+			"line": 104
+		},
+		{
+			"fingerprint": "a52a69759b28e331f50d1ed0",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/ResearchIndexer/buildSearchIndex.test.js",
+			"line": 104
+		},
+		{
+			"fingerprint": "a52a69759b28e331f50d1ed0",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/ResearchIndexer/buildSearchIndex.test.js",
+			"line": 104
+		},
+		{
+			"fingerprint": "1666a98119da4f573c51bdc8",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/ResearchIndexer/buildSearchIndex.test.js",
+			"line": 120
+		},
+		{
+			"fingerprint": "1666a98119da4f573c51bdc8",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/ResearchIndexer/buildSearchIndex.test.js",
+			"line": 120
+		},
+		{
+			"fingerprint": "defe251a29f1e3a98410b36a",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/ResearchIndexer/buildSearchIndex.test.js",
+			"line": 142
+		},
+		{
+			"fingerprint": "a241b23d7f8ec3dbcf7cdf55",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/ResearchIndexer/buildSearchIndex.test.js",
+			"line": 188
+		},
+		{
+			"fingerprint": "e8553f12b6ecc04915e670df",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/ResearchIndexer/buildSearchIndex.test.js",
+			"line": 200
+		},
+		{
+			"fingerprint": "ed9b1fc53edf941c998bd8ed",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/ResearchIndexer/buildSearchIndex.test.js",
+			"line": 209
+		},
+		{
+			"fingerprint": "96a9000704e17aa39c90a21c",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/ResearchIndexer/buildSearchIndex.test.js",
+			"line": 210
+		},
+		{
+			"fingerprint": "8c3a405ba3c782892999e02d",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/ResearchIndexer/buildSearchIndex.test.js",
+			"line": 231
+		},
+		{
+			"fingerprint": "4f18fe79dda5d4d73e1830e5",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/ResearchIndexer/buildSearchIndex.test.js",
+			"line": 298
+		},
+		{
+			"fingerprint": "148a001e7006c0e51af22d07",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/ResearchIndexer/buildSearchIndex.test.js",
+			"line": 396
+		},
+		{
+			"fingerprint": "148a001e7006c0e51af22d07",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/ResearchIndexer/buildSearchIndex.test.js",
+			"line": 396
+		},
+		{
+			"fingerprint": "1b3ddfe8bb5427f2ac1fd28e",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/ResearchIndexer/buildSearchIndex.test.js",
+			"line": 423
+		},
+		{
+			"fingerprint": "7bc7a447099403f54d9496b4",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/ResearchIndexer/buildSearchIndex.test.js",
+			"line": 424
+		},
+		{
+			"fingerprint": "7bc7a447099403f54d9496b4",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/ResearchIndexer/buildSearchIndex.test.js",
+			"line": 424
+		},
+		{
+			"fingerprint": "7bc7a447099403f54d9496b4",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/ResearchIndexer/buildSearchIndex.test.js",
+			"line": 424
+		},
+		{
+			"fingerprint": "f141602bddfbf7ef503b00e6",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/ResearchIndexer/buildSearchIndex.test.js",
+			"line": 579
+		},
+		{
+			"fingerprint": "bf6f991f2cccbba886206078",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/ResetPassword/ResetPassword/ResetPassword.js",
+			"line": 103
+		},
+		{
+			"fingerprint": "5c9dd8b872289754479c84fe",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/ResetPassword/ResetPassword/ResetPassword.test.js",
+			"line": 87
+		},
+		{
+			"fingerprint": "dc1606ce560152f9c327a1f9",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/ResetPassword/ResetPassword/ResetPassword.test.js",
+			"line": 88
+		},
+		{
+			"fingerprint": "721edb732d8875871d84ec58",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/ResetPassword/ResetPassword/ResetPassword.test.js",
+			"line": 108
+		},
+		{
+			"fingerprint": "42bdcc1c52e6e0d7338d1f19",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/ResetPassword/ResetPassword/ResetPassword.test.js",
+			"line": 109
+		},
+		{
+			"fingerprint": "6a442b4038e88ec83055d61e",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/ResetPassword/ResetPassword/ResetPassword.test.js",
+			"line": 150
+		},
+		{
+			"fingerprint": "d370dd3a1ed5b48746b4e212",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Schedule/DayView/DayView.js",
+			"line": 80
+		},
+		{
+			"fingerprint": "cfea258da8eced456e214975",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Schedule/DayView/DayView.js",
+			"line": 149
+		},
+		{
+			"fingerprint": "8d86fed04cb995a60d83a2c2",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Schedule/DayView/DayView.js",
+			"line": 176
+		},
+		{
+			"fingerprint": "cd33b199518fff9598adb3d5",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Schedule/DayView/DayView.js",
+			"line": 185
+		},
+		{
+			"fingerprint": "fc3069acba226cc38c4dd3d0",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Schedule/DayView/DayView.js",
+			"line": 192
+		},
+		{
+			"fingerprint": "37cdae993ae3b6bea4d97b4c",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Schedule/DayView/DayView.js",
+			"line": 219
+		},
+		{
+			"fingerprint": "b50f08db5e5ee5ec9f2ab292",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Schedule/DayView/DayView.test.js",
+			"line": 23
+		},
+		{
+			"fingerprint": "b50f08db5e5ee5ec9f2ab292",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Schedule/DayView/DayView.test.js",
+			"line": 23
+		},
+		{
+			"fingerprint": "e9d14564ce6d76de2bf52b6a",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Schedule/DayView/DayView.test.js",
+			"line": 24
+		},
+		{
+			"fingerprint": "3e1c027247c261a5b4dd37b1",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Schedule/DayView/DayView.test.js",
+			"line": 28
+		},
+		{
+			"fingerprint": "ce771137c5f65a554bdaf31d",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Schedule/DayView/DayView.test.js",
+			"line": 35
+		},
+		{
+			"fingerprint": "d7ec279dfb2ded26d1367ef5",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Schedule/DayView/DayView.test.js",
+			"line": 53
+		},
+		{
+			"fingerprint": "ee24ae2758a018f82f0f9631",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Schedule/DayView/DayView.test.js",
+			"line": 54
+		},
+		{
+			"fingerprint": "7c339b163500f5b300b1c5fe",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Schedule/DayView/DayView.test.js",
+			"line": 55
+		},
+		{
+			"fingerprint": "c8b09f18e1cdad3dc9e00157",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Schedule/DayView/DayView.test.js",
+			"line": 68
+		},
+		{
+			"fingerprint": "59db959feb075c5acb984147",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Schedule/DayView/Session/Session.js",
+			"line": 1
+		},
+		{
+			"fingerprint": "9854b144173084ced02f0ed8",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Schedule/DayView/Session/Session.js",
+			"line": 17
+		},
+		{
+			"fingerprint": "c005a78270824c1b21374778",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Schedule/DayView/Session/Session.module.css",
+			"line": 1
+		},
+		{
+			"fingerprint": "8a84413551e522f45d32c1f5",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Schedule/DayView/Session/Session.module.css",
+			"line": 87
+		},
+		{
+			"fingerprint": "8a84413551e522f45d32c1f5",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Schedule/DayView/Session/Session.module.css",
+			"line": 87
+		},
+		{
+			"fingerprint": "0c0fcc98d8f3e793a942e016",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Schedule/MonthView/Day/Day.js",
+			"line": 38
+		},
+		{
+			"fingerprint": "5965689c96c93f1ac79e1739",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Schedule/MonthView/Day/Day.js",
+			"line": 47
+		},
+		{
+			"fingerprint": "6f5c677c21b5acfd797c186e",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Schedule/MonthView/MonthView.js",
+			"line": 75
+		},
+		{
+			"fingerprint": "cf2400ea7d0b197a9d38e1c1",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Schedule/MonthView/MonthView.js",
+			"line": 116
+		},
+		{
+			"fingerprint": "0e00fab413d3fb6a4c9c5106",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Schedule/MonthView/MonthView.js",
+			"line": 121
+		},
+		{
+			"fingerprint": "11e58f5f087a61afb17ec5bd",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Schedule/MonthView/MonthView.js",
+			"line": 189
+		},
+		{
+			"fingerprint": "86670ad4634d0ab9a4b58826",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Schedule/MonthView/MonthView.js",
+			"line": 194
+		},
+		{
+			"fingerprint": "ba85233e3d4ceaf74116c3bf",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Schedule/MonthView/MonthView.js",
+			"line": 205
+		},
+		{
+			"fingerprint": "b4b1a81d046d4cff0882df80",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Schedule/MonthView/MonthView.test.js",
+			"line": 134
+		},
+		{
+			"fingerprint": "07d1e11c03a57adfbf2eb9dd",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Schedule/MonthView/MonthView.test.js",
+			"line": 176
+		},
+		{
+			"fingerprint": "2a869042bdaaaeca901b29af",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Schedule/MonthView/Sessions/Session/Session.js",
+			"line": 17
+		},
+		{
+			"fingerprint": "aa15f3373de408ca7458e59b",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Schedule/MonthView/Sessions/Session/Session.test.js",
+			"line": 4
+		},
+		{
+			"fingerprint": "4d721f22285fc5085210aa6f",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Schedule/MonthView/Week/Week.js",
+			"line": 14
+		},
+		{
+			"fingerprint": "c003912b05d2ef8515b24b43",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Schedule/Schedule/Schedule.js",
+			"line": 61
+		},
+		{
+			"fingerprint": "f8fb044cdd38daced1ca8d31",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Schedule/Schedule/Schedule.js",
+			"line": 231
+		},
+		{
+			"fingerprint": "0db3677e3e3b3dd0d5866802",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Schedule/Schedule/Schedule.test.js",
+			"line": 24
+		},
+		{
+			"fingerprint": "151a6cc96b4b1343ab405e6e",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Schedule/Section.test.js",
+			"line": 52
+		},
+		{
+			"fingerprint": "7b84240eabdde2458c790107",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Schedule/TracksView/Card/Card.js",
+			"line": 24
+		},
+		{
+			"fingerprint": "11b18d915f42898181f8def3",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Schedule/TracksView/Row/Row.module.css",
+			"line": 144
+		},
+		{
+			"fingerprint": "c0715f9fce4ebe6930f0b681",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Schedule/TracksView/Row/Row.test.js",
+			"line": 161
+		},
+		{
+			"fingerprint": "76721651593f374cdfba8d25",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Schedule/WeekView/WeekView.js",
+			"line": 231
+		},
+		{
+			"fingerprint": "b05bcd20c56145ee45bdd783",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Session/Session/Session.module.css",
+			"line": 174
+		},
+		{
+			"fingerprint": "43e890edf6e249a9c0bf8e3d",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Session/Session/Session.test.js",
+			"line": 290
+		},
+		{
+			"fingerprint": "732a1f271cc826e2a277e1fb",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Session/Tabs/Tabs.test.js",
+			"line": 52
+		},
+		{
+			"fingerprint": "f5cf3260b5c8939ba03d58ef",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Sessions/Sessions/Sessions.module.css",
+			"line": 415
+		},
+		{
+			"fingerprint": "bbc1102edf826e85385d2a7a",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Sessions/Sessions/Sessions.module.css",
+			"line": 423
+		},
+		{
+			"fingerprint": "ee8f5ddced79426b7bf704df",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Sessions/Sessions/Sessions.module.css",
+			"line": 435
+		},
+		{
+			"fingerprint": "4fb66380cf03dfd627a512a0",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Sessions/Sessions/Sessions.test.js",
+			"line": 39
+		},
+		{
+			"fingerprint": "d5a9e3f957dfa52309804ebd",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Sessions/Sessions/Sessions.test.js",
+			"line": 555
+		},
+		{
+			"fingerprint": "77753f8bb2ac7db3c6ac9599",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Settings/ClearStorage/ClearStorage.test.js",
+			"line": 10
+		},
+		{
+			"fingerprint": "71d213fefdd1e14ca0f6aeb7",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Settings/FullSync/FullSync.test.js",
+			"line": 10
+		},
+		{
+			"fingerprint": "0bf21eef3043005c9d3d7cb3",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/SignUp/SignUp/SignUp.js",
+			"line": 38
+		},
+		{
+			"fingerprint": "c0ddadf79c0ea90b1afd7262",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/SignUp/SignUp/SignUp.js",
+			"line": 58
+		},
+		{
+			"fingerprint": "2f5d702069497f8d81885e29",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/SignUp/SignUp/SignUp.test.js",
+			"line": 88
+		},
+		{
+			"fingerprint": "2f5d702069497f8d81885e29",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/SignUp/SignUp/SignUp.test.js",
+			"line": 88
+		},
+		{
+			"fingerprint": "7a8feb41052dc0fdc8bc1e7a",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/SignUp/SignUp/SignUp.test.js",
+			"line": 92
+		},
+		{
+			"fingerprint": "7a8feb41052dc0fdc8bc1e7a",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/SignUp/SignUp/SignUp.test.js",
+			"line": 92
+		},
+		{
+			"fingerprint": "c8f171cdf78cb289d98156b1",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Storage/Actions/Actions.js",
+			"line": 36
+		},
+		{
+			"fingerprint": "f7f425c273afc0df8766f796",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Storage/Actions/Actions.js",
+			"line": 110
+		},
+		{
+			"fingerprint": "7d770e884bbd2d74b898807f",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Storage/Actions/Actions.js",
+			"line": 120
+		},
+		{
+			"fingerprint": "d841481b325611b4f3c048bd",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Storage/Destination/Destination.js",
+			"line": 43
+		},
+		{
+			"fingerprint": "0b5ac2429df0fa5aca4f086f",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Storage/Destination/Destination.js",
+			"line": 47
+		},
+		{
+			"fingerprint": "50fa63dd859a1a3b0194f923",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Storage/ItemMenu/ItemMenu.js",
+			"line": 72
+		},
+		{
+			"fingerprint": "17cfbeedd9314d382a264578",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Storage/ItemMenu/ItemMenu.test.js",
+			"line": 88
+		},
+		{
+			"fingerprint": "17cfbeedd9314d382a264578",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Storage/ItemMenu/ItemMenu.test.js",
+			"line": 88
+		},
+		{
+			"fingerprint": "a197145648536f3c613b4576",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Storage/ItemMenu/ItemMenu.test.js",
+			"line": 89
+		},
+		{
+			"fingerprint": "af007397c19abd4e7ebb8c0a",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Storage/Storage/Storage.test.js",
+			"line": 305
+		},
+		{
+			"fingerprint": "f02b46f0bf46647ddb78cdff",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Sync/Sync/Sync.test.js",
+			"line": 111
+		},
+		{
+			"fingerprint": "19a7087c09e552553179e032",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Sync/Sync/Sync.test.js",
+			"line": 186
+		},
+		{
+			"fingerprint": "961b21817a45d946e50d8732",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Sync/Sync/Sync.test.js",
+			"line": 196
+		},
+		{
+			"fingerprint": "06f5a40a536cf257a078a6e3",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Sync/Sync/Sync.test.js",
+			"line": 209
+		},
+		{
+			"fingerprint": "eb7197e7a03c2ebdd5023dbc",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Tags/BatchDialog/BatchDialog.js",
+			"line": 76
+		},
+		{
+			"fingerprint": "a61ed964cf9c9824249c7afb",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Tags/BatchDialog/BatchDialog.js",
+			"line": 149
+		},
+		{
+			"fingerprint": "21ce64e2dace58d5ac2d5682",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Tags/BatchDialog/BatchDialog.js",
+			"line": 231
+		},
+		{
+			"fingerprint": "e2539543cc4cbe4d5a129748",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Tags/BatchDialog/BatchDialog.js",
+			"line": 233
+		},
+		{
+			"fingerprint": "1a4dc678f3a0e3ddb2213e47",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Tags/BatchDialog/BatchDialog.js",
+			"line": 254
+		},
+		{
+			"fingerprint": "f35cf5fe4f9f720a50e62099",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Tags/Library/Library.js",
+			"line": 131
+		},
+		{
+			"fingerprint": "a4b13817d135c1a01dc9240a",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Tags/Library/Library.js",
+			"line": 157
+		},
+		{
+			"fingerprint": "bd7fca936a6a67f7138160cc",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Tags/Library/Library.js",
+			"line": 168
+		},
+		{
+			"fingerprint": "3bb9b90c9200c55ea3777b9f",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Tags/Library/Library.js",
+			"line": 193
+		},
+		{
+			"fingerprint": "f3707b0ab5633c9bec0ac41f",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Tags/Library/Library.js",
+			"line": 197
+		},
+		{
+			"fingerprint": "20f7960ac5d8b2f1f0b55456",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/User/User/User.test.js",
+			"line": 123
+		},
+		{
+			"fingerprint": "49bee5484936f3e26b898488",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/User/User/User.test.js",
+			"line": 214
+		}
+	]
+}
