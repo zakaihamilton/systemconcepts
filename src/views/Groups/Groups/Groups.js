@@ -4,7 +4,6 @@ import UploadIcon from "@icons/svg/Upload.svg";
 import VisibilityIcon from "@icons/svg/Visibility.svg";
 import VisibilityOffIcon from "@icons/svg/VisibilityOff.svg";
 import { logger as structuredLogger } from "@util/api/logger";
-import { useOnline } from "@util/browser/online";
 import { useDeviceType, useStyles } from "@util/browser/styles";
 import { abbreviateSize, formatDuration } from "@util/data/string";
 import { GroupsStore } from "@util/domain/groups";
@@ -25,7 +24,6 @@ import styles from "./Groups.module.css";
 registerToolbar("Groups");
 
 export default function Groups() {
-	const online = useOnline();
 	const translations = useTranslations();
 	const isMobile = useDeviceType() !== "desktop";
 	const { counter, showDisabled } = GroupsStore.useState();
@@ -43,7 +41,10 @@ export default function Groups() {
 		updateGroup,
 	} = useUpdateSessions(groups);
 	const isSignedIn = Cookies.get("id") && Cookies.get("hash");
-	const syncEnabled = online && isSignedIn;
+	// Keep the actions visible when the browser's online flag is stale. The
+	// per-group menu already behaves this way, and the update functions handle
+	// request failures themselves.
+	const syncEnabled = !!isSignedIn;
 	const fileInputRef = useRef(null);
 	const [groupSizes, setGroupSizes] = useState({});
 	const [sizeRefreshTrigger, setSizeRefreshTrigger] = useState(0);

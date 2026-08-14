@@ -270,10 +270,17 @@ describe("Groups View", () => {
 		expect(updateRecentSessions).toHaveBeenCalled();
 	});
 
-	it("hides sync toolbar when offline", () => {
+	it("keeps sync toolbar visible when the browser reports offline", () => {
 		useOnline.mockReturnValue(false);
 		render(<Groups />);
-		expect(toolbarItems.every((i) => i.id !== "sync_all_sessions")).toBe(true);
+		expect(toolbarItems.map((i) => i.id)).toEqual(
+			expect.arrayContaining([
+				"sync_sessions",
+				"sync_all_sessions",
+				"update_recent_sessions",
+				"update_metadata_all_current_year",
+			]),
+		);
 	});
 
 	it("calculates sizes for split groups", async () => {
