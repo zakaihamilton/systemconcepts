@@ -83,14 +83,14 @@
 	},
 	"resolutions": {
 		"fast-uri": "3.1.5",
-		"nanoid": "3.3.17",
+		"nanoid": "3.3.18",
 		"postcss": "8.5.23",
 		"sharp": "0.35.3"
 	},
 	"overrides": {
 		"glob": "^13.0.0",
 		"fast-uri": "3.1.5",
-		"nanoid": "3.3.17",
+		"nanoid": "3.3.18",
 		"postcss": "8.5.23",
 		"sharp": "0.35.3"
 	},
