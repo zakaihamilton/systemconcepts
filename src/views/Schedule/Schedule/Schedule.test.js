@@ -2,6 +2,7 @@ import { useSearch } from "@components/Search";
 import { useToolbar } from "@components/Toolbar";
 import { SyncActiveStore } from "@sync/syncState";
 import { fireEvent, render, screen } from "@testing-library/react";
+import { useLocalStorage } from "@util/browser/store";
 import { useDeviceType } from "@util/browser/styles";
 import { SessionsStore, useSessions } from "@util/domain/sessions";
 import { useTranslations } from "@util/domain/translations";
@@ -108,6 +109,15 @@ describe("Schedule View", () => {
 	it("renders week view by default", () => {
 		render(<SchedulePage />);
 		expect(screen.getByTestId("week-view")).toBeInTheDocument();
+	});
+
+	it("persists the selected schedule date", () => {
+		render(<SchedulePage />);
+		expect(useLocalStorage).toHaveBeenCalledWith(
+			"ScheduleStore",
+			ScheduleStore,
+			expect.arrayContaining(["date"]),
+		);
 	});
 
 	it("renders loading message when sessions are loading", () => {

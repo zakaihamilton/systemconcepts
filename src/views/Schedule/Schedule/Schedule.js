@@ -51,10 +51,13 @@ export default function SchedulePage() {
 	const { session } = PlayerStore.useState();
 	const playingSession = session;
 
-	if (!date) {
-		date = new Date();
+	if (!(date instanceof Date)) {
+		const savedDate = date && new Date(date);
+		date =
+			savedDate && !Number.isNaN(savedDate.getTime()) ? savedDate : new Date();
 	}
 	useLocalStorage("ScheduleStore", ScheduleStore, [
+		"date",
 		"viewMode",
 		"lastViewMode",
 		"showBadges",
