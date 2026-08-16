@@ -33,43 +33,45 @@ export default function Session({
 	};
 
 	return (
-		<Tooltip title={name}>
-			<Link
-				underline="none"
-				color="initial"
-				href={href}
-				className={clsx(
-					styles.root,
-					isPhone && styles.mobile,
-					isPlaying && styles.playing,
-				)}
-				style={{ color: textColor }}
-				onClick={onClick}
-			>
-				<div className={styles.background} style={style} />
-				{showGroup && (
-					<div
-						className={clsx(styles.group, isPhone && styles.mobile)}
-						dir="auto"
-					>
-						{groupName}
-					</div>
-				)}
-				<div className={styles.container}>
-					<div className={styles.icons}>
-						<SessionIcon type={type} />
-					</div>
-					<div className={styles.text}>
+		<div className={styles.tooltipAnchor}>
+			<Tooltip title={name}>
+				<Link
+					underline="none"
+					color="initial"
+					href={href}
+					className={clsx(
+						styles.root,
+						isPhone && styles.mobile,
+						isPlaying && styles.playing,
+					)}
+					style={{ color: textColor }}
+					onClick={onClick}
+				>
+					<div className={styles.background} style={style} />
+					{showGroup && (
 						<div
-							className={clsx(styles.name, isPhone && styles.mobile)}
+							className={clsx(styles.group, isPhone && styles.mobile)}
 							dir="auto"
 						>
-							{name}
+							{groupName}
+						</div>
+					)}
+					<div className={styles.container}>
+						<div className={styles.icons}>
+							<SessionIcon type={type} />
+						</div>
+						<div className={styles.text}>
+							<div
+								className={clsx(styles.name, isPhone && styles.mobile)}
+								dir="auto"
+							>
+								{name}
+							</div>
 						</div>
 					</div>
-				</div>
-				<div className={styles.backgroundBorder} style={style} />
-			</Link>
-		</Tooltip>
+					<div className={styles.backgroundBorder} style={style} />
+				</Link>
+			</Tooltip>
+		</div>
 	);
 }

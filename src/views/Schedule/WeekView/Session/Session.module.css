@@ -19,6 +19,16 @@
 	padding: 0.55rem 0.65rem;
 }
 
+.tooltipAnchor {
+	align-self: stretch;
+	width: 100%;
+}
+
+.tooltipAnchor > span {
+	display: block !important;
+	width: 100%;
+}
+
 .root.mobile {
 	margin: 0px;
 	min-height: 4.25rem;
