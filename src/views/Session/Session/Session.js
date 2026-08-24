@@ -24,6 +24,24 @@ import styles from "./Session.module.css";
 
 registerToolbar("Session");
 
+const LEGACY_IMAGE_HOST = "screens.sfo2.digitaloceanspaces.com";
+
+function getLegacyWasabiImagePath(imagePath) {
+	if (typeof imagePath !== "string" || !imagePath.startsWith("http")) {
+		return null;
+	}
+
+	try {
+		const url = new URL(imagePath);
+		if (url.hostname !== LEGACY_IMAGE_HOST) return null;
+
+		const path = decodeURIComponent(url.pathname).replace(/^\/+/, "");
+		return path.startsWith("wasabi/") ? path : null;
+	} catch {
+		return null;
+	}
+}
+
 function getSessionImagePath(session) {
 	if (
 		session.image?.path?.startsWith("wasabi/") ||
@@ -33,12 +51,13 @@ function getSessionImagePath(session) {
 		return session.image.path;
 	}
 
-	return (
+	const imagePath =
 		session.imagePath ||
 		(typeof session.thumbnail === "string"
 			? session.thumbnail
-			: session.image?.path)
-	);
+			: session.image?.path);
+
+	return getLegacyWasabiImagePath(imagePath) || imagePath;
 }
 
 export default function SessionPage({ group, year, date, name }) {
@@ -186,20 +205,18 @@ export default function SessionPage({ group, year, date, name }) {
 	}
 
 	const { duration, thumbnail } = session;
+	const imagePath = getSessionImagePath(session);
 
 	const viewImage = () => {
-		const path = session.image
-			? session.image.path
-			: typeof thumbnail === "string" && !thumbnail.startsWith("data:")
-				? thumbnail
+		const path =
+			typeof imagePath === "string" && !imagePath.startsWith("data:")
+				? imagePath
 				: null;
 		if (path) {
 			const extension = path.split(".").pop();
 			addPath(extension === "png" ? "image" : "image?ext=" + extension);
 		}
 	};
-
-	const imagePath = getSessionImagePath(session);
 
 	return (
 		<div className={styles.root} {...swipeHandlers}>

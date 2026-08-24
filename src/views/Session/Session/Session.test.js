@@ -145,6 +145,36 @@ describe("Session View", () => {
 		);
 	});
 
+	it("normalizes legacy CDN image URLs to the Wasabi storage path", () => {
+		const mockSession = {
+			...baseSession,
+			group: "american",
+			year: "2026",
+			date: "2026-08-20",
+			name: "Breath, Sound, and Speech",
+			image: {
+				path: "https://screens.sfo2.digitaloceanspaces.com/wasabi/american/2026/2026-08-20%20Breath,%20Sound,%20and%20Speech.png",
+			},
+			imagePath:
+				"https://screens.sfo2.digitaloceanspaces.com/wasabi/american/2026/2026-08-20%20Breath,%20Sound,%20and%20Speech.png",
+		};
+		useSessions.mockReturnValue([[mockSession], false]);
+
+		render(
+			<SessionPage
+				group="american"
+				year="2026"
+				date="2026-08-20"
+				name="Breath, Sound, and Speech"
+			/>,
+		);
+
+		expect(screen.getByTestId("image")).toHaveAttribute(
+			"data-path",
+			"wasabi/american/2026/2026-08-20 Breath, Sound, and Speech.png",
+		);
+	});
+
 	it("copies title and tags to clipboard", () => {
 		useSessions.mockReturnValue([[baseSession], false]);
 		render(

@@ -122,6 +122,41 @@ describe("Image Widget", () => {
 		});
 	});
 
+	it("does not render storage keys as broken thumbnail URLs", () => {
+		useFetchJSON.mockReturnValue([null, false, false]);
+		render(
+			<ImageWidget
+				path="wasabi/group/2026/session.png"
+				thumbnail="wasabi/group/2026/session.png"
+				alt="storage image"
+			/>,
+		);
+
+		expect(screen.queryAllByRole("img")).toHaveLength(0);
+		expect(screen.getByTestId("progress")).toBeInTheDocument();
+	});
+
+	it("does not render a stale legacy CDN thumbnail beside the signed image", () => {
+		useFetchJSON.mockReturnValue([
+			{ path: "https://signed.example/session.png" },
+			false,
+			false,
+		]);
+		render(
+			<ImageWidget
+				path="wasabi/group/2026/session.png"
+				thumbnail="https://screens.sfo2.digitaloceanspaces.com/wasabi/group/2026/session.png"
+				alt="signed image"
+			/>,
+		);
+
+		expect(screen.getAllByRole("img")).toHaveLength(1);
+		expect(screen.getByRole("img")).toHaveAttribute(
+			"src",
+			"https://signed.example/session.png",
+		);
+	});
+
 	it("treats aws/ paths without a leading slash as signed", () => {
 		useFetchJSON.mockReturnValue([{ path: "https://signed" }, false, false]);
 		render(<ImageWidget path="aws/file.png" alt="aws" />);

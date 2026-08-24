@@ -5,6 +5,27 @@ import clsx from "clsx";
 import { useEffect, useRef, useState } from "react";
 import styles from "./Image.module.css";
 
+const LEGACY_IMAGE_HOST = "screens.sfo2.digitaloceanspaces.com";
+
+function isStoragePath(path) {
+	return (
+		typeof path === "string" &&
+		(path.startsWith("wasabi/") ||
+			path.startsWith("/aws/") ||
+			path.startsWith("aws/"))
+	);
+}
+
+function isLegacyImageUrl(path) {
+	if (typeof path !== "string" || !path.startsWith("http")) return false;
+
+	try {
+		return new URL(path).hostname === LEGACY_IMAGE_HOST;
+	} catch {
+		return false;
+	}
+}
+
 export default function ImageWidget({
 	className,
 	onClick,
@@ -89,6 +110,14 @@ export default function ImageWidget({
 
 	const isExternalLoading =
 		(typeof loading === "boolean" && loading) || (needsSignedUrl && !data);
+	const thumbnailPath =
+		typeof thumbnail === "string" &&
+		thumbnail !== path &&
+		thumbnail !== effectivePath &&
+		!isStoragePath(thumbnail) &&
+		!isLegacyImageUrl(thumbnail)
+			? thumbnail
+			: null;
 
 	const clickable = !!onClick;
 
@@ -103,7 +132,8 @@ export default function ImageWidget({
 			onClick={clickable ? onClick : undefined}
 		>
 			{showProgress &&
-				(!!isExternalLoading || (!!imageLoading && !loaded && !thumbnail)) && (
+				(!!isExternalLoading ||
+					(!!imageLoading && !loaded && !thumbnailPath)) && (
 					<Progress fullscreen={true} />
 				)}
 			{/* eslint-disable-next-line @next/next/no-img-element */}
@@ -122,9 +152,9 @@ export default function ImageWidget({
 				/>
 			)}
 			{/* eslint-disable-next-line @next/next/no-img-element */}
-			{thumbnail && thumbnail !== effectivePath && (
+			{thumbnailPath && (
 				<img
-					src={thumbnail}
+					src={thumbnailPath}
 					style={imageStyle}
 					className={clsx(styles.img, loaded && styles.hidden)}
 					alt={alt}
