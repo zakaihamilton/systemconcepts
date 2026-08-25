@@ -13,7 +13,7 @@ export default function App() {
 
 	return (
 		<React.StrictMode>
-			<SpeedInsights />
+			<SpeedInsights sampleRate={0.5} />
 			<Analytics />
 			<Head />
 			<NoSsr>

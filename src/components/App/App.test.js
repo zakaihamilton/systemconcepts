@@ -7,7 +7,9 @@ jest.mock("../Theme", () => ({ children }) => (
 jest.mock("../Head", () => () => <div data-testid="head" />);
 jest.mock("../Main", () => () => <div data-testid="main" />);
 jest.mock("@vercel/speed-insights/next", () => ({
-	SpeedInsights: () => <div data-testid="speed-insights" />,
+	SpeedInsights: ({ sampleRate }) => (
+		<div data-testid="speed-insights" data-sample-rate={sampleRate} />
+	),
 }));
 jest.mock("@vercel/analytics/react", () => ({
 	Analytics: () => <div data-testid="analytics" />,
@@ -19,6 +21,10 @@ jest.mock("@ui", () => ({
 describe("App Component", () => {
 	it("renders without crashing", () => {
 		const { getByTestId } = render(<App />);
+		expect(getByTestId("speed-insights")).toHaveAttribute(
+			"data-sample-rate",
+			"0.5",
+		);
 		expect(getByTestId("theme")).toBeInTheDocument();
 		expect(getByTestId("head")).toBeInTheDocument();
 		expect(getByTestId("main")).toBeInTheDocument();
