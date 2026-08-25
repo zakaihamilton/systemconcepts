@@ -9,12 +9,13 @@ import RestoreIcon from "@icons/svg/Restore.svg";
 import ViewDayIcon from "@icons/svg/ViewDay.svg";
 import ViewStreamIcon from "@icons/svg/ViewStream.svg";
 import ViewWeekIcon from "@icons/svg/ViewWeek.svg";
-import { SyncActiveStore, UpdateSessionsStore } from "@sync/syncState";
+import { useSessionReloadOnSyncComplete } from "@sync/useSessionReloadOnSyncComplete";
 import IconButton from "@ui/IconButton";
 import { useLocalStorage } from "@util/browser/store";
 import { useDeviceType } from "@util/browser/styles";
 import { SessionsStore, useSessions } from "@util/domain/sessions";
 import { useTranslations } from "@util/domain/translations";
+import { useRequireSigninMode } from "@util/domain/useRequireSigninMode";
 import { PlayerStore } from "@views/Player/Player";
 import FilterBar from "@views/Sessions/FilterBar";
 import Message from "@widgets/Message";
@@ -23,7 +24,7 @@ import Tooltip from "@widgets/Tooltip";
 import clsx from "clsx";
 import Cookies from "js-cookie";
 import { Store } from "pullstate";
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import DayView from "../DayView";
 import HistoryView from "../HistoryView";
 import MonthView from "../MonthView";
@@ -63,27 +64,7 @@ export default function SchedulePage() {
 		"showBadges",
 	]);
 
-	// Watch for sync completion and reload sessions if needed
-	const needsSessionReload = SyncActiveStore.useState(
-		(s) => s.needsSessionReload,
-	);
-	const syncBusy = SyncActiveStore.useState((s) => s.busy);
-	const updateSessionsBusy = UpdateSessionsStore.useState((s) => s.busy);
-
-	useEffect(() => {
-		// Only reload after sync/update-sessions completes (not during)
-		if (needsSessionReload && !syncBusy && !updateSessionsBusy) {
-			// Trigger a refresh while retaining the current list, so navigating to
-			// another view does not briefly render an empty page.
-			SessionsStore.update((s) => {
-				s.counter++;
-			});
-			// Clear the flag to acknowledge the reload
-			SyncActiveStore.update((s) => {
-				s.needsSessionReload = false;
-			});
-		}
-	}, [needsSessionReload, syncBusy, updateSessionsBusy]);
+	useSessionReloadOnSyncComplete();
 
 	const viewOptions = [
 		{
@@ -230,17 +211,7 @@ export default function SchedulePage() {
 
 	const statusBar = <StatusBar store={ScheduleStore} />;
 
-	useEffect(() => {
-		ScheduleStore.update((s) => {
-			if (!isSignedIn) {
-				s.mode = "signin";
-				s.message = translations.REQUIRE_SIGNIN;
-			} else {
-				s.mode = "";
-				s.message = "";
-			}
-		});
-	}, [isSignedIn, translations]);
+	useRequireSigninMode(ScheduleStore, isSignedIn, translations);
 
 	return (
 		<div className={styles.root}>

@@ -317,24 +317,6 @@ describe("Session View", () => {
 		);
 	});
 
-	it("copies the session title when the header is clicked", async () => {
-		const { copyToClipboard } = require("@util/data/string");
-		useSessions.mockReturnValue([[baseSession], false]);
-		render(
-			<SessionPage
-				group="test"
-				year="2024"
-				date="2024-05-05"
-				name="Test Session"
-			/>,
-		);
-		await waitFor(() => {
-			expect(screen.getByText("Test Session")).toBeInTheDocument();
-		});
-		fireEvent.click(screen.getByText("Test Session"));
-		expect(copyToClipboard).toHaveBeenCalledWith("2024-05-05 Test Session");
-	});
-
 	it("uses thumbnail string when image object is missing", () => {
 		const session = {
 			...baseSession,

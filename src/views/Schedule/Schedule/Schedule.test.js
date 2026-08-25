@@ -23,16 +23,19 @@ jest.mock("@components/Search");
 jest.mock("@util/browser/store", () => ({
 	useLocalStorage: jest.fn(),
 }));
-jest.mock("@sync/syncState", () => ({
-	SyncActiveStore: {
-		useState: jest.fn().mockReturnValue(false),
-		update: jest.fn(),
-	},
-	UpdateSessionsStore: {
-		useState: jest.fn().mockReturnValue(false),
-		update: jest.fn(),
-	},
-}));
+jest.mock("@sync/syncState", () => {
+	const idle = false;
+	return {
+		SyncActiveStore: {
+			useState: jest.fn().mockReturnValue(idle),
+			update: jest.fn(),
+		},
+		UpdateSessionsStore: {
+			useState: jest.fn().mockReturnValue(idle),
+			update: jest.fn(),
+		},
+	};
+});
 jest.mock("@views/Player/Player", () => ({
 	PlayerStore: {
 		useState: jest.fn().mockReturnValue({ session: null }),

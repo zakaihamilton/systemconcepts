@@ -4,7 +4,8 @@ import ExpandLessIcon from "@icons/svg/ExpandLess.svg";
 import ExpandMoreIcon from "@icons/svg/ExpandMore.svg";
 import GraphicEqIcon from "@icons/svg/GraphicEq.svg";
 import MovieIcon from "@icons/svg/Movie.svg";
-import { SyncActiveStore, UpdateSessionsStore } from "@sync/syncState";
+import { SyncActiveStore } from "@sync/syncState";
+import { useSessionReloadOnSyncComplete } from "@sync/useSessionReloadOnSyncComplete";
 import Chip from "@ui/Chip";
 import { useLocalStorage } from "@util/browser/store";
 import { useDeviceType } from "@util/browser/styles";
@@ -12,6 +13,7 @@ import { useDateFormatter } from "@util/data/locale";
 import { useRecentHistory } from "@util/domain/history";
 import { SessionsStore, useSessions } from "@util/domain/sessions";
 import { useTranslations } from "@util/domain/translations";
+import { useRequireSigninMode } from "@util/domain/useRequireSigninMode";
 import { addPath, toPath } from "@util/domain/views";
 import { PlayerStore } from "@views/Player/Player";
 import FilterBar from "@views/Sessions/FilterBar";
@@ -25,7 +27,7 @@ import Table from "@widgets/Table";
 import Tooltip from "@widgets/Tooltip";
 import clsx from "clsx";
 import Cookies from "js-cookie";
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useMemo, useRef } from "react";
 import styles from "./Sessions.module.css";
 
 function getSessionDateLocale() {
@@ -787,39 +789,10 @@ export default function SessionsPage() {
 	);
 
 	const statusBar = useMemo(() => <StatusBar store={SessionsStore} />, []);
-
-	useEffect(() => {
-		SessionsStore.update((s) => {
-			if (!isSignedIn) {
-				s.mode = "signin";
-				s.message = translations.REQUIRE_SIGNIN;
-			} else {
-				s.mode = "";
-				s.message = "";
-			}
-		});
-	}, [isSignedIn, translations]);
-
-	// Watch for sync completion and reload sessions if needed
-	const needsSessionReload = SyncActiveStore.useState(
-		(s) => s.needsSessionReload,
-	);
 	const syncBusy = SyncActiveStore.useState((s) => s.busy);
-	const updateSessionsBusy = UpdateSessionsStore.useState((s) => s.busy);
-	useEffect(() => {
-		// Only reload after sync/update-sessions completes (not during)
-		if (needsSessionReload && !syncBusy && !updateSessionsBusy) {
-			// Trigger a refresh while retaining the current list, so navigating to
-			// another view does not briefly render an empty page.
-			SessionsStore.update((s) => {
-				s.counter++;
-			});
-			// Clear the flag to acknowledge the reload
-			SyncActiveStore.update((s) => {
-				s.needsSessionReload = false;
-			});
-		}
-	}, [needsSessionReload, syncBusy, updateSessionsBusy]);
+
+	useRequireSigninMode(SessionsStore, isSignedIn, translations);
+	useSessionReloadOnSyncComplete();
 
 	return (
 		<>
