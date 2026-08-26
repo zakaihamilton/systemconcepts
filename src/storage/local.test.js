@@ -374,6 +374,20 @@ describe("native IndexedDB local storage", () => {
 		}
 	});
 
+	it("reopens after IndexedDB asks this connection to close", async () => {
+		await localStorage.writeFile("/sync/before-upgrade.json", "before-upgrade");
+		await new Promise((resolve, reject) => {
+			const request = indexedDB.deleteDatabase("systemconcepts-local-files");
+			request.onsuccess = () => resolve();
+			request.onerror = () => reject(request.error);
+		});
+
+		await localStorage.writeFile("/sync/after-upgrade.json", "after-upgrade");
+		expect(await localStorage.readFile("/sync/after-upgrade.json")).toBe(
+			"after-upgrade",
+		);
+	});
+
 	it("forgets a dead connection when the tab becomes visible again", async () => {
 		await localStorage.writeFile("/sync/visible.json", "visible");
 		const originalTransaction = IDBDatabase.prototype.transaction;
