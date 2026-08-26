@@ -391,6 +391,37 @@ describe("Sessions View", () => {
 		expect(lastTableProps.resetScrollDeps.at(-1)).toBe(0);
 	});
 
+	it("resets scroll when a new session is identified only by key", () => {
+		useSessions.mockReturnValue([
+			[{ key: "k1", name: "Existing", date: "2024-01-15" }],
+			false,
+		]);
+		const { rerender } = render(<SessionsPage />);
+		expect(lastTableProps.resetScrollDeps.at(-1)).toBe(0);
+
+		useSessions.mockReturnValue([
+			[
+				{ key: "k1", name: "Existing", date: "2024-01-15" },
+				{ key: "k2", name: "Newly synced", date: "2024-03-01" },
+			],
+			false,
+		]);
+		rerender(<SessionsPage />);
+
+		expect(lastTableProps.resetScrollDeps.at(-1)).toBe(1);
+	});
+
+	it("does not reset scroll when sessions are only removed", () => {
+		useSessions.mockReturnValue([sampleSessions, false]);
+		const { rerender } = render(<SessionsPage />);
+		const depsBefore = lastTableProps.resetScrollDeps;
+
+		useSessions.mockReturnValue([sampleSessions.slice(1), false]);
+		rerender(<SessionsPage />);
+
+		expect(lastTableProps.resetScrollDeps).toEqual(depsBefore);
+	});
+
 	it.each([
 		["group", "Filter group"],
 		["type", "Filter type"],
