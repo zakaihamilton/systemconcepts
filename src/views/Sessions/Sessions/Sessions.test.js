@@ -321,6 +321,76 @@ describe("Sessions View", () => {
 		expect(lastTableProps.hover).toBe(true);
 	});
 
+	it("does not reset scroll on the initial sessions load", () => {
+		useSessions.mockReturnValue([sampleSessions, false]);
+		render(<SessionsPage />);
+		expect(lastTableProps.resetScrollDeps.at(-1)).toBe(0);
+		expect(
+			SessionsStore.update.mock.calls.some((call) => {
+				const state = { offset: 1 };
+				call[0](state);
+				return state.offset === 0;
+			}),
+		).toBe(false);
+	});
+
+	it("resets scroll when new session ids are synced", () => {
+		useSessions.mockReturnValue([sampleSessions, false]);
+		const { rerender } = render(<SessionsPage />);
+		const depsBefore = lastTableProps.resetScrollDeps;
+		expect(depsBefore.at(-1)).toBe(0);
+
+		SessionsStore.update.mockClear();
+		useSessions.mockReturnValue([
+			[
+				...sampleSessions,
+				{
+					...sampleSessions[0],
+					key: "k5",
+					id: "5",
+					name: "Newly synced session",
+				},
+			],
+			false,
+		]);
+		rerender(<SessionsPage />);
+
+		expect(lastTableProps.resetScrollDeps).not.toEqual(depsBefore);
+		expect(lastTableProps.resetScrollDeps.at(-1)).toBe(1);
+		expect(SessionsStore.update).toHaveBeenCalled();
+		const offsetState = { offset: 4 };
+		SessionsStore.update.mock.calls[0][0](offsetState);
+		expect(offsetState.offset).toBe(0);
+	});
+
+	it("does not reset scroll when a reload keeps the same session ids", () => {
+		useSessions.mockReturnValue([sampleSessions, false]);
+		const { rerender } = render(<SessionsPage />);
+		const depsBefore = lastTableProps.resetScrollDeps;
+
+		SessionsStore.update.mockClear();
+		useSessions.mockReturnValue([
+			sampleSessions.map((session) => ({ ...session })),
+			false,
+		]);
+		rerender(<SessionsPage />);
+
+		expect(lastTableProps.resetScrollDeps).toEqual(depsBefore);
+		expect(lastTableProps.resetScrollDeps.at(-1)).toBe(0);
+		expect(SessionsStore.update).not.toHaveBeenCalled();
+	});
+
+	it("does not treat the loading empty list as a baseline for new sessions", () => {
+		useSessions.mockReturnValue([[], true]);
+		const { rerender } = render(<SessionsPage />);
+		expect(lastTableProps.resetScrollDeps.at(-1)).toBe(0);
+
+		useSessions.mockReturnValue([sampleSessions, false]);
+		rerender(<SessionsPage />);
+
+		expect(lastTableProps.resetScrollDeps.at(-1)).toBe(0);
+	});
+
 	it.each([
 		["group", "Filter group"],
 		["type", "Filter type"],
