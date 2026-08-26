@@ -27,8 +27,32 @@ import Table from "@widgets/Table";
 import Tooltip from "@widgets/Tooltip";
 import clsx from "clsx";
 import Cookies from "js-cookie";
-import { useCallback, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import styles from "./Sessions.module.css";
+
+function getSessionListId(session) {
+	return session?.id || session?.key;
+}
+
+function collectSessionIds(sessions) {
+	const ids = new Set();
+	for (const session of sessions) {
+		const id = getSessionListId(session);
+		if (id) {
+			ids.add(id);
+		}
+	}
+	return ids;
+}
+
+function hasNewSessionId(previousIds, nextIds) {
+	for (const id of nextIds) {
+		if (!previousIds.has(id)) {
+			return true;
+		}
+	}
+	return false;
+}
 
 function getSessionDateLocale() {
 	if (typeof navigator === "undefined") {
@@ -104,11 +128,29 @@ export default function SessionsPage() {
 		SessionsStore.useState((s) => s.expandedTreeGroups) || [];
 	const { session } = PlayerStore.useState();
 	const [history] = useRecentHistory();
+	const prevSessionIdsRef = useRef(null);
+	const [newSessionsScrollKey, setNewSessionsScrollKey] = useState(0);
 	useLocalStorage("SessionsStore", SessionsStore, [
 		"viewMode",
 		"scrollOffset",
 		"showHistory",
 	]);
+
+	useEffect(() => {
+		if (loading || !sessions) {
+			return;
+		}
+		const nextIds = collectSessionIds(sessions);
+		const previousIds = prevSessionIdsRef.current;
+		prevSessionIdsRef.current = nextIds;
+		if (!previousIds || !hasNewSessionId(previousIds, nextIds)) {
+			return;
+		}
+		setNewSessionsScrollKey((key) => key + 1);
+		SessionsStore.update((s) => {
+			s.offset = 0;
+		});
+	}, [sessions, loading]);
 
 	// Memoize dependencies to prevent unnecessary resets
 	const resetScrollDeps = useMemo(
@@ -121,6 +163,7 @@ export default function SessionsPage() {
 			viewMode,
 			showHistory,
 			history,
+			newSessionsScrollKey,
 		],
 		[
 			groupFilter,
@@ -131,6 +174,7 @@ export default function SessionsPage() {
 			viewMode,
 			showHistory,
 			history,
+			newSessionsScrollKey,
 		],
 	);
 	const tableDeps = useMemo(
