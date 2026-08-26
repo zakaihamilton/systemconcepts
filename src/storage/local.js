@@ -8,6 +8,8 @@ const LEGACY_DATABASE_NAME = "systemconcepts-fs";
 const LEGACY_ACTIVE_DATABASE_KEY = "local_active_database";
 
 let databasePromise = null;
+let databaseInstance = null;
+let pageLifecycleInstalled = false;
 
 function filesystemError(code, path) {
 	const error = new Error(`${code}: ${path}`);
@@ -30,69 +32,150 @@ function transactionComplete(transaction) {
 	});
 }
 
+function isUnavailableConnectionError(error) {
+	if (!error) return false;
+	const name = error.name || "";
+	const message = String(error.message || error);
+	if (name === "InvalidStateError" || name === "UnknownError") return true;
+	return /connection is closing|database connection is closing|Connection to Indexed Database server lost|InvalidStateError/i.test(
+		message,
+	);
+}
+
+function forgetDatabase() {
+	const database = databaseInstance;
+	databasePromise = null;
+	databaseInstance = null;
+	if (!database) return;
+	try {
+		database.onclose = null;
+		database.onversionchange = null;
+		database.close();
+	} catch {
+		// The connection may already have been closed by the browser.
+	}
+}
+
+function attachDatabaseLifecycle(database) {
+	databaseInstance = database;
+	database.onclose = () => {
+		if (databaseInstance === database) {
+			databasePromise = null;
+			databaseInstance = null;
+		}
+	};
+	database.onversionchange = () => {
+		if (databaseInstance === database) {
+			forgetDatabase();
+		}
+	};
+}
+
+function probeCachedConnection() {
+	if (!databaseInstance) return;
+	try {
+		databaseInstance.transaction([METADATA_STORE], "readonly").abort();
+	} catch {
+		forgetDatabase();
+	}
+}
+
+function installPageLifecycleHandlers() {
+	if (pageLifecycleInstalled || typeof window === "undefined") return;
+	pageLifecycleInstalled = true;
+	// iOS Safari closes IndexedDB when a tab is frozen or backgrounded. Drop
+	// the cached connection so a revisit reopens it instead of crashing.
+	window.addEventListener("pagehide", forgetDatabase);
+	window.addEventListener("pageshow", (event) => {
+		if (event.persisted) forgetDatabase();
+	});
+	document.addEventListener("freeze", forgetDatabase);
+	document.addEventListener("visibilitychange", () => {
+		if (document.visibilityState === "visible") probeCachedConnection();
+	});
+}
+
+function upgradeDatabase(request) {
+	const database = request.result;
+	const transaction = request.transaction;
+	const files = database.objectStoreNames.contains(FILE_STORE)
+		? transaction.objectStore(FILE_STORE)
+		: database.createObjectStore(FILE_STORE, { keyPath: "path" });
+	const metadata = database.objectStoreNames.contains(METADATA_STORE)
+		? transaction.objectStore(METADATA_STORE)
+		: database.createObjectStore(METADATA_STORE, { keyPath: "path" });
+
+	// Version 1 stored metadata and content together. Copy only the
+	// metadata so future listings never clone file bodies.
+	if (request.oldVersion < 2 && database.objectStoreNames.contains("entries")) {
+		const legacyEntries = transaction.objectStore("entries");
+		legacyEntries.openCursor().onsuccess = (event) => {
+			const cursor = event.target.result;
+			if (!cursor) return;
+			const { content, ...entry } = cursor.value;
+			metadata.put(entry);
+			if (entry.type === "file") files.put({ path: entry.path, content });
+			cursor.continue();
+		};
+	}
+}
+
+function openDatabase() {
+	return new Promise((resolve, reject) => {
+		const request = indexedDB.open(DATABASE_NAME, DATABASE_VERSION);
+		request.onupgradeneeded = () => upgradeDatabase(request);
+		request.onsuccess = () => {
+			const database = request.result;
+			attachDatabaseLifecycle(database);
+			resolve(database);
+		};
+		request.onerror = () => {
+			databasePromise = null;
+			reject(request.error);
+		};
+	});
+}
+
 function getDatabase() {
 	if (typeof indexedDB === "undefined") {
 		return Promise.reject(new Error("IndexedDB is unavailable"));
 	}
+	installPageLifecycleHandlers();
 	if (!databasePromise) {
-		databasePromise = new Promise((resolve, reject) => {
-			const request = indexedDB.open(DATABASE_NAME, DATABASE_VERSION);
-			request.onupgradeneeded = () => {
-				const database = request.result;
-				const transaction = request.transaction;
-				const files = database.objectStoreNames.contains(FILE_STORE)
-					? transaction.objectStore(FILE_STORE)
-					: database.createObjectStore(FILE_STORE, { keyPath: "path" });
-				const metadata = database.objectStoreNames.contains(METADATA_STORE)
-					? transaction.objectStore(METADATA_STORE)
-					: database.createObjectStore(METADATA_STORE, { keyPath: "path" });
-
-				// Version 1 stored metadata and content together. Copy only the
-				// metadata so future listings never clone file bodies.
-				if (
-					request.oldVersion < 2 &&
-					database.objectStoreNames.contains("entries")
-				) {
-					const legacyEntries = transaction.objectStore("entries");
-					legacyEntries.openCursor().onsuccess = (event) => {
-						const cursor = event.target.result;
-						if (!cursor) return;
-						const { content, ...entry } = cursor.value;
-						metadata.put(entry);
-						if (entry.type === "file") files.put({ path: entry.path, content });
-						cursor.continue();
-					};
-				}
-			};
-			request.onsuccess = () => resolve(request.result);
-			request.onerror = () => {
-				databasePromise = null;
-				reject(request.error);
-			};
-		});
+		databasePromise = openDatabase();
 	}
 	return databasePromise;
 }
 
-async function withStores(mode, callback) {
-	const database = await getDatabase();
-	const transaction = database.transaction([FILE_STORE, METADATA_STORE], mode);
-	const stores = {
-		files: transaction.objectStore(FILE_STORE),
-		metadata: transaction.objectStore(METADATA_STORE),
-	};
-	const completed = transactionComplete(transaction);
+async function withStores(mode, callback, isRetry = false) {
+	let transaction;
+	let completed;
 	try {
-		const result = await callback(stores);
-		await completed;
-		return result;
-	} catch (error) {
+		const database = await getDatabase();
+		transaction = database.transaction([FILE_STORE, METADATA_STORE], mode);
+		const stores = {
+			files: transaction.objectStore(FILE_STORE),
+			metadata: transaction.objectStore(METADATA_STORE),
+		};
+		completed = transactionComplete(transaction);
 		try {
-			transaction.abort();
-		} catch {
-			// The transaction may already have completed.
+			const result = await callback(stores);
+			await completed;
+			return result;
+		} catch (error) {
+			try {
+				transaction.abort();
+			} catch {
+				// The transaction may already have completed.
+			}
+			await completed.catch(() => {});
+			throw error;
 		}
-		await completed.catch(() => {});
+	} catch (error) {
+		if (!isRetry && isUnavailableConnectionError(error)) {
+			forgetDatabase();
+			return withStores(mode, callback, true);
+		}
 		throw error;
 	}
 }

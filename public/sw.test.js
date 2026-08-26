@@ -14,6 +14,7 @@ describe("native service worker", () => {
 		expect(worker).toContain("staleWhileRevalidate(request, SESSION_CACHE)");
 		expect(worker).toContain("no-store");
 		expect(worker).not.toContain("MEDIA_CACHE");
+		expect(worker).toMatch(/then\(\(\) => self\.clients\.claim\(\)\)/);
 	});
 
 	it("does not depend on generated Workbox runtime code", () => {

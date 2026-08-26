@@ -10,9 +10,8 @@ self.addEventListener("activate", (event) => {
 	event.waitUntil(
 		caches.keys().then((keys) =>
 			Promise.all(keys.filter((key) => key.startsWith("systemconcepts-") && !key.startsWith(VERSION)).map((key) => caches.delete(key))),
-		),
+		).then(() => self.clients.claim()),
 	);
-	self.clients.claim();
 });
 async function staleWhileRevalidate(request, cacheName) {
 	const cache = await caches.open(cacheName);

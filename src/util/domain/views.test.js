@@ -114,6 +114,10 @@ describe("urlToParentPath", () => {
 	it("decodes percent-encoded parent segments", () => {
 		expect(urlToParentPath("a/group%3Aname/c")).toBe("group:name");
 	});
+
+	it("keeps malformed percent-encoded parent segments", () => {
+		expect(urlToParentPath("a/%E0%/c")).toBe("%E0%");
+	});
 });
 
 describe("setHash / setPath / addPath / replacePath / goBackPage", () => {
@@ -170,6 +174,24 @@ describe("getPagesFromHash", () => {
 		});
 		expect(results).toHaveLength(1);
 		expect(results[0].id).toBe("home");
+	});
+
+	it("treats a missing hash as the root page", () => {
+		const results = getPagesFromHash({
+			translations: {},
+			pages: FIXTURE_PAGES,
+		});
+		expect(results[0].id).toBe("home");
+	});
+
+	it("does not throw on malformed percent-encoding in the hash", () => {
+		expect(() =>
+			getPagesFromHash({
+				hash: "#settings/%E0%",
+				translations: {},
+				pages: FIXTURE_PAGES,
+			}),
+		).not.toThrow();
 	});
 
 	it("does not duplicate the root page when it is already present", () => {

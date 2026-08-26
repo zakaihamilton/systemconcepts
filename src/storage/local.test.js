@@ -324,6 +324,91 @@ describe("native IndexedDB local storage", () => {
 			});
 		}
 	});
+
+	it("reopens IndexedDB after the page is hidden or frozen on mobile", async () => {
+		await localStorage.writeFile("/sync/keep.json", "keep");
+
+		window.dispatchEvent(new Event("pagehide"));
+		await localStorage.writeFile("/sync/after-hide.json", "after-hide");
+
+		document.dispatchEvent(new Event("freeze"));
+		expect(await localStorage.readFile("/sync/keep.json")).toBe("keep");
+		expect(await localStorage.readFile("/sync/after-hide.json")).toBe(
+			"after-hide",
+		);
+	});
+
+	it("drops a restored back-forward cache connection on pageshow", async () => {
+		await localStorage.writeFile("/sync/cached.json", "cached");
+		const pageshow = new Event("pageshow");
+		Object.defineProperty(pageshow, "persisted", { value: true });
+		window.dispatchEvent(pageshow);
+
+		expect(await localStorage.readFile("/sync/cached.json")).toBe("cached");
+		await localStorage.writeFile("/sync/resumed.json", "resumed");
+		expect(await localStorage.readFile("/sync/resumed.json")).toBe("resumed");
+	});
+
+	it("retries when the cached IndexedDB connection is already closing", async () => {
+		await localStorage.writeFile("/sync/before.json", "before");
+		const originalTransaction = IDBDatabase.prototype.transaction;
+		let calls = 0;
+		IDBDatabase.prototype.transaction = function transactionWithClosedError(
+			...args
+		) {
+			calls += 1;
+			if (calls === 1) {
+				const error = new Error("The database connection is closing");
+				error.name = "InvalidStateError";
+				throw error;
+			}
+			return originalTransaction.apply(this, args);
+		};
+		try {
+			await localStorage.writeFile("/sync/retry.json", "retry");
+			expect(await localStorage.readFile("/sync/retry.json")).toBe("retry");
+			expect(await localStorage.readFile("/sync/before.json")).toBe("before");
+			expect(calls).toBeGreaterThan(1);
+		} finally {
+			IDBDatabase.prototype.transaction = originalTransaction;
+		}
+	});
+
+	it("forgets a dead connection when the tab becomes visible again", async () => {
+		await localStorage.writeFile("/sync/visible.json", "visible");
+		const originalTransaction = IDBDatabase.prototype.transaction;
+		IDBDatabase.prototype.transaction = function deadConnection() {
+			const error = new Error(
+				"Connection to Indexed Database server lost. Refresh the page to try again",
+			);
+			error.name = "UnknownError";
+			throw error;
+		};
+		const originalVisibility = Object.getOwnPropertyDescriptor(
+			document,
+			"visibilityState",
+		);
+		Object.defineProperty(document, "visibilityState", {
+			configurable: true,
+			get: () => "visible",
+		});
+		try {
+			document.dispatchEvent(new Event("visibilitychange"));
+		} finally {
+			IDBDatabase.prototype.transaction = originalTransaction;
+			if (originalVisibility) {
+				Object.defineProperty(document, "visibilityState", originalVisibility);
+			} else {
+				delete document.visibilityState;
+			}
+		}
+
+		await localStorage.writeFile("/sync/after-visible.json", "after-visible");
+		expect(await localStorage.readFile("/sync/visible.json")).toBe("visible");
+		expect(await localStorage.readFile("/sync/after-visible.json")).toBe(
+			"after-visible",
+		);
+	});
 });
 
 afterAll(() => {

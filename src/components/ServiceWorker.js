@@ -9,7 +9,16 @@ export default function ServiceWorker() {
 			!("serviceWorker" in navigator)
 		)
 			return;
-		navigator.serviceWorker.register("/sw.js").catch(() => {});
+		const register = () => {
+			navigator.serviceWorker.register("/sw.js").catch(() => {});
+		};
+		// Defer until load so iOS Safari does not race IndexedDB on revisit.
+		if (document.readyState === "complete") {
+			register();
+			return;
+		}
+		window.addEventListener("load", register);
+		return () => window.removeEventListener("load", register);
 	}, []);
 	return null;
 }

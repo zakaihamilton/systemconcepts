@@ -131,6 +131,35 @@ describe("useLocalStorage (store)", () => {
 			}),
 		).not.toThrow();
 	});
+
+	it("marks the store as loaded when persisted JSON is invalid", () => {
+		window.localStorage.setItem("my-store-bad", "{not-json");
+		const store = new Store({ theme: "light" });
+		renderHook(() => useLocalStorage("my-store-bad", store, ["theme"]));
+		expect(store.getRawState()).toEqual({ theme: "light", _loaded: true });
+	});
+
+	it("keeps working when persisting to localStorage throws", () => {
+		const store = new Store({});
+		renderHook(() => useLocalStorage("my-store-quota", store, ["a"]));
+		const setItemSpy = jest
+			.spyOn(window.localStorage.__proto__, "setItem")
+			.mockImplementation(() => {
+				throw new Error("quota exceeded");
+			});
+		try {
+			expect(() =>
+				act(() => {
+					store.update((s) => {
+						s.a = 1;
+					});
+				}),
+			).not.toThrow();
+			expect(store.getRawState().a).toBe(1);
+		} finally {
+			setItemSpy.mockRestore();
+		}
+	});
 });
 
 describe("useGlobalState", () => {
