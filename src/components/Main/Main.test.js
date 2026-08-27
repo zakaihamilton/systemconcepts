@@ -91,4 +91,14 @@ describe("Main Component", () => {
 			"#library/id/5c665fb30551dbb6a6615a92",
 		);
 	});
+
+	it("resyncs the address bar hash when a frozen tab is restored", () => {
+		render(<Main />);
+		window.location.hash = "#settings";
+		window.dispatchEvent(new Event("pageshow"));
+		expect(MainStore.getRawState().hash).toBe("#settings");
+		window.location.hash = "#library";
+		document.dispatchEvent(new Event("resume"));
+		expect(MainStore.getRawState().hash).toBe("#library");
+	});
 });

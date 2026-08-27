@@ -52,6 +52,10 @@ beforeEach(async () => {
 	await resetLocalFileSystem();
 });
 
+afterEach(async () => {
+	await new Promise((resolve) => setTimeout(resolve, 0));
+});
+
 describe("native IndexedDB local storage", () => {
 	it("writes text files, creates parent directories, and lists virtual folders", async () => {
 		await localStorage.writeFile("/sync/american/2024.json", '{"sessions":[]}');
@@ -338,6 +342,32 @@ describe("native IndexedDB local storage", () => {
 		);
 	});
 
+	it("does not close IndexedDB synchronously while Chromium freezes the tab", async () => {
+		await localStorage.writeFile("/sync/frozen.json", "frozen");
+		const closeSpy = jest.spyOn(IDBDatabase.prototype, "close");
+		const callsBefore = closeSpy.mock.calls.length;
+		document.dispatchEvent(new Event("freeze"));
+		expect(closeSpy.mock.calls.length).toBe(callsBefore);
+		closeSpy.mockRestore();
+		await localStorage.writeFile("/sync/after-freeze.json", "after-freeze");
+		expect(await localStorage.readFile("/sync/frozen.json")).toBe("frozen");
+	});
+
+	it("reopens IndexedDB after Android Chrome resume and focus events", async () => {
+		await localStorage.writeFile("/sync/resume.json", "resume");
+		const openSpy = jest.spyOn(indexedDB, "open");
+		const callsBefore = openSpy.mock.calls.length;
+		document.dispatchEvent(new Event("resume"));
+		window.dispatchEvent(new Event("focus"));
+		await localStorage.writeFile("/sync/after-resume.json", "after-resume");
+		expect(openSpy.mock.calls.length).toBeGreaterThan(callsBefore);
+		openSpy.mockRestore();
+		expect(await localStorage.readFile("/sync/resume.json")).toBe("resume");
+		expect(await localStorage.readFile("/sync/after-resume.json")).toBe(
+			"after-resume",
+		);
+	});
+
 	it("drops a restored back-forward cache connection on pageshow", async () => {
 		await localStorage.writeFile("/sync/cached.json", "cached");
 		const pageshow = new Event("pageshow");
@@ -388,40 +418,30 @@ describe("native IndexedDB local storage", () => {
 		);
 	});
 
-	it("forgets a dead connection when the tab becomes visible again", async () => {
-		await localStorage.writeFile("/sync/visible.json", "visible");
+	it("retries when a transaction is aborted after the tab is frozen", async () => {
+		await localStorage.writeFile("/sync/abort-before.json", "abort-before");
 		const originalTransaction = IDBDatabase.prototype.transaction;
-		IDBDatabase.prototype.transaction = function deadConnection() {
-			const error = new Error(
-				"Connection to Indexed Database server lost. Refresh the page to try again",
-			);
-			error.name = "UnknownError";
-			throw error;
+		let calls = 0;
+		IDBDatabase.prototype.transaction = function transactionWithAbort(...args) {
+			calls += 1;
+			if (calls === 1) {
+				const error = new Error(
+					"An internal error was encountered in the Indexed Database server",
+				);
+				error.name = "AbortError";
+				throw error;
+			}
+			return originalTransaction.apply(this, args);
 		};
-		const originalVisibility = Object.getOwnPropertyDescriptor(
-			document,
-			"visibilityState",
-		);
-		Object.defineProperty(document, "visibilityState", {
-			configurable: true,
-			get: () => "visible",
-		});
 		try {
-			document.dispatchEvent(new Event("visibilitychange"));
+			await localStorage.writeFile("/sync/abort-retry.json", "abort-retry");
+			expect(await localStorage.readFile("/sync/abort-retry.json")).toBe(
+				"abort-retry",
+			);
+			expect(calls).toBeGreaterThan(1);
 		} finally {
 			IDBDatabase.prototype.transaction = originalTransaction;
-			if (originalVisibility) {
-				Object.defineProperty(document, "visibilityState", originalVisibility);
-			} else {
-				delete document.visibilityState;
-			}
 		}
-
-		await localStorage.writeFile("/sync/after-visible.json", "after-visible");
-		expect(await localStorage.readFile("/sync/visible.json")).toBe("visible");
-		expect(await localStorage.readFile("/sync/after-visible.json")).toBe(
-			"after-visible",
-		);
 	});
 });
 

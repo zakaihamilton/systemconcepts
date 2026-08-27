@@ -12,7 +12,7 @@ export default function ServiceWorker() {
 		const register = () => {
 			navigator.serviceWorker.register("/sw.js").catch(() => {});
 		};
-		// Defer until load so iOS Safari does not race IndexedDB on revisit.
+		// Defer until load so mobile browsers do not race IndexedDB on revisit.
 		if (document.readyState === "complete") {
 			register();
 			return;

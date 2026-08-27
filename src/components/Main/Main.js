@@ -52,8 +52,12 @@ export default function Main() {
 				}
 			});
 		};
+		window.addEventListener("pageshow", syncHashFromWindow);
+		document.addEventListener("resume", syncHashFromWindow);
 		return () => {
 			window.onhashchange = null;
+			window.removeEventListener("pageshow", syncHashFromWindow);
+			document.removeEventListener("resume", syncHashFromWindow);
 		};
 	}, []);
 
