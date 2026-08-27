@@ -12,7 +12,8 @@ self.addEventListener("activate", (event) => {
 			Promise.all(keys.filter((key) => key.startsWith("systemconcepts-") && !key.startsWith(VERSION)).map((key) => caches.delete(key))),
 		),
 	);
-	self.clients.claim();
+	// Do not claim clients here. Taking over a frozen Android Chrome tab on
+	// activate is a known renderer crash; the next navigation picks up the worker.
 });
 async function staleWhileRevalidate(request, cacheName) {
 	const cache = await caches.open(cacheName);

@@ -3,6 +3,14 @@ import { useLanguage } from "@util/domain/language";
 import { useTranslations } from "@util/domain/translations";
 import { useMemo } from "react";
 
+function decodeHashSegment(item) {
+	try {
+		return decodeURIComponent(item);
+	} catch {
+		return item;
+	}
+}
+
 export function usePathItems() {
 	let { hash = "" } = MainStore.useState();
 	const items = useMemo(() => {
@@ -13,7 +21,7 @@ export function usePathItems() {
 		return (h || "")
 			.split("/")
 			.filter(Boolean)
-			.map((item) => decodeURIComponent(item));
+			.map((item) => decodeHashSegment(item));
 	}, [hash]);
 	return items;
 }
@@ -76,14 +84,14 @@ export function goBackPage() {
 export function urlToParentPath(url) {
 	const items = url.split("/").filter(Boolean);
 	const previousItem = items[items.length - 2] || "";
-	return decodeURIComponent(previousItem);
+	return decodeHashSegment(previousItem);
 }
 
 export function useParentPath(index = 0) {
 	const { hash = "" } = MainStore.useState();
 	const items = (hash || "").split("/").filter(Boolean);
 	const previousItem = items[items.length - 2 - index] || "";
-	return decodeURIComponent(previousItem);
+	return decodeHashSegment(previousItem);
 }
 
 export function useParentParams(index) {
@@ -95,6 +103,7 @@ export function useParentParams(index) {
 
 export function getPagesFromHash({ hash, translations, pages }) {
 	let results = [];
+	hash = typeof hash === "string" ? hash : "";
 	if (hash.startsWith("#")) {
 		hash = hash.substring(1);
 	}
@@ -109,7 +118,7 @@ export function getPagesFromHash({ hash, translations, pages }) {
 	}
 	let path = "";
 	items.forEach((item) => {
-		item = decodeURIComponent(item);
+		item = decodeHashSegment(item);
 		const sections = item.split("/");
 		let sectionPath = "";
 		const pageId = (sections[0] || "").split("?")[0];

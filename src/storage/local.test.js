@@ -52,6 +52,10 @@ beforeEach(async () => {
 	await resetLocalFileSystem();
 });
 
+afterEach(async () => {
+	await new Promise((resolve) => setTimeout(resolve, 0));
+});
+
 describe("native IndexedDB local storage", () => {
 	it("writes text files, creates parent directories, and lists virtual folders", async () => {
 		await localStorage.writeFile("/sync/american/2024.json", '{"sessions":[]}');
@@ -322,6 +326,121 @@ describe("native IndexedDB local storage", () => {
 				configurable: true,
 				value: originalNavigator,
 			});
+		}
+	});
+
+	it("reopens IndexedDB after the page is hidden or frozen on mobile", async () => {
+		await localStorage.writeFile("/sync/keep.json", "keep");
+
+		window.dispatchEvent(new Event("pagehide"));
+		await localStorage.writeFile("/sync/after-hide.json", "after-hide");
+
+		document.dispatchEvent(new Event("freeze"));
+		expect(await localStorage.readFile("/sync/keep.json")).toBe("keep");
+		expect(await localStorage.readFile("/sync/after-hide.json")).toBe(
+			"after-hide",
+		);
+	});
+
+	it("does not close IndexedDB synchronously while Chromium freezes the tab", async () => {
+		await localStorage.writeFile("/sync/frozen.json", "frozen");
+		const closeSpy = jest.spyOn(IDBDatabase.prototype, "close");
+		const callsBefore = closeSpy.mock.calls.length;
+		document.dispatchEvent(new Event("freeze"));
+		expect(closeSpy.mock.calls.length).toBe(callsBefore);
+		closeSpy.mockRestore();
+		await localStorage.writeFile("/sync/after-freeze.json", "after-freeze");
+		expect(await localStorage.readFile("/sync/frozen.json")).toBe("frozen");
+	});
+
+	it("reopens IndexedDB after Android Chrome resume and focus events", async () => {
+		await localStorage.writeFile("/sync/resume.json", "resume");
+		const openSpy = jest.spyOn(indexedDB, "open");
+		const callsBefore = openSpy.mock.calls.length;
+		document.dispatchEvent(new Event("resume"));
+		window.dispatchEvent(new Event("focus"));
+		await localStorage.writeFile("/sync/after-resume.json", "after-resume");
+		expect(openSpy.mock.calls.length).toBeGreaterThan(callsBefore);
+		openSpy.mockRestore();
+		expect(await localStorage.readFile("/sync/resume.json")).toBe("resume");
+		expect(await localStorage.readFile("/sync/after-resume.json")).toBe(
+			"after-resume",
+		);
+	});
+
+	it("drops a restored back-forward cache connection on pageshow", async () => {
+		await localStorage.writeFile("/sync/cached.json", "cached");
+		const pageshow = new Event("pageshow");
+		Object.defineProperty(pageshow, "persisted", { value: true });
+		window.dispatchEvent(pageshow);
+
+		expect(await localStorage.readFile("/sync/cached.json")).toBe("cached");
+		await localStorage.writeFile("/sync/resumed.json", "resumed");
+		expect(await localStorage.readFile("/sync/resumed.json")).toBe("resumed");
+	});
+
+	it("retries when the cached IndexedDB connection is already closing", async () => {
+		await localStorage.writeFile("/sync/before.json", "before");
+		const originalTransaction = IDBDatabase.prototype.transaction;
+		let calls = 0;
+		IDBDatabase.prototype.transaction = function transactionWithClosedError(
+			...args
+		) {
+			calls += 1;
+			if (calls === 1) {
+				const error = new Error("The database connection is closing");
+				error.name = "InvalidStateError";
+				throw error;
+			}
+			return originalTransaction.apply(this, args);
+		};
+		try {
+			await localStorage.writeFile("/sync/retry.json", "retry");
+			expect(await localStorage.readFile("/sync/retry.json")).toBe("retry");
+			expect(await localStorage.readFile("/sync/before.json")).toBe("before");
+			expect(calls).toBeGreaterThan(1);
+		} finally {
+			IDBDatabase.prototype.transaction = originalTransaction;
+		}
+	});
+
+	it("reopens after IndexedDB asks this connection to close", async () => {
+		await localStorage.writeFile("/sync/before-upgrade.json", "before-upgrade");
+		await new Promise((resolve, reject) => {
+			const request = indexedDB.deleteDatabase("systemconcepts-local-files");
+			request.onsuccess = () => resolve();
+			request.onerror = () => reject(request.error);
+		});
+
+		await localStorage.writeFile("/sync/after-upgrade.json", "after-upgrade");
+		expect(await localStorage.readFile("/sync/after-upgrade.json")).toBe(
+			"after-upgrade",
+		);
+	});
+
+	it("retries when a transaction is aborted after the tab is frozen", async () => {
+		await localStorage.writeFile("/sync/abort-before.json", "abort-before");
+		const originalTransaction = IDBDatabase.prototype.transaction;
+		let calls = 0;
+		IDBDatabase.prototype.transaction = function transactionWithAbort(...args) {
+			calls += 1;
+			if (calls === 1) {
+				const error = new Error(
+					"An internal error was encountered in the Indexed Database server",
+				);
+				error.name = "AbortError";
+				throw error;
+			}
+			return originalTransaction.apply(this, args);
+		};
+		try {
+			await localStorage.writeFile("/sync/abort-retry.json", "abort-retry");
+			expect(await localStorage.readFile("/sync/abort-retry.json")).toBe(
+				"abort-retry",
+			);
+			expect(calls).toBeGreaterThan(1);
+		} finally {
+			IDBDatabase.prototype.transaction = originalTransaction;
 		}
 	});
 });
