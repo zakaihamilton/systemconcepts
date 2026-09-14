@@ -107,6 +107,15 @@ const TextField = forwardRef(function TextField(
 							id={id}
 							name={id}
 							aria-label={!label ? props["aria-label"] : undefined}
+							value={
+								multiple
+									? Array.isArray(value)
+										? value
+										: value == null
+											? []
+											: [value]
+									: (value ?? "")
+							}
 							onChange={onChange}
 							onFocus={handleFocus}
 							onBlur={handleBlur}

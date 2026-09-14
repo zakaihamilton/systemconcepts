@@ -80,6 +80,26 @@ describe("TextField", () => {
 		expect(screen.getByLabelText("Multi")).toHaveAttribute("multiple");
 	});
 
+	it("keeps the native select value in sync with the controlled value", () => {
+		const { rerender } = render(
+			<TextField label="Pick" select value="b">
+				<option value="a">A</option>
+				<option value="b">B</option>
+			</TextField>,
+		);
+		const select = screen.getByLabelText("Pick");
+
+		expect(select).toHaveValue("b");
+
+		rerender(
+			<TextField label="Pick" select value="a">
+				<option value="a">A</option>
+				<option value="b">B</option>
+			</TextField>,
+		);
+		expect(select).toHaveValue("a");
+	});
+
 	it("forwards function and object refs", () => {
 		const objectRef = createRef();
 		const nodes = [];
