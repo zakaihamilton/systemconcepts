@@ -183,7 +183,7 @@ export async function getSProxyUrl(path, baseUrl) {
 }
 
 /**
- * Fast, synchronous transcript URL resolver for the RSS feed.
+ * Fast transcript URL resolver for the RSS feed.
  * Resolves the best available transcript path from session metadata
  * WITHOUT issuing any S3 HeadObject calls.
  */

@@ -8,6 +8,10 @@ const CACHE_EXTENSIONS = {
 // Bump this when the generated RSS document changes in a way that makes a
 // previously stored document unusable (for example, enclosure URL format).
 const CACHE_CONTENT_VERSIONS = {
+	// Force regeneration after the sessions serializer started awaiting its
+	// signed media URLs. Older cached responses contain serialized Promises
+	// (`{}`) instead of URL strings or null.
+	sessions: "media-url-v2",
 	// Force regeneration after media capabilities became mandatory. Cached v3
 	// documents may still contain legacy unsigned enclosure URLs, which the
 	// media proxy correctly rejects.

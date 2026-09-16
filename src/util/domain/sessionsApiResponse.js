@@ -51,22 +51,24 @@ export function filterSessions(sessions, searchParams) {
 	return sortSessions(filtered).slice(index, index + count);
 }
 
-export function buildSessionsJson({ sessions, baseUrl }) {
-	const formattedSessions = sessions.map((session) => ({
-		id: session.id,
-		group: session.group,
-		year: session.year,
-		date: session.date,
-		name: session.name,
-		duration: session.duration ? Math.round(session.duration) : 0,
-		tags: session.tags || [],
-		summaryText: session.summaryText || session.summary || null,
-		imageUrl:
-			session.image && session.image.path
-				? getSProxyUrl(session.image.path, baseUrl)
-				: null,
-		transcriptionUrl: getTranscriptProxyUrlFast(session, baseUrl),
-	}));
+export async function buildSessionsJson({ sessions, baseUrl }) {
+	const formattedSessions = await Promise.all(
+		sessions.map(async (session) => ({
+			id: session.id,
+			group: session.group,
+			year: session.year,
+			date: session.date,
+			name: session.name,
+			duration: session.duration ? Math.round(session.duration) : 0,
+			tags: session.tags || [],
+			summaryText: session.summaryText || session.summary || null,
+			imageUrl:
+				session.image && session.image.path
+					? await getSProxyUrl(session.image.path, baseUrl)
+					: null,
+			transcriptionUrl: await getTranscriptProxyUrlFast(session, baseUrl),
+		})),
+	);
 
 	return JSON.stringify(formattedSessions);
 }

@@ -183,6 +183,23 @@ describe("/api/sessions", () => {
 		);
 	});
 
+	it("rotates the cache key before signed media URLs expire", async () => {
+		const now = 22 * 60 * 60 * 1000 * 123;
+		const dateNow = jest.spyOn(Date, "now").mockReturnValue(now);
+
+		try {
+			await GET(makeRequest("?id=user&token=token&group=alpha"));
+
+			expect(buildApiCacheKey).toHaveBeenCalledWith(
+				"sessions",
+				expect.objectContaining({ mediaUrlWindow: 123 }),
+				"fingerprint",
+			);
+		} finally {
+			dateNow.mockRestore();
+		}
+	});
+
 	it("does not cache unauthorized responses", async () => {
 		authenticateEdge.mockResolvedValue(false);
 

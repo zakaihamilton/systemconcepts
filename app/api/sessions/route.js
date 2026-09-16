@@ -28,6 +28,9 @@ const SESSION_CACHE_HEADERS = {
 		"public, max-age=300, stale-while-revalidate=3600",
 };
 
+// Rotate cached signed media URLs before their 24-hour capability expires.
+const SESSION_MEDIA_URL_WINDOW_MS = 22 * 60 * 60 * 1000;
+
 function preventCaching(response) {
 	for (const [name, value] of Object.entries(NO_CACHE_HEADERS)) {
 		response.headers.set(name, value);
@@ -69,7 +72,10 @@ export async function GET(request) {
 		const group = searchParams.get("group");
 		const manifest = await loadManifest();
 		const fingerprint = getManifestFingerprint(manifest, { group });
-		const contentParams = getContentParams("sessions", searchParams);
+		const contentParams = {
+			...getContentParams("sessions", searchParams),
+			mediaUrlWindow: Math.floor(Date.now() / SESSION_MEDIA_URL_WINDOW_MS),
+		};
 		const cacheKey = await buildApiCacheKey(
 			"sessions",
 			contentParams,
@@ -87,7 +93,7 @@ export async function GET(request) {
 		}
 
 		const sessions = filterSessions(await getSessions({ group }), searchParams);
-		const body = buildSessionsJson({ sessions, baseUrl });
+		const body = await buildSessionsJson({ sessions, baseUrl });
 		scheduleApiCacheWrite("sessions", cacheKey, body);
 
 		return new Response(body, {
