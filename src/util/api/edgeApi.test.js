@@ -1,5 +1,4 @@
 import {
-	__clearEdgeApiCachesForTests,
 	authenticateEdge,
 	enforceRateLimitEdge,
 	getClientIp,
@@ -71,23 +70,34 @@ describe("authenticateEdge", () => {
 });
 
 describe("enforceRateLimitEdge", () => {
+	let originalNodeEnv;
+	let originalPlaywright;
+
 	beforeEach(() => {
-		__clearEdgeApiCachesForTests();
+		originalNodeEnv = process.env.NODE_ENV;
+		originalPlaywright = process.env.PLAYWRIGHT;
+		process.env.NODE_ENV = "production";
+		delete process.env.PLAYWRIGHT;
 		global.fetch = jest.fn();
 	});
 
 	afterEach(() => {
-		__clearEdgeApiCachesForTests();
+		if (originalNodeEnv === undefined) delete process.env.NODE_ENV;
+		else process.env.NODE_ENV = originalNodeEnv;
+		if (originalPlaywright === undefined) delete process.env.PLAYWRIGHT;
+		else process.env.PLAYWRIGHT = originalPlaywright;
 		jest.restoreAllMocks();
 	});
 
-	it("bypasses external rate-limit persistence only in the Playwright harness", async () => {
-		const previous = process.env.PLAYWRIGHT;
+	it("bypasses persistence in Playwright and local development", async () => {
 		process.env.PLAYWRIGHT = "1";
 		await expect(enforceRateLimitEdge("203.0.113.1")).resolves.toBe(true);
 		expect(global.fetch).not.toHaveBeenCalled();
-		if (previous === undefined) delete process.env.PLAYWRIGHT;
-		else process.env.PLAYWRIGHT = previous;
+
+		process.env.PLAYWRIGHT = "0";
+		process.env.NODE_ENV = "development";
+		await expect(enforceRateLimitEdge("203.0.113.1")).resolves.toBe(true);
+		expect(global.fetch).not.toHaveBeenCalled();
 	});
 
 	it("returns false when no ip is provided", async () => {
@@ -95,21 +105,20 @@ describe("enforceRateLimitEdge", () => {
 		expect(global.fetch).not.toHaveBeenCalled();
 	});
 
-	it("returns true and caches the result when the endpoint allows the request", async () => {
+	it("checks each request when the endpoint allows it", async () => {
 		global.fetch.mockResolvedValue(jsonResponse({ ok: true }));
 		await expect(enforceRateLimitEdge("203.0.113.2")).resolves.toBe(true);
 		expect(global.fetch).toHaveBeenCalledTimes(1);
 
-		// Cached result is reused without another fetch call.
 		await expect(enforceRateLimitEdge("203.0.113.2")).resolves.toBe(true);
-		expect(global.fetch).toHaveBeenCalledTimes(1);
+		expect(global.fetch).toHaveBeenCalledTimes(2);
 	});
 
-	it("returns false and caches the result when the endpoint denies the request", async () => {
+	it("checks every request after the endpoint denies it", async () => {
 		global.fetch.mockResolvedValue(jsonResponse({ ok: false }));
 		await expect(enforceRateLimitEdge("203.0.113.3")).resolves.toBe(false);
 		await expect(enforceRateLimitEdge("203.0.113.3")).resolves.toBe(false);
-		expect(global.fetch).toHaveBeenCalledTimes(1);
+		expect(global.fetch).toHaveBeenCalledTimes(2);
 	});
 
 	it("returns false when the endpoint responds with a non-ok status", async () => {
@@ -117,9 +126,9 @@ describe("enforceRateLimitEdge", () => {
 		await expect(enforceRateLimitEdge("203.0.113.4")).resolves.toBe(false);
 	});
 
-	it("fails open (returns true) when the fetch call throws", async () => {
+	it("fails closed when the fetch call throws", async () => {
 		global.fetch.mockRejectedValue(new Error("network down"));
-		await expect(enforceRateLimitEdge("203.0.113.5")).resolves.toBe(true);
+		await expect(enforceRateLimitEdge("203.0.113.5")).resolves.toBe(false);
 	});
 
 	it("passes the configured limit and window to the endpoint", async () => {
@@ -133,14 +142,11 @@ describe("enforceRateLimitEdge", () => {
 		});
 	});
 
-	it("refetches when the cached rate-limit entry has expired", async () => {
-		jest.useFakeTimers();
+	it("does not cache a rate-limit result for the request window", async () => {
 		global.fetch.mockResolvedValue(jsonResponse({ ok: true }));
 		await enforceRateLimitEdge("203.0.113.7");
-		jest.advanceTimersByTime(6000);
 		await enforceRateLimitEdge("203.0.113.7");
 		expect(global.fetch).toHaveBeenCalledTimes(2);
-		jest.useRealTimers();
 	});
 });
 

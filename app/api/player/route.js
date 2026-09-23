@@ -81,6 +81,10 @@ export async function GET(request) {
 		// browser retry the same failed request forever.
 		const result = await (async () => {
 			let s3Key = getWasabiKey(decodedPath);
+			// Validate the underlying object key as well as the virtual path. The
+			// wasabi/ prefix is removed before signing, so checking only the input
+			// would let wasabi/private/... bypass the private-folder guard.
+			validatePathAccess(s3Key);
 			let useAwsPrimary = isAwsPath;
 			if (!isAwsPath && isImageFile(s3Key)) {
 				const wasabiImage = await wasabiMetadataInfo({ path: s3Key });

@@ -81,6 +81,7 @@ describe("RSS media capabilities", () => {
 		).resolves.toBe(false);
 		expect(isPublicRssMediaPath("personal/alice/private.mp3")).toBe(false);
 		expect(isPublicRssMediaPath("private/secret.mp3")).toBe(false);
+		expect(isPublicRssMediaPath("wasabi/private/secret.mp3")).toBe(false);
 		expect(isPublicRssMediaPath("sessions/../personal/alice.mp3")).toBe(false);
 	});
 

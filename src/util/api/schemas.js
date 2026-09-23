@@ -1,3 +1,4 @@
+import { isValidNewPassword } from "@util/auth/passwordPolicy";
 import { z } from "zod";
 
 export const loginRequestSchema = z
@@ -19,7 +20,34 @@ export const loginRequestSchema = z
 		lastName: z.string().max(200).optional(),
 		remember: z.boolean().optional(),
 	})
-	.strict();
+	.strict()
+	.superRefine((body, context) => {
+		const requirePassword = (value, path, policy = false) => {
+			const valid =
+				typeof value === "string" &&
+				value.length > 0 &&
+				(!policy || isValidNewPassword(value));
+			if (!valid) {
+				context.addIssue({
+					code: "custom",
+					path: [path],
+					message: policy ? "INVALID_PASSWORD" : "PASSWORD_REQUIRED",
+				});
+			}
+		};
+
+		if (body.action === "login") requirePassword(body.password, "password");
+		if (body.action === "register") {
+			requirePassword(body.password, "password", true);
+		}
+		if (body.action === "password-change") {
+			requirePassword(body.oldPassword, "oldPassword");
+			requirePassword(body.newPassword, "newPassword", true);
+		}
+		if (body.action === "reset-confirm") {
+			requirePassword(body.newPassword, "newPassword", true);
+		}
+	});
 
 export const internalCacheRequestSchema = z
 	.object({

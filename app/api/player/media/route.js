@@ -34,6 +34,7 @@ export async function GET(request) {
 		validatePathAccess(path);
 		const isAwsPath = path.replace(/^\//, "").startsWith("aws/");
 		const key = getWasabiKey(path);
+		validatePathAccess(key);
 		const range = request.headers.get("range");
 
 		let sourceUrl;

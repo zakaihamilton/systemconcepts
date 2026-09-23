@@ -1,5 +1,6 @@
 import { logger as structuredLogger } from "@util/api/logger";
 import { getSafeError } from "@util/api/safeError";
+import { isValidNewPassword } from "@util/auth/passwordPolicy";
 import { assertSameOrigin } from "@util/auth/requestSecurity";
 import { roleAuth } from "@util/auth/roles";
 import {
@@ -65,6 +66,15 @@ async function handleUsers(request) {
 				: body && Array.isArray(body[collectionName])
 					? body[collectionName]
 					: [body];
+			for (const record of records) {
+				if (
+					record?.password &&
+					typeof record.id === "string" &&
+					!isValidNewPassword(record.password)
+				) {
+					throw "INVALID_PASSWORD";
+				}
+			}
 			for (const record of records) {
 				if (!record || typeof record.id !== "string") continue;
 				const existing = await findRecord({

@@ -23,6 +23,7 @@ export async function getDownloadUrl({
 	expiresIn = 3600,
 	responseContentDisposition,
 }) {
+	validatePathAccess(path);
 	const s3 = await getS3({});
 	const bucket = bucketName;
 	const key = normalizePath(path);
@@ -136,7 +137,7 @@ export function validatePathAccess(path) {
 
 	// Decode first to ensure %2e%2e is caught as ..
 	const decoded = decodeURIComponent(path);
-	const normalized = normalizePath(decoded);
+	const normalized = normalizePath(decoded).replace(/^\/+/, "");
 
 	// 3. Security: Robust traversal check
 	if (normalized.split("/").includes("..")) {
@@ -147,6 +148,36 @@ export function validatePathAccess(path) {
 	if (normalized.startsWith("private/") || normalized === "private") {
 		throw new Error("ACCESS_DENIED");
 	}
+}
+
+/**
+ * Normalize and authorize an object path used by the public session-content
+ * endpoints. Those endpoints must never be able to read the personal sync
+ * namespace merely because the caller has a student session.
+ */
+export function normalizeSessionContentPath(path) {
+	if (typeof path !== "string" || !path) {
+		throw new Error("ACCESS_DENIED");
+	}
+
+	let normalized;
+	try {
+		normalized = decodeURIComponent(path).replace(/^\/+/, "");
+	} catch {
+		throw new Error("ACCESS_DENIED");
+	}
+
+	// Session metadata may contain either the storage key or the legacy virtual
+	// device-prefixed form. S3 receives the key without that device prefix.
+	if (normalized.startsWith("aws/")) {
+		normalized = normalized.slice("aws/".length);
+	}
+
+	validatePathAccess(normalized);
+	if (!normalized.startsWith("sessions/")) {
+		throw new Error("ACCESS_DENIED");
+	}
+	return normalized;
 }
 
 export async function uploadFile({

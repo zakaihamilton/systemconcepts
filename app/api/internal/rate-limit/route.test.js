@@ -1,11 +1,7 @@
 import { checkRateLimit } from "@util/auth/rateLimit";
-import { unstable_cache } from "next/cache";
 import { POST } from "./route";
 
 jest.mock("@util/auth/rateLimit", () => ({ checkRateLimit: jest.fn() }));
-jest.mock("next/cache", () => ({
-	unstable_cache: jest.fn((callback) => callback),
-}));
 jest.mock("next/server", () => {
 	class TestResponse {
 		constructor(body, init = {}) {
@@ -52,23 +48,19 @@ describe("POST /api/internal/rate-limit", () => {
 		process.env.AWS_SECRET = originalSecret;
 	});
 
-	it("caches rate-limit checks using a hashed IP key", async () => {
+	it("checks the rate limit on every request", async () => {
 		checkRateLimit.mockResolvedValue();
-		const response = await POST(
-			request({ ip: "203.0.113.8", limit: 60, windowMs: 60000 }),
-		);
+		const body = { ip: "203.0.113.8", limit: 60, windowMs: 60000 };
+		const firstResponse = await POST(request(body));
+		const secondResponse = await POST(request(body));
 
-		expect(await response.json()).toEqual({ ok: true });
-		expect(unstable_cache).toHaveBeenCalledWith(
-			expect.any(Function),
-			["rate-limit", expect.stringMatching(/^[a-f0-9]{64}$/), "60", "60000"],
-			{ revalidate: 5 },
-		);
-		expect(unstable_cache.mock.calls[0][1]).not.toContain("203.0.113.8");
+		expect(await firstResponse.json()).toEqual({ ok: true });
+		expect(await secondResponse.json()).toEqual({ ok: true });
 		expect(checkRateLimit).toHaveBeenCalledWith(
 			{ ip: "203.0.113.8" },
 			{ limit: 60, windowMs: 60000, key: "203.0.113.8" },
 		);
+		expect(checkRateLimit).toHaveBeenCalledTimes(2);
 	});
 
 	it("preserves rate-limit denials", async () => {
@@ -99,5 +91,6 @@ describe("POST /api/internal/rate-limit", () => {
 		const response = await POST(request({ ip: "203.0.113.8" }));
 
 		expect(await response.json()).toEqual({ ok: false });
+		expect(response.status).toBe(503);
 	});
 });

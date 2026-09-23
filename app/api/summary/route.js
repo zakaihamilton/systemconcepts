@@ -1,7 +1,7 @@
 import { error } from "@util/api/logger";
 import { roleAuth } from "@util/auth/roles";
 import { getAuthErrorStatus, getSessionUser } from "@util/auth/session";
-import { downloadData, validatePathAccess } from "@util/storage/aws";
+import { downloadData, normalizeSessionContentPath } from "@util/storage/aws";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
@@ -20,9 +20,8 @@ export async function GET(request) {
 		if (!user) throw "ACCESS_DENIED";
 		if (!roleAuth(user.role, "student")) throw "ACCESS_DENIED";
 
-		const decodedPath = decodeURIComponent(path);
-		validatePathAccess(decodedPath);
-		const data = await downloadData({ path: decodedPath });
+		const sessionPath = normalizeSessionContentPath(path);
+		const data = await downloadData({ path: sessionPath });
 
 		return new NextResponse(data, {
 			status: 200,

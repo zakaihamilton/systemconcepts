@@ -55,8 +55,13 @@ function payload({ route, resource, expiresAt }) {
 
 export function isPublicRssMediaPath(path) {
 	if (!path || typeof path !== "string" || path.includes("\0")) return false;
-	const normalized = path.replace(/^\//, "");
-	if (normalized.split("/").includes("..")) return false;
+	const normalized = path.replace(/^\/+/, "");
+	const objectPath = normalized.startsWith("wasabi/")
+		? normalized.slice("wasabi/".length)
+		: normalized;
+	const pathSegments = objectPath.replace(/^\/+/, "").split(/[\/\n]/);
+	if (pathSegments.includes("..") || pathSegments[0] === "private")
+		return false;
 	return normalized.startsWith("sessions/") || normalized.startsWith("wasabi/");
 }
 

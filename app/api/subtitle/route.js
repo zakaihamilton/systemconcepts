@@ -1,7 +1,11 @@
 import { error } from "@util/api/logger";
 import { roleAuth } from "@util/auth/roles";
 import { getAuthErrorStatus, getSessionUser } from "@util/auth/session";
-import { downloadData, validatePathAccess } from "@util/storage/aws";
+import {
+	downloadData,
+	normalizeSessionContentPath,
+	validatePathAccess,
+} from "@util/storage/aws";
 import JSZip from "jszip";
 import { NextResponse } from "next/server";
 
@@ -17,22 +21,21 @@ export async function GET(request) {
 		const user = await getSessionUser(request);
 		if (!user || !roleAuth(user.role, "student")) throw "ACCESS_DENIED";
 
-		let decodedPath = decodeURIComponent(path);
-		validatePathAccess(decodedPath);
+		const sessionPath = normalizeSessionContentPath(path);
 
 		let data;
 		let contentType = "text/vtt";
 		if (file) {
 			validatePathAccess(file);
-			const blob = await downloadData({ path: decodedPath, binary: true });
+			const blob = await downloadData({ path: sessionPath, binary: true });
 			const zip = await JSZip.loadAsync(blob);
 			const entry = zip.file(file);
 			if (!entry) throw "NOT_FOUND";
 			data = await entry.async("string");
 			contentType = file.endsWith(".txt") ? "text/plain" : "text/vtt";
 		} else {
-			data = await downloadData({ path: decodedPath });
-			contentType = decodedPath.endsWith(".txt") ? "text/plain" : "text/vtt";
+			data = await downloadData({ path: sessionPath });
+			contentType = sessionPath.endsWith(".txt") ? "text/plain" : "text/vtt";
 		}
 
 		return new NextResponse(data, {

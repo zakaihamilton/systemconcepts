@@ -35,17 +35,13 @@ export async function authenticateEdge(searchParams) {
 	}
 }
 
-const rateLimitCache = new Map();
-const RATE_LIMIT_CACHE_TTL_MS = 5 * 1000;
-
 export async function enforceRateLimitEdge(ip, options = {}) {
 	if (process.env.PLAYWRIGHT === "1") return true;
+	// Local development can run without MongoDB or an internal secret. Keep the
+	// public local UI usable there; production must enforce the persisted limit.
+	if (process.env.NODE_ENV === "development") return true;
 	const { limit = 60, windowMs = 60 * 1000 } = options;
 	if (!ip) return false;
-
-	const now = Date.now();
-	const cached = rateLimitCache.get(ip);
-	if (cached && cached.expiresAt > now) return cached.ok;
 
 	const siteUrl = getSiteUrl();
 	try {
@@ -65,14 +61,12 @@ export async function enforceRateLimitEdge(ip, options = {}) {
 			return false;
 		}
 		const { ok } = await res.json();
-		rateLimitCache.set(ip, {
-			ok: ok === true,
-			expiresAt: now + RATE_LIMIT_CACHE_TTL_MS,
-		});
 		return ok === true;
 	} catch (err) {
 		structuredLogger.error("[Edge API] Rate limit fetch failed:", err);
-		return true;
+		// Fail closed so an internal rate-limit outage cannot become an
+		// unrestricted public API window.
+		return false;
 	}
 }
 
@@ -91,10 +85,6 @@ export function scheduleApiCacheWrite(type, key, body) {
 			err,
 		);
 	});
-}
-
-export function __clearEdgeApiCachesForTests() {
-	rateLimitCache.clear();
 }
 
 export function getClientIp(request) {
