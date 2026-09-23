@@ -1,11 +1,14 @@
 const VERSION = "systemconcepts-v2";
 const PAGE_CACHE = `${VERSION}-pages`;
 const SESSION_CACHE = `${VERSION}-sessions`;
+const SESSION_CACHE_MAX_ENTRIES = 128;
 
 interface CacheHandle {
 	add(request: RequestInfo | URL): Promise<void>;
 	match(request: RequestInfo | URL): Promise<Response | undefined>;
 	put(request: RequestInfo | URL, response: Response): Promise<void>;
+	keys(): Promise<Request[]>;
+	delete(request: RequestInfo | URL): Promise<boolean>;
 }
 
 interface CacheStorageHandle {
@@ -67,20 +70,44 @@ worker.addEventListener("activate", (event) => {
 	// activate is a known renderer crash; the next navigation picks up the worker.
 });
 
-async function staleWhileRevalidate(
+async function putSessionResponse(
+	cache: CacheHandle,
+	request: Request,
+	response: Response,
+): Promise<void> {
+	await cache.put(request, response.clone());
+	const requests = await cache.keys();
+	const excess = requests.length - SESSION_CACHE_MAX_ENTRIES;
+	if (excess > 0) {
+		await Promise.all(
+			requests.slice(0, excess).map((cached) => cache.delete(cached)),
+		);
+	}
+}
+
+function networkFirst(
 	request: Request,
 	cacheName: string,
-): Promise<Response | undefined> {
-	const cache = await cacheStorage.open(cacheName);
-	const cached = await cache.match(request);
-	const network = fetch(request).then((response) => {
-		const cacheControl = response.headers.get("cache-control") || "";
-		if (response.ok && !/\bno-store\b/i.test(cacheControl)) {
-			void cache.put(request, response.clone());
-		}
-		return response;
+	event: FetchEventHandle,
+): Promise<Response> {
+	const cachePromise = cacheStorage.open(cacheName);
+	const network = fetch(request);
+	const update = network
+		.then(async (response) => {
+			const cacheControl = response.headers.get("cache-control") || "";
+			if (response.ok && !/\bno-store\b/i.test(cacheControl)) {
+				const cache = await cachePromise;
+				await putSessionResponse(cache, request, response);
+			}
+		})
+		.catch(() => {});
+	event.waitUntil(update);
+	return network.catch(async (error) => {
+		const cache = await cachePromise;
+		const cached = await cache.match(request);
+		if (cached) return cached;
+		throw error;
 	});
-	return cached || network;
 }
 
 worker.addEventListener("fetch", (event) => {
@@ -89,7 +116,7 @@ worker.addEventListener("fetch", (event) => {
 	if (request.method !== "GET" || url.origin !== worker.location.origin) return;
 	if (url.pathname === "/api/player") return;
 	if (url.pathname === "/api/sessions") {
-		event.respondWith(staleWhileRevalidate(request, SESSION_CACHE));
+		event.respondWith(networkFirst(request, SESSION_CACHE, event));
 		return;
 	}
 	if (request.mode === "navigate") {

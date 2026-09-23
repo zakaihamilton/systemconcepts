@@ -1,14 +1,12 @@
 import { logger as structuredLogger } from "@util/api/logger";
 import { verifyRssMediaToken } from "@util/api/rssMediaToken";
 import { NextResponse } from "next/server";
-import { MEDIA_CACHE_HEADERS, NO_STORE_HEADERS } from "../cache";
+import { NO_STORE_HEADERS } from "../cache";
 
 export const runtime = "edge";
 export const dynamic = "force-dynamic";
 
-const SIGNED_URL_TTL_MS = 23 * 60 * 60 * 1000;
 const importedHmacKeys = new Map<any, any>();
-const signedUrlCache = new Map<any, any>();
 
 async function hmacSha256(key: any, data: any) {
 	let cryptoKey;
@@ -63,14 +61,7 @@ async function getPresignedUrl({
 	expiresIn = 86400,
 	method = "GET",
 }: any) {
-	const cacheKey = [endpoint, region, bucket, key, accessKeyId, method].join(
-		"\0",
-	);
-	const nowMs = Date.now();
-	const cached = signedUrlCache.get(cacheKey);
-	if (cached && cached.expiresAt > nowMs) return cached.promise;
-
-	const promise = createPresignedUrl({
+	return createPresignedUrl({
 		endpoint,
 		region,
 		bucket,
@@ -80,16 +71,6 @@ async function getPresignedUrl({
 		expiresIn,
 		method,
 	});
-	signedUrlCache.set(cacheKey, {
-		expiresAt: nowMs + SIGNED_URL_TTL_MS,
-		promise,
-	});
-	try {
-		return await promise;
-	} catch (err: any) {
-		signedUrlCache.delete(cacheKey);
-		throw err;
-	}
 }
 
 async function createPresignedUrl({
@@ -305,7 +286,7 @@ async function handleRequest(request: any) {
 						"Accept-Ranges": "bytes",
 						"Last-Modified": headRes.headers.get("Last-Modified") || "",
 						ETag: headRes.headers.get("ETag") || "",
-						...MEDIA_CACHE_HEADERS,
+						...NO_STORE_HEADERS,
 					},
 				});
 			} catch (err: any) {
@@ -332,7 +313,7 @@ async function handleRequest(request: any) {
 			status: 302,
 			headers: {
 				Location: signedStr,
-				...MEDIA_CACHE_HEADERS,
+				...NO_STORE_HEADERS,
 			},
 		});
 	} catch (err: any) {

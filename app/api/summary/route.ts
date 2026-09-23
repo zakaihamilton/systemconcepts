@@ -7,9 +7,9 @@ import { NextResponse } from "next/server";
 export const dynamic = "force-dynamic";
 
 const component = "summary";
-const STABLE_CONTENT_HEADERS = {
+const CONTENT_HEADERS = {
 	"Content-Type": "text/markdown",
-	"Cache-Control": "private, max-age=86400, stale-while-revalidate=604800",
+	"Cache-Control": "no-store",
 };
 
 export async function GET(request: any) {
@@ -25,10 +25,13 @@ export async function GET(request: any) {
 
 		return new NextResponse(data, {
 			status: 200,
-			headers: STABLE_CONTENT_HEADERS,
+			headers: CONTENT_HEADERS,
 		});
 	} catch (err: any) {
 		error({ component, error: "error", err });
-		return new NextResponse(null, { status: getAuthErrorStatus(err, 404) });
+		return new NextResponse(null, {
+			status: getAuthErrorStatus(err, 404),
+			headers: { "Cache-Control": "no-store" },
+		});
 	}
 }

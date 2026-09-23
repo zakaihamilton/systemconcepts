@@ -42,12 +42,14 @@ export async function GET(request: any) {
 			status: 200,
 			headers: {
 				"Content-Type": contentType,
-				"Cache-Control":
-					"private, max-age=86400, stale-while-revalidate=604800",
+				"Cache-Control": "no-store",
 			},
 		});
 	} catch (err: any) {
 		error({ component, error: "Subtitle fetch error", err });
-		return new NextResponse(null, { status: getAuthErrorStatus(err, 404) });
+		return new NextResponse(null, {
+			status: getAuthErrorStatus(err, 404),
+			headers: { "Cache-Control": "no-store" },
+		});
 	}
 }
