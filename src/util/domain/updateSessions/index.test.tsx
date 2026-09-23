@@ -51,14 +51,14 @@ describe("useUpdateSessions", () => {
 			s.status = [];
 			s.start = 0;
 		});
-		getListing.mockResolvedValue([
+		asMock(getListing).mockResolvedValue([
 			{ name: "active" },
 			{ name: "disabled" },
 			{ name: "bundled" },
 			{ name: "unknown" },
 		]);
-		updateGroupProcess.mockResolvedValue([]);
-		updateBundleFile.mockResolvedValue();
+		asMock(updateGroupProcess).mockResolvedValue([]);
+		asMock(updateBundleFile).mockResolvedValue(undefined);
 	});
 
 	it("updates only enabled groups by default", async () => {
@@ -103,7 +103,7 @@ describe("useUpdateSessions", () => {
 	});
 
 	it("calls updateBundleFile with flattened bundled results", async () => {
-		updateGroupProcess.mockImplementation(async (name: any) => {
+		asMock(updateGroupProcess).mockImplementation(async (name: any) => {
 			if (name === "bundled") {
 				return [{ id: "session1", group: "bundled" }];
 			}
@@ -121,7 +121,7 @@ describe("useUpdateSessions", () => {
 	});
 
 	it("does not call updateBundleFile when no bundled sessions are returned", async () => {
-		updateGroupProcess.mockResolvedValue(undefined);
+		asMock(updateGroupProcess).mockResolvedValue(undefined);
 		renderHarness(GROUPS);
 
 		await act(async () => {
@@ -149,7 +149,7 @@ describe("useUpdateSessions", () => {
 
 	it("logs and continues with an empty listing when getListing throws", async () => {
 		const { logger } = require("@util/api/logger");
-		getListing.mockRejectedValue(new Error("listing failed"));
+		asMock(getListing).mockRejectedValue(new Error("listing failed"));
 		renderHarness(GROUPS);
 
 		let result;
@@ -163,7 +163,7 @@ describe("useUpdateSessions", () => {
 	});
 
 	it("returns early when getListing resolves to a falsy value", async () => {
-		getListing.mockResolvedValue(null);
+		asMock(getListing).mockResolvedValue(null);
 		renderHarness(GROUPS);
 
 		let result;
@@ -180,7 +180,7 @@ describe("useUpdateSessions", () => {
 		const processPromise = new Promise((resolve) => {
 			resolveProcess = resolve;
 		});
-		updateGroupProcess.mockImplementation(() => processPromise);
+		asMock(updateGroupProcess).mockImplementation(() => processPromise);
 		renderHarness(GROUPS);
 
 		let pending: any;
@@ -269,7 +269,9 @@ describe("useUpdateSessions", () => {
 	});
 
 	it("updateGroup (updateSpecificGroup) targets a single group by name", async () => {
-		updateGroupProcess.mockResolvedValue([{ id: "s1", group: "active" }]);
+		asMock(updateGroupProcess).mockResolvedValue([
+			{ id: "s1", group: "active" },
+		]);
 		renderHarness(GROUPS);
 
 		let result;
@@ -290,7 +292,9 @@ describe("useUpdateSessions", () => {
 	});
 
 	it("updateGroup calls updateBundleFile when targeting a bundled group with results", async () => {
-		updateGroupProcess.mockResolvedValue([{ id: "s1", group: "bundled" }]);
+		asMock(updateGroupProcess).mockResolvedValue([
+			{ id: "s1", group: "bundled" },
+		]);
 		renderHarness(GROUPS);
 
 		await act(async () => {
@@ -303,7 +307,7 @@ describe("useUpdateSessions", () => {
 	});
 
 	it("updateGroup handles an unknown group name gracefully", async () => {
-		updateGroupProcess.mockResolvedValue(undefined);
+		asMock(updateGroupProcess).mockResolvedValue(undefined);
 		renderHarness(GROUPS);
 
 		let result;
@@ -324,7 +328,7 @@ describe("useUpdateSessions", () => {
 
 	it("updateAllSessions logs listing failures and returns early on falsy listings", async () => {
 		const { logger } = require("@util/api/logger");
-		getListing.mockRejectedValueOnce(new Error("all listing failed"));
+		asMock(getListing).mockRejectedValueOnce(new Error("all listing failed"));
 		renderHarness(GROUPS);
 
 		let result;
@@ -334,7 +338,7 @@ describe("useUpdateSessions", () => {
 		expect(logger.error).toHaveBeenCalled();
 		expect(result).toEqual([]);
 
-		getListing.mockResolvedValue(null);
+		asMock(getListing).mockResolvedValue(null);
 		await act(async () => {
 			result = await latestApi.updateAllSessions(false);
 		});
@@ -342,7 +346,7 @@ describe("useUpdateSessions", () => {
 	});
 
 	it("updateAllMetadataCurrentYear bundles results and honors includeDisabled", async () => {
-		updateGroupProcess.mockImplementation(async (name: any) =>
+		asMock(updateGroupProcess).mockImplementation(async (name: any) =>
 			name === "bundled" ? [{ id: "s1" }] : [],
 		);
 		renderHarness(GROUPS);
@@ -361,7 +365,7 @@ describe("useUpdateSessions", () => {
 	});
 
 	it("updateAllSessions bundles results and returns early on falsy listings", async () => {
-		updateGroupProcess.mockImplementation(async (name: any) =>
+		asMock(updateGroupProcess).mockImplementation(async (name: any) =>
 			name === "bundled" ? [{ id: "all" }] : [],
 		);
 		renderHarness(GROUPS);
@@ -371,7 +375,7 @@ describe("useUpdateSessions", () => {
 		});
 		expect(updateBundleFile).toHaveBeenCalledWith([{ id: "all" }]);
 
-		getListing.mockResolvedValue(null);
+		asMock(getListing).mockResolvedValue(null);
 		await act(async () => {
 			await latestApi.updateAllMetadataCurrentYear(false);
 		});
@@ -380,15 +384,17 @@ describe("useUpdateSessions", () => {
 
 	it("updateRecentSessions logs listing failures and bundles recent results", async () => {
 		const { logger } = require("@util/api/logger");
-		getListing.mockRejectedValueOnce(new Error("recent listing failed"));
+		asMock(getListing).mockRejectedValueOnce(
+			new Error("recent listing failed"),
+		);
 		renderHarness(GROUPS);
 		await act(async () => {
 			await latestApi.updateRecentSessions(false);
 		});
 		expect(logger.error).toHaveBeenCalled();
 
-		getListing.mockResolvedValue([{ name: "bundled" }]);
-		updateGroupProcess.mockResolvedValue([{ id: "recent" }]);
+		asMock(getListing).mockResolvedValue([{ name: "bundled" }]);
+		asMock(updateGroupProcess).mockResolvedValue([{ id: "recent" }]);
 		await act(async () => {
 			await latestApi.updateRecentSessions(false);
 		});

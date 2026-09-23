@@ -9,14 +9,14 @@ import {
 
 describe("useStoreState", () => {
 	it("exposes a [value, setter] tuple for each key in the store", () => {
-		const store = new Store({ count: 1, name: "a" });
+		const store = new Store<Record<string, any>>({ count: 1, name: "a" });
 		const { result } = renderHook(() => useStoreState(store));
 		expect(result.current.count[0]).toBe(1);
 		expect(result.current.name[0]).toBe("a");
 	});
 
 	it("updates the underlying store when a setter is called", () => {
-		const store = new Store({ count: 1 });
+		const store = new Store<Record<string, any>>({ count: 1 });
 		const { result } = renderHook(() => useStoreState(store));
 
 		act(() => {
@@ -28,7 +28,7 @@ describe("useStoreState", () => {
 	});
 
 	it("supports a filter to select a subset of the state", () => {
-		const store = new Store({ a: 1, b: 2 });
+		const store = new Store<Record<string, any>>({ a: 1, b: 2 });
 		const { result } = renderHook(() =>
 			useStoreState(store, (s) => ({ a: s.a })),
 		);
@@ -46,7 +46,7 @@ describe("useLocalStorage (store)", () => {
 			"my-store",
 			JSON.stringify({ theme: "dark", ignored: true }),
 		);
-		const store = new Store({});
+		const store = new Store<Record<string, any>>({});
 		renderHook(() => useLocalStorage("my-store", store, ["theme"]));
 		expect(store.getRawState()).toEqual({ theme: "dark", _loaded: true });
 	});
@@ -59,7 +59,7 @@ describe("useLocalStorage (store)", () => {
 				fontSize: "18",
 			}),
 		);
-		const store = new Store({ fontSize: "16" });
+		const store = new Store<Record<string, any>>({ fontSize: "16" });
 		renderHook(() => useLocalStorage("main-store-hash", store, ["fontSize"]));
 		expect(store.getRawState()).toEqual({
 			fontSize: "18",
@@ -73,7 +73,7 @@ describe("useLocalStorage (store)", () => {
 			"my-store-all",
 			JSON.stringify({ theme: "dark", volume: 5 }),
 		);
-		const store = new Store({});
+		const store = new Store<Record<string, any>>({});
 		renderHook(() => useLocalStorage("my-store-all", store));
 		expect(store.getRawState()).toEqual({
 			theme: "dark",
@@ -83,13 +83,13 @@ describe("useLocalStorage (store)", () => {
 	});
 
 	it("marks the store as loaded when nothing is persisted", () => {
-		const store = new Store({});
+		const store = new Store<Record<string, any>>({});
 		renderHook(() => useLocalStorage("my-store-empty", store));
 		expect(store.getRawState()._loaded).toBe(true);
 	});
 
 	it("persists filtered fields back to localStorage on updates", () => {
-		const store = new Store({});
+		const store = new Store<Record<string, any>>({});
 		renderHook(() => useLocalStorage("my-store-persist", store, ["a"]));
 
 		act(() => {
@@ -105,7 +105,7 @@ describe("useLocalStorage (store)", () => {
 	});
 
 	it("persists all fields when no field filter is given", () => {
-		const store = new Store({});
+		const store = new Store<Record<string, any>>({});
 		renderHook(() => useLocalStorage("my-store-persist-all", store));
 
 		act(() => {
@@ -120,7 +120,7 @@ describe("useLocalStorage (store)", () => {
 	});
 
 	it("removes the subscription on unmount", () => {
-		const store = new Store({});
+		const store = new Store<Record<string, any>>({});
 		const { unmount } = renderHook(() =>
 			useLocalStorage("my-store-unmount", store),
 		);
@@ -134,13 +134,13 @@ describe("useLocalStorage (store)", () => {
 
 	it("marks the store as loaded when persisted JSON is invalid", () => {
 		window.localStorage.setItem("my-store-bad", "{not-json");
-		const store = new Store({ theme: "light" });
+		const store = new Store<Record<string, any>>({ theme: "light" });
 		renderHook(() => useLocalStorage("my-store-bad", store, ["theme"]));
 		expect(store.getRawState()).toEqual({ theme: "light", _loaded: true });
 	});
 
 	it("keeps working when persisting to localStorage throws", () => {
-		const store = new Store({});
+		const store = new Store<Record<string, any>>({});
 		renderHook(() => useLocalStorage("my-store-quota", store, ["a"]));
 		const setItemSpy = jest
 			.spyOn(window.localStorage.__proto__, "setItem")
@@ -157,7 +157,7 @@ describe("useLocalStorage (store)", () => {
 			).not.toThrow();
 			expect(store.getRawState().a).toBe(1);
 		} finally {
-			setItemSpy.mockRestore();
+			asMock(setItemSpy).mockRestore();
 		}
 	});
 });

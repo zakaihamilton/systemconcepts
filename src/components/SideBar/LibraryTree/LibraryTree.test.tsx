@@ -60,27 +60,27 @@ describe("LibraryTree Component", () => {
 			scrollToPath: null,
 			expandedNodes: [],
 		};
-		useTranslations.mockReturnValue({
+		asMock(useTranslations).mockReturnValue({
 			FILTER_TAGS: "Filter tags...",
 			CLEAR_FILTER: "Clear filter",
 		});
-		usePathItems.mockReturnValue(["library"]);
-		SyncActiveStore.useState.mockReturnValue(0);
-		LibraryStore.useState.mockImplementation((selector: any) =>
+		asMock(usePathItems).mockReturnValue(["library"]);
+		asMock(SyncActiveStore.useState).mockReturnValue(0);
+		asMock(LibraryStore.useState).mockImplementation((selector: any) =>
 			selector ? selector(libraryState) : libraryState,
 		);
-		LibraryStore.update.mockImplementation((updater: any) =>
+		asMock(LibraryStore.update).mockImplementation((updater: any) =>
 			updater(libraryState),
 		);
-		storage.exists.mockResolvedValue(false);
-		storage.readFile.mockResolvedValue("{}");
+		asMock(storage.exists).mockResolvedValue(false);
+		asMock(storage.readFile).mockResolvedValue("{}");
 	});
 
 	afterEach(() => {
 		jest.useRealTimers();
 	});
 
-	const renderTree = (props: any) => render(<LibraryTree {...props} />);
+	const renderTree = (props: any = {}) => render(<LibraryTree {...props} />);
 
 	it("renders nothing when there are no tags", () => {
 		const { container } = renderTree();
@@ -88,8 +88,8 @@ describe("LibraryTree Component", () => {
 	});
 
 	it("loads tags and custom order from storage, builds tree", async () => {
-		storage.exists.mockResolvedValue(true);
-		storage.readFile.mockImplementation((path: any) => {
+		asMock(storage.exists).mockResolvedValue(true);
+		asMock(storage.readFile).mockImplementation((path: any) => {
 			if (path.endsWith("tags.json")) {
 				return Promise.resolve(
 					JSON.stringify([
@@ -113,7 +113,7 @@ describe("LibraryTree Component", () => {
 	});
 
 	it("logs an error when loading tags fails", async () => {
-		storage.exists.mockRejectedValue(new Error("boom"));
+		asMock(storage.exists).mockRejectedValue(new Error("boom"));
 		renderTree();
 		await waitFor(() => {
 			expect(structuredLogger.error).toHaveBeenCalledWith(
@@ -124,11 +124,11 @@ describe("LibraryTree Component", () => {
 	});
 
 	it("logs an error when loading custom order fails", async () => {
-		storage.exists.mockImplementation((path: any) => {
+		asMock(storage.exists).mockImplementation((path: any) => {
 			if (path.endsWith("tags.json")) return Promise.resolve(true);
 			return Promise.reject(new Error("order failure"));
 		});
-		storage.readFile.mockResolvedValue(
+		asMock(storage.readFile).mockResolvedValue(
 			JSON.stringify([{ _id: "t1", author: "Augustine" }]),
 		);
 		renderTree();
@@ -141,11 +141,11 @@ describe("LibraryTree Component", () => {
 	});
 
 	it("reloads tags and order when libraryUpdateCounter increments", async () => {
-		storage.exists.mockResolvedValue(true);
-		storage.readFile.mockImplementation((path: any) =>
+		asMock(storage.exists).mockResolvedValue(true);
+		asMock(storage.readFile).mockImplementation((path: any) =>
 			Promise.resolve(tagsToJson(path, [{ _id: "t1", author: "Augustine" }])),
 		);
-		SyncActiveStore.useState.mockReturnValue(1);
+		asMock(SyncActiveStore.useState).mockReturnValue(1);
 		renderTree();
 		await waitFor(() => {
 			expect(storage.readFile).toHaveBeenCalled();
@@ -159,8 +159,8 @@ describe("LibraryTree Component", () => {
 		];
 
 		beforeEach(() => {
-			storage.exists.mockResolvedValue(true);
-			storage.readFile.mockImplementation((path: any) =>
+			asMock(storage.exists).mockResolvedValue(true);
+			asMock(storage.readFile).mockImplementation((path: any) =>
 				Promise.resolve(tagsToJson(path, flatTags)),
 			);
 		});
@@ -190,7 +190,9 @@ describe("LibraryTree Component", () => {
 			await waitFor(() => {
 				expect(screen.getByText("Confessions")).toBeInTheDocument();
 			});
-			const input = screen.getByPlaceholderText("Filter tags...");
+			const input = screen.getByPlaceholderText(
+				"Filter tags...",
+			) as HTMLInputElement;
 
 			fireEvent.change(input, { target: { value: "confessions" } });
 			await waitFor(
@@ -216,7 +218,9 @@ describe("LibraryTree Component", () => {
 				expect(screen.getByText("Confessions")).toBeInTheDocument();
 			});
 
-			const input = screen.getByPlaceholderText("Filter tags...");
+			const input = screen.getByPlaceholderText(
+				"Filter tags...",
+			) as HTMLInputElement;
 			fireEvent.change(input, { target: { value: "summa" } });
 			await waitFor(
 				() => {
@@ -317,14 +321,14 @@ describe("LibraryTree Component", () => {
 		];
 
 		beforeEach(() => {
-			storage.exists.mockResolvedValue(true);
-			storage.readFile.mockImplementation((path: any) =>
+			asMock(storage.exists).mockResolvedValue(true);
+			asMock(storage.readFile).mockImplementation((path: any) =>
 				Promise.resolve(tagsToJson(path, hierarchyTags)),
 			);
 		});
 
 		it("selects a tag from the URL path by id", async () => {
-			usePathItems.mockReturnValue(["library", "id", "t1"]);
+			asMock(usePathItems).mockReturnValue(["library", "id", "t1"]);
 			renderTree();
 			await waitFor(() => {
 				expect(libraryState.selectedId).toBe("t1");
@@ -333,7 +337,7 @@ describe("LibraryTree Component", () => {
 		});
 
 		it("selects a tag from the URL path with a paragraph suffix", async () => {
-			usePathItems.mockReturnValue(["library", "id", "t1:5"]);
+			asMock(usePathItems).mockReturnValue(["library", "id", "t1:5"]);
 			renderTree();
 			await waitFor(() => {
 				expect(libraryState.selectedId).toBe("t1");
@@ -342,7 +346,7 @@ describe("LibraryTree Component", () => {
 		});
 
 		it("selects a tag from a hierarchy path without id", async () => {
-			usePathItems.mockReturnValue([
+			asMock(usePathItems).mockReturnValue([
 				"library",
 				"Augustine",
 				"Confessions",
@@ -355,7 +359,7 @@ describe("LibraryTree Component", () => {
 		});
 
 		it("falls back to matching hierarchy base when a paragraph suffix is appended", async () => {
-			usePathItems.mockReturnValue([
+			asMock(usePathItems).mockReturnValue([
 				"library",
 				"Augustine",
 				"Confessions",
@@ -369,7 +373,7 @@ describe("LibraryTree Component", () => {
 		});
 
 		it("clears selection when no tag matches the URL path", async () => {
-			usePathItems.mockReturnValue(["library", "Nonexistent", "Path"]);
+			asMock(usePathItems).mockReturnValue(["library", "Nonexistent", "Path"]);
 			renderTree();
 			await waitFor(() => {
 				expect(libraryState.selectedId).toBe(null);
@@ -378,7 +382,7 @@ describe("LibraryTree Component", () => {
 		});
 
 		it("matches a tag by base hierarchy when its own number differs from the requested paragraph", async () => {
-			usePathItems.mockReturnValue([
+			asMock(usePathItems).mockReturnValue([
 				"library",
 				"Augustine",
 				"Confessions",
@@ -393,9 +397,9 @@ describe("LibraryTree Component", () => {
 	});
 
 	describe("tree sort ordering", () => {
-		const getRenderedOrder = async (tags: any, customOrder: any) => {
-			storage.exists.mockResolvedValue(true);
-			storage.readFile.mockImplementation((path: any) => {
+		const getRenderedOrder = async (tags: any, customOrder: any = null) => {
+			asMock(storage.exists).mockResolvedValue(true);
+			asMock(storage.readFile).mockImplementation((path: any) => {
 				if (path.endsWith("tags.json")) {
 					return Promise.resolve(JSON.stringify(tags));
 				}
@@ -561,8 +565,8 @@ describe("LibraryTree Component", () => {
 		});
 
 		it("skips tags that have no hierarchy levels", async () => {
-			storage.exists.mockResolvedValue(true);
-			storage.readFile.mockImplementation((path: any) =>
+			asMock(storage.exists).mockResolvedValue(true);
+			asMock(storage.readFile).mockImplementation((path: any) =>
 				Promise.resolve(
 					tagsToJson(path, [
 						{ _id: "empty", author: "  " },
@@ -579,11 +583,11 @@ describe("LibraryTree Component", () => {
 	});
 
 	it("reads libraryUpdateCounter from the sync store selector", () => {
-		SyncActiveStore.useState.mockImplementation((selector: any) =>
+		asMock(SyncActiveStore.useState).mockImplementation((selector: any) =>
 			selector({ libraryUpdateCounter: 2 }),
 		);
-		storage.exists.mockResolvedValue(true);
-		storage.readFile.mockResolvedValue(
+		asMock(storage.exists).mockResolvedValue(true);
+		asMock(storage.readFile).mockResolvedValue(
 			JSON.stringify([{ _id: "t1", author: "Augustine" }]),
 		);
 		renderTree();

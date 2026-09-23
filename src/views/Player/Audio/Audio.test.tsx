@@ -26,16 +26,16 @@ jest.mock("@util/browser/styles");
 describe("Audio Component", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
-		useDeviceType.mockReturnValue("desktop");
-		useDateFormatter.mockReturnValue({
+		asMock(useDeviceType).mockReturnValue("desktop");
+		asMock(useDateFormatter).mockReturnValue({
 			format: jest.fn().mockReturnValue("Formatted Date"),
 		});
 		jest.spyOn(HTMLMediaElement.prototype, "load").mockImplementation(() => {});
 	});
 
 	afterEach(() => {
-		if (HTMLMediaElement.prototype.load.mockRestore) {
-			HTMLMediaElement.prototype.load.mockRestore();
+		if (asMock(HTMLMediaElement.prototype.load).mockRestore) {
+			asMock(HTMLMediaElement.prototype.load).mockRestore();
 		}
 	});
 
@@ -72,7 +72,7 @@ describe("Audio Component", () => {
 
 	it("loads the media when its source path becomes available", () => {
 		const loadSpy = HTMLMediaElement.prototype.load;
-		loadSpy.mockClear();
+		asMock(loadSpy).mockClear();
 
 		render(
 			<Audio
@@ -276,7 +276,7 @@ describe("Audio Component", () => {
 
 	it("enables the first text track when children are provided", () => {
 		const track = { mode: "disabled" };
-		const textTracks = [track];
+		const textTracks = [track] as unknown as TextTrackList;
 		jest
 			.spyOn(HTMLVideoElement.prototype, "textTracks", "get")
 			.mockReturnValue(textTracks);
@@ -291,7 +291,7 @@ describe("Audio Component", () => {
 	});
 
 	it("logs when date formatting fails", () => {
-		useDateFormatter.mockReturnValue({
+		asMock(useDateFormatter).mockReturnValue({
 			format: jest.fn(() => {
 				throw new Error("bad date");
 			}),
@@ -313,7 +313,7 @@ describe("Audio Component", () => {
 	});
 
 	it("uses short month formatting on mobile and hides video for transcripts", () => {
-		useDeviceType.mockReturnValue("mobile");
+		asMock(useDeviceType).mockReturnValue("mobile");
 		const { container } = render(
 			<Audio
 				show={true}

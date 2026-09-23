@@ -31,6 +31,7 @@ jest.mock("@util/domain/views", () => ({
 	getPagesFromHash: jest.fn().mockReturnValue([{ id: "a" }, { id: "b" }]),
 }));
 jest.mock("@util/browser/store", () => ({
+	...jest.requireActual("@util/browser/store"),
 	useLocalStorage: jest.fn(),
 }));
 jest.mock(
@@ -75,8 +76,11 @@ jest.mock("../ItemMenu", () => () => <div data-testid="item-menu" />);
 describe("Bookmarks View", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
-		useTranslations.mockReturnValue({ NAME: "Name", LOCATION: "Location" });
-		Bookmarks.useState.mockReturnValue({ bookmarks: [] });
+		asMock(useTranslations).mockReturnValue({
+			NAME: "Name",
+			LOCATION: "Location",
+		});
+		asMock(Bookmarks.useState).mockReturnValue({ bookmarks: [] });
 		BookmarksStore.update((s) => {
 			Object.assign(s, BookmarksStoreDefaults);
 			s.viewMode = "table";
@@ -94,7 +98,7 @@ describe("Bookmarks View", () => {
 	});
 
 	it("navigates on bookmark click when not selecting", () => {
-		Bookmarks.useState.mockReturnValue({
+		asMock(Bookmarks.useState).mockReturnValue({
 			bookmarks: [{ id: "#sessions", name: "Sessions" }],
 		});
 		render(<BookmarksPage />);
@@ -107,7 +111,7 @@ describe("Bookmarks View", () => {
 
 	it("toggles selection when select mode is active", () => {
 		const item = { id: "#a", name: "A" };
-		Bookmarks.useState.mockReturnValue({ bookmarks: [item] });
+		asMock(Bookmarks.useState).mockReturnValue({ bookmarks: [item] });
 		const { rerender } = render(<BookmarksPage />);
 		// Mount effect resets defaults; enable select mode afterward
 		act(() => {

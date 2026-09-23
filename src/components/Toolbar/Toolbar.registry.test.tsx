@@ -23,8 +23,8 @@ describe("Toolbar registry", () => {
 		ToolbarStore.update((s) => {
 			s.sections = [];
 		});
-		useTranslations.mockReturnValue({ MENU: "Menu" });
-		useDeviceType.mockReturnValue("desktop");
+		asMock(useTranslations).mockReturnValue({ MENU: "Menu" });
+		asMock(useDeviceType).mockReturnValue("desktop");
 	});
 
 	it("preserves onClick handlers outside of pullstate", () => {

@@ -19,7 +19,7 @@ jest.mock("@widgets/Dialog", () => ({ title, children, actions }: any) => (
 describe("ClearStorage Component", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
-		useTranslations.mockReturnValue({
+		asMock(useTranslations).mockReturnValue({
 			CLEAR_STORAGE: "Clear Storage",
 			CANCEL: "Cancel",
 			CONFIRM_CLEAR_STORAGE: "Are you sure?",

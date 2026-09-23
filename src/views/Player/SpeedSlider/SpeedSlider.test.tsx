@@ -27,13 +27,13 @@ describe("SpeedSlider Component", () => {
 
 	beforeEach(() => {
 		jest.clearAllMocks();
-		useTranslations.mockReturnValue({ SPEED: "Speed" });
+		asMock(useTranslations).mockReturnValue({ SPEED: "Speed" });
 		mockPlayer = {
 			addEventListener: jest.fn(),
 			removeEventListener: jest.fn(),
 			playbackRate: 1.0,
 		};
-		PlayerStore.useState.mockReturnValue({
+		asMock(PlayerStore.useState).mockReturnValue({
 			player: mockPlayer,
 			showSpeed: true,
 		});
@@ -45,7 +45,7 @@ describe("SpeedSlider Component", () => {
 	});
 
 	it("renders nothing when showSpeed is false", () => {
-		PlayerStore.useState.mockReturnValue({
+		asMock(PlayerStore.useState).mockReturnValue({
 			player: mockPlayer,
 			showSpeed: false,
 		});

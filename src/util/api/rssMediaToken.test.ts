@@ -148,7 +148,7 @@ describe("RSS media capabilities", () => {
 	it("uses the development secret when RSS_MEDIA_SECRET is unset outside production", async () => {
 		process.env = { ...originalEnv };
 		delete process.env.RSS_MEDIA_SECRET;
-		process.env.NODE_ENV = "test";
+		Reflect.set(process.env, "NODE_ENV", "test");
 		const token = await createRssMediaToken({
 			route: "media",
 			resource: "sessions/dev.mp3",

@@ -278,7 +278,7 @@ export async function downloadUpdates(
 	localPath = LOCAL_SYNC_PATH,
 	remotePath = SYNC_BASE_PATH,
 	canUpload = true,
-	progressTracker: SyncProgressTracker | null = null,
+	progressTracker: Pick<SyncProgressTracker, "updateProgress"> | null = null,
 	restoreMissingFiles = false,
 ) {
 	const start = performance.now();

@@ -13,9 +13,12 @@ jest.mock("@util/domain/sessionFeedEdge", () => ({
 describe("buildSessionsJson", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
-		getSProxyUrl.mockImplementation(async (path: any) => `https://cdn/${path}`);
-		getTranscriptProxyUrlFast.mockImplementation(async (session: any) =>
-			session.transcription ? "https://cdn/transcript.txt" : null,
+		asMock(getSProxyUrl).mockImplementation(
+			async (path: any) => `https://cdn/${path}`,
+		);
+		asMock(getTranscriptProxyUrlFast).mockImplementation(
+			async (session: any) =>
+				session.transcription ? "https://cdn/transcript.txt" : null,
 		);
 	});
 

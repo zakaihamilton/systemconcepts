@@ -8,7 +8,7 @@ import { useDateFormatter } from "@util/data/locale";
 import { useTranslations } from "@util/domain/translations";
 import DayView from "./DayView";
 
-let swipeHandlers = {};
+let swipeHandlers: Record<string, any> = {};
 
 jest.mock("@components/Toolbar", () => ({
 	registerToolbar: jest.fn(),
@@ -58,8 +58,8 @@ jest.mock(
 		),
 );
 
-function createStore(initial = {}) {
-	const state = { lastViewMode: null, ...initial };
+function createStore(initial: Record<string, any> = {}) {
+	const state: Record<string, any> = { lastViewMode: null, ...initial };
 	return {
 		useState: jest.fn(() => ({ ...state })),
 		update: jest.fn((fn) => fn(state)),
@@ -68,7 +68,7 @@ function createStore(initial = {}) {
 }
 
 function getToolbarItem(id: any) {
-	const lastCall = useToolbar.mock.calls.at(-1)[0];
+	const lastCall = asMock(useToolbar).mock.calls.at(-1)[0];
 	return lastCall.items.find((item: any) => item.id === id);
 }
 
@@ -98,10 +98,10 @@ describe("DayView", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
 		swipeHandlers = {};
-		useDeviceType.mockReturnValue("desktop");
-		useDirection.mockReturnValue("ltr");
-		useTranslations.mockReturnValue(translations);
-		useDateFormatter.mockImplementation((opts = {}) => ({
+		asMock(useDeviceType).mockReturnValue("desktop");
+		asMock(useDirection).mockReturnValue("ltr");
+		asMock(useTranslations).mockReturnValue(translations);
+		asMock(useDateFormatter).mockImplementation((opts = {}) => ({
 			format: (date: any) => {
 				if (opts.weekday) return "Monday";
 				if (opts.month) return opts.month === "short" ? "Jan" : "January";
@@ -113,7 +113,7 @@ describe("DayView", () => {
 		}));
 	});
 
-	const renderDay = (props = {}) => {
+	const renderDay = (props: Record<string, any> = {}) => {
 		const store = props.store || createStore();
 		const date = props.date || new Date(2024, 5, 15);
 		return {
@@ -139,7 +139,7 @@ describe("DayView", () => {
 	});
 
 	it("falls back to default empty text when translation is missing", () => {
-		useTranslations.mockReturnValue({
+		asMock(useTranslations).mockReturnValue({
 			...translations,
 			NO_SESSIONS: undefined,
 		});
@@ -215,7 +215,7 @@ describe("DayView", () => {
 		expect(getToolbarItem("back").disabled).toBe(true);
 
 		getToolbarItem("back").onClick();
-		expect(useToolbar.mock.calls.length).toBeGreaterThan(0);
+		expect(asMock(useToolbar).mock.calls.length).toBeGreaterThan(0);
 	});
 
 	it("updates date from day, month, and year widgets", () => {
@@ -261,7 +261,7 @@ describe("DayView", () => {
 		swipeHandlers.onSwipeRight();
 		expect(getDateString(store2._state.date)).toBe("2024-06-14");
 
-		useDirection.mockReturnValue("rtl");
+		asMock(useDirection).mockReturnValue("rtl");
 		renderDay({ store: createStore(), date });
 		expect(useSwipe).toHaveBeenCalledWith(
 			expect.objectContaining({
@@ -272,7 +272,7 @@ describe("DayView", () => {
 	});
 
 	it("uses short month names on phone", () => {
-		useDeviceType.mockReturnValue("phone");
+		asMock(useDeviceType).mockReturnValue("phone");
 		renderDay();
 		expect(useDateFormatter).toHaveBeenCalledWith({ month: "short" });
 	});

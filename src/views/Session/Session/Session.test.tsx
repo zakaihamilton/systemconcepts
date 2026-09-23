@@ -83,7 +83,7 @@ const baseSession = {
 describe("Session View", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
-		useTranslations.mockReturnValue({
+		asMock(useTranslations).mockReturnValue({
 			LOADING: "Loading",
 			NOT_FOUND: "Not Found",
 			PREVIOUS: "Previous",
@@ -91,10 +91,10 @@ describe("Session View", () => {
 			DOWNLOAD: "Download",
 			COPIED_TO_CLIPBOARD: "Copied",
 		});
-		useDeviceType.mockReturnValue("desktop");
-		useSessions.mockReturnValue([[], true]);
-		useFetch.mockReturnValue([null, null, false]);
-		useSwipe.mockReturnValue({});
+		asMock(useDeviceType).mockReturnValue("desktop");
+		asMock(useSessions).mockReturnValue([[], true]);
+		asMock(useFetch).mockReturnValue([null, null, false]);
+		asMock(useSwipe).mockReturnValue({});
 		URL.createObjectURL = jest.fn(() => "blob:1");
 		URL.revokeObjectURL = jest.fn();
 	});
@@ -105,13 +105,13 @@ describe("Session View", () => {
 	});
 
 	it("renders not found state if session missing", () => {
-		useSessions.mockReturnValue([[], false]);
+		asMock(useSessions).mockReturnValue([[], false]);
 		render(<SessionPage />);
 		expect(screen.getByText("Not Found")).toBeInTheDocument();
 	});
 
 	it("renders session details when available", () => {
-		useSessions.mockReturnValue([[baseSession], false]);
+		asMock(useSessions).mockReturnValue([[baseSession], false]);
 		render(
 			<SessionPage
 				group="test"
@@ -135,7 +135,7 @@ describe("Session View", () => {
 			imagePath: "https://cdn.example/stale.png",
 			image: { path: "/aws/sessions/will/2026/2026-06-30 Beastly.png" },
 		};
-		useSessions.mockReturnValue([[mockSession], false]);
+		asMock(useSessions).mockReturnValue([[mockSession], false]);
 		render(
 			<SessionPage group="will" year="2026" date="2026-06-30" name="Beastly" />,
 		);
@@ -158,7 +158,7 @@ describe("Session View", () => {
 			imagePath:
 				"https://screens.sfo2.digitaloceanspaces.com/wasabi/american/2026/2026-08-20%20Breath,%20Sound,%20and%20Speech.png",
 		};
-		useSessions.mockReturnValue([[mockSession], false]);
+		asMock(useSessions).mockReturnValue([[mockSession], false]);
 
 		render(
 			<SessionPage
@@ -176,7 +176,7 @@ describe("Session View", () => {
 	});
 
 	it("copies title and tags to clipboard", () => {
-		useSessions.mockReturnValue([[baseSession], false]);
+		asMock(useSessions).mockReturnValue([[baseSession], false]);
 		render(
 			<SessionPage
 				group="test"
@@ -194,7 +194,7 @@ describe("Session View", () => {
 	});
 
 	it("opens image path and downloads summary via toolbar", () => {
-		useSessions.mockReturnValue([[baseSession], false]);
+		asMock(useSessions).mockReturnValue([[baseSession], false]);
 		const anchor = { click: jest.fn(), href: "", download: "" };
 		const originalCreateElement = document.createElement.bind(document);
 		jest.spyOn(document, "createElement").mockImplementation((tag, ...rest) => {
@@ -212,13 +212,13 @@ describe("Session View", () => {
 		fireEvent.click(screen.getByTestId("image"));
 		expect(addPath).toHaveBeenCalledWith("image");
 
-		const download = useToolbar.mock.calls
-			.at(-1)[0]
+		const download = asMock(useToolbar)
+			.mock.calls.at(-1)[0]
 			.items.find((i: any) => i.id === "download");
 		download.onClick();
 		expect(URL.createObjectURL).toHaveBeenCalled();
 		expect(anchor.click).toHaveBeenCalled();
-		document.createElement.mockRestore();
+		asMock(document.createElement).mockRestore();
 	});
 
 	it("navigates prev/next and wires swipe handlers", () => {
@@ -227,12 +227,12 @@ describe("Session View", () => {
 			baseSession,
 			{ ...baseSession, name: "C", date: "2024-05-06" },
 		];
-		useSessions.mockImplementation((_init: any, opts = {}) => {
+		asMock(useSessions).mockImplementation((_init: any, opts = {}) => {
 			if (opts.filterSessions) return [sessions, false];
 			return [sessions, false];
 		});
 		let swipeArgs;
-		useSwipe.mockImplementation((args: any) => {
+		asMock(useSwipe).mockImplementation((args: any) => {
 			swipeArgs = args;
 			return { "data-swipe": "1" };
 		});
@@ -244,13 +244,13 @@ describe("Session View", () => {
 				name="Test Session"
 			/>,
 		);
-		const items = useToolbar.mock.calls.at(-1)[0].items;
+		const items = asMock(useToolbar).mock.calls.at(-1)[0].items;
 		items.find((i: any) => i.id === "prevSession").onClick();
 		items.find((i: any) => i.id === "nextSession").onClick();
 		expect(replacePath).toHaveBeenCalled();
 		swipeArgs.onSwipeLeft();
 		swipeArgs.onSwipeRight();
-		expect(replacePath.mock.calls.length).toBeGreaterThanOrEqual(2);
+		expect(asMock(replacePath).mock.calls.length).toBeGreaterThanOrEqual(2);
 	});
 
 	it("hides summary for image type and uses wasabi path", () => {
@@ -261,7 +261,7 @@ describe("Session View", () => {
 			tags: [],
 			image: { path: "wasabi/x.jpg" },
 		};
-		useSessions.mockReturnValue([[session], false]);
+		asMock(useSessions).mockReturnValue([[session], false]);
 		render(
 			<SessionPage
 				group="test"
@@ -277,8 +277,8 @@ describe("Session View", () => {
 
 	it("fetches summary when summaryText missing", async () => {
 		const session = { ...baseSession, summaryText: undefined };
-		useSessions.mockReturnValue([[session], false]);
-		useFetch.mockReturnValue(["fetched", null, false]);
+		asMock(useSessions).mockReturnValue([[session], false]);
+		asMock(useFetch).mockReturnValue(["fetched", null, false]);
 		render(
 			<SessionPage
 				group="test"
@@ -293,14 +293,14 @@ describe("Session View", () => {
 	});
 
 	it("uses imagePath fallback and mobile toolbar without prev/next", () => {
-		useDeviceType.mockReturnValue("phone");
+		asMock(useDeviceType).mockReturnValue("phone");
 		const session = {
 			...baseSession,
 			image: undefined,
 			imagePath: "local/path.png",
 			thumbnail: "thumb.png",
 		};
-		useSessions.mockReturnValue([[session], false]);
+		asMock(useSessions).mockReturnValue([[session], false]);
 		render(
 			<SessionPage
 				group="test"
@@ -309,7 +309,7 @@ describe("Session View", () => {
 				name="Test Session"
 			/>,
 		);
-		const items = useToolbar.mock.calls.at(-1)[0].items.filter(Boolean);
+		const items = asMock(useToolbar).mock.calls.at(-1)[0].items.filter(Boolean);
 		expect(items.find((i: any) => i.id === "prevSession")).toBeUndefined();
 		expect(screen.getByTestId("image")).toHaveAttribute(
 			"data-path",
@@ -324,7 +324,7 @@ describe("Session View", () => {
 			imagePath: undefined,
 			thumbnail: "thumb/path.jpg",
 		};
-		useSessions.mockReturnValue([[session], false]);
+		asMock(useSessions).mockReturnValue([[session], false]);
 		render(
 			<SessionPage
 				group="test"
@@ -348,7 +348,7 @@ describe("Session View", () => {
 			imagePath: undefined,
 			thumbnail: "data:image/png;base64,abc",
 		};
-		useSessions.mockReturnValue([[session], false]);
+		asMock(useSessions).mockReturnValue([[session], false]);
 		render(
 			<SessionPage
 				group="test"
@@ -362,7 +362,7 @@ describe("Session View", () => {
 	});
 
 	it("handles null filtered sessions while loading completes", () => {
-		useSessions.mockImplementation((_init: any, opts = {}) => {
+		asMock(useSessions).mockImplementation((_init: any, opts = {}) => {
 			if (opts.filterSessions) return [null, false];
 			return [[baseSession], false];
 		});
@@ -379,7 +379,7 @@ describe("Session View", () => {
 
 	it("copies a cleaned tag label and shows snackbar feedback", async () => {
 		const { copyToClipboard } = require("@util/data/string");
-		useSessions.mockReturnValue([[baseSession], false]);
+		asMock(useSessions).mockReturnValue([[baseSession], false]);
 		render(
 			<SessionPage
 				group="test"

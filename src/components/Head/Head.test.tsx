@@ -12,8 +12,8 @@ describe("HeadComponent", () => {
 	});
 
 	it("updates document title with app name and page title", () => {
-		useTranslations.mockReturnValue({ APP_NAME: "System Concepts" });
-		useCurrentPageTitle.mockReturnValue("Home");
+		asMock(useTranslations).mockReturnValue({ APP_NAME: "System Concepts" });
+		asMock(useCurrentPageTitle).mockReturnValue("Home");
 
 		render(<HeadComponent />);
 
@@ -21,8 +21,8 @@ describe("HeadComponent", () => {
 	});
 
 	it("updates document title with only app name if page title is missing", () => {
-		useTranslations.mockReturnValue({ APP_NAME: "System Concepts" });
-		useCurrentPageTitle.mockReturnValue("");
+		asMock(useTranslations).mockReturnValue({ APP_NAME: "System Concepts" });
+		asMock(useCurrentPageTitle).mockReturnValue("");
 
 		render(<HeadComponent />);
 

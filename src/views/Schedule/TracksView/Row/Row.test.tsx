@@ -110,15 +110,15 @@ describe("TrackRow", () => {
 			clientWidth: 200,
 			scrollTo: jest.fn(),
 		};
-		useDateFormatter.mockReturnValue({
+		asMock(useDateFormatter).mockReturnValue({
 			format: () => "January 2024",
 		});
-		GroupsStore.useState.mockReturnValue([
+		asMock(GroupsStore.useState).mockReturnValue([
 			{ name: "alpha", color: "#f00" },
 			{ name: "beta", color: "#0f0" },
 		]);
-		ScheduleStore.useState.mockReturnValue(true);
-		ScheduleStore.update.mockImplementation((fn: any) => {
+		asMock(ScheduleStore.useState).mockReturnValue(true);
+		asMock(ScheduleStore.update).mockImplementation((fn: any) => {
 			const state = { showBadges: true };
 			fn(state);
 		});
@@ -178,7 +178,7 @@ describe("TrackRow", () => {
 	});
 
 	it("hides badges when showBadges is false", () => {
-		ScheduleStore.useState.mockReturnValue(false);
+		asMock(ScheduleStore.useState).mockReturnValue(false);
 		render(
 			<TrackRow
 				date="2024-01"
@@ -194,7 +194,7 @@ describe("TrackRow", () => {
 	});
 
 	it("navigates to month view on header click", () => {
-		const store = {
+		const store: any = {
 			update: jest.fn((fn) => {
 				const state = { viewMode: "tracks", lastViewMode: null };
 				fn(state);
@@ -292,7 +292,7 @@ describe("TrackRow", () => {
 		);
 
 		globalThis.__trackListScroll.scrollLeft = 900;
-		globalThis.__trackListScroll.scrollTo.mockClear();
+		asMock(globalThis.__trackListScroll.scrollTo).mockClear();
 		rerender(
 			<TrackRow
 				date="2024-01"
@@ -328,7 +328,7 @@ describe("TrackRow", () => {
 	});
 
 	it("uses default badge color when group metadata is missing", () => {
-		GroupsStore.useState.mockReturnValue([]);
+		asMock(GroupsStore.useState).mockReturnValue([]);
 		render(
 			<TrackRow
 				date="2024-01"

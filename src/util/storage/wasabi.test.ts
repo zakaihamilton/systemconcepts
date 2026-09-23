@@ -40,7 +40,7 @@ beforeEach(async () => {
 	};
 	const { client } = await getWasabi();
 	sendMock = client.send;
-	sendMock.mockReset();
+	asMock(sendMock).mockReset();
 });
 
 afterAll(() => {
@@ -128,7 +128,7 @@ describe("getWasabi", () => {
 
 describe("getDownloadUrl", () => {
 	it("validates the path and returns a signed url", async () => {
-		getSignedUrl.mockResolvedValue("https://signed.example/file.txt");
+		asMock(getSignedUrl).mockResolvedValue("https://signed.example/file.txt");
 
 		const url = await getDownloadUrl({ path: "/sessions/file.txt" });
 
@@ -147,7 +147,7 @@ describe("getDownloadUrl", () => {
 
 describe("downloadData", () => {
 	it("returns text content by default", async () => {
-		sendMock.mockResolvedValue({
+		asMock(sendMock).mockResolvedValue({
 			Body: { transformToString: jest.fn().mockResolvedValue("hello") },
 		});
 
@@ -155,7 +155,7 @@ describe("downloadData", () => {
 	});
 
 	it("returns binary content as a Buffer", async () => {
-		sendMock.mockResolvedValue({
+		asMock(sendMock).mockResolvedValue({
 			Body: {
 				transformToByteArray: jest
 					.fn()
@@ -172,7 +172,7 @@ describe("downloadData", () => {
 
 describe("metadataInfo", () => {
 	it("returns file metadata from HeadObject", async () => {
-		sendMock.mockResolvedValue({
+		asMock(sendMock).mockResolvedValue({
 			ContentType: "text/plain",
 			ContentLength: 12,
 			LastModified: new Date("2024-06-01"),
@@ -188,7 +188,7 @@ describe("metadataInfo", () => {
 	});
 
 	it("falls back to a directory listing when the head request fails", async () => {
-		sendMock
+		asMock(sendMock)
 			.mockRejectedValueOnce(new Error("not found"))
 			.mockResolvedValueOnce({ CommonPrefixes: [{ Prefix: "folder/" }] });
 
@@ -198,7 +198,7 @@ describe("metadataInfo", () => {
 	});
 
 	it("returns null when neither the file nor a folder exists", async () => {
-		sendMock
+		asMock(sendMock)
 			.mockRejectedValueOnce(new Error("not found"))
 			.mockResolvedValueOnce({ Contents: [], CommonPrefixes: [] });
 
@@ -206,7 +206,7 @@ describe("metadataInfo", () => {
 	});
 
 	it("returns null when the fallback listing also throws", async () => {
-		sendMock.mockRejectedValue(new Error("still failing"));
+		asMock(sendMock).mockRejectedValue(new Error("still failing"));
 
 		await expect(metadataInfo({ path: "missing" })).resolves.toBe(null);
 	});
@@ -214,7 +214,7 @@ describe("metadataInfo", () => {
 
 describe("list", () => {
 	it("collects folders and files across multiple pages", async () => {
-		sendMock
+		asMock(sendMock)
 			.mockResolvedValueOnce({
 				CommonPrefixes: [{ Prefix: "sub/" }],
 				Contents: [
@@ -237,7 +237,9 @@ describe("list", () => {
 	});
 
 	it("skips content entries without a resolvable name", async () => {
-		sendMock.mockResolvedValue({ Contents: [{ Key: "root/", Size: 0 }] });
+		asMock(sendMock).mockResolvedValue({
+			Contents: [{ Key: "root/", Size: 0 }],
+		});
 
 		const items = await list({ path: "root" });
 
@@ -245,7 +247,7 @@ describe("list", () => {
 	});
 
 	it("stops when a continuation token repeats", async () => {
-		sendMock.mockResolvedValue({
+		asMock(sendMock).mockResolvedValue({
 			Contents: [{ Key: "a.txt", Size: 1 }],
 			NextContinuationToken: "same-token",
 		});
@@ -265,7 +267,7 @@ describe("handleRequest", () => {
 	});
 
 	it("returns exists metadata for GET requests", async () => {
-		sendMock.mockResolvedValue({
+		asMock(sendMock).mockResolvedValue({
 			ContentType: "text/plain",
 			ContentLength: 3,
 			LastModified: new Date("2024-01-01"),
@@ -280,7 +282,7 @@ describe("handleRequest", () => {
 	});
 
 	it("returns an empty object for exists checks on missing files", async () => {
-		sendMock.mockRejectedValue(new Error("not found"));
+		asMock(sendMock).mockRejectedValue(new Error("not found"));
 
 		const result = await handleRequest({
 			req: { method: "GET", query: { exists: "true" } },
@@ -291,7 +293,7 @@ describe("handleRequest", () => {
 	});
 
 	it("lists a directory for type=dir GET requests", async () => {
-		sendMock.mockResolvedValue({
+		asMock(sendMock).mockResolvedValue({
 			CommonPrefixes: [{ Prefix: "sub/" }],
 			Contents: [],
 		});
@@ -305,7 +307,7 @@ describe("handleRequest", () => {
 	});
 
 	it("downloads file content for plain GET requests", async () => {
-		sendMock.mockResolvedValue({
+		asMock(sendMock).mockResolvedValue({
 			Body: { transformToString: jest.fn().mockResolvedValue("contents") },
 		});
 
@@ -318,7 +320,7 @@ describe("handleRequest", () => {
 	});
 
 	it("reads the path from request headers when not explicitly provided", async () => {
-		sendMock.mockResolvedValue({
+		asMock(sendMock).mockResolvedValue({
 			Body: { transformToString: jest.fn().mockResolvedValue("via-header") },
 		});
 
@@ -340,7 +342,7 @@ describe("handleRequest", () => {
 	});
 
 	it("downloads binary content when the binary flag is set", async () => {
-		sendMock.mockResolvedValue({
+		asMock(sendMock).mockResolvedValue({
 			Body: {
 				transformToByteArray: jest
 					.fn()
@@ -358,7 +360,7 @@ describe("handleRequest", () => {
 	});
 
 	it("treats a folder as a directory when only Contents are returned", async () => {
-		sendMock
+		asMock(sendMock)
 			.mockRejectedValueOnce(new Error("not found"))
 			.mockResolvedValueOnce({ Contents: [{ Key: "folder/item.txt" }] });
 
@@ -371,7 +373,7 @@ describe("handleRequest", () => {
 	});
 
 	it("marks directory content types as folders in listings", async () => {
-		sendMock.mockResolvedValue({
+		asMock(sendMock).mockResolvedValue({
 			Contents: [
 				{
 					Key: "root/subdir/file.txt",

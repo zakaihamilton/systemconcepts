@@ -161,14 +161,16 @@ describe("Article Component", () => {
 		toolbarItems = [];
 		handleScrollUpdate = jest.fn();
 		const { useArticleScroll } = require("./useArticleScroll");
-		useArticleScroll.mockImplementation((ref: any, handleScroll: any) => {
-			handleScrollUpdate = (e: any) => handleScroll?.(e);
-			return {
-				...defaultScrollReturn,
-				handleScrollUpdate,
-			};
-		});
-		useTranslations.mockReturnValue({
+		asMock(useArticleScroll).mockImplementation(
+			(ref: any, handleScroll: any) => {
+				handleScrollUpdate = (e: any) => handleScroll?.(e);
+				return {
+					...defaultScrollReturn,
+					handleScrollUpdate,
+				};
+			},
+		);
+		asMock(useTranslations).mockReturnValue({
 			SELECT_ITEM: "Select an item",
 			SHOW_FULL_TERMS: "Show full terms",
 			SHOW_ABBREVIATIONS: "Show abbreviations",
@@ -187,16 +189,16 @@ describe("Article Component", () => {
 			PREVIOUS: "Previous",
 			NEXT: "Next",
 		});
-		useSearch.mockReturnValue("grace");
-		useDeviceType.mockReturnValue("desktop");
-		Cookies.get.mockReturnValue("visitor");
-		roleAuth.mockReturnValue(false);
-		useLocalStorage.mockImplementation((key: any, def: any) => {
+		asMock(useSearch).mockReturnValue("grace");
+		asMock(useDeviceType).mockReturnValue("desktop");
+		asMock(Cookies.get).mockReturnValue("visitor");
+		asMock(roleAuth).mockReturnValue(false);
+		asMock(useLocalStorage).mockImplementation((key: any, def: any) => {
 			if (key === "showAbbreviations") return [true, setShowAbbreviations];
 			if (key === "hideSquareBrackets") return [false, setHideSquareBrackets];
 			return [def, jest.fn()];
 		});
-		useToolbar.mockImplementation(({ items }: any) => {
+		asMock(useToolbar).mockImplementation(({ items }: any) => {
 			toolbarItems = items || [];
 		});
 		LibraryStore.update((s) => {
@@ -290,8 +292,8 @@ describe("Article Component", () => {
 	});
 
 	it("includes admin edit actions when authorized", () => {
-		roleAuth.mockReturnValue(true);
-		Cookies.get.mockReturnValue("admin");
+		asMock(roleAuth).mockReturnValue(true);
+		asMock(Cookies.get).mockReturnValue("admin");
 		const openEditDialog = jest.fn();
 		const openEditContentDialog = jest.fn();
 		render(
@@ -382,7 +384,7 @@ describe("Article Component", () => {
 	it("shows scroll-to-top when available", () => {
 		const { useArticleScroll } = require("./useArticleScroll");
 		const scrollToTop = jest.fn();
-		useArticleScroll.mockReturnValue({
+		asMock(useArticleScroll).mockReturnValue({
 			scrollInfo: {
 				page: 2,
 				total: 2,
@@ -436,13 +438,13 @@ describe("Article Component", () => {
 			exportItem.onClick();
 		});
 		// Either print or export path is fine for coverage; export path needs showMarkdown false
-		if (exportData.mock.calls.length) {
+		if (asMock(exportData).mock.calls.length) {
 			expect(exportData).toHaveBeenCalled();
 		}
 	});
 
 	it("uses phone layout for match toolbar locations", () => {
-		useDeviceType.mockReturnValue("phone");
+		asMock(useDeviceType).mockReturnValue("phone");
 		render(<Article content="Body" selectedTag={{ _id: "1", title: "T" }} />);
 		const prevMatch: any = toolbarItems.find((i: any) => i.id === "prevMatch");
 		expect(prevMatch?.location).toBe("header");
@@ -505,7 +507,7 @@ describe("Article Component", () => {
 
 	it("processes content when abbreviations are hidden", () => {
 		const { replaceAbbreviations } = require("./GlossaryUtils");
-		useLocalStorage.mockImplementation((key: any, def: any) => {
+		asMock(useLocalStorage).mockImplementation((key: any, def: any) => {
 			if (key === "showAbbreviations") return [false, setShowAbbreviations];
 			if (key === "hideSquareBrackets") return [false, setHideSquareBrackets];
 			return [def, jest.fn()];
@@ -520,7 +522,7 @@ describe("Article Component", () => {
 	});
 
 	it("strips square brackets when hideSquareBrackets is enabled", () => {
-		useLocalStorage.mockImplementation((key: any, def: any) => {
+		asMock(useLocalStorage).mockImplementation((key: any, def: any) => {
 			if (key === "showAbbreviations") return [true, setShowAbbreviations];
 			if (key === "hideSquareBrackets") return [true, setHideSquareBrackets];
 			return [def, jest.fn()];
@@ -605,8 +607,8 @@ describe("Article Component", () => {
 			jest.advanceTimersByTime(5000);
 		});
 		expect(removeChild).toHaveBeenCalled();
-		document.createElement.mockRestore();
-		removeChild.mockRestore();
+		asMock(document.createElement).mockRestore();
+		asMock(removeChild).mockRestore();
 	});
 
 	it("jumps to a paragraph from the terms dialog", () => {
@@ -640,7 +642,7 @@ describe("Article Component", () => {
 			.spyOn(Element.prototype, "querySelector")
 			.mockImplementation(function querySelector(sel) {
 				if (sel === '[data-paragraph-index="1"]') {
-					return { scrollIntoView, classList };
+					return { scrollIntoView, classList } as unknown as Element;
 				}
 				return null;
 			});
@@ -657,7 +659,7 @@ describe("Article Component", () => {
 			jest.advanceTimersByTime(2000);
 		});
 		expect(classList.remove).toHaveBeenCalled();
-		Element.prototype.querySelector.mockRestore();
+		asMock(Element.prototype.querySelector).mockRestore();
 	});
 
 	it("returns an empty title when the tag has no hierarchy fields", () => {
@@ -692,7 +694,7 @@ describe("Article Component", () => {
 		expect(mockDoc.write).toHaveBeenCalledWith(
 			expect.stringContaining("<style>"),
 		);
-		document.createElement.mockRestore();
+		asMock(document.createElement).mockRestore();
 		document.head.removeChild(styleNode);
 	});
 
@@ -711,7 +713,7 @@ describe("Article Component", () => {
 	});
 
 	it("shows admin edit controls when roleAuth allows", () => {
-		roleAuth.mockReturnValue(true);
+		asMock(roleAuth).mockReturnValue(true);
 		render(
 			<Article
 				content="Body"

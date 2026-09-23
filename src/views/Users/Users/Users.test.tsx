@@ -9,6 +9,7 @@ jest.mock("@util/domain/translations");
 jest.mock("@util/api/fetch");
 jest.mock("@util/browser/styles");
 jest.mock("@util/browser/store", () => ({
+	...jest.requireActual("@util/browser/store"),
 	useLocalStorage: jest.fn(),
 }));
 jest.mock("@util/domain/views", () => ({
@@ -62,7 +63,7 @@ describe("Users View", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
 		lastTableProps = null;
-		useTranslations.mockReturnValue({
+		asMock(useTranslations).mockReturnValue({
 			NAME: "Name",
 			ID: "ID",
 			EMAIL_ADDRESS: "Email",
@@ -72,8 +73,8 @@ describe("Users View", () => {
 			VISITOR: "Visitor",
 			USER: "User",
 		});
-		useDeviceType.mockReturnValue("desktop");
-		useFetchJSON.mockReturnValue([users, false, null]);
+		asMock(useDeviceType).mockReturnValue("desktop");
+		asMock(useFetchJSON).mockReturnValue([users, false, null]);
 		UsersStore.update((s) => {
 			s.select = null;
 			s.roleFilter = "";
@@ -136,7 +137,7 @@ describe("Users View", () => {
 	});
 
 	it("hides phone-only columns on phone", () => {
-		useDeviceType.mockReturnValue("phone");
+		asMock(useDeviceType).mockReturnValue("phone");
 		render(<Users />);
 		const ids: any = lastTableProps.columns
 			.filter(Boolean)
@@ -146,7 +147,7 @@ describe("Users View", () => {
 	});
 
 	it("imports users via onImport", async () => {
-		fetchJSON.mockResolvedValue({});
+		asMock(fetchJSON).mockResolvedValue({});
 		render(<Users />);
 		fireEvent.click(screen.getByTestId("import"));
 		await waitFor(() => {
@@ -158,7 +159,7 @@ describe("Users View", () => {
 	});
 
 	it("handles import errors", async () => {
-		fetchJSON.mockResolvedValue({ err: "fail" });
+		asMock(fetchJSON).mockResolvedValue({ err: "fail" });
 		render(<Users />);
 		fireEvent.click(screen.getByTestId("import"));
 		await waitFor(() => {

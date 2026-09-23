@@ -83,11 +83,11 @@ describe("Home View", () => {
 		window.localStorage.clear();
 		Cookies.set("id", "test-user");
 		Cookies.set("hash", "test-hash");
-		usePages.mockReturnValue(mockPages);
-		useSessions.mockReturnValue([mockSessions, false]);
-		useRecentHistory.mockReturnValue([[mockSessions[0]]]);
-		useSyncFeature.mockReturnValue({ sync: jest.fn(), busy: false });
-		useTranslations.mockReturnValue({
+		asMock(usePages).mockReturnValue(mockPages);
+		asMock(useSessions).mockReturnValue([mockSessions, false]);
+		asMock(useRecentHistory).mockReturnValue([[mockSessions[0]]]);
+		asMock(useSyncFeature).mockReturnValue({ sync: jest.fn(), busy: false });
+		asMock(useTranslations).mockReturnValue({
 			HOME: "Home",
 			SESSIONS: "Sessions",
 			CONTINUE_WATCHING: "Continue watching",
@@ -153,7 +153,7 @@ describe("Home View", () => {
 
 		expect(SessionsStore.update).toHaveBeenCalled();
 		const sessionState = { sessions: mockSessions, busy: true, counter: 4 };
-		SessionsStore.update.mock.calls[0][0](sessionState);
+		asMock(SessionsStore.update).mock.calls[0][0](sessionState);
 		expect(sessionState).toMatchObject({
 			sessions: mockSessions,
 			busy: true,
@@ -164,9 +164,13 @@ describe("Home View", () => {
 
 	it("prompts signed-in users to start a sync when no sessions are available", () => {
 		const sync = jest.fn();
-		useSessions.mockReturnValue([[], false]);
-		useRecentHistory.mockReturnValue([[], false]);
-		useSyncFeature.mockReturnValue({ sync, busy: false, percentage: 0 });
+		asMock(useSessions).mockReturnValue([[], false]);
+		asMock(useRecentHistory).mockReturnValue([[], false]);
+		asMock(useSyncFeature).mockReturnValue({
+			sync,
+			busy: false,
+			percentage: 0,
+		});
 
 		const { getByRole, getByText, queryByText, rerender } = render(<Home />);
 
@@ -176,7 +180,11 @@ describe("Home View", () => {
 		fireEvent.click(getByRole("button", { name: "Start sync" }));
 		expect(sync).toHaveBeenCalledTimes(1);
 
-		useSyncFeature.mockReturnValue({ sync, busy: true, percentage: 42 });
+		asMock(useSyncFeature).mockReturnValue({
+			sync,
+			busy: true,
+			percentage: 42,
+		});
 		rerender(<Home />);
 		expect(getByText("Syncing")).toBeInTheDocument();
 		expect(getByText("42%")).toBeInTheDocument();
@@ -219,8 +227,8 @@ describe("Home View", () => {
 
 		fireEvent.click(getByText("Continue watching"));
 		expect(ScheduleStore.update).toHaveBeenCalled();
-		const historyState = {};
-		ScheduleStore.update.mock.calls[0][0](historyState);
+		const historyState: Record<string, any> = {};
+		asMock(ScheduleStore.update).mock.calls[0][0](historyState);
 		expect(historyState.viewMode).toBe("history");
 		expect(historyState.lastViewMode).toBeNull();
 		expect(
@@ -233,8 +241,8 @@ describe("Home View", () => {
 
 		fireEvent.click(getByText("Latest sessions"));
 		expect(ScheduleStore.update).toHaveBeenCalledTimes(2);
-		const weekState = {};
-		ScheduleStore.update.mock.calls[1][0](weekState);
+		const weekState: Record<string, any> = {};
+		asMock(ScheduleStore.update).mock.calls[1][0](weekState);
 		expect(weekState.viewMode).toBe("week");
 		expect(weekState.lastViewMode).toBeNull();
 		expect(
@@ -247,7 +255,7 @@ describe("Home View", () => {
 	});
 
 	it("omits stale history entries and renders the empty state", () => {
-		useRecentHistory.mockReturnValue([
+		asMock(useRecentHistory).mockReturnValue([
 			[{ ...mockSessions[0], name: "Removed" }],
 		]);
 		const { getAllByText } = render(<Home />);
@@ -255,7 +263,7 @@ describe("Home View", () => {
 	});
 
 	it("shows each session only once in Continue watching", () => {
-		useRecentHistory.mockReturnValue([
+		asMock(useRecentHistory).mockReturnValue([
 			[mockSessions[0], { ...mockSessions[0], position: 40 }],
 		]);
 
@@ -268,7 +276,7 @@ describe("Home View", () => {
 
 	it("uses track-card skeletons while sessions load", () => {
 		jest.useFakeTimers();
-		useSessions.mockReturnValue([[], true]);
+		asMock(useSessions).mockReturnValue([[], true]);
 		const { getAllByTestId, queryAllByTestId, queryByText } = render(<Home />);
 		expect(queryAllByTestId("session-skeletons")).toHaveLength(0);
 		expect(queryByText("Continue watching")).not.toBeInTheDocument();
@@ -281,7 +289,11 @@ describe("Home View", () => {
 
 	it("loads both session sections together when history is still loading", () => {
 		jest.useFakeTimers();
-		useRecentHistory.mockReturnValue([[mockSessions[0]], jest.fn(), true]);
+		asMock(useRecentHistory).mockReturnValue([
+			[mockSessions[0]],
+			jest.fn(),
+			true,
+		]);
 
 		const { getAllByTestId, queryByText, rerender } = render(<Home />);
 		expect(queryByText("Continue watching")).not.toBeInTheDocument();
@@ -292,7 +304,11 @@ describe("Home View", () => {
 		});
 		expect(getAllByTestId("session-skeletons")).toHaveLength(2);
 
-		useRecentHistory.mockReturnValue([[mockSessions[0]], jest.fn(), false]);
+		asMock(useRecentHistory).mockReturnValue([
+			[mockSessions[0]],
+			jest.fn(),
+			false,
+		]);
 		rerender(<Home />);
 		expect(queryByText("Continue watching")).toBeInTheDocument();
 		expect(queryByText("Latest sessions")).toBeInTheDocument();
@@ -304,8 +320,8 @@ describe("Home View", () => {
 			name: `Session ${index + 1}`,
 			date: `2025-03-${String(index + 1).padStart(2, "0")}`,
 		}));
-		useSessions.mockReturnValue([sessions, false]);
-		useRecentHistory.mockReturnValue([[]]);
+		asMock(useSessions).mockReturnValue([sessions, false]);
+		asMock(useRecentHistory).mockReturnValue([[]]);
 
 		const { getByLabelText } = render(<Home />);
 		expect(
@@ -317,21 +333,21 @@ describe("Home View", () => {
 		const consoleError = jest
 			.spyOn(console, "error")
 			.mockImplementation(() => {});
-		useSessions.mockReturnValue([
+		asMock(useSessions).mockReturnValue([
 			[mockSessions[0], { ...mockSessions[0], id: "duplicate-session" }],
 			false,
 		]);
-		useRecentHistory.mockReturnValue([[]]);
+		asMock(useRecentHistory).mockReturnValue([[]]);
 
 		render(<Home />);
 
 		expect(consoleError).not.toHaveBeenCalled();
-		consoleError.mockRestore();
+		asMock(consoleError).mockRestore();
 	});
 
 	it("keeps skeletons visible while the session store initializes", () => {
 		jest.useFakeTimers();
-		useSessions.mockReturnValue([null, false]);
+		asMock(useSessions).mockReturnValue([null, false]);
 		const { getAllByTestId, queryAllByTestId } = render(<Home />);
 		expect(queryAllByTestId("session-skeletons")).toHaveLength(0);
 		act(() => {
@@ -353,7 +369,7 @@ describe("Home View", () => {
 	});
 
 	it("uses alternate image path fallbacks for session thumbnails", () => {
-		useSessions.mockReturnValue([
+		asMock(useSessions).mockReturnValue([
 			[
 				{
 					group: "alpha",
@@ -379,7 +395,7 @@ describe("Home View", () => {
 			],
 			false,
 		]);
-		useRecentHistory.mockReturnValue([[]]);
+		asMock(useRecentHistory).mockReturnValue([[]]);
 
 		const { getAllByTestId } = render(<Home />);
 		const cards = getAllByTestId("track-card");
@@ -422,13 +438,15 @@ describe("Home View", () => {
 		SyncActiveStore.update((state) => {
 			state.needsSessionReload = true;
 		});
-		useSyncFeature.mockReturnValue({ sync: jest.fn(), busy: true });
+		asMock(useSyncFeature).mockReturnValue({ sync: jest.fn(), busy: true });
 		render(<Home />);
 		expect(SessionsStore.update).not.toHaveBeenCalled();
 	});
 
 	it("merges continue-watching positions from history entries", () => {
-		useRecentHistory.mockReturnValue([[{ ...mockSessions[0], position: 99 }]]);
+		asMock(useRecentHistory).mockReturnValue([
+			[{ ...mockSessions[0], position: 99 }],
+		]);
 
 		const { getByLabelText } = render(<Home />);
 		expect(
@@ -437,14 +455,14 @@ describe("Home View", () => {
 	});
 
 	it("sorts latest sessions by date descending", () => {
-		useSessions.mockReturnValue([
+		asMock(useSessions).mockReturnValue([
 			[
 				{ ...mockSessions[0], date: "2025-01-01", name: "Older" },
 				{ ...mockSessions[1], date: "2025-03-01", name: "Newer" },
 			],
 			false,
 		]);
-		useRecentHistory.mockReturnValue([[], false]);
+		asMock(useRecentHistory).mockReturnValue([[], false]);
 
 		const { getByLabelText } = render(<Home />);
 		const cards = within(getByLabelText("Latest sessions")).getAllByTestId(
@@ -455,7 +473,7 @@ describe("Home View", () => {
 	});
 
 	it("supports aws-prefixed image paths without a leading slash", () => {
-		useSessions.mockReturnValue([
+		asMock(useSessions).mockReturnValue([
 			[
 				{
 					...mockSessions[0],
@@ -465,7 +483,7 @@ describe("Home View", () => {
 			],
 			false,
 		]);
-		useRecentHistory.mockReturnValue([[]]);
+		asMock(useRecentHistory).mockReturnValue([[]]);
 
 		const { getByTestId } = render(<Home />);
 		expect(getByTestId("track-card")).toHaveAttribute(

@@ -21,13 +21,13 @@ describe("Footer Component", () => {
 	});
 
 	it("renders nothing if no items are present", () => {
-		useToolbarItems.mockReturnValue([]);
+		asMock(useToolbarItems).mockReturnValue([]);
 		const { container } = render(<Footer />);
 		expect(container.firstChild).toBeNull();
 	});
 
 	it("renders footer toolbar if footer items are present", () => {
-		useToolbarItems.mockImplementation(({ location }: any) =>
+		asMock(useToolbarItems).mockImplementation(({ location }: any) =>
 			location === "footer" ? [{ id: "test" }] : [],
 		);
 		const { getByTestId } = render(<Footer />);
@@ -35,8 +35,8 @@ describe("Footer Component", () => {
 	});
 
 	it("renders mobile toolbar if on phone and mobile items are present", () => {
-		useDeviceType.mockReturnValue("phone");
-		useToolbarItems.mockImplementation(({ location }: any) =>
+		asMock(useDeviceType).mockReturnValue("phone");
+		asMock(useToolbarItems).mockImplementation(({ location }: any) =>
 			location === "mobile" ? [{ id: "test" }] : [],
 		);
 		const { getByTestId } = render(<Footer />);

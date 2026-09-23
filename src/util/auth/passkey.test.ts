@@ -46,7 +46,7 @@ const origin = "https://example.com";
 describe("getPasskeyRegistrationOptions", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
-		generateRegistrationOptions.mockResolvedValue({
+		asMock(generateRegistrationOptions).mockResolvedValue({
 			challenge: "reg-challenge",
 			rp: { id: rpID, name: "App" },
 		});
@@ -59,7 +59,7 @@ describe("getPasskeyRegistrationOptions", () => {
 	});
 
 	it("throws USER_ALREADY_EXISTS when the user exists and is not authenticated", async () => {
-		findRecord.mockResolvedValue({ id: "alice", credentials: [] });
+		asMock(findRecord).mockResolvedValue({ id: "alice", credentials: [] });
 
 		await expect(
 			getPasskeyRegistrationOptions({
@@ -72,7 +72,7 @@ describe("getPasskeyRegistrationOptions", () => {
 	});
 
 	it("returns options and stores a challenge for a new user", async () => {
-		findRecord.mockResolvedValue(null);
+		asMock(findRecord).mockResolvedValue(null);
 
 		const options = await getPasskeyRegistrationOptions({
 			id: "Alice",
@@ -110,7 +110,7 @@ describe("getPasskeyRegistrationOptions", () => {
 	});
 
 	it("allows an authenticated user to register another passkey", async () => {
-		findRecord.mockResolvedValue({
+		asMock(findRecord).mockResolvedValue({
 			id: "alice",
 			email: "stored@b.com",
 			credentials: [{ id: "cred-1", transports: ["internal"] }],
@@ -137,7 +137,7 @@ describe("getPasskeyRegistrationOptions", () => {
 		});
 	});
 	it("defaults userName to the id when email is absent", async () => {
-		findRecord.mockResolvedValue(null);
+		asMock(findRecord).mockResolvedValue(null);
 
 		await getPasskeyRegistrationOptions({ id: "alice", rpID });
 
@@ -158,8 +158,8 @@ describe("verifyPasskeyRegistration", () => {
 
 	beforeEach(() => {
 		jest.clearAllMocks();
-		uuidv4.mockReturnValue("random-password");
-		hash.mockResolvedValue("hashed-password");
+		asMock(uuidv4).mockReturnValue("random-password");
+		asMock(hash).mockResolvedValue("hashed-password");
 	});
 
 	it("throws MISSING_ID when id is absent", async () => {
@@ -169,7 +169,7 @@ describe("verifyPasskeyRegistration", () => {
 	});
 
 	it("throws CHALLENGE_NOT_FOUND when no challenge exists", async () => {
-		findRecord.mockResolvedValueOnce(null);
+		asMock(findRecord).mockResolvedValueOnce(null);
 
 		await expect(
 			verifyPasskeyRegistration({
@@ -182,7 +182,7 @@ describe("verifyPasskeyRegistration", () => {
 	});
 
 	it("throws CHALLENGE_EXPIRED when the challenge is older than the TTL", async () => {
-		findRecord.mockResolvedValueOnce({
+		asMock(findRecord).mockResolvedValueOnce({
 			challenge: "old",
 			createdAt: new Date(Date.now() - 16 * 60 * 1000),
 			type: "register",
@@ -199,12 +199,12 @@ describe("verifyPasskeyRegistration", () => {
 	});
 
 	it("throws VERIFICATION_FAILED when the attestation is not verified", async () => {
-		findRecord.mockResolvedValueOnce({
+		asMock(findRecord).mockResolvedValueOnce({
 			challenge: "reg-challenge",
 			createdAt: new Date(),
 			type: "register",
 		});
-		verifyRegistrationResponse.mockResolvedValue({ verified: false });
+		asMock(verifyRegistrationResponse).mockResolvedValue({ verified: false });
 
 		await expect(
 			verifyPasskeyRegistration({
@@ -217,7 +217,7 @@ describe("verifyPasskeyRegistration", () => {
 	});
 
 	it("throws USER_ALREADY_EXISTS when verifying for an existing unauthenticated user", async () => {
-		findRecord
+		asMock(findRecord)
 			.mockResolvedValueOnce({
 				challenge: "reg-challenge",
 				createdAt: new Date(),
@@ -225,7 +225,7 @@ describe("verifyPasskeyRegistration", () => {
 				userInfo: {},
 			})
 			.mockResolvedValueOnce({ id: "alice", credentials: [] });
-		verifyRegistrationResponse.mockResolvedValue({
+		asMock(verifyRegistrationResponse).mockResolvedValue({
 			verified: true,
 			registrationInfo: {
 				credential: {
@@ -251,7 +251,7 @@ describe("verifyPasskeyRegistration", () => {
 	});
 
 	it("creates a new user on successful registration", async () => {
-		findRecord
+		asMock(findRecord)
 			.mockResolvedValueOnce({
 				challenge: "reg-challenge",
 				createdAt: new Date(),
@@ -263,7 +263,7 @@ describe("verifyPasskeyRegistration", () => {
 				},
 			})
 			.mockResolvedValueOnce(null);
-		verifyRegistrationResponse.mockResolvedValue({
+		asMock(verifyRegistrationResponse).mockResolvedValue({
 			verified: true,
 			registrationInfo: {
 				credential: {
@@ -314,14 +314,14 @@ describe("verifyPasskeyRegistration", () => {
 	});
 
 	it("defaults user fields and passkey name when userInfo and name are absent", async () => {
-		findRecord
+		asMock(findRecord)
 			.mockResolvedValueOnce({
 				challenge: "reg-challenge",
 				createdAt: new Date(),
 				type: "register",
 			})
 			.mockResolvedValueOnce(null);
-		verifyRegistrationResponse.mockResolvedValue({
+		asMock(verifyRegistrationResponse).mockResolvedValue({
 			verified: true,
 			registrationInfo: {
 				credential: {
@@ -353,7 +353,7 @@ describe("verifyPasskeyRegistration", () => {
 			email: "a@b.com",
 			credentials: [{ id: "cred-1", name: "Passkey 1" }],
 		};
-		findRecord
+		asMock(findRecord)
 			.mockResolvedValueOnce({
 				challenge: "reg-challenge",
 				createdAt: new Date(),
@@ -361,7 +361,7 @@ describe("verifyPasskeyRegistration", () => {
 				userInfo: null,
 			})
 			.mockResolvedValueOnce(existingUser);
-		verifyRegistrationResponse.mockResolvedValue({
+		asMock(verifyRegistrationResponse).mockResolvedValue({
 			verified: true,
 			registrationInfo: {
 				credential: {
@@ -400,14 +400,14 @@ describe("verifyPasskeyRegistration", () => {
 	});
 
 	it("defaults credentials to an empty array when the authenticated user has none", async () => {
-		findRecord
+		asMock(findRecord)
 			.mockResolvedValueOnce({
 				challenge: "reg-challenge",
 				createdAt: new Date(),
 				type: "register",
 			})
 			.mockResolvedValueOnce({ id: "alice" });
-		verifyRegistrationResponse.mockResolvedValue({
+		asMock(verifyRegistrationResponse).mockResolvedValue({
 			verified: true,
 			registrationInfo: {
 				credential: {
@@ -448,12 +448,12 @@ describe("getPasskeys", () => {
 	});
 
 	it("throws USER_NOT_FOUND when the user does not exist", async () => {
-		findRecord.mockResolvedValue(null);
+		asMock(findRecord).mockResolvedValue(null);
 		await expect(getPasskeys({ id: "alice" })).rejects.toBe("USER_NOT_FOUND");
 	});
 
 	it("returns mapped credentials", async () => {
-		findRecord.mockResolvedValue({
+		asMock(findRecord).mockResolvedValue({
 			id: "alice",
 			credentials: [
 				{ id: "c1", name: "Phone", createdAt: "2024-01-01" },
@@ -468,7 +468,7 @@ describe("getPasskeys", () => {
 	});
 
 	it("returns an empty list when the user has no credentials field", async () => {
-		findRecord.mockResolvedValue({ id: "alice" });
+		asMock(findRecord).mockResolvedValue({ id: "alice" });
 		await expect(getPasskeys({ id: "alice" })).resolves.toEqual([]);
 	});
 });
@@ -485,14 +485,14 @@ describe("deletePasskey", () => {
 	});
 
 	it("throws USER_NOT_FOUND when the user does not exist", async () => {
-		findRecord.mockResolvedValue(null);
+		asMock(findRecord).mockResolvedValue(null);
 		await expect(
 			deletePasskey({ id: "alice", credentialId: "c1" }),
 		).rejects.toBe("USER_NOT_FOUND");
 	});
 
 	it("removes the matching credential", async () => {
-		findRecord.mockResolvedValue({
+		asMock(findRecord).mockResolvedValue({
 			id: "alice",
 			credentials: [{ id: "c1" }, { id: "c2" }],
 		});
@@ -511,7 +511,7 @@ describe("deletePasskey", () => {
 	});
 
 	it("treats a missing credentials field as an empty list", async () => {
-		findRecord.mockResolvedValue({ id: "alice" });
+		asMock(findRecord).mockResolvedValue({ id: "alice" });
 
 		await deletePasskey({ id: "alice", credentialId: "missing" });
 
@@ -526,13 +526,13 @@ describe("deletePasskey", () => {
 describe("getPasskeyAuthOptions", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
-		generateAuthenticationOptions.mockResolvedValue({
+		asMock(generateAuthenticationOptions).mockResolvedValue({
 			challenge: "auth-challenge",
 		});
 	});
 
 	it("throws USER_NOT_FOUND when an id is provided but the user is missing", async () => {
-		findRecord.mockResolvedValue(null);
+		asMock(findRecord).mockResolvedValue(null);
 
 		await expect(getPasskeyAuthOptions({ id: "alice", rpID })).rejects.toBe(
 			"USER_NOT_FOUND",
@@ -540,7 +540,7 @@ describe("getPasskeyAuthOptions", () => {
 	});
 
 	it("returns options for a known user and stores an auth challenge", async () => {
-		findRecord.mockResolvedValue({
+		asMock(findRecord).mockResolvedValue({
 			id: "alice",
 			credentials: [{ id: "cred-1", transports: ["internal"] }],
 		});
@@ -568,7 +568,7 @@ describe("getPasskeyAuthOptions", () => {
 	});
 
 	it("uses an empty allowCredentials list when the user has no credentials", async () => {
-		findRecord.mockResolvedValue({ id: "alice" });
+		asMock(findRecord).mockResolvedValue({ id: "alice" });
 
 		await getPasskeyAuthOptions({ id: "alice", rpID });
 
@@ -617,7 +617,7 @@ describe("verifyPasskeyAuth", () => {
 	});
 
 	it("throws CHALLENGE_NOT_FOUND when no auth challenge exists", async () => {
-		findRecord.mockResolvedValueOnce(null);
+		asMock(findRecord).mockResolvedValueOnce(null);
 
 		await expect(
 			verifyPasskeyAuth({ id: "alice", response, origin, rpID }),
@@ -625,7 +625,7 @@ describe("verifyPasskeyAuth", () => {
 	});
 
 	it("throws CHALLENGE_EXPIRED for a stale auth challenge", async () => {
-		findRecord.mockResolvedValueOnce({
+		asMock(findRecord).mockResolvedValueOnce({
 			challenge: "auth-challenge",
 			createdAt: new Date(Date.now() - 20 * 60 * 1000),
 			type: "auth",
@@ -637,7 +637,7 @@ describe("verifyPasskeyAuth", () => {
 	});
 
 	it("throws USER_NOT_FOUND when the user is missing", async () => {
-		findRecord
+		asMock(findRecord)
 			.mockResolvedValueOnce({
 				challenge: "auth-challenge",
 				createdAt: new Date(),
@@ -651,7 +651,7 @@ describe("verifyPasskeyAuth", () => {
 	});
 
 	it("throws CREDENTIAL_NOT_FOUND when the assertion id is unknown", async () => {
-		findRecord
+		asMock(findRecord)
 			.mockResolvedValueOnce({
 				challenge: "auth-challenge",
 				createdAt: new Date(),
@@ -670,14 +670,14 @@ describe("verifyPasskeyAuth", () => {
 	});
 
 	it("throws VERIFICATION_FAILED when the assertion is not verified", async () => {
-		findRecord
+		asMock(findRecord)
 			.mockResolvedValueOnce({
 				challenge: "auth-challenge",
 				createdAt: new Date(),
 				type: "auth",
 			})
 			.mockResolvedValueOnce({ id: "alice", credentials: [credential] });
-		verifyAuthenticationResponse.mockResolvedValue({ verified: false });
+		asMock(verifyAuthenticationResponse).mockResolvedValue({ verified: false });
 
 		await expect(
 			verifyPasskeyAuth({ id: "alice", response, origin, rpID }),
@@ -686,14 +686,14 @@ describe("verifyPasskeyAuth", () => {
 
 	it("updates the counter and returns the user on success", async () => {
 		const user = { id: "alice", credentials: [credential], role: "teacher" };
-		findRecord
+		asMock(findRecord)
 			.mockResolvedValueOnce({
 				challenge: "auth-challenge",
 				createdAt: new Date(),
 				type: "auth",
 			})
 			.mockResolvedValueOnce(user);
-		verifyAuthenticationResponse.mockResolvedValue({
+		asMock(verifyAuthenticationResponse).mockResolvedValue({
 			verified: true,
 			authenticationInfo: { newCounter: 5 },
 		});
@@ -718,8 +718,9 @@ describe("verifyPasskeyAuth", () => {
 				expectedChallenge: "auth-challenge",
 				expectedOrigin: origin,
 				expectedRPID: rpID,
-				authenticator: expect.objectContaining({
-					credentialID: "cred-1",
+				credential: expect.objectContaining({
+					id: "cred-1",
+					publicKey: Buffer.from([1, 2, 3]),
 					counter: 0,
 				}),
 			}),

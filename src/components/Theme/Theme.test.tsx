@@ -14,9 +14,9 @@ jest.mock("@components/Main/MainStore", () => ({
 
 describe("Theme Component", () => {
 	beforeEach(() => {
-		useDirection.mockReturnValue("ltr");
-		useDarkMode.mockReturnValue({ value: false });
-		MainStore.useState.mockImplementation((selector: any) =>
+		asMock(useDirection).mockReturnValue("ltr");
+		asMock(useDarkMode).mockReturnValue({ value: false });
+		asMock(MainStore.useState).mockImplementation((selector: any) =>
 			selector({ fontSize: "16" }),
 		);
 	});
@@ -31,7 +31,7 @@ describe("Theme Component", () => {
 	});
 
 	it("sets data-theme attribute on document element", () => {
-		useDarkMode.mockReturnValue({ value: true });
+		asMock(useDarkMode).mockReturnValue({ value: true });
 		render(
 			<Theme>
 				<div>Test</div>
@@ -41,7 +41,7 @@ describe("Theme Component", () => {
 	});
 
 	it("sets font-size on body", () => {
-		MainStore.useState.mockImplementation((selector: any) =>
+		asMock(MainStore.useState).mockImplementation((selector: any) =>
 			selector({ fontSize: "20" }),
 		);
 		render(

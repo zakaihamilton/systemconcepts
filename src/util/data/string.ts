@@ -1,4 +1,4 @@
-export function makeCommaSeparatedString(arr: any, useOxfordComma: any) {
+export function makeCommaSeparatedString(arr: any, useOxfordComma = false) {
 	const listStart = arr.slice(0, -1).join(", ");
 	const listEnd = arr.slice(-1);
 	const conjunction =

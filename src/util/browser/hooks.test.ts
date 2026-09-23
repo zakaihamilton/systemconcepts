@@ -204,12 +204,11 @@ describe("useLocalStorage", () => {
 		});
 
 		expect(structuredLogger.debug).toHaveBeenCalled();
-		setItemSpy.mockRestore();
+		asMock(setItemSpy).mockRestore();
 	});
 
 	it("returns the initial value during server-side rendering", () => {
 		const originalWindow = global.window;
-		// @ts-expect-error test shim
 		delete global.window;
 		const { result } = renderHook(() => useLocalStorage("ssr-key", "server"));
 		expect(result.current[0]).toBe("server");

@@ -51,13 +51,16 @@ describe("getListing", () => {
 	});
 
 	it("returns the listing when storage returns items", async () => {
-		storage.getListing.mockResolvedValue([{ name: "a" }, { name: "b" }]);
+		asMock(storage.getListing).mockResolvedValue([
+			{ name: "a" },
+			{ name: "b" },
+		]);
 		const result = await getListing("some/path");
 		expect(result).toEqual([{ name: "a" }, { name: "b" }]);
 	});
 
 	it("returns an empty array and warns when storage returns no listing", async () => {
-		storage.getListing.mockResolvedValue(null);
+		asMock(storage.getListing).mockResolvedValue(null);
 		const result = await getListing("some/path");
 		expect(result).toEqual([]);
 		expect(logger.warn).toHaveBeenCalledWith(
@@ -98,15 +101,15 @@ describe("stringifyJsonArrayChunked", () => {
 describe("updateYearSync", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
-		lockMutex.mockImplementation(async () => jest.fn());
-		getFileInfo.mockResolvedValue({ hash: "hash1", size: 100 });
-		storage.exists.mockResolvedValue(false);
-		storage.createFolderPath.mockResolvedValue(undefined);
-		storage.writeFile.mockResolvedValue(undefined);
-		storage.deleteFile.mockResolvedValue(undefined);
-		storage.rename.mockResolvedValue(undefined);
-		writeCompressedFile.mockResolvedValue(undefined);
-		updateManifestEntry.mockResolvedValue(undefined);
+		asMock(lockMutex).mockImplementation(async () => jest.fn());
+		asMock(getFileInfo).mockResolvedValue({ hash: "hash1", size: 100 });
+		asMock(storage.exists).mockResolvedValue(false);
+		asMock(storage.createFolderPath).mockResolvedValue(undefined);
+		asMock(storage.writeFile).mockResolvedValue(undefined);
+		asMock(storage.deleteFile).mockResolvedValue(undefined);
+		asMock(storage.rename).mockResolvedValue(undefined);
+		asMock(writeCompressedFile).mockResolvedValue(undefined);
+		asMock(updateManifestEntry).mockResolvedValue(undefined);
 	});
 
 	it("returns zero counters for an empty sessions array", async () => {
@@ -133,7 +136,7 @@ describe("updateYearSync", () => {
 		expect(storage.deleteFile).not.toHaveBeenCalledWith(
 			"/local/sync/test/2024.json",
 		);
-		const [, jsonString] = storage.writeFile.mock.calls[0];
+		const [, jsonString] = asMock(storage.writeFile).mock.calls[0];
 		const data = JSON.parse(jsonString);
 		expect(data.sessions.map((s: any) => s.name)).toEqual([
 			"a-session",
@@ -147,7 +150,7 @@ describe("updateYearSync", () => {
 	});
 
 	it("leaves the live year file intact when the temp write fails", async () => {
-		storage.writeFile.mockRejectedValue(new Error("write failed"));
+		asMock(storage.writeFile).mockRejectedValue(new Error("write failed"));
 
 		const result = await updateYearSync("test", "2024", [{ id: "a-session" }]);
 
@@ -178,11 +181,11 @@ describe("updateYearSync", () => {
 describe("updateBundleFile", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
-		lockMutex.mockImplementation(async () => jest.fn());
-		getFileInfo.mockResolvedValue({ hash: "hash2", size: 200 });
-		writeCompressedFile.mockResolvedValue(undefined);
-		updateManifestEntry.mockResolvedValue(undefined);
-		storage.exists.mockResolvedValue(false);
+		asMock(lockMutex).mockImplementation(async () => jest.fn());
+		asMock(getFileInfo).mockResolvedValue({ hash: "hash2", size: 200 });
+		asMock(writeCompressedFile).mockResolvedValue(undefined);
+		asMock(updateManifestEntry).mockResolvedValue(undefined);
+		asMock(storage.exists).mockResolvedValue(false);
 	});
 
 	it("creates a new bundle when none exists", async () => {
@@ -195,8 +198,8 @@ describe("updateBundleFile", () => {
 	});
 
 	it("propagates an error when reading the existing bundle fails", async () => {
-		storage.exists.mockResolvedValue(true);
-		storage.readFile.mockRejectedValue(new Error("read failed"));
+		asMock(storage.exists).mockResolvedValue(true);
+		asMock(storage.readFile).mockRejectedValue(new Error("read failed"));
 
 		await expect(
 			updateBundleFile([{ id: "s1", group: "test" }]),

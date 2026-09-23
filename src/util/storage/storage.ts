@@ -225,7 +225,7 @@ storageMethods.getRecursiveList = async (
 	return callMethod({ name: "getRecursiveList" }, path, options);
 };
 
-export function useListing(url: any, depends: unknown[] = [], options: any) {
+export function useListing(url: any, depends: unknown[] = [], options?: any) {
 	const [listing, setListing] = useState<any>(null);
 	const [loading, setLoading] = useState<any>(null);
 	const [error, setError] = useState<any>(null);
@@ -281,7 +281,7 @@ export function useListing(url: any, depends: unknown[] = [], options: any) {
 export function useFile(
 	urlArgument: any,
 	depends: unknown[] = [],
-	mapping: any,
+	mapping?: any,
 ) {
 	const url = urlArgument && makePath(urlArgument);
 	type FileState = {

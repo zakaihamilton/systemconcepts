@@ -86,7 +86,7 @@ export function useWindowSize() {
 	return size;
 }
 
-export function useSize(ref: any, depends: unknown[] = []) {
+export function useSize(ref: any = null, depends: unknown[] = []) {
 	const [size, setSize] = useState({ width: 0, height: 0, emPixels: 16 });
 	const counter = useResize(depends);
 

@@ -20,8 +20,8 @@ describe("Tabs Component", () => {
 	});
 
 	it("renders nothing if no page with tabs is active", () => {
-		useActivePages.mockReturnValue([{ id: "home" }]);
-		MainStore.useState.mockReturnValue({ hash: "#home" });
+		asMock(useActivePages).mockReturnValue([{ id: "home" }]);
+		asMock(MainStore.useState).mockReturnValue({ hash: "#home" });
 		const { container } = render(<Tabs />);
 		expect(container.firstChild).toBeNull();
 	});
@@ -32,8 +32,10 @@ describe("Tabs Component", () => {
 				<div>Mocked Tabs Content</div>
 			</Container>
 		);
-		useActivePages.mockReturnValue([{ id: "page-with-tabs", tabs: MockTabs }]);
-		MainStore.useState.mockReturnValue({ hash: "#test" });
+		asMock(useActivePages).mockReturnValue([
+			{ id: "page-with-tabs", tabs: MockTabs },
+		]);
+		asMock(MainStore.useState).mockReturnValue({ hash: "#test" });
 
 		const { getByTestId, getByText } = render(<Tabs />);
 		expect(getByTestId("tabs-widget")).toBeInTheDocument();

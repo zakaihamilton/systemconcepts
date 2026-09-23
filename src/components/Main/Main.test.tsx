@@ -9,7 +9,10 @@ import Main, { MAIN_STORE_PERSISTED_FIELDS, MainStore } from "./index";
 jest.mock("@util/browser/size");
 jest.mock("@util/domain/language");
 jest.mock("@util/browser/styles");
-jest.mock("@util/browser/store");
+jest.mock("@util/browser/store", () => ({
+	...jest.requireActual("@util/browser/store"),
+	useLocalStorage: jest.fn(),
+}));
 jest.mock("@sync/sync", () => ({
 	useSync: jest.fn().mockReturnValue([0, false]),
 }));
@@ -25,9 +28,9 @@ jest.mock("../Title", () => () => <div data-testid="title" />);
 describe("Main Component", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
-		useResize.mockReturnValue(0);
-		useLanguage.mockReturnValue("eng");
-		useDeviceType.mockReturnValue("desktop");
+		asMock(useResize).mockReturnValue(0);
+		asMock(useLanguage).mockReturnValue("eng");
+		asMock(useDeviceType).mockReturnValue("desktop");
 		MainStore.update((s) => {
 			s.direction = "ltr";
 			s.showSideBar = true;
@@ -71,7 +74,7 @@ describe("Main Component", () => {
 	});
 
 	it("sets html dir attribute based on language", () => {
-		useLanguage.mockReturnValue("heb");
+		asMock(useLanguage).mockReturnValue("heb");
 		render(<Main />);
 		expect(document.getElementsByTagName("html")[0].getAttribute("dir")).toBe(
 			"rtl",

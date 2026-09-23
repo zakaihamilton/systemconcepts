@@ -30,17 +30,17 @@ jest.mock("@components/Main", () => ({
 jest.mock("@util/storage/storage", () => ({
 	__esModule: true,
 	default: {
-		deleteFolder: jest.fn().mockResolvedValue(),
+		deleteFolder: jest.fn().mockResolvedValue(undefined),
 	},
 }));
 jest.mock("@sync/sync", () => ({
-	clearBundleCache: jest.fn().mockResolvedValue(),
+	clearBundleCache: jest.fn().mockResolvedValue(undefined),
 }));
 jest.mock("@sync/syncState", () => ({
 	UpdateSessionsStore: {
 		update: jest.fn(),
 	},
-	loadUserSyncState: jest.fn().mockResolvedValue(),
+	loadUserSyncState: jest.fn().mockResolvedValue(undefined),
 }));
 jest.mock("@simplewebauthn/browser", () => ({
 	browserSupportsWebAuthn: jest.fn().mockReturnValue(true),
@@ -68,12 +68,12 @@ describe("Account View", () => {
 
 	beforeEach(() => {
 		jest.clearAllMocks();
-		useTranslations.mockReturnValue(mockTranslations);
-		MainStore.useState.mockReturnValue({ direction: "ltr" });
-		Cookies.get.mockReturnValue(null);
+		asMock(useTranslations).mockReturnValue(mockTranslations);
+		asMock(MainStore.useState).mockReturnValue({ direction: "ltr" });
+		asMock(Cookies.get).mockReturnValue(null);
 		Cookies.set = jest.fn();
-		fetchJSON.mockResolvedValue([]);
-		browserSupportsWebAuthn.mockReturnValue(true);
+		asMock(fetchJSON).mockResolvedValue([]);
+		asMock(browserSupportsWebAuthn).mockReturnValue(true);
 	});
 
 	it("renders sign in form when not signed in", async () => {
@@ -84,12 +84,12 @@ describe("Account View", () => {
 	});
 
 	it("renders signed in state when cookies are present", async () => {
-		Cookies.get.mockImplementation((key: any) => {
+		asMock(Cookies.get).mockImplementation((key: any) => {
 			if (key === "id") return "testuser";
 			if (key === "hash") return "testhash";
 			return null;
 		});
-		fetchJSON.mockResolvedValue([
+		asMock(fetchJSON).mockResolvedValue([
 			{ id: "pk1", name: "My Passkey", createdAt: new Date().toISOString() },
 		]);
 
@@ -100,7 +100,7 @@ describe("Account View", () => {
 
 	it("submits a boolean remember value after it is toggled", async () => {
 		const user = userEvent.setup();
-		fetchJSON.mockResolvedValue({ role: "visitor" });
+		asMock(fetchJSON).mockResolvedValue({ role: "visitor" });
 		render(<Account />);
 
 		await user.type(screen.getByLabelText("ID"), "person@example.com");
@@ -124,13 +124,13 @@ describe("Account View", () => {
 		render(<Account />);
 		await user.click(screen.getByRole("button", { name: "Sign In" }));
 		expect(
-			fetchJSON.mock.calls.some(([url]: any) => url === "/api/login"),
+			asMock(fetchJSON).mock.calls.some(([url]: any) => url === "/api/login"),
 		).toBe(false);
 	});
 
 	it("handles login failure", async () => {
 		const user = userEvent.setup();
-		fetchJSON.mockResolvedValue({ err: "bad credentials" });
+		asMock(fetchJSON).mockResolvedValue({ err: "bad credentials" });
 		render(<Account />);
 		await user.type(screen.getByLabelText("ID"), "person@example.com");
 		await user.type(screen.getByLabelText("Password"), "password");
@@ -141,12 +141,12 @@ describe("Account View", () => {
 	});
 
 	it("signs out and clears cookies", async () => {
-		Cookies.get.mockImplementation((key: any) => {
+		asMock(Cookies.get).mockImplementation((key: any) => {
 			if (key === "id") return "testuser";
 			if (key === "hash") return "testhash";
 			return null;
 		});
-		fetchJSON.mockResolvedValue([]);
+		asMock(fetchJSON).mockResolvedValue([]);
 		render(<Account />);
 		expect(await screen.findByText("Signed In")).toBeInTheDocument();
 		fireEvent.click(screen.getByRole("button", { name: "Sign Out" }));
@@ -157,7 +157,7 @@ describe("Account View", () => {
 	});
 
 	it("hides create-passkey checkbox when WebAuthn is unsupported", () => {
-		browserSupportsWebAuthn.mockReturnValue(false);
+		asMock(browserSupportsWebAuthn).mockReturnValue(false);
 		render(<Account />);
 		expect(screen.queryByLabelText(/Create passkey/i)).not.toBeInTheDocument();
 		expect(
@@ -166,14 +166,14 @@ describe("Account View", () => {
 	});
 
 	it("respects rtl direction", () => {
-		MainStore.useState.mockReturnValue({ direction: "rtl" });
+		asMock(MainStore.useState).mockReturnValue({ direction: "rtl" });
 		render(<Account />);
 		expect(screen.getAllByText("Sign In").length).toBeGreaterThan(0);
 	});
 
 	it("redirects via setPath after successful login", async () => {
 		const user = userEvent.setup();
-		fetchJSON.mockResolvedValue({ role: "user" });
+		asMock(fetchJSON).mockResolvedValue({ role: "user" });
 		render(<Account />);
 		await user.type(screen.getByLabelText("ID"), "person@example.com");
 		await user.type(screen.getByLabelText("Password"), "password");
@@ -185,7 +185,7 @@ describe("Account View", () => {
 
 	it("redirects via setHash when redirect prop is provided", async () => {
 		const user = userEvent.setup();
-		fetchJSON.mockResolvedValue({ role: "user" });
+		asMock(fetchJSON).mockResolvedValue({ role: "user" });
 		render(<Account redirect="sessions" />);
 		await user.type(screen.getByLabelText("ID"), "person@example.com");
 		await user.type(screen.getByLabelText("Password"), "password");
@@ -196,14 +196,14 @@ describe("Account View", () => {
 	});
 
 	it("registers a passkey when signed in", async () => {
-		Cookies.get.mockImplementation((key: any) => {
+		asMock(Cookies.get).mockImplementation((key: any) => {
 			if (key === "id") return "testuser";
 			if (key === "hash") return "testhash";
 			return null;
 		});
 		window.prompt = jest.fn().mockReturnValue("Work laptop");
-		startRegistration.mockResolvedValue({ id: "cred" });
-		fetchJSON
+		asMock(startRegistration).mockResolvedValue({ id: "cred" });
+		asMock(fetchJSON)
 			.mockResolvedValueOnce([])
 			.mockResolvedValueOnce({ challenge: "abc" })
 			.mockResolvedValueOnce({ verified: true });
@@ -222,13 +222,13 @@ describe("Account View", () => {
 	});
 
 	it("deletes a passkey after confirmation", async () => {
-		Cookies.get.mockImplementation((key: any) => {
+		asMock(Cookies.get).mockImplementation((key: any) => {
 			if (key === "id") return "testuser";
 			if (key === "hash") return "testhash";
 			return null;
 		});
 		window.confirm = jest.fn().mockReturnValue(true);
-		fetchJSON.mockResolvedValue([
+		asMock(fetchJSON).mockResolvedValue([
 			{ id: "pk1", name: "My Passkey", createdAt: new Date().toISOString() },
 		]);
 
@@ -245,13 +245,13 @@ describe("Account View", () => {
 	});
 
 	it("skips passkey deletion when confirmation is cancelled", async () => {
-		Cookies.get.mockImplementation((key: any) => {
+		asMock(Cookies.get).mockImplementation((key: any) => {
 			if (key === "id") return "testuser";
 			if (key === "hash") return "testhash";
 			return null;
 		});
 		window.confirm = jest.fn().mockReturnValue(false);
-		fetchJSON.mockResolvedValue([
+		asMock(fetchJSON).mockResolvedValue([
 			{ id: "pk1", name: "My Passkey", createdAt: new Date().toISOString() },
 		]);
 
@@ -260,7 +260,7 @@ describe("Account View", () => {
 		fireEvent.click(screen.getByRole("button", { name: "Delete My Passkey" }));
 
 		expect(
-			fetchJSON.mock.calls.some(
+			asMock(fetchJSON).mock.calls.some(
 				([url, opts]: any) =>
 					url.includes("credentialId=pk1") && opts?.method === "DELETE",
 			),
@@ -269,8 +269,8 @@ describe("Account View", () => {
 
 	it("logs in with a passkey", async () => {
 		const user = userEvent.setup();
-		startAuthentication.mockResolvedValue({ id: "assertion" });
-		fetchJSON
+		asMock(startAuthentication).mockResolvedValue({ id: "assertion" });
+		asMock(fetchJSON)
 			.mockResolvedValueOnce({ challenge: "abc" })
 			.mockResolvedValueOnce({ role: "user" });
 
@@ -289,8 +289,8 @@ describe("Account View", () => {
 	it("creates a passkey after login when checkbox is checked", async () => {
 		const user = userEvent.setup();
 		window.prompt = jest.fn().mockReturnValue(null);
-		startRegistration.mockResolvedValue({ id: "cred" });
-		fetchJSON
+		asMock(startRegistration).mockResolvedValue({ id: "cred" });
+		asMock(fetchJSON)
 			.mockResolvedValueOnce({ role: "user" })
 			.mockResolvedValueOnce({ challenge: "abc" })
 			.mockResolvedValueOnce({ verified: true });
@@ -307,12 +307,12 @@ describe("Account View", () => {
 	});
 
 	it("clears session store and bundle cache on sign out", async () => {
-		Cookies.get.mockImplementation((key: any) => {
+		asMock(Cookies.get).mockImplementation((key: any) => {
 			if (key === "id") return "testuser";
 			if (key === "hash") return "testhash";
 			return null;
 		});
-		fetchJSON.mockResolvedValue([]);
+		asMock(fetchJSON).mockResolvedValue([]);
 
 		render(<Account />);
 		await screen.findByText("Signed In");
@@ -326,12 +326,12 @@ describe("Account View", () => {
 	});
 
 	it("shows error when passkey registration options fail", async () => {
-		Cookies.get.mockImplementation((key: any) => {
+		asMock(Cookies.get).mockImplementation((key: any) => {
 			if (key === "id") return "testuser";
 			if (key === "hash") return "testhash";
 			return null;
 		});
-		fetchJSON
+		asMock(fetchJSON)
 			.mockResolvedValueOnce([])
 			.mockResolvedValueOnce({ err: "PASSKEY_DENIED" });
 
@@ -345,14 +345,14 @@ describe("Account View", () => {
 	});
 
 	it("shows error when passkey registration is not verified", async () => {
-		Cookies.get.mockImplementation((key: any) => {
+		asMock(Cookies.get).mockImplementation((key: any) => {
 			if (key === "id") return "testuser";
 			if (key === "hash") return "testhash";
 			return null;
 		});
 		window.prompt = jest.fn().mockReturnValue("Key");
-		startRegistration.mockResolvedValue({ id: "cred" });
-		fetchJSON
+		asMock(startRegistration).mockResolvedValue({ id: "cred" });
+		asMock(fetchJSON)
 			.mockResolvedValueOnce([])
 			.mockResolvedValueOnce({ challenge: "abc" })
 			.mockResolvedValueOnce({ verified: false });
@@ -369,13 +369,13 @@ describe("Account View", () => {
 	});
 
 	it("shows error when passkey deletion fails", async () => {
-		Cookies.get.mockImplementation((key: any) => {
+		asMock(Cookies.get).mockImplementation((key: any) => {
 			if (key === "id") return "testuser";
 			if (key === "hash") return "testhash";
 			return null;
 		});
 		window.confirm = jest.fn().mockReturnValue(true);
-		fetchJSON
+		asMock(fetchJSON)
 			.mockResolvedValueOnce([
 				{ id: "pk1", name: "My Passkey", createdAt: new Date().toISOString() },
 			])
@@ -400,8 +400,8 @@ describe("Account View", () => {
 
 	it("shows error when passkey login verification fails", async () => {
 		const user = userEvent.setup();
-		startAuthentication.mockResolvedValue({ id: "assertion" });
-		fetchJSON
+		asMock(startAuthentication).mockResolvedValue({ id: "assertion" });
+		asMock(fetchJSON)
 			.mockResolvedValueOnce({ challenge: "abc" })
 			.mockResolvedValueOnce({ err: "PASSKEY_LOGIN_FAILED" });
 
@@ -418,8 +418,8 @@ describe("Account View", () => {
 
 	it("redirects via setHash after passkey login when redirect prop is set", async () => {
 		const user = userEvent.setup();
-		startAuthentication.mockResolvedValue({ id: "assertion" });
-		fetchJSON
+		asMock(startAuthentication).mockResolvedValue({ id: "assertion" });
+		asMock(fetchJSON)
 			.mockResolvedValueOnce({ challenge: "abc" })
 			.mockResolvedValueOnce({ role: "user" });
 
@@ -436,7 +436,7 @@ describe("Account View", () => {
 
 	it("shows error when passkey auth options fail", async () => {
 		const user = userEvent.setup();
-		fetchJSON.mockResolvedValueOnce({ err: "PASSKEY_OPTIONS_FAILED" });
+		asMock(fetchJSON).mockResolvedValueOnce({ err: "PASSKEY_OPTIONS_FAILED" });
 
 		render(<Account />);
 		await user.type(screen.getByLabelText("ID"), "person@example.com");
@@ -452,8 +452,10 @@ describe("Account View", () => {
 	it("continues login when post-login passkey creation fails", async () => {
 		const user = userEvent.setup();
 		window.prompt = jest.fn().mockReturnValue("Laptop");
-		startRegistration.mockRejectedValue(new Error("registration failed"));
-		fetchJSON.mockResolvedValueOnce({ role: "user" });
+		asMock(startRegistration).mockRejectedValue(
+			new Error("registration failed"),
+		);
+		asMock(fetchJSON).mockResolvedValueOnce({ role: "user" });
 
 		render(<Account />);
 		await user.type(screen.getByLabelText("ID"), "person@example.com");

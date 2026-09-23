@@ -62,7 +62,7 @@ export async function uploadNewFiles(
 	remoteManifest: any,
 	localPath = LOCAL_SYNC_PATH,
 	remotePath = SYNC_BASE_PATH,
-	progressTracker: SyncProgressTracker | null = null,
+	progressTracker: Pick<SyncProgressTracker, "updateProgress"> | null = null,
 ) {
 	const start = performance.now();
 	addSyncLog("Step 6: Uploading new files...", "info");

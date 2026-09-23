@@ -64,9 +64,9 @@ describe("ChangePassword View", () => {
 
 	beforeEach(() => {
 		jest.clearAllMocks();
-		useTranslations.mockReturnValue(mockTranslations);
-		MainStore.useState.mockReturnValue({ direction: "ltr" });
-		Cookies.get.mockReturnValue("testuser");
+		asMock(useTranslations).mockReturnValue(mockTranslations);
+		asMock(MainStore.useState).mockReturnValue({ direction: "ltr" });
+		asMock(Cookies.get).mockReturnValue("testuser");
 	});
 
 	it("renders change password form", () => {
@@ -78,7 +78,7 @@ describe("ChangePassword View", () => {
 	});
 
 	it("calls fetchJSON on submit", async () => {
-		fetchJSON.mockResolvedValue({ hash: "newhash" });
+		asMock(fetchJSON).mockResolvedValue({ hash: "newhash" });
 		render(<ChangePassword />);
 
 		fireEvent.change(screen.getByTestId("input-oldpassword"), {
@@ -119,7 +119,7 @@ describe("ChangePassword View", () => {
 	});
 
 	it("submits on Enter and navigates home on success", async () => {
-		fetchJSON.mockResolvedValue({});
+		asMock(fetchJSON).mockResolvedValue({});
 		render(<ChangePassword />);
 		fireEvent.change(screen.getByTestId("input-oldpassword"), {
 			target: { value: "oldpassword123" },
@@ -137,7 +137,7 @@ describe("ChangePassword View", () => {
 	});
 
 	it("shows translated errors from the API response", async () => {
-		fetchJSON.mockResolvedValue({ err: "ACCESS_DENIED" });
+		asMock(fetchJSON).mockResolvedValue({ err: "ACCESS_DENIED" });
 		render(<ChangePassword />);
 		fireEvent.change(screen.getByTestId("input-oldpassword"), {
 			target: { value: "oldpassword123" },
@@ -152,7 +152,7 @@ describe("ChangePassword View", () => {
 	});
 
 	it("shows a fallback error when the request rejects", async () => {
-		fetchJSON.mockRejectedValue("NETWORK_ERROR");
+		asMock(fetchJSON).mockRejectedValue("NETWORK_ERROR");
 		render(<ChangePassword />);
 		fireEvent.change(screen.getByTestId("input-oldpassword"), {
 			target: { value: "oldpassword123" },
@@ -167,15 +167,15 @@ describe("ChangePassword View", () => {
 	});
 
 	it("renders RTL layout and toggles remember me", () => {
-		MainStore.useState.mockReturnValue({ direction: "rtl" });
-		Cookies.get.mockReturnValue(null);
+		asMock(MainStore.useState).mockReturnValue({ direction: "rtl" });
+		asMock(Cookies.get).mockReturnValue(null);
 		render(<ChangePassword />);
 		fireEvent.click(screen.getByRole("checkbox"));
 		expect(screen.getByTestId("input-userid")).toBeInTheDocument();
 	});
 
 	it("rejects an empty id and an overlong password", () => {
-		Cookies.get.mockReturnValue(null);
+		asMock(Cookies.get).mockReturnValue(null);
 		render(<ChangePassword />);
 		fireEvent.change(screen.getByTestId("input-oldpassword"), {
 			target: { value: "validpass1" },

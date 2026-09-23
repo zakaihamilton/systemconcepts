@@ -39,7 +39,7 @@ describe("VariableSizeList Component", () => {
 			overscanStartIndex: 0,
 			overscanStopIndex: 3,
 		});
-		const scrollContainer = container.firstChild;
+		const scrollContainer = container.firstChild as HTMLElement;
 		Object.defineProperty(scrollContainer, "scrollTop", {
 			configurable: true,
 			writable: true,
@@ -53,7 +53,7 @@ describe("VariableSizeList Component", () => {
 	});
 
 	it("supports scrolling and imperative refs", () => {
-		const ref = createRef();
+		const ref = createRef<any>();
 		const { container } = render(
 			<VariableSizeList
 				ref={ref}
@@ -73,12 +73,12 @@ describe("VariableSizeList Component", () => {
 		expect(typeof ref.current.scrollToItem).toBe("function");
 		expect(typeof ref.current.resetAfterIndex).toBe("function");
 
-		const scrollContainer = container.firstChild;
+		const scrollContainer = container.firstChild as HTMLElement;
 		fireEvent.scroll(scrollContainer, { target: { scrollTop: 100 } });
 	});
 
 	it("scrollToItem with start align jumps to the item top", () => {
-		const ref = createRef();
+		const ref = createRef<any>();
 		const { container } = render(
 			<VariableSizeList
 				ref={ref}
@@ -93,7 +93,7 @@ describe("VariableSizeList Component", () => {
 			</VariableSizeList>,
 		);
 
-		const scrollContainer = container.firstChild;
+		const scrollContainer = container.firstChild as HTMLElement;
 		Object.defineProperty(scrollContainer, "scrollTop", {
 			configurable: true,
 			writable: true,
@@ -115,7 +115,7 @@ describe("VariableSizeList Component", () => {
 	});
 
 	it("supports end, center, and auto scrollToItem alignments", () => {
-		const ref = createRef();
+		const ref = createRef<any>();
 		const { container } = render(
 			<VariableSizeList
 				ref={ref}
@@ -131,7 +131,7 @@ describe("VariableSizeList Component", () => {
 				{Row}
 			</VariableSizeList>,
 		);
-		const scrollContainer = container.firstChild;
+		const scrollContainer = container.firstChild as HTMLElement;
 		Object.defineProperty(scrollContainer, "scrollTop", {
 			configurable: true,
 			writable: true,
@@ -168,7 +168,7 @@ describe("VariableSizeList Component", () => {
 	});
 
 	it("forwards an external outerRef", () => {
-		const outerRef = createRef();
+		const outerRef = createRef<any>();
 		render(
 			<VariableSizeList
 				outerRef={outerRef}

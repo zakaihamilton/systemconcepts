@@ -19,6 +19,7 @@ function makeDependencies(roleAuth: any) {
 		storage: {
 			createFolderPath: jest.fn(),
 			exists: jest.fn().mockResolvedValue(false),
+			readFile: jest.fn(),
 			writeFile: jest.fn(),
 		},
 		roleAuth,
@@ -112,19 +113,19 @@ describe("sync pipeline permissions", () => {
 
 	it("blocks manifest publication and remote removal after a partial upload", async () => {
 		const dependencies = makeDependencies(jest.fn().mockReturnValue(true));
-		dependencies.updateLocalManifest.mockResolvedValue([
+		asMock(dependencies.updateLocalManifest).mockResolvedValue([
 			{ path: "/deleted.json", version: "2", deleted: true },
 		]);
-		dependencies.downloadUpdates.mockResolvedValue({
+		asMock(dependencies.downloadUpdates).mockResolvedValue({
 			manifest: [{ path: "/deleted.json", version: "2", deleted: true }],
 			hasChanges: false,
 			complete: true,
 		});
-		dependencies.removeDeletedFiles.mockResolvedValue({
+		asMock(dependencies.removeDeletedFiles).mockResolvedValue({
 			manifest: [{ path: "/deleted.json", version: "2", deleted: true }],
 			hasChanges: false,
 		});
-		dependencies.uploadUpdates.mockResolvedValue({
+		asMock(dependencies.uploadUpdates).mockResolvedValue({
 			manifest: [],
 			hasChanges: false,
 			complete: false,
@@ -153,12 +154,12 @@ describe("sync pipeline permissions", () => {
 
 	it("does not apply remote tombstones after an incomplete download", async () => {
 		const dependencies = makeDependencies(jest.fn().mockReturnValue(false));
-		const remoteManifest = [
-			{ path: "/deleted.json", version: "3", deleted: true },
-		];
-		remoteManifest.loadedFromManifest = true;
-		dependencies.syncManifest.mockResolvedValue(remoteManifest);
-		dependencies.downloadUpdates.mockResolvedValue({
+		const remoteManifest = Object.assign(
+			[{ path: "/deleted.json", version: "3", deleted: true }],
+			{ loadedFromManifest: true },
+		);
+		asMock(dependencies.syncManifest).mockResolvedValue(remoteManifest);
+		asMock(dependencies.downloadUpdates).mockResolvedValue({
 			manifest: [],
 			hasChanges: false,
 			complete: false,
@@ -186,15 +187,15 @@ describe("sync pipeline permissions", () => {
 		const remoteManifest: any = [];
 		remoteManifest.loadedFromManifest = false;
 		remoteManifest.authoritative = false;
-		dependencies.syncManifest.mockResolvedValue(remoteManifest);
+		asMock(dependencies.syncManifest).mockResolvedValue(remoteManifest);
 		const tombstones = [{ path: "/deleted.json", version: "2", deleted: true }];
-		dependencies.updateLocalManifest.mockResolvedValue(tombstones);
-		dependencies.downloadUpdates.mockResolvedValue({
+		asMock(dependencies.updateLocalManifest).mockResolvedValue(tombstones);
+		asMock(dependencies.downloadUpdates).mockResolvedValue({
 			manifest: tombstones,
 			hasChanges: false,
 			complete: true,
 		});
-		dependencies.removeDeletedFiles.mockResolvedValue({
+		asMock(dependencies.removeDeletedFiles).mockResolvedValue({
 			manifest: tombstones,
 			hasChanges: false,
 		});
@@ -220,8 +221,8 @@ describe("sync pipeline permissions", () => {
 
 	it("skips local hashing when library counter is unchanged", async () => {
 		const dependencies = makeDependencies(jest.fn().mockReturnValue(true));
-		dependencies.readLibraryCounter.mockResolvedValue(5);
-		dependencies.getSavedLibraryCounter.mockReturnValue(5);
+		asMock(dependencies.readLibraryCounter).mockResolvedValue(5);
+		asMock(dependencies.getSavedLibraryCounter).mockReturnValue(5);
 		dependencies.storage.readFile = jest.fn().mockResolvedValue(
 			JSON.stringify([
 				{ path: "/a.json", deleted: false },
@@ -258,10 +259,10 @@ describe("sync pipeline permissions", () => {
 
 	it("rescans library files when the counter changes", async () => {
 		const dependencies = makeDependencies(jest.fn().mockReturnValue(true));
-		dependencies.readLibraryCounter
+		asMock(dependencies.readLibraryCounter)
 			.mockResolvedValueOnce(7)
 			.mockResolvedValueOnce(8);
-		dependencies.getSavedLibraryCounter.mockReturnValue(3);
+		asMock(dependencies.getSavedLibraryCounter).mockReturnValue(3);
 		dependencies.storage.readFile = jest
 			.fn()
 			.mockResolvedValue(JSON.stringify([{ path: "/a.json" }]));
@@ -291,8 +292,8 @@ describe("sync pipeline permissions", () => {
 
 	it("warns when cached library manifest cannot be read", async () => {
 		const dependencies = makeDependencies(jest.fn().mockReturnValue(true));
-		dependencies.readLibraryCounter.mockResolvedValue(1);
-		dependencies.getSavedLibraryCounter.mockReturnValue(null);
+		asMock(dependencies.readLibraryCounter).mockResolvedValue(1);
+		asMock(dependencies.getSavedLibraryCounter).mockReturnValue(null);
 		dependencies.storage.readFile = jest
 			.fn()
 			.mockRejectedValue(new Error("bad manifest"));
@@ -317,7 +318,7 @@ describe("sync pipeline permissions", () => {
 	});
 	it("runs migration and merges FORCE_UPLOAD entries", async () => {
 		const dependencies = makeDependencies(jest.fn().mockReturnValue(true));
-		dependencies.migrateFromMongoDB.mockResolvedValue({
+		asMock(dependencies.migrateFromMongoDB).mockResolvedValue({
 			migrated: true,
 			fileCount: 2,
 			deletedKeys: ["/old.json"],
@@ -326,13 +327,14 @@ describe("sync pipeline permissions", () => {
 				{ path: "/keep.json", version: 1 },
 			],
 		});
-		const remoteManifest = [
-			{ path: "/old.json", version: "1" },
-			{ path: "/keep.json", version: "1" },
-		];
-		remoteManifest.loadedFromManifest = true;
-		remoteManifest.authoritative = true;
-		dependencies.syncManifest.mockResolvedValue(remoteManifest);
+		const remoteManifest = Object.assign(
+			[
+				{ path: "/old.json", version: "1" },
+				{ path: "/keep.json", version: "1" },
+			],
+			{ loadedFromManifest: true, authoritative: true },
+		);
+		asMock(dependencies.syncManifest).mockResolvedValue(remoteManifest);
 
 		await createSyncPipeline(dependencies)(
 			{
@@ -358,7 +360,7 @@ describe("sync pipeline permissions", () => {
 
 	it("marks phase incomplete when migration throws", async () => {
 		const dependencies = makeDependencies(jest.fn().mockReturnValue(true));
-		dependencies.migrateFromMongoDB.mockRejectedValue(
+		asMock(dependencies.migrateFromMongoDB).mockRejectedValue(
 			new Error("migrate boom"),
 		);
 
@@ -385,27 +387,29 @@ describe("sync pipeline permissions", () => {
 	it("applies local tombstones and deletes remotes when deletion is safe", async () => {
 		const dependencies = makeDependencies(jest.fn().mockReturnValue(true));
 		const tombstones = [{ path: "/gone.json", version: "2", deleted: true }];
-		dependencies.updateLocalManifest.mockResolvedValue(tombstones);
-		dependencies.downloadUpdates.mockResolvedValue({
+		asMock(dependencies.updateLocalManifest).mockResolvedValue(tombstones);
+		asMock(dependencies.downloadUpdates).mockResolvedValue({
 			manifest: tombstones,
 			hasChanges: true,
 			complete: true,
 		});
-		dependencies.removeDeletedFiles.mockResolvedValue({
+		asMock(dependencies.removeDeletedFiles).mockResolvedValue({
 			manifest: tombstones,
 			hasChanges: false,
 		});
-		dependencies.uploadUpdates.mockResolvedValue({
+		asMock(dependencies.uploadUpdates).mockResolvedValue({
 			manifest: [],
 			hasChanges: false,
 			complete: true,
 		});
-		dependencies.uploadNewFiles.mockResolvedValue({
+		asMock(dependencies.uploadNewFiles).mockResolvedValue({
 			manifest: [],
 			hasChanges: false,
 			complete: true,
 		});
-		dependencies.deleteRemoteFiles.mockResolvedValue({ complete: true });
+		asMock(dependencies.deleteRemoteFiles).mockResolvedValue({
+			complete: true,
+		});
 
 		const result = await createSyncPipeline(dependencies)(
 			{
@@ -426,7 +430,7 @@ describe("sync pipeline permissions", () => {
 
 	it("skips manifest upload when nothing changed and manifest was loaded", async () => {
 		const dependencies = makeDependencies(jest.fn().mockReturnValue(true));
-		dependencies.downloadUpdates.mockResolvedValue({
+		asMock(dependencies.downloadUpdates).mockResolvedValue({
 			manifest: [],
 			hasChanges: false,
 			complete: true,
@@ -452,19 +456,18 @@ describe("sync pipeline permissions", () => {
 
 	it("applies remote tombstones when local deletion is safe", async () => {
 		const dependencies = makeDependencies(jest.fn().mockReturnValue(false));
-		const remoteManifest = [
-			{ path: "/remote-gone.json", version: "3", deleted: true },
-		];
-		remoteManifest.loadedFromManifest = true;
-		remoteManifest.authoritative = true;
-		dependencies.syncManifest.mockResolvedValue(remoteManifest);
-		dependencies.downloadUpdates.mockResolvedValue({
+		const remoteManifest = Object.assign(
+			[{ path: "/remote-gone.json", version: "3", deleted: true }],
+			{ loadedFromManifest: true, authoritative: true },
+		);
+		asMock(dependencies.syncManifest).mockResolvedValue(remoteManifest);
+		asMock(dependencies.downloadUpdates).mockResolvedValue({
 			manifest: [],
 			hasChanges: false,
 			complete: true,
 			cleanedRemoteManifest: remoteManifest,
 		});
-		dependencies.applyRemoteTombstones.mockResolvedValue({
+		asMock(dependencies.applyRemoteTombstones).mockResolvedValue({
 			manifest: [],
 			hasChanges: true,
 			complete: true,
@@ -509,20 +512,21 @@ describe("sync pipeline permissions", () => {
 
 	it("merges migrated manifest entries and filters deleted remote keys", async () => {
 		const dependencies = makeDependencies(jest.fn().mockReturnValue(true));
-		const remoteManifest = [
-			{ path: "old-key.json", version: 1 },
-			{ path: "keep.json", version: 1 },
-		];
-		remoteManifest.loadedFromManifest = true;
-		remoteManifest.authoritative = true;
-		dependencies.syncManifest.mockResolvedValue(remoteManifest);
-		dependencies.migrateFromMongoDB.mockResolvedValue({
+		const remoteManifest = Object.assign(
+			[
+				{ path: "old-key.json", version: 1 },
+				{ path: "keep.json", version: 1 },
+			],
+			{ loadedFromManifest: true, authoritative: true },
+		);
+		asMock(dependencies.syncManifest).mockResolvedValue(remoteManifest);
+		asMock(dependencies.migrateFromMongoDB).mockResolvedValue({
 			migrated: true,
 			fileCount: 2,
 			deletedKeys: ["old-key.json"],
 			manifest: [{ path: "new-local.json", version: 2 }],
 		});
-		dependencies.getLocalFiles
+		asMock(dependencies.getLocalFiles)
 			.mockResolvedValueOnce([])
 			.mockResolvedValueOnce([
 				{ path: "/new-local.json", fullPath: "/local/personal/new-local.json" },
@@ -550,7 +554,7 @@ describe("sync pipeline permissions", () => {
 
 	it("logs migration failures without aborting the rest of the pipeline", async () => {
 		const dependencies = makeDependencies(jest.fn().mockReturnValue(true));
-		dependencies.migrateFromMongoDB.mockRejectedValue(
+		asMock(dependencies.migrateFromMongoDB).mockRejectedValue(
 			new Error("migration boom"),
 		);
 

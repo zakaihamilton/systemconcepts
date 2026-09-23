@@ -10,6 +10,7 @@ import { EditorStore } from "./Editor";
 import Editor from "./index";
 
 jest.mock("@util/browser/store", () => ({
+	...jest.requireActual("@util/browser/store"),
 	useStoreState: jest.fn(),
 }));
 jest.mock("@widgets/Editor", () => () => <div data-testid="editor-widget" />);
@@ -72,16 +73,16 @@ describe("Editor View", () => {
 		EditorStore.update((s) => {
 			s.content = "";
 		});
-		useStoreState.mockImplementation((_store: any, selector: any) => {
+		asMock(useStoreState).mockImplementation((_store: any, selector: any) => {
 			const raw = EditorStore.getRawState();
 			const content = Array.isArray(raw.content)
 				? raw.content
 				: [raw.content ?? ""];
 			return selector({ content });
 		});
-		useParentPath.mockReturnValue("local/test");
-		storage.readFile.mockResolvedValue("file content");
-		isCompressedJSONFile.mockReturnValue(false);
+		asMock(useParentPath).mockReturnValue("local/test");
+		asMock(storage.readFile).mockResolvedValue("file content");
+		asMock(isCompressedJSONFile).mockReturnValue(false);
 	});
 
 	it("renders progress while loading", async () => {
@@ -109,11 +110,11 @@ describe("Editor View", () => {
 	});
 
 	it("decompresses base64 gzip json files on read", async () => {
-		isCompressedJSONFile.mockReturnValue(true);
+		asMock(isCompressedJSONFile).mockReturnValue(true);
 		const bytes = new Uint8Array([1, 2, 3]);
 		const base64 = btoa(String.fromCharCode(...bytes));
-		storage.readFile.mockResolvedValue(`H4sI${base64}`);
-		pako.ungzip.mockReturnValue('{"saved":true}');
+		asMock(storage.readFile).mockResolvedValue(`H4sI${base64}`);
+		asMock(pako.ungzip).mockReturnValue('{"saved":true}');
 
 		render(<Editor name="data.json.gz" path="local/data.json.gz" />);
 
@@ -124,9 +125,9 @@ describe("Editor View", () => {
 	});
 
 	it("logs and keeps content when gzip decompression fails", async () => {
-		isCompressedJSONFile.mockReturnValue(true);
-		storage.readFile.mockResolvedValue("plain-json-content");
-		pako.ungzip.mockImplementation(() => {
+		asMock(isCompressedJSONFile).mockReturnValue(true);
+		asMock(storage.readFile).mockResolvedValue("plain-json-content");
+		asMock(pako.ungzip).mockImplementation(() => {
 			throw new Error("bad gzip");
 		});
 
@@ -142,16 +143,16 @@ describe("Editor View", () => {
 	});
 
 	it("compresses json.gz files before saving", async () => {
-		isCompressedJSONFile.mockReturnValue(true);
-		storage.readFile.mockResolvedValue("loaded");
-		pako.gzip.mockReturnValue(new Uint8Array([9, 8, 7]));
+		asMock(isCompressedJSONFile).mockReturnValue(true);
+		asMock(storage.readFile).mockResolvedValue("loaded");
+		asMock(pako.gzip).mockReturnValue(new Uint8Array([9, 8, 7]));
 		const props = { name: "data.json.gz", path: "local/data.json.gz" };
 		const view = render(<Editor {...props} />);
 		await waitFor(() => {
 			expect(screen.getByTestId("save")).toBeInTheDocument();
 		});
 		EditorStore.update((s) => {
-			s.content = ['{"a":1}'];
+			s.content = '{"a":1}';
 		});
 		view.rerender(<Editor {...props} />);
 
@@ -167,9 +168,9 @@ describe("Editor View", () => {
 	});
 
 	it("falls back to uncompressed content when gzip compression fails", async () => {
-		isCompressedJSONFile.mockReturnValue(true);
-		storage.readFile.mockResolvedValue("loaded");
-		pako.gzip.mockImplementation(() => {
+		asMock(isCompressedJSONFile).mockReturnValue(true);
+		asMock(storage.readFile).mockResolvedValue("loaded");
+		asMock(pako.gzip).mockImplementation(() => {
 			throw new Error("compress failed");
 		});
 		const props = { name: "data.json.gz", path: "local/data.json.gz" };
@@ -178,7 +179,7 @@ describe("Editor View", () => {
 			expect(screen.getByTestId("save")).toBeInTheDocument();
 		});
 		EditorStore.update((s) => {
-			s.content = ['{"a":1}'];
+			s.content = '{"a":1}';
 		});
 		view.rerender(<Editor {...props} />);
 
@@ -203,7 +204,7 @@ describe("Editor View", () => {
 			expect(screen.getByTestId("download")).toBeInTheDocument();
 		});
 		EditorStore.update((s) => {
-			s.content = ["export me"];
+			s.content = "export me";
 		});
 		view.rerender(<Editor {...props} />);
 

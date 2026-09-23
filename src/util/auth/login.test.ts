@@ -34,7 +34,7 @@ jest.mock("nodemailer", () => ({
 }));
 jest.mock("uuid", () => ({ v4: jest.fn(() => "generated-token") }));
 
-const transport = nodemailer.createTransport.mock.results[0].value;
+const transport = asMock(nodemailer.createTransport).mock.results[0].value;
 
 describe("login", () => {
 	beforeEach(() => {
@@ -48,35 +48,35 @@ describe("login", () => {
 	});
 
 	it("throws when finding the user fails", async () => {
-		findRecord.mockRejectedValue(new Error("db down"));
+		asMock(findRecord).mockRejectedValue(new Error("db down"));
 		await expect(login({ id: "user", password: "x" })).rejects.toBe(
 			"USER_NOT_FOUND",
 		);
 	});
 
 	it("throws when the user does not exist", async () => {
-		findRecord.mockResolvedValue(null);
+		asMock(findRecord).mockResolvedValue(null);
 		await expect(login({ id: "user", password: "x" })).rejects.toBe(
 			"USER_NOT_FOUND",
 		);
 	});
 
 	it("throws when no password is provided", async () => {
-		findRecord.mockResolvedValue({ id: "user", hash: "h" });
+		asMock(findRecord).mockResolvedValue({ id: "user", hash: "h" });
 		await expect(login({ id: "user" })).rejects.toBe("PASSWORD_REQUIRED");
 	});
 
 	it("throws when the password does not match", async () => {
-		findRecord.mockResolvedValue({ id: "user", hash: "h" });
-		compare.mockResolvedValue(false);
+		asMock(findRecord).mockResolvedValue({ id: "user", hash: "h" });
+		asMock(compare).mockResolvedValue(false);
 		await expect(login({ id: "user", password: "wrong" })).rejects.toBe(
 			"WRONG_PASSWORD",
 		);
 	});
 
 	it("logs in successfully and defaults the role to visitor", async () => {
-		findRecord.mockResolvedValue({ id: "user", hash: "h" });
-		compare.mockResolvedValue(true);
+		asMock(findRecord).mockResolvedValue({ id: "user", hash: "h" });
+		asMock(compare).mockResolvedValue(true);
 
 		const user = await login({ id: "USER", password: "correct" });
 
@@ -91,8 +91,12 @@ describe("login", () => {
 	});
 
 	it("preserves an existing role", async () => {
-		findRecord.mockResolvedValue({ id: "user", hash: "h", role: "teacher" });
-		compare.mockResolvedValue(true);
+		asMock(findRecord).mockResolvedValue({
+			id: "user",
+			hash: "h",
+			role: "teacher",
+		});
+		asMock(compare).mockResolvedValue(true);
 
 		const user = await login({ id: "user", password: "correct" });
 		expect(user.role).toBe("teacher");
@@ -105,23 +109,23 @@ describe("register", () => {
 	});
 
 	it("throws when the user already exists", async () => {
-		findRecord.mockResolvedValue({ id: "user" });
+		asMock(findRecord).mockResolvedValue({ id: "user" });
 		await expect(register({ id: "user", password: "pw" })).rejects.toBe(
 			"USER_ALREADY_EXISTS",
 		);
 	});
 
 	it("rethrows hashing errors", async () => {
-		findRecord.mockResolvedValue(null);
-		hash.mockRejectedValue(new Error("hash failed"));
+		asMock(findRecord).mockResolvedValue(null);
+		asMock(hash).mockRejectedValue(new Error("hash failed"));
 		await expect(register({ id: "user", password: "pw" })).rejects.toThrow(
 			"hash failed",
 		);
 	});
 
 	it("creates a new user with the visitor role", async () => {
-		findRecord.mockResolvedValue(null);
-		hash.mockResolvedValue("hashed-pw");
+		asMock(findRecord).mockResolvedValue(null);
+		asMock(hash).mockResolvedValue("hashed-pw");
 
 		const result = await register({
 			id: "NewUser",
@@ -149,9 +153,9 @@ describe("changePassword", () => {
 	});
 
 	it("verifies the old password before setting the new one", async () => {
-		findRecord.mockResolvedValue({ id: "user", hash: "h" });
-		compare.mockResolvedValue(true);
-		hash.mockResolvedValue("new-hash");
+		asMock(findRecord).mockResolvedValue({ id: "user", hash: "h" });
+		asMock(compare).mockResolvedValue(true);
+		asMock(hash).mockResolvedValue("new-hash");
 
 		const result = await changePassword({
 			id: "user",
@@ -168,8 +172,8 @@ describe("changePassword", () => {
 	});
 
 	it("rejects when the old password is wrong", async () => {
-		findRecord.mockResolvedValue({ id: "user", hash: "h" });
-		compare.mockResolvedValue(false);
+		asMock(findRecord).mockResolvedValue({ id: "user", hash: "h" });
+		asMock(compare).mockResolvedValue(false);
 		await expect(
 			changePassword({ id: "user", oldPassword: "wrong", newPassword: "new" }),
 		).rejects.toBe("WRONG_PASSWORD");
@@ -182,51 +186,51 @@ describe("resetPassword", () => {
 	});
 
 	it("throws when the user does not exist", async () => {
-		findRecord.mockResolvedValue(null);
+		asMock(findRecord).mockResolvedValue(null);
 		await expect(
 			resetPassword({ id: "user", code: "c", newPassword: "n" }),
 		).rejects.toBe("USER_NOT_FOUND");
 	});
 
 	it("throws when there is no reset token on the user", async () => {
-		findRecord.mockResolvedValue({ id: "user" });
+		asMock(findRecord).mockResolvedValue({ id: "user" });
 		await expect(
 			resetPassword({ id: "user", code: "c", newPassword: "n" }),
 		).rejects.toBe("NO_RESET_TOKEN");
 	});
 
 	it("throws when the reset code does not match", async () => {
-		findRecord.mockResolvedValue({
+		asMock(findRecord).mockResolvedValue({
 			id: "user",
 			resetToken: "hashed-token",
 			resetTokenExpiry: Date.now() + 100000,
 		});
-		compare.mockResolvedValue(false);
+		asMock(compare).mockResolvedValue(false);
 		await expect(
 			resetPassword({ id: "user", code: "wrong", newPassword: "n" }),
 		).rejects.toBe("INVALID_TOKEN");
 	});
 
 	it("throws when the reset token has expired", async () => {
-		findRecord.mockResolvedValue({
+		asMock(findRecord).mockResolvedValue({
 			id: "user",
 			resetToken: "hashed-token",
 			resetTokenExpiry: Date.now() - 1000,
 		});
-		compare.mockResolvedValue(true);
+		asMock(compare).mockResolvedValue(true);
 		await expect(
 			resetPassword({ id: "user", code: "c", newPassword: "n" }),
 		).rejects.toBe("TOKEN_EXPIRED");
 	});
 
 	it("resets the password and clears the reset token fields", async () => {
-		findRecord.mockResolvedValue({
+		asMock(findRecord).mockResolvedValue({
 			id: "user",
 			resetToken: "hashed-token",
 			resetTokenExpiry: Date.now() + 100000,
 		});
-		compare.mockResolvedValue(true);
-		hash.mockResolvedValue("new-hash");
+		asMock(compare).mockResolvedValue(true);
+		asMock(hash).mockResolvedValue("new-hash");
 
 		const result = await resetPassword({
 			id: "user",
@@ -235,7 +239,7 @@ describe("resetPassword", () => {
 		});
 
 		expect(result).toBe("new-hash");
-		const [{ record }] = replaceRecord.mock.calls[0];
+		const [{ record }] = asMock(replaceRecord).mock.calls[0];
 		expect(record.hash).toBe("new-hash");
 		expect(record).not.toHaveProperty("resetToken");
 		expect(record).not.toHaveProperty("resetTokenExpiry");
@@ -248,18 +252,18 @@ describe("sendResetEmail", () => {
 	});
 
 	it("throws when the user cannot be found", async () => {
-		findRecord.mockResolvedValue(null);
+		asMock(findRecord).mockResolvedValue(null);
 		await expect(sendResetEmail({ id: "user" })).rejects.toBe("USER_NOT_FOUND");
 	});
 
 	it("stores a hashed reset token and emails the reset link", async () => {
-		findRecord.mockResolvedValue({
+		asMock(findRecord).mockResolvedValue({
 			id: "user",
 			email: "user@example.com",
 			firstName: "First",
 			lastName: "Last",
 		});
-		hash.mockResolvedValue("hashed-token");
+		asMock(hash).mockResolvedValue("hashed-token");
 
 		await sendResetEmail({ id: "USER" });
 
@@ -274,7 +278,7 @@ describe("sendResetEmail", () => {
 				text: expect.stringContaining("First Last"),
 			}),
 		);
-		expect(transport.sendMail.mock.calls[0][0].text).toContain(
+		expect(asMock(transport.sendMail).mock.calls[0][0].text).toContain(
 			"generated-token",
 		);
 	});

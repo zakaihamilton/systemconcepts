@@ -18,6 +18,6 @@ describe("Loading Component", () => {
 				message: "Test Error",
 			}),
 		);
-		consoleSpy.mockRestore();
+		asMock(consoleSpy).mockRestore();
 	});
 });

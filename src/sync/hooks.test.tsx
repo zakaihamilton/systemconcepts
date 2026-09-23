@@ -38,21 +38,21 @@ function Scheduler() {
 describe("useSync automatic scheduler", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
-		Cookies.get.mockImplementation((name: any) =>
+		asMock(Cookies.get).mockImplementation((name: any) =>
 			name === "id" ? "user" : "hash",
 		);
-		useOnline.mockReturnValue(true);
-		usePageVisibility.mockReturnValue(true);
-		SyncActiveStore.getRawState.mockReturnValue({
+		asMock(useOnline).mockReturnValue(true);
+		asMock(usePageVisibility).mockReturnValue(true);
+		asMock(SyncActiveStore.getRawState).mockReturnValue({
 			busy: false,
 			autoSync: true,
 			counter: 0,
 			lastSyncTime: 0,
 		});
-		SyncActiveStore.useState.mockImplementation((selector: any) =>
+		asMock(SyncActiveStore.useState).mockImplementation((selector: any) =>
 			selector({ busy: false, autoSync: true, counter: 0, lastSyncTime: 0 }),
 		);
-		UpdateSessionsStore.getRawState.mockReturnValue({ busy: false });
+		asMock(UpdateSessionsStore.getRawState).mockReturnValue({ busy: false });
 	});
 
 	it("syncs immediately on mount when the previous sync is due", () => {
@@ -63,31 +63,31 @@ describe("useSync automatic scheduler", () => {
 
 	it("does not sync on mount when the previous sync is recent", () => {
 		jest.spyOn(Date, "now").mockReturnValue(1_000);
-		SyncActiveStore.getRawState.mockReturnValue({ lastSyncTime: 1 });
+		asMock(SyncActiveStore.getRawState).mockReturnValue({ lastSyncTime: 1 });
 		render(<Scheduler />);
 		expect(requestSync).not.toHaveBeenCalled();
 	});
 
 	it("checks immediately when the page returns to visible", () => {
 		jest.spyOn(Date, "now").mockReturnValue(12 * 60 * 1000);
-		usePageVisibility.mockReturnValue(false);
+		asMock(usePageVisibility).mockReturnValue(false);
 		const view = render(<Scheduler />);
 		expect(requestSync).not.toHaveBeenCalled();
-		usePageVisibility.mockReturnValue(true);
+		asMock(usePageVisibility).mockReturnValue(true);
 		view.rerender(<Scheduler />);
 		expect(requestSync).toHaveBeenCalledWith(false);
 	});
 
 	it("does not sync while sessions are refreshing", () => {
 		jest.spyOn(Date, "now").mockReturnValue(12 * 60 * 1000);
-		UpdateSessionsStore.getRawState.mockReturnValue({ busy: true });
+		asMock(UpdateSessionsStore.getRawState).mockReturnValue({ busy: true });
 		render(<Scheduler />);
 		expect(requestSync).not.toHaveBeenCalled();
 	});
 
 	it("does not sync when automatic sync is disabled", () => {
 		jest.spyOn(Date, "now").mockReturnValue(12 * 60 * 1000);
-		SyncActiveStore.useState.mockImplementation((selector: any) =>
+		asMock(SyncActiveStore.useState).mockImplementation((selector: any) =>
 			selector({ busy: false, autoSync: false, counter: 0, lastSyncTime: 0 }),
 		);
 		render(<Scheduler />);
@@ -96,13 +96,13 @@ describe("useSync automatic scheduler", () => {
 
 	it("does not sync while another sync is active", () => {
 		jest.spyOn(Date, "now").mockReturnValue(12 * 60 * 1000);
-		SyncActiveStore.getRawState.mockReturnValue({
+		asMock(SyncActiveStore.getRawState).mockReturnValue({
 			busy: true,
 			autoSync: true,
 			counter: 0,
 			lastSyncTime: 0,
 		});
-		SyncActiveStore.useState.mockImplementation((selector: any) =>
+		asMock(SyncActiveStore.useState).mockImplementation((selector: any) =>
 			selector({ busy: true, autoSync: true, counter: 0, lastSyncTime: 0 }),
 		);
 		render(<Scheduler />);
@@ -111,7 +111,7 @@ describe("useSync automatic scheduler", () => {
 
 	it("does not restart sync when busy flips after an incomplete attempt", () => {
 		const { shouldRunInitialAutoSync } = require("./autoSync");
-		shouldRunInitialAutoSync.mockReturnValue(true);
+		asMock(shouldRunInitialAutoSync).mockReturnValue(true);
 		jest.spyOn(Date, "now").mockReturnValue(12 * 60 * 1000);
 
 		const view = render(<Scheduler />);
@@ -120,7 +120,7 @@ describe("useSync automatic scheduler", () => {
 		// Simulate the scheduler re-rendering when SyncActiveStore.busy clears
 		// after an incomplete sync. checkSync must not be recreated from that
 		// busy transition, or Update Sessions / sync would loop forever.
-		SyncActiveStore.useState.mockImplementation((selector: any) =>
+		asMock(SyncActiveStore.useState).mockImplementation((selector: any) =>
 			selector({ busy: false, autoSync: true, counter: 0, lastSyncTime: 0 }),
 		);
 		view.rerender(<Scheduler />);
@@ -129,11 +129,11 @@ describe("useSync automatic scheduler", () => {
 
 	it("does not sync while offline or signed out", () => {
 		jest.spyOn(Date, "now").mockReturnValue(12 * 60 * 1000);
-		useOnline.mockReturnValue(false);
+		asMock(useOnline).mockReturnValue(false);
 		const view = render(<Scheduler />);
 		expect(requestSync).not.toHaveBeenCalled();
-		useOnline.mockReturnValue(true);
-		Cookies.get.mockReturnValue(undefined);
+		asMock(useOnline).mockReturnValue(true);
+		asMock(Cookies.get).mockReturnValue(undefined);
 		view.rerender(<Scheduler />);
 		expect(requestSync).not.toHaveBeenCalled();
 	});
@@ -170,7 +170,7 @@ describe("useSyncFeature", () => {
 	}
 
 	it("exposes sync controls and caps percentage while syncing", () => {
-		SyncActiveStore.useState.mockImplementation((selector: any) =>
+		asMock(SyncActiveStore.useState).mockImplementation((selector: any) =>
 			selector({
 				busy: true,
 				lastSynced: 1,
@@ -201,7 +201,7 @@ describe("useSyncFeature", () => {
 	});
 
 	it("reports zero percentage when progress is missing", () => {
-		SyncActiveStore.useState.mockImplementation((selector: any) =>
+		asMock(SyncActiveStore.useState).mockImplementation((selector: any) =>
 			selector({
 				busy: false,
 				lastSynced: null,

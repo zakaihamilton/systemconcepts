@@ -50,7 +50,9 @@ describe("SearchWidget", () => {
 		render(
 			<SearchWidget placeholder="Search..." value="test" onChange={() => {}} />,
 		);
-		expect(screen.getByPlaceholderText("Search...").value).toBe("test");
+		expect(
+			(screen.getByPlaceholderText("Search...") as HTMLInputElement).value,
+		).toBe("test");
 	});
 
 	it("calls onChange when text is entered", () => {
@@ -125,7 +127,9 @@ describe("SearchWidget", () => {
 		const input = screen.getByPlaceholderText("Search...");
 		fireEvent.focus(input);
 		fireEvent.blur(input);
-		expect(container.firstChild.className).not.toMatch(/searchExpanded/);
+		expect((container.firstChild as HTMLElement).className).not.toMatch(
+			/searchExpanded/,
+		);
 	});
 });
 
@@ -133,8 +137,8 @@ describe("useSearch", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
 		jest.useFakeTimers();
-		useDeviceType.mockReturnValue("desktop");
-		useTranslations.mockReturnValue({
+		asMock(useDeviceType).mockReturnValue("desktop");
+		asMock(useTranslations).mockReturnValue({
 			SEARCH: "Search",
 			PREVIOUS_MATCH: "Prev",
 			NEXT_MATCH: "Next",
@@ -152,7 +156,7 @@ describe("useSearch", () => {
 		const updateCallback = jest.fn();
 		const { result } = renderHook(() => useSearch("schedule", updateCallback));
 
-		const toolbarCall = useToolbar.mock.calls.at(-1)[0];
+		const toolbarCall = asMock(useToolbar).mock.calls.at(-1)[0];
 		const element = toolbarCall.items[0].element;
 		const { getByPlaceholderText } = render(element);
 		fireEvent.change(getByPlaceholderText("Search…"), {
@@ -170,14 +174,14 @@ describe("useSearch", () => {
 		const updateCallback = jest.fn();
 		renderHook(() => useSearch(updateCallback));
 		expect(useToolbar).toHaveBeenCalled();
-		const items = useToolbar.mock.calls.at(-1)[0].items;
+		const items = asMock(useToolbar).mock.calls.at(-1)[0].items;
 		expect(items[0].id).toBe("search");
 	});
 
 	it("includes match navigation items when matchesCount > 0", () => {
 		const prevMatch = jest.fn();
 		const nextMatch = jest.fn();
-		useDeviceType.mockReturnValue("phone");
+		asMock(useDeviceType).mockReturnValue("phone");
 		renderHook(() =>
 			useSearch("x", jest.fn(), true, {
 				matchesCount: 3,
@@ -189,7 +193,7 @@ describe("useSearch", () => {
 				nextName: "Down",
 			}),
 		);
-		const items = useToolbar.mock.calls.at(-1)[0].items;
+		const items = asMock(useToolbar).mock.calls.at(-1)[0].items;
 		expect(items.map((i: any) => i.id)).toEqual([
 			"search",
 			"prevMatch",
@@ -211,9 +215,9 @@ describe("useSearch", () => {
 				nextMatch: jest.fn(),
 			}),
 		);
-		const items = useToolbar.mock.calls.at(-1)[0].items;
+		const items = asMock(useToolbar).mock.calls.at(-1)[0].items;
 		expect(items).toHaveLength(1);
-		expect(useToolbar.mock.calls.at(-1)[0].visible).toBe(false);
+		expect(asMock(useToolbar).mock.calls.at(-1)[0].visible).toBe(false);
 	});
 
 	it("defaults the search name and omits partial match toolbar items", () => {
@@ -223,7 +227,7 @@ describe("useSearch", () => {
 				nextMatch: jest.fn(),
 			}),
 		);
-		const items = useToolbar.mock.calls.at(-1)[0].items;
+		const items = asMock(useToolbar).mock.calls.at(-1)[0].items;
 		expect(items.map((item: any) => item.id)).toEqual(["search", "nextMatch"]);
 	});
 });

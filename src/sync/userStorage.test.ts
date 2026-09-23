@@ -22,7 +22,7 @@ describe("user-scoped sync storage", () => {
 	});
 
 	it("uses the signed-in user when no ID is supplied", () => {
-		Cookies.get.mockReturnValue("Bob");
+		asMock(Cookies.get).mockReturnValue("Bob");
 		expect(getUserSyncStorageKey("sync_lastVersion")).toBe(
 			"sync_lastVersion:bob",
 		);

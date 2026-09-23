@@ -57,7 +57,7 @@ describe("FixedSizeList Component", () => {
 			</FixedSizeList>,
 		);
 
-		const scrollContainer = container.firstChild;
+		const scrollContainer = container.firstChild as HTMLElement;
 		Object.defineProperty(scrollContainer, "scrollTop", {
 			configurable: true,
 			value: 50,
@@ -73,7 +73,7 @@ describe("FixedSizeList Component", () => {
 	});
 
 	it("supports imperative vertical scrollTo and scrollToItem alignments", () => {
-		const ref = createRef();
+		const ref = createRef<any>();
 		const { container } = render(
 			<FixedSizeList
 				ref={ref}
@@ -88,7 +88,7 @@ describe("FixedSizeList Component", () => {
 			</FixedSizeList>,
 		);
 
-		const el = container.firstChild;
+		const el = container.firstChild as HTMLElement;
 		Object.defineProperty(el, "scrollTop", {
 			configurable: true,
 			writable: true,
@@ -124,7 +124,7 @@ describe("FixedSizeList Component", () => {
 		const onScroll = jest.fn();
 		const onItemsRendered = jest.fn();
 		const outerRef = { current: null };
-		const ref = createRef();
+		const ref = createRef<any>();
 		const { container } = render(
 			<FixedSizeList
 				ref={ref}

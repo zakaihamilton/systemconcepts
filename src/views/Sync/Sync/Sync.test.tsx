@@ -110,9 +110,9 @@ describe("Sync View", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
 		jest.useFakeTimers();
-		useTranslations.mockReturnValue(mockTranslations);
-		useOnline.mockReturnValue(true);
-		useSyncFeature.mockReturnValue({
+		asMock(useTranslations).mockReturnValue(mockTranslations);
+		asMock(useOnline).mockReturnValue(true);
+		asMock(useSyncFeature).mockReturnValue({
 			sync: jest.fn(),
 			stop: jest.fn(),
 			busy: false,
@@ -123,7 +123,7 @@ describe("Sync View", () => {
 			logs: [],
 			startTime: null,
 		});
-		Cookies.get.mockImplementation((key: any) => {
+		asMock(Cookies.get).mockImplementation((key: any) => {
 			if (key === "id") return "u";
 			if (key === "hash") return "h";
 			if (key === "role") return "admin";
@@ -147,7 +147,7 @@ describe("Sync View", () => {
 
 	it("shows syncing status when busy and stops", () => {
 		const stop = jest.fn();
-		useSyncFeature.mockReturnValue({
+		asMock(useSyncFeature).mockReturnValue({
 			sync: jest.fn(),
 			stop,
 			busy: true,
@@ -168,7 +168,7 @@ describe("Sync View", () => {
 	});
 
 	it("shows complete when lastSynced set", () => {
-		useSyncFeature.mockReturnValue({
+		asMock(useSyncFeature).mockReturnValue({
 			sync: jest.fn(),
 			stop: jest.fn(),
 			busy: false,
@@ -185,8 +185,8 @@ describe("Sync View", () => {
 
 	it("opens full sync dialog and runs full sync", async () => {
 		const sync = jest.fn().mockResolvedValue(undefined);
-		resetLocalCacheForFullSync.mockResolvedValue(undefined);
-		useSyncFeature.mockReturnValue({
+		asMock(resetLocalCacheForFullSync).mockResolvedValue(undefined);
+		asMock(useSyncFeature).mockReturnValue({
 			sync,
 			stop: jest.fn(),
 			busy: false,
@@ -210,7 +210,7 @@ describe("Sync View", () => {
 	});
 
 	it("copies logs to clipboard", () => {
-		useSyncFeature.mockReturnValue({
+		asMock(useSyncFeature).mockReturnValue({
 			sync: jest.fn(),
 			stop: jest.fn(),
 			busy: false,
@@ -238,8 +238,8 @@ describe("Sync View", () => {
 	});
 
 	it("renders incomplete-sync safety log without marking complete", () => {
-		Cookies.get.mockReturnValue(null);
-		useSyncFeature.mockReturnValue({
+		asMock(Cookies.get).mockReturnValue(null);
+		asMock(useSyncFeature).mockReturnValue({
 			sync: jest.fn(),
 			stop: jest.fn(),
 			busy: false,
@@ -282,7 +282,9 @@ describe("Sync View", () => {
 	});
 
 	it("logs when full sync fails", async () => {
-		resetLocalCacheForFullSync.mockRejectedValue(new Error("cache fail"));
+		asMock(resetLocalCacheForFullSync).mockRejectedValue(
+			new Error("cache fail"),
+		);
 		render(<Sync />);
 		fireEvent.click(screen.getAllByRole("button", { name: "Full Sync" })[0]);
 		fireEvent.click(
@@ -306,7 +308,7 @@ describe("Sync View", () => {
 	});
 
 	it("does not copy when logs are empty", () => {
-		useSyncFeature.mockReturnValue({
+		asMock(useSyncFeature).mockReturnValue({
 			sync: jest.fn(),
 			stop: jest.fn(),
 			busy: false,
@@ -323,7 +325,7 @@ describe("Sync View", () => {
 	});
 
 	it("hides admin debug controls for non-admin users", () => {
-		Cookies.get.mockImplementation((key: any) => {
+		asMock(Cookies.get).mockImplementation((key: any) => {
 			if (key === "id") return "u";
 			if (key === "hash") return "h";
 			return null;
@@ -355,7 +357,7 @@ describe("Sync View", () => {
 
 	it("disables full sync while session updates are busy", () => {
 		const { useUpdateSessions } = require("@util/domain/updateSessions");
-		useUpdateSessions.mockReturnValue({ busy: true });
+		asMock(useUpdateSessions).mockReturnValue({ busy: true });
 		render(<Sync />);
 		expect(
 			screen.getAllByRole("button", { name: "Full Sync" })[0],

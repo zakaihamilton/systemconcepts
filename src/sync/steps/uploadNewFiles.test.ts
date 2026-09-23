@@ -24,16 +24,16 @@ jest.mock("js-cookie", () => ({
 describe("uploadNewFiles", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
-		storage.createFolderPath.mockResolvedValue(undefined);
-		storage.writeFile.mockResolvedValue(undefined);
-		writeCompressedFile.mockResolvedValue(undefined);
+		asMock(storage.createFolderPath).mockResolvedValue(undefined);
+		asMock(storage.writeFile).mockResolvedValue(undefined);
+		asMock(writeCompressedFile).mockResolvedValue(undefined);
 		SyncActiveStore.update((state) => {
 			state.stopping = false;
 		});
 	});
 
 	it("uploads local files that are absent from the remote manifest", async () => {
-		storage.readFile.mockResolvedValue('{"a":1}');
+		asMock(storage.readFile).mockResolvedValue('{"a":1}');
 
 		const localManifest = [{ path: "/new.json", version: "1" }];
 		const result = await uploadNewFiles(localManifest, []);
@@ -49,7 +49,7 @@ describe("uploadNewFiles", () => {
 	});
 
 	it("uploads new binary files directly, without JSON parsing", async () => {
-		storage.readFile.mockResolvedValue("YmluYXJ5");
+		asMock(storage.readFile).mockResolvedValue("YmluYXJ5");
 
 		await uploadNewFiles([{ path: "/photo.png", version: "1" }], []);
 
@@ -87,7 +87,7 @@ describe("uploadNewFiles", () => {
 	});
 
 	it("skips a file whose local content cannot be read", async () => {
-		storage.readFile.mockResolvedValue(null);
+		asMock(storage.readFile).mockResolvedValue(null);
 
 		const result = await uploadNewFiles(
 			[{ path: "/new.json", version: "1" }],
@@ -99,8 +99,8 @@ describe("uploadNewFiles", () => {
 	});
 
 	it("logs and skips a file when the upload throws", async () => {
-		storage.readFile.mockResolvedValue('{"a":1}');
-		writeCompressedFile.mockRejectedValue(new Error("network failed"));
+		asMock(storage.readFile).mockResolvedValue('{"a":1}');
+		asMock(writeCompressedFile).mockRejectedValue(new Error("network failed"));
 
 		const result = await uploadNewFiles(
 			[{ path: "/new.json", version: "1" }],
@@ -115,7 +115,7 @@ describe("uploadNewFiles", () => {
 	});
 
 	it("reports progress via an injected progress tracker", async () => {
-		storage.readFile.mockResolvedValue('{"a":1}');
+		asMock(storage.readFile).mockResolvedValue('{"a":1}');
 		const progressTracker = { updateProgress: jest.fn() };
 
 		await uploadNewFiles(
@@ -133,14 +133,14 @@ describe("uploadNewFiles", () => {
 	});
 
 	it("stops uploading once a stop is requested mid-batch", async () => {
-		storage.readFile.mockResolvedValue('{"a":1}');
+		asMock(storage.readFile).mockResolvedValue('{"a":1}');
 		const localManifest = Array.from({ length: 11 }, (_, i) => ({
 			path: `/f-${i}.json`,
 			version: "1",
 		}));
 
 		let calls = 0;
-		writeCompressedFile.mockImplementation(async () => {
+		asMock(writeCompressedFile).mockImplementation(async () => {
 			calls++;
 			if (calls === 1) {
 				SyncActiveStore.update((state) => {
@@ -159,8 +159,8 @@ describe("uploadNewFiles", () => {
 	});
 
 	it("warns a visitor role about restricted write access on a 403", async () => {
-		Cookies.get.mockReturnValue("visitor");
-		storage.readFile.mockResolvedValue('{"a":1}');
+		asMock(Cookies.get).mockReturnValue("visitor");
+		asMock(storage.readFile).mockResolvedValue('{"a":1}');
 		const progressTracker = {
 			updateProgress: jest.fn(() => {
 				throw { status: 403 };
@@ -189,8 +189,8 @@ describe("uploadNewFiles", () => {
 	});
 
 	it("skips uploads quietly for a non-visitor role on ACCESS_DENIED", async () => {
-		Cookies.get.mockReturnValue("student");
-		storage.readFile.mockResolvedValue('{"a":1}');
+		asMock(Cookies.get).mockReturnValue("student");
+		asMock(storage.readFile).mockResolvedValue('{"a":1}');
 		const progressTracker = {
 			updateProgress: jest.fn(() => {
 				throw new Error("ACCESS_DENIED");
@@ -212,7 +212,7 @@ describe("uploadNewFiles", () => {
 	});
 
 	it("rethrows an unrelated error after logging it", async () => {
-		storage.readFile.mockResolvedValue('{"a":1}');
+		asMock(storage.readFile).mockResolvedValue('{"a":1}');
 		const progressTracker = {
 			updateProgress: jest.fn(() => {
 				throw new Error("disk exploded");

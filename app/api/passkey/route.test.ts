@@ -45,7 +45,7 @@ jest.mock("@util/auth/session", () => ({
 }));
 jest.mock("next/server", () => ({
 	NextResponse: {
-		json: (body: any, init = {}) => ({
+		json: (body: any, init: ResponseInit = {}) => ({
 			status: init.status || 200,
 			json: async () => body,
 			cookies: { set: jest.fn() },
@@ -53,7 +53,10 @@ jest.mock("next/server", () => ({
 	},
 }));
 
-function request(url: any, { method = "GET", body } = {}) {
+function request(
+	url: string,
+	{ method = "GET", body }: { method?: string; body?: unknown } = {},
+) {
 	return {
 		url,
 		method,
@@ -75,7 +78,7 @@ describe("/api/passkey", () => {
 	});
 
 	it("returns 401 when a passkey-list request outlives its session", async () => {
-		getSessionUser.mockRejectedValue("AUTHENTICATION_REQUIRED");
+		asMock(getSessionUser).mockRejectedValue("AUTHENTICATION_REQUIRED");
 
 		const response = await GET(
 			request("http://localhost:3000/api/passkey?action=list&id=user"),
@@ -88,8 +91,10 @@ describe("/api/passkey", () => {
 	});
 
 	it("returns registration options", async () => {
-		getSessionUser.mockRejectedValue("AUTHENTICATION_REQUIRED");
-		getPasskeyRegistrationOptions.mockResolvedValue({ challenge: "c1" });
+		asMock(getSessionUser).mockRejectedValue("AUTHENTICATION_REQUIRED");
+		asMock(getPasskeyRegistrationOptions).mockResolvedValue({
+			challenge: "c1",
+		});
 
 		const response = await GET(
 			request(
@@ -110,7 +115,7 @@ describe("/api/passkey", () => {
 	});
 
 	it("returns auth options", async () => {
-		getPasskeyAuthOptions.mockResolvedValue({ challenge: "auth" });
+		asMock(getPasskeyAuthOptions).mockResolvedValue({ challenge: "auth" });
 
 		const response = await GET(
 			request("http://localhost:3000/api/passkey?action=auth-options&id=user"),
@@ -121,8 +126,8 @@ describe("/api/passkey", () => {
 	});
 
 	it("lists passkeys for the authenticated owner", async () => {
-		getSessionUser.mockResolvedValue({ id: "user" });
-		getPasskeys.mockResolvedValue([{ id: "c1", name: "Phone" }]);
+		asMock(getSessionUser).mockResolvedValue({ id: "user" });
+		asMock(getPasskeys).mockResolvedValue([{ id: "c1", name: "Phone" }]);
 
 		const response = await GET(
 			request("http://localhost:3000/api/passkey?action=list&id=user"),
@@ -133,7 +138,7 @@ describe("/api/passkey", () => {
 	});
 
 	it("rejects listing passkeys for another user", async () => {
-		getSessionUser.mockResolvedValue({ id: "other" });
+		asMock(getSessionUser).mockResolvedValue({ id: "other" });
 
 		const response = await GET(
 			request("http://localhost:3000/api/passkey?action=list&id=user"),
@@ -150,8 +155,8 @@ describe("/api/passkey", () => {
 	});
 
 	it("deletes a passkey for the authenticated owner", async () => {
-		getSessionUser.mockResolvedValue({ id: "user" });
-		deletePasskey.mockResolvedValue({ success: true });
+		asMock(getSessionUser).mockResolvedValue({ id: "user" });
+		asMock(deletePasskey).mockResolvedValue({ success: true });
 
 		const response = await DELETE(
 			request("http://localhost:3000/api/passkey?id=user&credentialId=c1", {
@@ -168,8 +173,8 @@ describe("/api/passkey", () => {
 	});
 
 	it("verifies registration", async () => {
-		getSessionUser.mockRejectedValue("AUTHENTICATION_REQUIRED");
-		verifyPasskeyRegistration.mockResolvedValue({ verified: true });
+		asMock(getSessionUser).mockRejectedValue("AUTHENTICATION_REQUIRED");
+		asMock(verifyPasskeyRegistration).mockResolvedValue({ verified: true });
 
 		const response = await POST(
 			request(
@@ -194,8 +199,11 @@ describe("/api/passkey", () => {
 	});
 
 	it("verifies auth and sets session cookies", async () => {
-		verifyPasskeyAuth.mockResolvedValue({ id: "user", role: "teacher" });
-		createSession.mockResolvedValue({ token: "sess" });
+		asMock(verifyPasskeyAuth).mockResolvedValue({
+			id: "user",
+			role: "teacher",
+		});
+		asMock(createSession).mockResolvedValue({ token: "sess" });
 
 		const response = await POST(
 			request("http://localhost:3000/api/passkey?action=auth-verify&id=user", {
@@ -221,8 +229,10 @@ describe("/api/passkey", () => {
 	});
 
 	it("marks registration options as authenticated when the session matches", async () => {
-		getSessionUser.mockResolvedValue({ id: "user" });
-		getPasskeyRegistrationOptions.mockResolvedValue({ challenge: "c2" });
+		asMock(getSessionUser).mockResolvedValue({ id: "user" });
+		asMock(getPasskeyRegistrationOptions).mockResolvedValue({
+			challenge: "c2",
+		});
 
 		await GET(
 			request(
@@ -236,7 +246,7 @@ describe("/api/passkey", () => {
 	});
 
 	it("rejects deleting a passkey for another user", async () => {
-		getSessionUser.mockResolvedValue({ id: "other" });
+		asMock(getSessionUser).mockResolvedValue({ id: "other" });
 
 		const response = await DELETE(
 			request("http://localhost:3000/api/passkey?id=user&credentialId=c1", {
@@ -250,7 +260,7 @@ describe("/api/passkey", () => {
 
 	it("returns a safe error when rate limiting fails", async () => {
 		const { checkRateLimit } = require("@util/auth/rateLimit");
-		checkRateLimit.mockRejectedValueOnce("RATE_LIMIT_EXCEEDED");
+		asMock(checkRateLimit).mockRejectedValueOnce("RATE_LIMIT_EXCEEDED");
 
 		const response = await GET(
 			request("http://localhost:3000/api/passkey?action=auth-options&id=user"),
@@ -261,8 +271,8 @@ describe("/api/passkey", () => {
 	});
 
 	it("defaults visitor role when auth verification omits a role", async () => {
-		verifyPasskeyAuth.mockResolvedValue({ id: "user" });
-		createSession.mockResolvedValue({ token: "sess" });
+		asMock(verifyPasskeyAuth).mockResolvedValue({ id: "user" });
+		asMock(createSession).mockResolvedValue({ token: "sess" });
 
 		const response = await POST(
 			request("http://localhost:3000/api/passkey?action=auth-verify&id=user", {
@@ -275,7 +285,9 @@ describe("/api/passkey", () => {
 	});
 
 	it("returns 500 for unexpected POST failures", async () => {
-		verifyPasskeyAuth.mockRejectedValue(new Error("verification failed"));
+		asMock(verifyPasskeyAuth).mockRejectedValue(
+			new Error("verification failed"),
+		);
 
 		const response = await POST(
 			request("http://localhost:3000/api/passkey?action=auth-verify&id=user", {

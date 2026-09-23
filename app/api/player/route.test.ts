@@ -42,7 +42,7 @@ jest.mock("@util/storage/storageRedirect", () => ({
 }));
 jest.mock("next/server", () => ({
 	NextResponse: {
-		json: (body: any, init = {}) => ({
+		json: (body: any, init: ResponseInit = {}) => ({
 			body,
 			status: init.status || 200,
 			headers: init.headers || {},
@@ -71,19 +71,21 @@ function request(
 describe("/api/player transcript URLs", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
-		isProductionDeployment.mockReturnValue(true);
-		getSessionUser.mockResolvedValue({ id: "user", role: "student" });
-		roleAuth.mockReturnValue(true);
-		getWasabi.mockResolvedValue({ client: {}, bucket: "media" });
-		getSignedUrl.mockResolvedValue("https://wasabi.example/download");
-		getAwsDownloadUrl.mockResolvedValue("https://aws.example/transcript");
-		awsMetadataInfo.mockResolvedValue(null);
-		wasabiMetadataInfo.mockResolvedValue({ type: "image/jpeg" });
-		getSessions.mockResolvedValue([]);
+		asMock(isProductionDeployment).mockReturnValue(true);
+		asMock(getSessionUser).mockResolvedValue({ id: "user", role: "student" });
+		asMock(roleAuth).mockReturnValue(true);
+		asMock(getWasabi).mockResolvedValue({ client: {}, bucket: "media" });
+		asMock(getSignedUrl).mockResolvedValue("https://wasabi.example/download");
+		asMock(getAwsDownloadUrl).mockResolvedValue(
+			"https://aws.example/transcript",
+		);
+		asMock(awsMetadataInfo).mockResolvedValue(null);
+		asMock(wasabiMetadataInfo).mockResolvedValue({ type: "image/jpeg" });
+		asMock(getSessions).mockResolvedValue([]);
 	});
 
 	it("signs an explicit transcript against AWS while media stays on Wasabi", async () => {
-		getSessions.mockResolvedValue([
+		asMock(getSessions).mockResolvedValue([
 			{
 				group: "american",
 				year: "2024",
@@ -92,7 +94,7 @@ describe("/api/player transcript URLs", () => {
 					"/aws/sessions/american/2024/2024-08-26 The Serpents.txt",
 			},
 		]);
-		awsMetadataInfo.mockImplementation(async ({ path }: any) =>
+		asMock(awsMetadataInfo).mockImplementation(async ({ path }: any) =>
 			path.endsWith("The Serpents.txt") ? { type: "text/plain" } : null,
 		);
 
@@ -113,7 +115,7 @@ describe("/api/player transcript URLs", () => {
 	});
 
 	it("generates a new signed media URL for every request", async () => {
-		getSignedUrl
+		asMock(getSignedUrl)
 			.mockResolvedValueOnce("https://wasabi.example/first")
 			.mockResolvedValueOnce("https://wasabi.example/first-download")
 			.mockResolvedValueOnce("https://wasabi.example/renewed")
@@ -127,7 +129,7 @@ describe("/api/player transcript URLs", () => {
 	});
 
 	it("streams media through the local function instead of exposing a signed URL", async () => {
-		isProductionDeployment.mockReturnValue(false);
+		asMock(isProductionDeployment).mockReturnValue(false);
 		const localRequest = request(undefined, "http://localhost:3000/api/player");
 
 		const response = await GET(localRequest);
@@ -139,7 +141,7 @@ describe("/api/player transcript URLs", () => {
 	});
 
 	it("signs the inferred same-name transcript against AWS", async () => {
-		awsMetadataInfo.mockImplementation(async ({ path }: any) =>
+		asMock(awsMetadataInfo).mockImplementation(async ({ path }: any) =>
 			path.endsWith("The Serpents.txt") ? { type: "text/plain" } : null,
 		);
 
@@ -184,9 +186,9 @@ describe("/api/player transcript URLs", () => {
 	});
 
 	it("falls back to AWS when stale metadata points an image at Wasabi", async () => {
-		wasabiMetadataInfo.mockResolvedValue(null);
-		awsMetadataInfo.mockResolvedValue({ type: "image/png" });
-		getAwsDownloadUrl.mockResolvedValue("https://aws.example/download");
+		asMock(wasabiMetadataInfo).mockResolvedValue(null);
+		asMock(awsMetadataInfo).mockResolvedValue({ type: "image/png" });
+		asMock(getAwsDownloadUrl).mockResolvedValue("https://aws.example/download");
 
 		const response = await GET(
 			request("wasabi/will/2026/2026-06-30 Beastly.png"),
@@ -216,7 +218,7 @@ describe("/api/player transcript URLs", () => {
 	});
 
 	it("signs AWS images against AWS without using Wasabi", async () => {
-		getAwsDownloadUrl.mockResolvedValue("https://aws.example/download");
+		asMock(getAwsDownloadUrl).mockResolvedValue("https://aws.example/download");
 
 		const response = await GET(
 			request("/aws/sessions/will/2026/2026-06-30 Beastly.png"),
@@ -243,7 +245,7 @@ describe("/api/player transcript URLs", () => {
 	});
 
 	it("returns subtitles when a matching VTT exists on AWS", async () => {
-		awsMetadataInfo.mockImplementation(async ({ path }: any) => {
+		asMock(awsMetadataInfo).mockImplementation(async ({ path }: any) => {
 			if (path.endsWith(".vtt")) return { type: "text/vtt" };
 			return null;
 		});
@@ -257,7 +259,7 @@ describe("/api/player transcript URLs", () => {
 	});
 
 	it("strips resolution suffixes when resolving transcript metadata", async () => {
-		getSessions.mockResolvedValue([
+		asMock(getSessions).mockResolvedValue([
 			{
 				group: "american",
 				year: "2024",
@@ -266,7 +268,7 @@ describe("/api/player transcript URLs", () => {
 					"/aws/sessions/american/2024/2024-08-26 The Serpents.txt",
 			},
 		]);
-		awsMetadataInfo.mockImplementation(async ({ path }: any) =>
+		asMock(awsMetadataInfo).mockImplementation(async ({ path }: any) =>
 			path.endsWith(".txt") ? { type: "text/plain" } : null,
 		);
 		await GET(
@@ -277,20 +279,20 @@ describe("/api/player transcript URLs", () => {
 
 	it("warns and continues when session transcript lookup fails", async () => {
 		const { logger } = require("@util/api/logger");
-		getSessions.mockRejectedValue(new Error("feed down"));
+		asMock(getSessions).mockRejectedValue(new Error("feed down"));
 		await GET(request());
 		expect(logger.warn).toHaveBeenCalled();
 	});
 
 	it("returns an auth error when the user is not allowed", async () => {
-		getSessionUser.mockResolvedValue(null);
+		asMock(getSessionUser).mockResolvedValue(null);
 		const response = await GET(request());
 		expect(response.status).toBe(403);
 		expect(await response.json()).toEqual({ err: "ACCESS_DENIED" });
 	});
 
 	it("uses signed Wasabi URLs in production instead of proxying media", async () => {
-		isProductionDeployment.mockReturnValue(true);
+		asMock(isProductionDeployment).mockReturnValue(true);
 
 		const response = await GET(
 			request(undefined, "https://systemconcepts.app/api/player"),
@@ -303,7 +305,7 @@ describe("/api/player transcript URLs", () => {
 	});
 
 	it("uses explicit session subtitle paths ending in .vtt", async () => {
-		getSessions.mockResolvedValue([
+		asMock(getSessions).mockResolvedValue([
 			{
 				group: "american",
 				year: "2024",
@@ -313,7 +315,7 @@ describe("/api/player transcript URLs", () => {
 				},
 			},
 		]);
-		awsMetadataInfo.mockImplementation(async ({ path }: any) =>
+		asMock(awsMetadataInfo).mockImplementation(async ({ path }: any) =>
 			path.endsWith(".vtt") ? { type: "text/vtt" } : null,
 		);
 
@@ -328,7 +330,7 @@ describe("/api/player transcript URLs", () => {
 	});
 
 	it("uses explicit session transcript paths ending in .txt", async () => {
-		getSessions.mockResolvedValue([
+		asMock(getSessions).mockResolvedValue([
 			{
 				group: "american",
 				year: "2024",
@@ -336,7 +338,7 @@ describe("/api/player transcript URLs", () => {
 				transcriptPath: "wasabi/american/2024/2024-08-26 The Serpents.txt",
 			},
 		]);
-		awsMetadataInfo.mockImplementation(async ({ path }: any) =>
+		asMock(awsMetadataInfo).mockImplementation(async ({ path }: any) =>
 			path.endsWith(".txt") ? { type: "text/plain" } : null,
 		);
 
@@ -348,7 +350,7 @@ describe("/api/player transcript URLs", () => {
 	});
 
 	it("returns no transcript metadata when the session lookup finds no match", async () => {
-		getSessions.mockResolvedValue([
+		asMock(getSessions).mockResolvedValue([
 			{
 				group: "american",
 				year: "2024",
@@ -363,7 +365,7 @@ describe("/api/player transcript URLs", () => {
 	});
 
 	it("returns an auth error when session lookup is rejected", async () => {
-		getSessionUser.mockRejectedValue("AUTHENTICATION_REQUIRED");
+		asMock(getSessionUser).mockRejectedValue("AUTHENTICATION_REQUIRED");
 
 		const response = await GET(request());
 

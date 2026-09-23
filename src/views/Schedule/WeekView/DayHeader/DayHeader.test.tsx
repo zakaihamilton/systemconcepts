@@ -13,12 +13,12 @@ jest.mock("@util/data/date", () => ({
 describe("WeekView DayHeader", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
-		useDeviceType.mockReturnValue("desktop");
-		isDateToday.mockReturnValue(true);
+		asMock(useDeviceType).mockReturnValue("desktop");
+		asMock(isDateToday).mockReturnValue(true);
 	});
 
 	it("renders day/date and switches to day view on click", () => {
-		const store = { update: jest.fn((fn) => fn({})) };
+		const store = { update: jest.fn((fn) => fn({} as Record<string, any>)) };
 		const date = new Date("2024-06-10");
 		render(
 			<DayHeader
@@ -34,15 +34,15 @@ describe("WeekView DayHeader", () => {
 		expect(screen.getByText("10")).toBeInTheDocument();
 		fireEvent.click(screen.getByText("Mon"));
 		expect(store.update).toHaveBeenCalled();
-		const state = {};
-		store.update.mock.calls[0][0](state);
+		const state: Record<string, any> = {};
+		asMock(store.update).mock.calls[0][0](state);
 		expect(state.viewMode).toBe("day");
 		expect(state.lastViewMode).toBe("week");
 	});
 
 	it("applies mobile styles", () => {
-		useDeviceType.mockReturnValue("phone");
-		isDateToday.mockReturnValue(false);
+		asMock(useDeviceType).mockReturnValue("phone");
+		asMock(isDateToday).mockReturnValue(false);
 		render(
 			<DayHeader
 				date={new Date()}

@@ -7,7 +7,7 @@ jest.mock("@util/domain/translations");
 describe("Error Component", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
-		useTranslations.mockReturnValue({
+		asMock(useTranslations).mockReturnValue({
 			ERROR: "Translated Error Title",
 			MOCK_TRANSLATED_ERROR: "This is a translated error message",
 		});

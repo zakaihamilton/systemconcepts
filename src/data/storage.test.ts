@@ -26,14 +26,14 @@ describe("data/storage device registry", () => {
 	});
 
 	it("disables personal, aws, and wasabi without auth cookies", () => {
-		cookies.get.mockReturnValue(undefined);
+		asMock(cookies.get).mockReturnValue(undefined);
 		expect(devices.find((d: any) => d.id === "personal").enabled()).toBeFalsy();
 		expect(devices.find((d: any) => d.id === "aws").enabled()).toBeFalsy();
 		expect(devices.find((d: any) => d.id === "wasabi").enabled()).toBeFalsy();
 	});
 
 	it("enables personal, aws, and wasabi when id and hash cookies exist", () => {
-		cookies.get.mockImplementation((key: any) =>
+		asMock(cookies.get).mockImplementation((key: any) =>
 			key === "id" ? "user-1" : key === "hash" ? "session-hash" : undefined,
 		);
 		expect(

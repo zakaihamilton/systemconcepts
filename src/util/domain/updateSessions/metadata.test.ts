@@ -37,10 +37,10 @@ describe("update session metadata", () => {
 
 	describe("loadTags", () => {
 		it("loads tags from bundle.json when the group is bundled", async () => {
-			storage.exists.mockImplementation(
+			asMock(storage.exists).mockImplementation(
 				async (path: any) => path === "/local/sync/bundle.json",
 			);
-			storage.readFile.mockImplementation(async (path: any) => {
+			asMock(storage.readFile).mockImplementation(async (path: any) => {
 				if (path === "/local/sync/bundle.json") {
 					return JSON.stringify({
 						sessions: [
@@ -64,10 +64,10 @@ describe("update session metadata", () => {
 		});
 
 		it("falls back to the merged group file when not bundled", async () => {
-			storage.exists.mockImplementation(
+			asMock(storage.exists).mockImplementation(
 				async (path: any) => path === "/local/sync/test.json",
 			);
-			storage.readFile.mockImplementation(async (path: any) => {
+			asMock(storage.readFile).mockImplementation(async (path: any) => {
 				if (path === "/local/sync/test.json") {
 					return JSON.stringify({
 						sessions: [
@@ -88,10 +88,10 @@ describe("update session metadata", () => {
 		});
 
 		it("falls back to the local year file when no merged/bundled cache matches", async () => {
-			storage.exists.mockImplementation(
+			asMock(storage.exists).mockImplementation(
 				async (path: any) => path === "/local/sync/test/2024.json",
 			);
-			storage.readFile.mockImplementation(async (path: any) => {
+			asMock(storage.readFile).mockImplementation(async (path: any) => {
 				if (path === "/local/sync/test/2024.json") {
 					return JSON.stringify({
 						sessions: [
@@ -112,10 +112,10 @@ describe("update session metadata", () => {
 		});
 
 		it("reads the remote .tags file when nothing is cached locally", async () => {
-			storage.exists.mockImplementation(
+			asMock(storage.exists).mockImplementation(
 				async (path: any) => path === `${PATH}/2024.tags`,
 			);
-			storage.readFile.mockImplementation(async (path: any) => {
+			asMock(storage.readFile).mockImplementation(async (path: any) => {
 				if (path === `${PATH}/2024.tags`) {
 					return JSON.stringify({
 						sessions: [
@@ -132,10 +132,10 @@ describe("update session metadata", () => {
 		});
 
 		it("skips cache lookups entirely when forceUpdate is true", async () => {
-			storage.exists.mockImplementation(
+			asMock(storage.exists).mockImplementation(
 				async (path: any) => path === `${PATH}/2024.tags`,
 			);
-			storage.readFile.mockImplementation(async (path: any) => {
+			asMock(storage.readFile).mockImplementation(async (path: any) => {
 				if (path === `${PATH}/2024.tags`) {
 					return JSON.stringify({
 						sessions: [
@@ -155,8 +155,8 @@ describe("update session metadata", () => {
 		});
 
 		it("returns an empty map when the remote tags file does not exist", async () => {
-			storage.exists.mockResolvedValue(false);
-			storage.readFile.mockResolvedValue("");
+			asMock(storage.exists).mockResolvedValue(false);
+			asMock(storage.readFile).mockResolvedValue("");
 
 			const tags = await loadTags(YEAR, "test", PATH, false, false, false);
 
@@ -164,10 +164,10 @@ describe("update session metadata", () => {
 		});
 
 		it("throws and logs an error when reading the remote tags file fails", async () => {
-			storage.exists.mockImplementation(
+			asMock(storage.exists).mockImplementation(
 				async (path: any) => path === `${PATH}/2024.tags`,
 			);
-			storage.readFile.mockRejectedValue(new Error("read failed"));
+			asMock(storage.readFile).mockRejectedValue(new Error("read failed"));
 
 			await expect(
 				loadTags(YEAR, "test", PATH, false, false, false),
@@ -179,13 +179,13 @@ describe("update session metadata", () => {
 		});
 
 		it("logs a warning and continues when the cache lookup throws", async () => {
-			storage.exists.mockImplementation(async (path: any) => {
+			asMock(storage.exists).mockImplementation(async (path: any) => {
 				if (path === "/local/sync/bundle.json") {
 					throw new Error("exists failed");
 				}
 				return path === `${PATH}/2024.tags`;
 			});
-			storage.readFile.mockImplementation(async (path: any) => {
+			asMock(storage.readFile).mockImplementation(async (path: any) => {
 				if (path === `${PATH}/2024.tags`) {
 					return JSON.stringify({
 						sessions: [
@@ -208,10 +208,10 @@ describe("update session metadata", () => {
 
 	describe("loadDurations", () => {
 		it("reads the remote .duration file when nothing is cached", async () => {
-			storage.exists.mockImplementation(
+			asMock(storage.exists).mockImplementation(
 				async (path: any) => path === `${PATH}/2024.duration`,
 			);
-			storage.readFile.mockImplementation(async (path: any) => {
+			asMock(storage.readFile).mockImplementation(async (path: any) => {
 				if (path === `${PATH}/2024.duration`) {
 					return JSON.stringify({
 						sessions: [
@@ -235,10 +235,10 @@ describe("update session metadata", () => {
 		});
 
 		it("uses cached durations from the merged file without hitting remote", async () => {
-			storage.exists.mockImplementation(
+			asMock(storage.exists).mockImplementation(
 				async (path: any) => path === "/local/sync/test.json",
 			);
-			storage.readFile.mockImplementation(async (path: any) => {
+			asMock(storage.readFile).mockImplementation(async (path: any) => {
 				if (path === "/local/sync/test.json") {
 					return JSON.stringify({
 						sessions: [
@@ -271,10 +271,10 @@ describe("update session metadata", () => {
 
 	describe("loadSummaries", () => {
 		it("loads cached summaries from bundle.json", async () => {
-			storage.exists.mockImplementation(
+			asMock(storage.exists).mockImplementation(
 				async (path: any) => path === "/local/sync/bundle.json",
 			);
-			storage.readFile.mockImplementation(async (path: any) => {
+			asMock(storage.readFile).mockImplementation(async (path: any) => {
 				if (path === "/local/sync/bundle.json") {
 					return JSON.stringify({
 						sessions: [
@@ -302,10 +302,10 @@ describe("update session metadata", () => {
 		});
 
 		it("reads the remote markdown file when nothing is cached", async () => {
-			storage.exists.mockImplementation(
+			asMock(storage.exists).mockImplementation(
 				async (path: any) => path === `${PATH}/2024.md`,
 			);
-			storage.readFile.mockImplementation(async (path: any) => {
+			asMock(storage.readFile).mockImplementation(async (path: any) => {
 				if (path === `${PATH}/2024.md`) {
 					return "## 2024-05-05 Test Session\nRemote summary\n---\n";
 				}
@@ -325,7 +325,7 @@ describe("update session metadata", () => {
 		});
 
 		it("returns an empty object when the remote markdown file is missing", async () => {
-			storage.exists.mockResolvedValue(false);
+			asMock(storage.exists).mockResolvedValue(false);
 
 			const summaries = await loadSummaries(
 				YEAR,
@@ -340,10 +340,10 @@ describe("update session metadata", () => {
 		});
 
 		it("throws and logs an error when reading the remote markdown file fails", async () => {
-			storage.exists.mockImplementation(
+			asMock(storage.exists).mockImplementation(
 				async (path: any) => path === `${PATH}/2024.md`,
 			);
-			storage.readFile.mockRejectedValue(new Error("md read failed"));
+			asMock(storage.readFile).mockRejectedValue(new Error("md read failed"));
 
 			await expect(
 				loadSummaries(YEAR, "test", PATH, false, false, false),
@@ -366,8 +366,8 @@ describe("update session metadata", () => {
 
 			const blob = await zip.generateAsync({ type: "blob" });
 
-			storage.exists.mockResolvedValue(true);
-			readBinary.mockResolvedValue(blob);
+			asMock(storage.exists).mockResolvedValue(true);
+			asMock(readBinary).mockResolvedValue(blob);
 
 			const transcriptions = await loadTranscriptions(
 				{ name: "2024" },
@@ -386,10 +386,10 @@ describe("update session metadata", () => {
 		});
 
 		it("loads cached transcription flags from the bundle file", async () => {
-			storage.exists.mockImplementation(
+			asMock(storage.exists).mockImplementation(
 				async (path: any) => path === "/local/sync/bundle.json",
 			);
-			storage.readFile.mockImplementation(async (path: any) => {
+			asMock(storage.readFile).mockImplementation(async (path: any) => {
 				if (path === "/local/sync/bundle.json") {
 					return JSON.stringify({
 						sessions: [
@@ -418,7 +418,7 @@ describe("update session metadata", () => {
 		});
 
 		it("returns an empty object when the remote zip file does not exist", async () => {
-			storage.exists.mockResolvedValue(false);
+			asMock(storage.exists).mockResolvedValue(false);
 
 			const transcriptions = await loadTranscriptions(
 				YEAR,
@@ -433,10 +433,10 @@ describe("update session metadata", () => {
 		});
 
 		it("swallows errors reading the remote zip file without throwing", async () => {
-			storage.exists.mockImplementation(
+			asMock(storage.exists).mockImplementation(
 				async (path: any) => path === `${PATH}/2024.zip`,
 			);
-			readBinary.mockRejectedValue(new Error("zip read failed"));
+			asMock(readBinary).mockRejectedValue(new Error("zip read failed"));
 
 			const transcriptions = await loadTranscriptions(
 				YEAR,
@@ -455,8 +455,8 @@ describe("update session metadata", () => {
 		});
 
 		it("ignores a null zip blob and empty zip entries", async () => {
-			storage.exists.mockResolvedValue(true);
-			readBinary.mockResolvedValue(null);
+			asMock(storage.exists).mockResolvedValue(true);
+			asMock(readBinary).mockResolvedValue(null);
 			const transcriptions = await loadTranscriptions(
 				YEAR,
 				"test",
@@ -470,10 +470,10 @@ describe("update session metadata", () => {
 	});
 
 	it("ignores empty tag arrays and sessions without matching year prefixes", async () => {
-		storage.exists.mockImplementation(
+		asMock(storage.exists).mockImplementation(
 			async (path: any) => path === "/local/sync/bundle.json",
 		);
-		storage.readFile.mockResolvedValue(
+		asMock(storage.readFile).mockResolvedValue(
 			JSON.stringify({
 				sessions: [
 					{ id: "1", name: "2023-01-01 Old", tags: [] },
@@ -490,12 +490,12 @@ describe("update session metadata", () => {
 	});
 
 	it("loads summaries from the year file when merged cache is incomplete", async () => {
-		storage.exists.mockImplementation(async (path: any) => {
+		asMock(storage.exists).mockImplementation(async (path: any) => {
 			if (path === "/local/sync/test.json") return true;
 			if (path === "/local/sync/test/2024.json") return true;
 			return false;
 		});
-		storage.readFile.mockImplementation(async (path: any) => {
+		asMock(storage.readFile).mockImplementation(async (path: any) => {
 			if (path === "/local/sync/test.json") {
 				return JSON.stringify({ sessions: [{ id: "1", name: "nope" }] });
 			}
@@ -525,10 +525,10 @@ describe("update session metadata", () => {
 	});
 
 	it("maps tags by session id when the cached session has no name", async () => {
-		storage.exists.mockImplementation(
+		asMock(storage.exists).mockImplementation(
 			async (path: any) => path === "/local/sync/bundle.json",
 		);
-		storage.readFile.mockResolvedValue(
+		asMock(storage.readFile).mockResolvedValue(
 			JSON.stringify({
 				sessions: [
 					{
@@ -544,10 +544,10 @@ describe("update session metadata", () => {
 	});
 
 	it("ignores empty duration values when loading from cache", async () => {
-		storage.exists.mockImplementation(
+		asMock(storage.exists).mockImplementation(
 			async (path: any) => path === "/local/sync/bundle.json",
 		);
-		storage.readFile.mockResolvedValue(
+		asMock(storage.readFile).mockResolvedValue(
 			JSON.stringify({
 				sessions: [
 					{

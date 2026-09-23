@@ -17,16 +17,16 @@ let clear: any;
 let resetLocalFileSystem: any;
 const originalProcessBrowser = process.browser;
 
-function openDatabase(name: any) {
-	return new Promise((resolve, reject) => {
+function openDatabase(name: string): Promise<IDBDatabase> {
+	return new Promise<IDBDatabase>((resolve, reject) => {
 		const request = indexedDB.open(name);
 		request.onsuccess = () => resolve(request.result);
 		request.onerror = () => reject(request.error);
 	});
 }
 
-function readRecord(store: any, path: any) {
-	return new Promise((resolve, reject) => {
+function readRecord(store: any, path: string): Promise<any> {
+	return new Promise<any>((resolve, reject) => {
 		const request = store.get(path);
 		request.onsuccess = () => resolve(request.result);
 		request.onerror = () => reject(request.error);
@@ -34,7 +34,7 @@ function readRecord(store: any, path: any) {
 }
 
 beforeAll(() => {
-	process.browser = true;
+	Reflect.set(process, "browser", true);
 	jest.resetModules();
 	// eslint-disable-next-line global-require
 	const mod = require("@storage/local");
@@ -44,7 +44,7 @@ beforeAll(() => {
 });
 
 afterAll(() => {
-	process.browser = originalProcessBrowser;
+	Reflect.set(process, "browser", originalProcessBrowser);
 });
 
 beforeEach(async () => {
@@ -345,10 +345,10 @@ describe("native IndexedDB local storage", () => {
 	it("does not close IndexedDB synchronously while Chromium freezes the tab", async () => {
 		await localStorage.writeFile("/sync/frozen.json", "frozen");
 		const closeSpy = jest.spyOn(IDBDatabase.prototype, "close");
-		const callsBefore = closeSpy.mock.calls.length;
+		const callsBefore = asMock(closeSpy).mock.calls.length;
 		document.dispatchEvent(new Event("freeze"));
-		expect(closeSpy.mock.calls.length).toBe(callsBefore);
-		closeSpy.mockRestore();
+		expect(asMock(closeSpy).mock.calls.length).toBe(callsBefore);
+		asMock(closeSpy).mockRestore();
 		await localStorage.writeFile("/sync/after-freeze.json", "after-freeze");
 		expect(await localStorage.readFile("/sync/frozen.json")).toBe("frozen");
 	});
@@ -356,12 +356,12 @@ describe("native IndexedDB local storage", () => {
 	it("reopens IndexedDB after Android Chrome resume and focus events", async () => {
 		await localStorage.writeFile("/sync/resume.json", "resume");
 		const openSpy = jest.spyOn(indexedDB, "open");
-		const callsBefore = openSpy.mock.calls.length;
+		const callsBefore = asMock(openSpy).mock.calls.length;
 		document.dispatchEvent(new Event("resume"));
 		window.dispatchEvent(new Event("focus"));
 		await localStorage.writeFile("/sync/after-resume.json", "after-resume");
-		expect(openSpy.mock.calls.length).toBeGreaterThan(callsBefore);
-		openSpy.mockRestore();
+		expect(asMock(openSpy).mock.calls.length).toBeGreaterThan(callsBefore);
+		asMock(openSpy).mockRestore();
 		expect(await localStorage.readFile("/sync/resume.json")).toBe("resume");
 		expect(await localStorage.readFile("/sync/after-resume.json")).toBe(
 			"after-resume",
@@ -406,7 +406,7 @@ describe("native IndexedDB local storage", () => {
 
 	it("reopens after IndexedDB asks this connection to close", async () => {
 		await localStorage.writeFile("/sync/before-upgrade.json", "before-upgrade");
-		await new Promise((resolve, reject) => {
+		await new Promise<void>((resolve, reject) => {
 			const request = indexedDB.deleteDatabase("systemconcepts-local-files");
 			request.onsuccess = () => resolve();
 			request.onerror = () => reject(request.error);

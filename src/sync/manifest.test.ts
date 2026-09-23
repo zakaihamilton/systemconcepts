@@ -18,12 +18,14 @@ jest.mock("./storageReads", () => ({ readFileIfExists: jest.fn() }));
 describe("updateManifestEntry", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
-		writeCompressedFile.mockResolvedValue(undefined);
-		storage.writeFile.mockResolvedValue(undefined);
+		asMock(writeCompressedFile).mockResolvedValue(undefined);
+		asMock(storage.writeFile).mockResolvedValue(undefined);
 	});
 
 	it("appends a new entry to a compressed (.gz) manifest", async () => {
-		readCompressedFile.mockResolvedValue([{ path: "/a.json", version: "1" }]);
+		asMock(readCompressedFile).mockResolvedValue([
+			{ path: "/a.json", version: "1" },
+		]);
 
 		const manifest = await updateManifestEntry("/aws/sync/files.json.gz", {
 			path: "/b.json",
@@ -41,7 +43,9 @@ describe("updateManifestEntry", () => {
 	});
 
 	it("replaces an existing entry in a compressed manifest instead of duplicating it", async () => {
-		readCompressedFile.mockResolvedValue([{ path: "/a.json", version: "1" }]);
+		asMock(readCompressedFile).mockResolvedValue([
+			{ path: "/a.json", version: "1" },
+		]);
 
 		const manifest = await updateManifestEntry("/aws/sync/files.json.gz", {
 			path: "/a.json",
@@ -52,7 +56,7 @@ describe("updateManifestEntry", () => {
 	});
 
 	it("reads and writes a plain .json manifest as JSON text", async () => {
-		readFileIfExists.mockResolvedValue(
+		asMock(readFileIfExists).mockResolvedValue(
 			JSON.stringify([{ path: "/a.json", version: "1" }]),
 		);
 
@@ -69,7 +73,7 @@ describe("updateManifestEntry", () => {
 	});
 
 	it("starts from an empty manifest when the .json file cannot be parsed", async () => {
-		readFileIfExists.mockResolvedValue("{not json");
+		asMock(readFileIfExists).mockResolvedValue("{not json");
 
 		const manifest = await updateManifestEntry("/local/sync/files.json", {
 			path: "/b.json",
@@ -80,7 +84,7 @@ describe("updateManifestEntry", () => {
 	});
 
 	it("converts a legacy dictionary-style .json manifest into array form", async () => {
-		readFileIfExists.mockResolvedValue(
+		asMock(readFileIfExists).mockResolvedValue(
 			JSON.stringify({ "/a.json": { version: "1" } }),
 		);
 
@@ -96,7 +100,7 @@ describe("updateManifestEntry", () => {
 	});
 
 	it("starts from an empty manifest when no .json file exists yet", async () => {
-		readFileIfExists.mockResolvedValue(null);
+		asMock(readFileIfExists).mockResolvedValue(null);
 
 		const manifest = await updateManifestEntry("/local/sync/files.json", {
 			path: "/a.json",

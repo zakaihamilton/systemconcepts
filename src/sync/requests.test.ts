@@ -83,7 +83,7 @@ describe("requestSync", () => {
 		SyncActiveStore.update((state) => {
 			state.locked = true;
 		});
-		performSync.mockResolvedValue({ completed: true });
+		asMock(performSync).mockResolvedValue({ completed: true });
 
 		await requestSync(true);
 
@@ -95,7 +95,7 @@ describe("requestSync", () => {
 	});
 
 	it("marks the sync busy, runs performSync, and records success on completion", async () => {
-		performSync.mockResolvedValue({ completed: true });
+		asMock(performSync).mockResolvedValue({ completed: true });
 
 		await requestSync(false);
 
@@ -107,7 +107,10 @@ describe("requestSync", () => {
 	});
 
 	it("clears busy/phase and backs off lastSyncTime when the sync is incomplete", async () => {
-		performSync.mockResolvedValue({ completed: false, reason: "incomplete" });
+		asMock(performSync).mockResolvedValue({
+			completed: false,
+			reason: "incomplete",
+		});
 
 		const result = await requestSync(false);
 
@@ -121,7 +124,7 @@ describe("requestSync", () => {
 	});
 
 	it("clears the busy flag and backs off lastSyncTime if performSync throws", async () => {
-		performSync.mockRejectedValue(new Error("pipeline exploded"));
+		asMock(performSync).mockRejectedValue(new Error("pipeline exploded"));
 
 		await requestSync(false);
 

@@ -1,4 +1,4 @@
-export function getTrustedClientIp(request: any) {
+export function getTrustedClientIp(request: any = {}) {
 	if (request?.ip) return String(request.ip);
 	return request?.headers?.get("x-vercel-forwarded-for") || "unknown";
 }

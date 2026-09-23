@@ -8,7 +8,7 @@ jest.mock("@util/data/date", () => ({
 
 describe("MonthView DayHeader", () => {
 	it("renders weekday and marks today/last", () => {
-		isDayToday.mockReturnValue(true);
+		asMock(isDayToday).mockReturnValue(true);
 		render(
 			<DayHeader
 				date={new Date("2024-06-10")}
@@ -21,7 +21,7 @@ describe("MonthView DayHeader", () => {
 	});
 
 	it("renders non-today mid week", () => {
-		isDayToday.mockReturnValue(false);
+		asMock(isDayToday).mockReturnValue(false);
 		render(
 			<DayHeader
 				date={new Date()}

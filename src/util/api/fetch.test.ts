@@ -36,7 +36,7 @@ describe("fetch cache", () => {
 	});
 
 	it("reuses cacheable JSON responses within the TTL", async () => {
-		global.fetch.mockResolvedValue(mockResponse('{"ok":true}'));
+		asMock(global.fetch).mockResolvedValue(mockResponse('{"ok":true}'));
 
 		const options = getStableFetchCacheOptions(1000);
 		const first = await fetchJSON("/api/sessions?id=user", options);
@@ -48,7 +48,7 @@ describe("fetch cache", () => {
 	});
 
 	it("reuses cached null JSON responses within the TTL", async () => {
-		global.fetch.mockResolvedValue(mockResponse(""));
+		asMock(global.fetch).mockResolvedValue(mockResponse(""));
 
 		const options = getStableFetchCacheOptions(1000);
 		const first = await fetchJSON("/api/empty", options);
@@ -60,7 +60,7 @@ describe("fetch cache", () => {
 	});
 
 	it("does not cache responses unless explicitly requested", async () => {
-		global.fetch
+		asMock(global.fetch)
 			.mockResolvedValueOnce(mockResponse("first"))
 			.mockResolvedValueOnce(mockResponse("second"));
 
@@ -72,7 +72,7 @@ describe("fetch cache", () => {
 
 	it("routes expired sessions through login and preserves the return path", async () => {
 		window.location.hash = "#sessions/test";
-		global.fetch.mockResolvedValue({
+		asMock(global.fetch).mockResolvedValue({
 			status: 401,
 			text: () => Promise.resolve('{"err":"Please sign in again"}'),
 		});
@@ -88,7 +88,7 @@ describe("fetch cache", () => {
 
 	it("redirects straight to account when already on an auth path", async () => {
 		window.location.hash = "#account";
-		global.fetch.mockResolvedValue({
+		asMock(global.fetch).mockResolvedValue({
 			status: 401,
 			text: () => Promise.resolve("{}"),
 		});
@@ -102,7 +102,7 @@ describe("fetch cache", () => {
 
 	it("only starts one redirect flow when two requests fail at the same time", async () => {
 		window.location.hash = "#sessions/test";
-		global.fetch.mockResolvedValue({
+		asMock(global.fetch).mockResolvedValue({
 			status: 401,
 			text: () => Promise.resolve("{}"),
 		});
@@ -113,14 +113,16 @@ describe("fetch cache", () => {
 		]);
 
 		expect(first.status).toBe("rejected");
-		expect(first.reason).toBe("AUTHENTICATION_REQUIRED");
+		if (first.status === "rejected") {
+			expect(first.reason).toBe("AUTHENTICATION_REQUIRED");
+		}
 		expect(second.status).toBe("rejected");
 		// The second call is guarded and falls through to a plain status rejection.
-		expect(second.reason).toBe(401);
+		if (second.status === "rejected") expect(second.reason).toBe(401);
 	});
 
 	it("rejects with the status code for non-200, non-401 JSON responses", async () => {
-		global.fetch.mockResolvedValue({
+		asMock(global.fetch).mockResolvedValue({
 			status: 500,
 			text: () => Promise.resolve("Internal Error"),
 		});
@@ -128,17 +130,17 @@ describe("fetch cache", () => {
 	});
 
 	it("rejects when the underlying fetch call throws for JSON requests", async () => {
-		global.fetch.mockRejectedValue(new Error("network down"));
+		asMock(global.fetch).mockRejectedValue(new Error("network down"));
 		await expect(fetchJSON("/api/broken")).rejects.toThrow("network down");
 	});
 
 	it("rejects when the JSON response body cannot be parsed", async () => {
-		global.fetch.mockResolvedValue(mockResponse("{not-json"));
+		asMock(global.fetch).mockResolvedValue(mockResponse("{not-json"));
 		await expect(fetchJSON("/api/broken")).rejects.toBeInstanceOf(SyntaxError);
 	});
 
 	it("rejects with the status code for non-200 text responses", async () => {
-		global.fetch.mockResolvedValue({
+		asMock(global.fetch).mockResolvedValue({
 			status: 404,
 			text: () => Promise.resolve("not found"),
 		});
@@ -146,7 +148,7 @@ describe("fetch cache", () => {
 	});
 
 	it("rejects when the text response body cannot be parsed", async () => {
-		global.fetch.mockResolvedValue({
+		asMock(global.fetch).mockResolvedValue({
 			status: 200,
 			text: () => Promise.reject(new Error("bad text")),
 		});
@@ -156,7 +158,7 @@ describe("fetch cache", () => {
 	});
 
 	it("reuses cacheable text responses within the TTL", async () => {
-		global.fetch.mockResolvedValue(mockResponse("cached-text"));
+		asMock(global.fetch).mockResolvedValue(mockResponse("cached-text"));
 
 		const options = getStableFetchCacheOptions(1000);
 		const first = await fetchText("/api/text", options);
@@ -168,7 +170,7 @@ describe("fetch cache", () => {
 	});
 
 	it("rejects when the underlying fetch call throws for text requests", async () => {
-		global.fetch.mockRejectedValue(new Error("network down"));
+		asMock(global.fetch).mockRejectedValue(new Error("network down"));
 		await expect(fetchText("/api/missing")).rejects.toThrow("network down");
 	});
 });
@@ -186,7 +188,7 @@ describe("fetchBlob", () => {
 
 	it("resolves with the blob body on success", async () => {
 		const blob = new Blob(["hello"]);
-		global.fetch.mockResolvedValue({
+		asMock(global.fetch).mockResolvedValue({
 			status: 200,
 			blob: () => Promise.resolve(blob),
 		});
@@ -195,19 +197,19 @@ describe("fetchBlob", () => {
 
 	it("routes 401 responses through the relogin flow", async () => {
 		window.location.hash = "#library";
-		global.fetch.mockResolvedValue({ status: 401 });
+		asMock(global.fetch).mockResolvedValue({ status: 401 });
 		await expect(fetchBlob("/api/file")).rejects.toBe(
 			"AUTHENTICATION_REQUIRED",
 		);
 	});
 
 	it("rejects with the status code for non-200 responses", async () => {
-		global.fetch.mockResolvedValue({ status: 500 });
+		asMock(global.fetch).mockResolvedValue({ status: 500 });
 		await expect(fetchBlob("/api/file")).rejects.toBe(500);
 	});
 
 	it("rejects when blob parsing fails", async () => {
-		global.fetch.mockResolvedValue({
+		asMock(global.fetch).mockResolvedValue({
 			status: 200,
 			blob: () => Promise.reject(new Error("bad blob")),
 		});
@@ -215,7 +217,7 @@ describe("fetchBlob", () => {
 	});
 
 	it("rejects when the underlying fetch call throws", async () => {
-		global.fetch.mockRejectedValue(new Error("network down"));
+		asMock(global.fetch).mockRejectedValue(new Error("network down"));
 		await expect(fetchBlob("/api/file")).rejects.toThrow("network down");
 	});
 });
@@ -225,7 +227,7 @@ describe("useFetchJSON", () => {
 		jest.useFakeTimers();
 		clearFetchCache();
 		global.fetch = jest.fn();
-		useOnline.mockReturnValue(true);
+		asMock(useOnline).mockReturnValue(true);
 	});
 
 	afterEach(() => {
@@ -235,7 +237,7 @@ describe("useFetchJSON", () => {
 	});
 
 	it("fetches JSON and reports progress and the result", async () => {
-		global.fetch.mockResolvedValue(mockResponse('{"ok":true}'));
+		asMock(global.fetch).mockResolvedValue(mockResponse('{"ok":true}'));
 		const { result } = renderHook(() => useFetchJSON("/api/data"));
 
 		expect(result.current[2]).toBe(true);
@@ -251,7 +253,7 @@ describe("useFetchJSON", () => {
 	});
 
 	it("captures an error when the fetch fails", async () => {
-		global.fetch.mockResolvedValue({
+		asMock(global.fetch).mockResolvedValue({
 			status: 500,
 			text: () => Promise.resolve("oops"),
 		});
@@ -287,7 +289,7 @@ describe("useFetchJSON", () => {
 	});
 
 	it("does not fetch while offline", () => {
-		useOnline.mockReturnValue(false);
+		asMock(useOnline).mockReturnValue(false);
 		renderHook(() => useFetchJSON("/api/data"));
 		act(() => {
 			jest.runOnlyPendingTimers();
@@ -296,7 +298,7 @@ describe("useFetchJSON", () => {
 	});
 
 	it("reload triggers another fetch", async () => {
-		global.fetch.mockResolvedValue(mockResponse('{"ok":true}'));
+		asMock(global.fetch).mockResolvedValue(mockResponse('{"ok":true}'));
 		const { result } = renderHook(() => useFetchJSON("/api/data"));
 
 		await act(async () => {
@@ -316,7 +318,7 @@ describe("useFetchJSON", () => {
 	});
 
 	it("cleans up pending timers on unmount", () => {
-		global.fetch.mockResolvedValue(mockResponse('{"ok":true}'));
+		asMock(global.fetch).mockResolvedValue(mockResponse('{"ok":true}'));
 		const { unmount } = renderHook(() => useFetchJSON("/api/data"));
 		expect(() => unmount()).not.toThrow();
 	});
@@ -327,7 +329,7 @@ describe("useFetch", () => {
 		jest.useFakeTimers();
 		clearFetchCache();
 		global.fetch = jest.fn();
-		useOnline.mockReturnValue(true);
+		asMock(useOnline).mockReturnValue(true);
 	});
 
 	afterEach(() => {
@@ -337,7 +339,7 @@ describe("useFetch", () => {
 	});
 
 	it("fetches text and reports the result", async () => {
-		global.fetch.mockResolvedValue(mockResponse("hello world"));
+		asMock(global.fetch).mockResolvedValue(mockResponse("hello world"));
 		const { result } = renderHook(() => useFetch("/api/text"));
 
 		await act(async () => {
@@ -358,7 +360,7 @@ describe("useFetch", () => {
 	});
 
 	it("captures errors and supports reload", async () => {
-		global.fetch.mockResolvedValue({
+		asMock(global.fetch).mockResolvedValue({
 			status: 500,
 			text: () => Promise.resolve("oops"),
 		});
@@ -373,7 +375,7 @@ describe("useFetch", () => {
 		act(() => {
 			result.current[4]();
 		});
-		global.fetch.mockResolvedValue(mockResponse("again"));
+		asMock(global.fetch).mockResolvedValue(mockResponse("again"));
 		await act(async () => {
 			jest.runOnlyPendingTimers();
 			await Promise.resolve();
@@ -382,7 +384,7 @@ describe("useFetch", () => {
 	});
 
 	it("clears timers when offline", () => {
-		useOnline.mockReturnValue(false);
+		asMock(useOnline).mockReturnValue(false);
 		const { unmount } = renderHook(() => useFetch("/api/text"));
 		expect(() => unmount()).not.toThrow();
 	});

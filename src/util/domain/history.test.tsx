@@ -27,7 +27,7 @@ function setup({ history = [], loading = false, error = null } = {}) {
 			typeof updater === "function" ? updater(currentHistory) : updater;
 		return Promise.resolve();
 	});
-	useFile.mockImplementation(() => [
+	asMock(useFile).mockImplementation(() => [
 		currentHistory,
 		loadingValue,
 		errorValue,
@@ -47,8 +47,10 @@ describe("useRecentHistory", () => {
 
 	it("calls useFile with the history path, sync revision depends, and JSON mapping", () => {
 		setup();
-		const [, depends, mapping] = useFile.mock.calls[0];
-		expect(useFile.mock.calls[0][0]).toBe("local/personal/history.json");
+		const [, depends, mapping] = asMock(useFile).mock.calls[0];
+		expect(asMock(useFile).mock.calls[0][0]).toBe(
+			"local/personal/history.json",
+		);
 		expect(depends).toEqual([0]);
 		expect(mapping(null)).toEqual([]);
 		expect(mapping(JSON.stringify([{ id: 1 }]))).toEqual([{ id: 1 }]);
@@ -56,7 +58,7 @@ describe("useRecentHistory", () => {
 
 	it("reloads history when personalUpdateCounter increments after sync", () => {
 		setup();
-		expect(useFile.mock.calls[0][1]).toEqual([0]);
+		expect(asMock(useFile).mock.calls[0][1]).toEqual([0]);
 
 		act(() => {
 			SyncActiveStore.update((state) => {
@@ -64,7 +66,7 @@ describe("useRecentHistory", () => {
 			});
 		});
 
-		expect(useFile.mock.calls.at(-1)[1]).toEqual([2]);
+		expect(asMock(useFile).mock.calls.at(-1)[1]).toEqual([2]);
 	});
 
 	it("adds a new session to the front of the history with a timestamp", async () => {

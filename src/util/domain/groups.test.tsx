@@ -49,18 +49,18 @@ describe("useGroups", () => {
 			state.loaded = false;
 			state.counter = 0;
 		});
-		readGroups.mockResolvedValue({
+		asMock(readGroups).mockResolvedValue({
 			groups: [{ name: "example" }],
 			settings: {},
 			version: 1,
 		});
-		writeGroups.mockResolvedValue(undefined);
-		SyncActiveStore.subscribe.mockReturnValue(() => {});
+		asMock(writeGroups).mockResolvedValue(undefined);
+		asMock(SyncActiveStore.subscribe).mockReturnValue(() => {});
 	});
 
 	it("clears loading for every consumer when they mount during the same read", async () => {
 		let resolveGroups: any;
-		readGroups.mockReturnValue(
+		asMock(readGroups).mockReturnValue(
 			new Promise((resolve) => {
 				resolveGroups = resolve;
 			}),
@@ -106,7 +106,7 @@ describe("useGroups", () => {
 
 	it("skips starting a second load while busy with empty groups", async () => {
 		let resolveGroups: any;
-		readGroups.mockReturnValue(
+		asMock(readGroups).mockReturnValue(
 			new Promise((resolve) => {
 				resolveGroups = resolve;
 			}),
@@ -123,7 +123,7 @@ describe("useGroups", () => {
 	});
 
 	it("marks loaded even when readGroups fails", async () => {
-		readGroups.mockRejectedValue(new Error("boom"));
+		asMock(readGroups).mockRejectedValue(new Error("boom"));
 		render(<GroupsHarness />);
 		await waitFor(() => {
 			expect(screen.getByTestId("loading")).toHaveTextContent("false");
@@ -161,7 +161,7 @@ describe("useGroups", () => {
 			s.loaded = true;
 			s.busy = false;
 		});
-		readGroups.mockResolvedValue({
+		asMock(readGroups).mockResolvedValue({
 			groups: [{ name: "alpha", counter: 2 }],
 			settings: { theme: "dark" },
 			version: 1,
@@ -185,7 +185,7 @@ describe("useGroups", () => {
 		});
 
 		expect(writeGroups).toHaveBeenCalled();
-		const written = writeGroups.mock.calls.at(-1)[0].groups;
+		const written = asMock(writeGroups).mock.calls.at(-1)[0].groups;
 		expect(written.find((g: any) => g.name === "alpha").counter).toBe(3);
 	});
 
@@ -211,12 +211,12 @@ describe("useGroups", () => {
 			await api.updateGroups([{ name: "alpha", counter: 1 }]);
 		});
 
-		const written = writeGroups.mock.calls.at(-1)[0].groups;
+		const written = asMock(writeGroups).mock.calls.at(-1)[0].groups;
 		expect(written[0].counter).toBe(1);
 	});
 
 	it("updateGroups clears busy when writeGroups fails", async () => {
-		writeGroups.mockRejectedValue(new Error("write failed"));
+		asMock(writeGroups).mockRejectedValue(new Error("write failed"));
 		let api: any;
 		render(
 			<GroupsHarness
@@ -236,10 +236,12 @@ describe("useGroups", () => {
 
 	it("reloads when the sync counter subscription fires", async () => {
 		let counterCb: any;
-		SyncActiveStore.subscribe.mockImplementation((_selector: any, cb: any) => {
-			counterCb = cb;
-			return () => {};
-		});
+		asMock(SyncActiveStore.subscribe).mockImplementation(
+			(_selector: any, cb: any) => {
+				counterCb = cb;
+				return () => {};
+			},
+		);
 
 		render(<GroupsHarness />);
 		await waitFor(() => expect(readGroups).toHaveBeenCalledTimes(1));

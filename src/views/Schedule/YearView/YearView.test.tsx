@@ -6,7 +6,7 @@ import { useDateFormatter } from "@util/data/locale";
 import { useTranslations } from "@util/domain/translations";
 import YearView from "./YearView";
 
-let swipeHandlers = {};
+let swipeHandlers: Record<string, any> = {};
 
 jest.mock("@components/Toolbar", () => ({
 	registerToolbar: jest.fn(),
@@ -49,8 +49,8 @@ jest.mock("./Month", () => ({ date, sessions, store, playingSession }: any) => (
 	</button>
 ));
 
-function createStore(initial = {}) {
-	const state = { lastViewMode: null, ...initial };
+function createStore(initial: Record<string, any> = {}) {
+	const state: Record<string, any> = { lastViewMode: null, ...initial };
 	return {
 		useState: jest.fn(() => ({ ...state })),
 		update: jest.fn((fn) => fn(state)),
@@ -59,8 +59,8 @@ function createStore(initial = {}) {
 }
 
 function getToolbarItem(id: any) {
-	return useToolbar.mock.calls
-		.at(-1)[0]
+	return asMock(useToolbar)
+		.mock.calls.at(-1)[0]
 		.items.find((item: any) => item.id === id);
 }
 
@@ -76,14 +76,14 @@ describe("YearView", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
 		swipeHandlers = {};
-		useDirection.mockReturnValue("ltr");
-		useTranslations.mockReturnValue(translations);
-		useDateFormatter.mockImplementation(() => ({
+		asMock(useDirection).mockReturnValue("ltr");
+		asMock(useTranslations).mockReturnValue(translations);
+		asMock(useDateFormatter).mockImplementation(() => ({
 			format: (date: any) => String(date.getFullYear()),
 		}));
 	});
 
-	const renderYear = (props = {}) => {
+	const renderYear = (props: Record<string, any> = {}) => {
 		const store = props.store || createStore();
 		const date = props.date || new Date(2024, 5, 15);
 		return {
@@ -150,13 +150,13 @@ describe("YearView", () => {
 		swipeHandlers.onSwipeRight();
 		expect(store2._state.date.getFullYear()).toBe(2023);
 
-		useDirection.mockReturnValue("rtl");
+		asMock(useDirection).mockReturnValue("rtl");
 		renderYear({ store: createStore(), date: new Date(2024, 0, 1) });
 		expect(useSwipe).toHaveBeenCalled();
 	});
 
 	it("uses rtl icons in toolbar", () => {
-		useDirection.mockReturnValue("rtl");
+		asMock(useDirection).mockReturnValue("rtl");
 		renderYear();
 		expect(getToolbarItem("previousYear").icon).toBeTruthy();
 		expect(getToolbarItem("nextYear").icon).toBeTruthy();

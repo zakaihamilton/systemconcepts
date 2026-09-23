@@ -27,11 +27,11 @@ function asPlainArray(manifest: any) {
 describe("syncManifest", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
-		writeCompressedFile.mockResolvedValue(undefined);
+		asMock(writeCompressedFile).mockResolvedValue(undefined);
 	});
 
 	it("loads and normalizes a manifest from files.json.gz", async () => {
-		readCompressedFile.mockResolvedValue([
+		asMock(readCompressedFile).mockResolvedValue([
 			{ path: "alpha.json", version: "1" },
 		]);
 
@@ -46,7 +46,7 @@ describe("syncManifest", () => {
 	});
 
 	it("deduplicates entries by keeping the highest version and re-saves the cleaned manifest", async () => {
-		readCompressedFile.mockResolvedValue([
+		asMock(readCompressedFile).mockResolvedValue([
 			{ path: "/dup.json", version: "1" },
 			{ path: "/dup.json", version: "3" },
 			{ path: "loadedFromManifest" },
@@ -63,7 +63,7 @@ describe("syncManifest", () => {
 	});
 
 	it("does not re-save a cleaned manifest while the sync is locked", async () => {
-		readCompressedFile.mockResolvedValue([
+		asMock(readCompressedFile).mockResolvedValue([
 			{ path: "/dup.json", version: "1" },
 			{ path: "/dup.json", version: "3" },
 		]);
@@ -78,13 +78,13 @@ describe("syncManifest", () => {
 	});
 
 	it("propagates a transient (non-404) failure reading the compressed manifest", async () => {
-		readCompressedFile.mockRejectedValue(new Error("network failed"));
+		asMock(readCompressedFile).mockRejectedValue(new Error("network failed"));
 
 		await expect(syncManifest("aws/sync")).rejects.toThrow("network failed");
 	});
 
 	it("throws when the compressed manifest exists but is not an array", async () => {
-		readCompressedFile.mockResolvedValue({ not: "an array" });
+		asMock(readCompressedFile).mockResolvedValue({ not: "an array" });
 
 		await expect(syncManifest("aws/sync")).rejects.toThrow(
 			"Invalid remote sync manifest",
@@ -92,8 +92,8 @@ describe("syncManifest", () => {
 	});
 
 	it("falls back to files.json when files.json.gz is missing (404)", async () => {
-		readCompressedFile.mockResolvedValue(null);
-		storage.readFile.mockResolvedValue(
+		asMock(readCompressedFile).mockResolvedValue(null);
+		asMock(storage.readFile).mockResolvedValue(
 			JSON.stringify([{ path: "/beta.json", version: "2" }]),
 		);
 
@@ -107,8 +107,8 @@ describe("syncManifest", () => {
 	});
 
 	it("throws when files.json content is not a JSON array", async () => {
-		readCompressedFile.mockResolvedValue(null);
-		storage.readFile.mockResolvedValue(JSON.stringify({ a: 1 }));
+		asMock(readCompressedFile).mockResolvedValue(null);
+		asMock(storage.readFile).mockResolvedValue(JSON.stringify({ a: 1 }));
 
 		await expect(syncManifest("aws/sync")).rejects.toThrow(
 			"Invalid remote sync manifest",
@@ -116,8 +116,8 @@ describe("syncManifest", () => {
 	});
 
 	it("stays empty without scanning remote storage when skipScan is set", async () => {
-		readCompressedFile.mockResolvedValue(null);
-		storage.readFile.mockResolvedValue(null);
+		asMock(readCompressedFile).mockResolvedValue(null);
+		asMock(storage.readFile).mockResolvedValue(null);
 
 		const result = await syncManifest("aws/sync", false, true);
 
@@ -128,9 +128,9 @@ describe("syncManifest", () => {
 	});
 
 	it("generates a manifest from a recursive listing when nothing else is available", async () => {
-		readCompressedFile.mockResolvedValue(null);
-		storage.readFile.mockResolvedValue(null);
-		storage.getRecursiveList.mockResolvedValue([
+		asMock(readCompressedFile).mockResolvedValue(null);
+		asMock(storage.readFile).mockResolvedValue(null);
+		asMock(storage.getRecursiveList).mockResolvedValue([
 			{ type: "dir", name: "folder", path: "/aws/sync/folder" },
 			{
 				type: "file",
@@ -166,9 +166,9 @@ describe("syncManifest", () => {
 	});
 
 	it("does not persist a generated manifest while locked", async () => {
-		readCompressedFile.mockResolvedValue(null);
-		storage.readFile.mockResolvedValue(null);
-		storage.getRecursiveList.mockResolvedValue([
+		asMock(readCompressedFile).mockResolvedValue(null);
+		asMock(storage.readFile).mockResolvedValue(null);
+		asMock(storage.getRecursiveList).mockResolvedValue([
 			{
 				type: "file",
 				name: "gamma.json.gz",
@@ -190,7 +190,7 @@ describe("syncManifest", () => {
 	it("logs critically when every entry is filtered during normalization", async () => {
 		const { logger } = require("@util/api/logger");
 		jest.spyOn(logger, "error").mockImplementation(() => {});
-		readCompressedFile.mockResolvedValue([
+		asMock(readCompressedFile).mockResolvedValue([
 			{ path: "loadedFromManifest" },
 			{ version: "1" },
 		]);
@@ -203,7 +203,7 @@ describe("syncManifest", () => {
 	});
 
 	it("keeps an existing higher version when a duplicate is lower", async () => {
-		readCompressedFile.mockResolvedValue([
+		asMock(readCompressedFile).mockResolvedValue([
 			{ path: "/dup.json", version: "5" },
 			{ path: "/dup.json", version: "2" },
 			{ path: null, version: "1" },

@@ -77,7 +77,7 @@ beforeEach(async () => {
 	};
 	const s3 = await getS3({});
 	sendMock = s3.send;
-	sendMock.mockReset();
+	asMock(sendMock).mockReset();
 });
 
 afterAll(() => {
@@ -179,7 +179,7 @@ describe("validatePathAccess", () => {
 
 describe("getDownloadUrl", () => {
 	it("builds a signed GET url for the default bucket", async () => {
-		getSignedUrl.mockResolvedValue("https://signed.example/file.txt");
+		asMock(getSignedUrl).mockResolvedValue("https://signed.example/file.txt");
 
 		const url = await getDownloadUrl({ path: "/sessions/file.txt" });
 
@@ -193,7 +193,7 @@ describe("getDownloadUrl", () => {
 	});
 
 	it("forwards a custom content disposition", async () => {
-		getSignedUrl.mockResolvedValue("https://signed.example/file.txt");
+		asMock(getSignedUrl).mockResolvedValue("https://signed.example/file.txt");
 
 		await getDownloadUrl({
 			path: "file.txt",
@@ -208,7 +208,7 @@ describe("getDownloadUrl", () => {
 
 describe("uploadFile", () => {
 	it("throws when the source file does not exist", async () => {
-		fs.existsSync.mockReturnValue(false);
+		asMock(fs.existsSync).mockReturnValue(false);
 
 		await expect(
 			uploadFile({ from: "/tmp/missing.txt", to: "dest.txt" }),
@@ -216,10 +216,10 @@ describe("uploadFile", () => {
 	});
 
 	it("uploads the file stream to S3", async () => {
-		fs.existsSync.mockReturnValue(true);
+		asMock(fs.existsSync).mockReturnValue(true);
 		const stream = {};
-		fs.createReadStream.mockReturnValue(stream);
-		sendMock.mockResolvedValue({});
+		asMock(fs.createReadStream).mockReturnValue(stream);
+		asMock(sendMock).mockResolvedValue({});
 
 		await uploadFile({ from: "/tmp/source.txt", to: "dest.txt" });
 
@@ -232,12 +232,13 @@ describe("uploadFile", () => {
 describe("downloadFile", () => {
 	it("pipes the response body to the destination when supported", async () => {
 		const fileStream = new EventEmitter();
-		fs.createWriteStream.mockReturnValue(fileStream);
-		const body = new EventEmitter();
-		body.pipe = jest.fn((dest) => {
-			setTimeout(() => dest.emit("finish"), 0);
+		asMock(fs.createWriteStream).mockReturnValue(fileStream);
+		const body = Object.assign(new EventEmitter(), {
+			pipe: jest.fn((dest: EventEmitter) => {
+				setTimeout(() => dest.emit("finish"), 0);
+			}),
 		});
-		sendMock.mockResolvedValue({ Body: body });
+		asMock(sendMock).mockResolvedValue({ Body: body });
 
 		await downloadFile({ from: "src.txt", to: "/tmp/dest.txt" });
 
@@ -246,7 +247,7 @@ describe("downloadFile", () => {
 
 	it("falls back to writeFileSync when the body cannot be piped", async () => {
 		const bytes = new Uint8Array([1, 2, 3]);
-		sendMock.mockResolvedValue({
+		asMock(sendMock).mockResolvedValue({
 			Body: { transformToByteArray: jest.fn().mockResolvedValue(bytes) },
 		});
 
@@ -258,7 +259,7 @@ describe("downloadFile", () => {
 
 describe("uploadData / downloadData", () => {
 	it("uploads raw data without making the object public", async () => {
-		sendMock.mockResolvedValue({});
+		asMock(sendMock).mockResolvedValue({});
 
 		await uploadData({ path: "/data.json", data: "{}" });
 
@@ -268,11 +269,11 @@ describe("uploadData / downloadData", () => {
 				Body: "{}",
 			}),
 		);
-		expect(sendMock.mock.calls[0][0]).not.toHaveProperty("ACL");
+		expect(asMock(sendMock).mock.calls[0][0]).not.toHaveProperty("ACL");
 	});
 
 	it("downloads text content", async () => {
-		sendMock.mockResolvedValue({
+		asMock(sendMock).mockResolvedValue({
 			Body: { transformToString: jest.fn().mockResolvedValue("hello") },
 		});
 
@@ -280,7 +281,7 @@ describe("uploadData / downloadData", () => {
 	});
 
 	it("downloads binary content as a Buffer", async () => {
-		sendMock.mockResolvedValue({
+		asMock(sendMock).mockResolvedValue({
 			Body: {
 				transformToByteArray: jest
 					.fn()
@@ -297,7 +298,7 @@ describe("uploadData / downloadData", () => {
 
 describe("copyFile / moveFile / deleteFile", () => {
 	it("copies within the default bucket when no bucket prefix is given", async () => {
-		sendMock.mockResolvedValue({});
+		asMock(sendMock).mockResolvedValue({});
 
 		await copyFile("from.txt", "to.txt");
 
@@ -309,7 +310,7 @@ describe("copyFile / moveFile / deleteFile", () => {
 	});
 
 	it("copies across explicit bucket/path pairs", async () => {
-		sendMock.mockResolvedValue({});
+		asMock(sendMock).mockResolvedValue({});
 
 		await copyFile("bucket-a/from.txt", "bucket-b/to.txt");
 
@@ -321,7 +322,7 @@ describe("copyFile / moveFile / deleteFile", () => {
 	});
 
 	it("moves a file by copying then deleting the source", async () => {
-		sendMock.mockResolvedValue({});
+		asMock(sendMock).mockResolvedValue({});
 
 		await moveFile({ from: "from.txt", to: "to.txt" });
 
@@ -334,7 +335,7 @@ describe("copyFile / moveFile / deleteFile", () => {
 	});
 
 	it("deletes a file", async () => {
-		sendMock.mockResolvedValue({});
+		asMock(sendMock).mockResolvedValue({});
 
 		await deleteFile({ path: "/gone.txt" });
 
@@ -346,7 +347,7 @@ describe("copyFile / moveFile / deleteFile", () => {
 
 describe("metadataInfo", () => {
 	it("returns file metadata from HeadObject", async () => {
-		sendMock.mockResolvedValue({
+		asMock(sendMock).mockResolvedValue({
 			ContentType: "text/plain",
 			ContentLength: 42,
 			LastModified: new Date("2024-01-01"),
@@ -362,7 +363,7 @@ describe("metadataInfo", () => {
 	});
 
 	it("falls back to a directory listing when the head request fails", async () => {
-		sendMock
+		asMock(sendMock)
 			.mockRejectedValueOnce(new Error("not found"))
 			.mockResolvedValueOnce({ CommonPrefixes: [{ Prefix: "folder/" }] });
 
@@ -375,7 +376,7 @@ describe("metadataInfo", () => {
 	});
 
 	it("returns null when neither the file nor a folder exists", async () => {
-		sendMock
+		asMock(sendMock)
 			.mockRejectedValueOnce(new Error("not found"))
 			.mockResolvedValueOnce({ Contents: [], CommonPrefixes: [] });
 
@@ -383,7 +384,7 @@ describe("metadataInfo", () => {
 	});
 
 	it("returns null when the fallback listing also throws", async () => {
-		sendMock.mockRejectedValue(new Error("still failing"));
+		asMock(sendMock).mockRejectedValue(new Error("still failing"));
 
 		await expect(metadataInfo({ path: "missing" })).resolves.toBe(null);
 	});
@@ -391,7 +392,7 @@ describe("metadataInfo", () => {
 
 describe("list", () => {
 	it("collects files and folders, excluding private, across pages", async () => {
-		sendMock
+		asMock(sendMock)
 			.mockResolvedValueOnce({
 				CommonPrefixes: [{ Prefix: "sub/" }, { Prefix: "private/" }],
 				Contents: [
@@ -414,7 +415,9 @@ describe("list", () => {
 	});
 
 	it("skips content entries without a resolvable name", async () => {
-		sendMock.mockResolvedValue({ Contents: [{ Key: "root/", Size: 0 }] });
+		asMock(sendMock).mockResolvedValue({
+			Contents: [{ Key: "root/", Size: 0 }],
+		});
 
 		const items = await list({ path: "root" });
 
@@ -422,7 +425,7 @@ describe("list", () => {
 	});
 
 	it("stops when a continuation token repeats", async () => {
-		sendMock.mockResolvedValue({
+		asMock(sendMock).mockResolvedValue({
 			Contents: [{ Key: "a.txt", Size: 1 }],
 			NextContinuationToken: "same-token",
 		});
@@ -434,7 +437,7 @@ describe("list", () => {
 	});
 
 	it("includes child directory counts when requested", async () => {
-		sendMock
+		asMock(sendMock)
 			.mockResolvedValueOnce({
 				CommonPrefixes: [{ Prefix: "sub/" }],
 			})
@@ -449,7 +452,7 @@ describe("list", () => {
 	});
 
 	it("skips the private folder in directory listings", async () => {
-		sendMock.mockResolvedValue({
+		asMock(sendMock).mockResolvedValue({
 			CommonPrefixes: [{ Prefix: "private/" }, { Prefix: "public/" }],
 		});
 
@@ -458,7 +461,7 @@ describe("list", () => {
 	});
 
 	it("marks application/x-directory content entries as folders", async () => {
-		sendMock.mockResolvedValue({
+		asMock(sendMock).mockResolvedValue({
 			Contents: [
 				{
 					Key: "root/subdir",
@@ -481,7 +484,7 @@ describe("handleRequest", () => {
 	});
 
 	it("returns exists metadata for GET requests", async () => {
-		sendMock.mockResolvedValue({
+		asMock(sendMock).mockResolvedValue({
 			ContentType: "text/plain",
 			ContentLength: 3,
 			LastModified: new Date("2024-01-01"),
@@ -496,7 +499,7 @@ describe("handleRequest", () => {
 	});
 
 	it("returns an empty object for exists checks on missing files", async () => {
-		sendMock.mockRejectedValue(new Error("not found"));
+		asMock(sendMock).mockRejectedValue(new Error("not found"));
 
 		const result = await handleRequest({
 			req: { method: "GET", query: { exists: "true" } },
@@ -507,7 +510,7 @@ describe("handleRequest", () => {
 	});
 
 	it("lists a directory for type=dir GET requests", async () => {
-		sendMock.mockResolvedValue({
+		asMock(sendMock).mockResolvedValue({
 			CommonPrefixes: [{ Prefix: "sub/" }],
 			Contents: [],
 		});
@@ -521,7 +524,7 @@ describe("handleRequest", () => {
 	});
 
 	it("downloads file content for plain GET requests", async () => {
-		sendMock.mockResolvedValue({
+		asMock(sendMock).mockResolvedValue({
 			Body: { transformToString: jest.fn().mockResolvedValue("contents") },
 		});
 
@@ -534,7 +537,7 @@ describe("handleRequest", () => {
 	});
 
 	it("returns an empty string when the object is missing (NoSuchKey)", async () => {
-		sendMock.mockRejectedValue({ name: "NoSuchKey" });
+		asMock(sendMock).mockRejectedValue({ name: "NoSuchKey" });
 
 		const result = await handleRequest({
 			req: { method: "GET", query: {} },
@@ -545,7 +548,7 @@ describe("handleRequest", () => {
 	});
 
 	it("returns a safe error payload for unexpected GET failures", async () => {
-		sendMock.mockRejectedValue(new Error("boom"));
+		asMock(sendMock).mockRejectedValue(new Error("boom"));
 
 		const result = await handleRequest({
 			req: { method: "GET", query: {} },
@@ -565,7 +568,7 @@ describe("handleRequest", () => {
 	});
 
 	it("uploads a single PUT item, decoding base64 for binary paths", async () => {
-		sendMock.mockResolvedValue({});
+		asMock(sendMock).mockResolvedValue({});
 
 		const result = await handleRequest({
 			req: {
@@ -581,7 +584,7 @@ describe("handleRequest", () => {
 	});
 
 	it("uploads a batch of PUT items", async () => {
-		sendMock.mockResolvedValue({});
+		asMock(sendMock).mockResolvedValue({});
 
 		const result = await handleRequest({
 			req: {
@@ -608,7 +611,7 @@ describe("handleRequest", () => {
 	});
 
 	it("deletes the resolved path for DELETE requests", async () => {
-		sendMock.mockResolvedValue({});
+		asMock(sendMock).mockResolvedValue({});
 
 		const result = await handleRequest({
 			req: { method: "DELETE" },
@@ -622,7 +625,7 @@ describe("handleRequest", () => {
 	});
 
 	it("reads the path from request headers when not explicitly provided", async () => {
-		sendMock.mockResolvedValue({
+		asMock(sendMock).mockResolvedValue({
 			Body: { transformToString: jest.fn().mockResolvedValue("via-header") },
 		});
 
@@ -638,7 +641,7 @@ describe("handleRequest", () => {
 	});
 
 	it("lists directories with counts when the counts header is set", async () => {
-		sendMock
+		asMock(sendMock)
 			.mockResolvedValueOnce({
 				CommonPrefixes: [{ Prefix: "sub/" }],
 			})
@@ -659,7 +662,7 @@ describe("handleRequest", () => {
 	});
 
 	it("returns directory metadata for exists checks", async () => {
-		sendMock
+		asMock(sendMock)
 			.mockRejectedValueOnce(new Error("not found"))
 			.mockResolvedValueOnce({ CommonPrefixes: [{ Prefix: "folder/" }] });
 

@@ -15,8 +15,10 @@ jest.mock("@util/api/logger", () => ({
 function makeDevice(id: any, overrides = {}) {
 	return {
 		id,
+		name: id,
 		enabled: true,
 		getListing: jest.fn().mockResolvedValue([]),
+		getRecursiveList: jest.fn().mockResolvedValue([]),
 		createFolder: jest.fn().mockResolvedValue(undefined),
 		createFolders: jest.fn().mockResolvedValue(undefined),
 		createFolderPath: jest.fn().mockResolvedValue(undefined),
@@ -70,7 +72,7 @@ describe("callMethod", () => {
 
 	it("dispatches simple methods to the matching device with a normalized path", async () => {
 		const device = makeDevice("local");
-		device.readFile.mockResolvedValue("hello");
+		asMock(device.readFile).mockResolvedValue("hello");
 		storageDevices.push(device);
 
 		const result = await callMethod({ name: "readFile" }, "local/a/b.txt");
@@ -95,7 +97,7 @@ describe("callMethod", () => {
 	it("re-throws non-filesystem errors and logs them", async () => {
 		const device = makeDevice("local");
 		const err = new Error("boom");
-		device.readFile.mockRejectedValue(err);
+		asMock(device.readFile).mockRejectedValue(err);
 		storageDevices.push(device);
 
 		await expect(callMethod({ name: "readFile" }, "local/a.txt")).rejects.toBe(
@@ -112,7 +114,7 @@ describe("callMethod", () => {
 	])("suppresses logging for common filesystem error %s", async (code) => {
 		const device = makeDevice("local");
 		const err = Object.assign(new Error("fs error"), { code });
-		device.readFile.mockRejectedValue(err);
+		asMock(device.readFile).mockRejectedValue(err);
 		storageDevices.push(device);
 
 		await expect(callMethod({ name: "readFile" }, "local/a.txt")).rejects.toBe(
@@ -136,7 +138,10 @@ describe("callMethod", () => {
 
 		it("includes counts when useCount is requested", async () => {
 			const device = makeDevice("local");
-			device.getListing.mockResolvedValue([{ name: "a" }, { name: "b" }]);
+			asMock(device.getListing).mockResolvedValue([
+				{ name: "a" },
+				{ name: "b" },
+			]);
 			storageDevices.push(device);
 
 			const [result] = await callMethod({ name: "getListing" }, "", {
@@ -165,7 +170,7 @@ describe("callMethod", () => {
 			const device = makeDevice("local", {
 				getRecursiveList: jest.fn().mockRejectedValue(new Error("fail")),
 			});
-			device.getListing.mockRejectedValue(new Error("also fails"));
+			asMock(device.getListing).mockRejectedValue(new Error("also fails"));
 			storageDevices.push(device);
 
 			const [result] = await callMethod({ name: "getListing" }, "", {
@@ -206,7 +211,7 @@ describe("callMethod", () => {
 	describe("getListing with a device id", () => {
 		it("computes recursive directory sizes for the local device", async () => {
 			const device = makeDevice("local");
-			device.getListing.mockResolvedValueOnce([
+			asMock(device.getListing).mockResolvedValueOnce([
 				{
 					name: "sub",
 					type: "dir",
@@ -228,7 +233,7 @@ describe("callMethod", () => {
 
 		it("defaults the directory size to zero when recursion yields nothing", async () => {
 			const device = makeDevice("local");
-			device.getListing
+			asMock(device.getListing)
 				.mockResolvedValueOnce([
 					{
 						name: "sub",
@@ -249,7 +254,7 @@ describe("callMethod", () => {
 
 		it("does not compute sizes for non-local devices", async () => {
 			const device = makeDevice("aws");
-			device.getListing.mockResolvedValue([
+			asMock(device.getListing).mockResolvedValue([
 				{ name: "sub", type: "dir", path: "/aws/root/sub" },
 			]);
 			storageDevices.push(device);
@@ -278,7 +283,7 @@ describe("storage.getRecursiveList", () => {
 	it("falls back to manual recursion when the device method is unsupported", async () => {
 		const device = makeDevice("local");
 		delete device.getRecursiveList;
-		device.getListing.mockImplementation((path) => {
+		asMock(device.getListing).mockImplementation((path) => {
 			if (path === "/root") {
 				return Promise.resolve([
 					{ name: "file.txt", type: "file", path: "/local/root/file.txt" },
@@ -310,7 +315,7 @@ describe("storage.getRecursiveList", () => {
 		const device = makeDevice("local", {
 			getRecursiveList: jest.fn().mockRejectedValue(new Error("unsupported")),
 		});
-		device.getListing.mockResolvedValue([]);
+		asMock(device.getListing).mockResolvedValue([]);
 		storageDevices.push(device);
 
 		const result = await storage.getRecursiveList("local/root");
@@ -335,7 +340,7 @@ describe("storage.getRecursiveList", () => {
 		const device = makeDevice("local");
 		delete device.getRecursiveList;
 		let depth = 0;
-		device.getListing.mockImplementation((path) => {
+		asMock(device.getListing).mockImplementation((path) => {
 			depth += 1;
 			const name = `d${depth}`;
 			return Promise.resolve([
@@ -353,7 +358,7 @@ describe("storage.getRecursiveList", () => {
 	it("avoids revisiting the same directory twice", async () => {
 		const device = makeDevice("local");
 		delete device.getRecursiveList;
-		device.getListing.mockImplementation((path) => {
+		asMock(device.getListing).mockImplementation((path) => {
 			if (path === "/root") {
 				return Promise.resolve([
 					{ name: "sub", type: "dir", path: "/local/root/sub" },
@@ -373,7 +378,7 @@ describe("storage.getRecursiveList", () => {
 	it("skips entries whose path does not belong to the directory", async () => {
 		const device = makeDevice("local");
 		delete device.getRecursiveList;
-		device.getListing.mockResolvedValue([
+		asMock(device.getListing).mockResolvedValue([
 			{
 				name: "escaped.txt",
 				type: "file",
@@ -392,7 +397,7 @@ describe("storage.getRecursiveList", () => {
 		const device = makeDevice("local");
 		delete device.getRecursiveList;
 		let depth = 0;
-		device.getListing.mockImplementation(() => {
+		asMock(device.getListing).mockImplementation(() => {
 			depth += 1;
 			const name = `d${depth}`;
 			return Promise.resolve([
@@ -413,7 +418,7 @@ describe("storage.getRecursiveList", () => {
 	it("throws in strict mode when some entries fail path validation", async () => {
 		const device = makeDevice("local");
 		delete device.getRecursiveList;
-		device.getListing.mockResolvedValue([
+		asMock(device.getListing).mockResolvedValue([
 			{ name: "good.txt", type: "file", path: "/local/root/good.txt" },
 			{ name: "bad.txt", type: "file", path: "/local/elsewhere/bad.txt" },
 		]);
@@ -429,7 +434,7 @@ describe("storage.exportFolder", () => {
 	it("builds a nested data object from files and folders, skipping binaries", async () => {
 		const device = makeDevice("local");
 		delete device.getRecursiveList;
-		device.getListing.mockImplementation((path) => {
+		asMock(device.getListing).mockImplementation((path) => {
 			if (path === "/root") {
 				return Promise.resolve([
 					{ name: "file.txt", type: "file", path: "local/root/file.txt" },
@@ -448,7 +453,7 @@ describe("storage.exportFolder", () => {
 			}
 			return Promise.resolve([]);
 		});
-		device.readFile.mockImplementation((path) => {
+		asMock(device.readFile).mockImplementation((path) => {
 			if (path === "/root/file.txt") return Promise.resolve("hello");
 			if (path === "/root/sub/nested.txt") return Promise.resolve("world");
 			return Promise.resolve(null);
@@ -466,10 +471,10 @@ describe("storage.exportFolder", () => {
 
 	it("logs and continues when a nested item fails to read", async () => {
 		const device = makeDevice("local");
-		device.getListing.mockResolvedValueOnce([
+		asMock(device.getListing).mockResolvedValueOnce([
 			{ name: "broken.txt", type: "file", path: "local/root/broken.txt" },
 		]);
-		device.readFile.mockRejectedValue(new Error("read failed"));
+		asMock(device.readFile).mockRejectedValue(new Error("read failed"));
 		storageDevices.push(device);
 
 		const data = await storage.exportFolder("local/root");
@@ -482,7 +487,7 @@ describe("storage.exportFolder", () => {
 describe("storage.exportFolderAsZip", () => {
 	it("builds a zip blob containing nested files", async () => {
 		const device = makeDevice("local");
-		device.getListing.mockImplementation((path) => {
+		asMock(device.getListing).mockImplementation((path) => {
 			if (path === "/root") {
 				return Promise.resolve([
 					{ name: "file.txt", type: "file", path: "local/root/file.txt" },
@@ -500,7 +505,7 @@ describe("storage.exportFolderAsZip", () => {
 			}
 			return Promise.resolve([]);
 		});
-		device.readFile.mockImplementation((path) => {
+		asMock(device.readFile).mockImplementation((path) => {
 			if (path === "/root/file.txt") return Promise.resolve("hello");
 			if (path === "/root/sub/nested.txt") return Promise.resolve("world");
 			return Promise.resolve(null);
@@ -515,10 +520,10 @@ describe("storage.exportFolderAsZip", () => {
 
 	it("stores binary files as base64 strings in the zip", async () => {
 		const device = makeDevice("local");
-		device.getListing.mockResolvedValue([
+		asMock(device.getListing).mockResolvedValue([
 			{ name: "photo.png", type: "file", path: "local/root/photo.png" },
 		]);
-		device.readFile.mockResolvedValue("aGVsbG8=");
+		asMock(device.readFile).mockResolvedValue("aGVsbG8=");
 		storageDevices.push(device);
 
 		const blob = await storage.exportFolderAsZip("local/root");
@@ -529,10 +534,10 @@ describe("storage.exportFolderAsZip", () => {
 
 	it("logs and continues when a nested item fails while zipping", async () => {
 		const device = makeDevice("local");
-		device.getListing.mockResolvedValueOnce([
+		asMock(device.getListing).mockResolvedValueOnce([
 			{ name: "broken.txt", type: "file", path: "local/root/broken.txt" },
 		]);
-		device.readFile.mockRejectedValue(new Error("read failed"));
+		asMock(device.readFile).mockRejectedValue(new Error("read failed"));
 		storageDevices.push(device);
 
 		const blob = await storage.exportFolderAsZip("local/root");
@@ -543,10 +548,10 @@ describe("storage.exportFolderAsZip", () => {
 
 	it("omits files whose content is null when building the zip", async () => {
 		const device = makeDevice("local");
-		device.getListing.mockResolvedValue([
+		asMock(device.getListing).mockResolvedValue([
 			{ name: "empty.txt", type: "file", path: "local/root/empty.txt" },
 		]);
-		device.readFile.mockResolvedValue(null);
+		asMock(device.readFile).mockResolvedValue(null);
 		storageDevices.push(device);
 
 		const blob = await storage.exportFolderAsZip("local/root");
@@ -610,7 +615,7 @@ describe("storage.copyFolder / copyFile / moveFolder / moveFile", () => {
 
 	it("copies file contents from one path to another", async () => {
 		const device = makeDevice("local");
-		device.readFile.mockResolvedValue("payload");
+		asMock(device.readFile).mockResolvedValue("payload");
 		storageDevices.push(device);
 
 		await storage.copyFile("local/a.txt", "local/b.txt");
@@ -630,7 +635,7 @@ describe("storage.copyFolder / copyFile / moveFolder / moveFile", () => {
 
 	it("recursively copies folders and files", async () => {
 		const device = makeDevice("local");
-		device.getListing.mockImplementation((path) => {
+		asMock(device.getListing).mockImplementation((path) => {
 			if (path === "/from") {
 				return Promise.resolve([
 					{ name: "file.txt", type: "file" },
@@ -639,7 +644,7 @@ describe("storage.copyFolder / copyFile / moveFolder / moveFile", () => {
 			}
 			return Promise.resolve([]);
 		});
-		device.readFile.mockResolvedValue("contents");
+		asMock(device.readFile).mockResolvedValue("contents");
 		storageDevices.push(device);
 
 		await storage.copyFolder("local/from", "local/to");
@@ -651,7 +656,7 @@ describe("storage.copyFolder / copyFile / moveFolder / moveFile", () => {
 
 	it("moves a file by copying then deleting the source", async () => {
 		const device = makeDevice("local");
-		device.readFile.mockResolvedValue("payload");
+		asMock(device.readFile).mockResolvedValue("payload");
 		storageDevices.push(device);
 
 		await storage.moveFile("local/a.txt", "local/b.txt");
@@ -671,7 +676,7 @@ describe("storage.copyFolder / copyFile / moveFolder / moveFile", () => {
 
 	it("moves a folder by copying then deleting the source", async () => {
 		const device = makeDevice("local");
-		device.getListing.mockResolvedValue([]);
+		asMock(device.getListing).mockResolvedValue([]);
 		storageDevices.push(device);
 
 		await storage.moveFolder("local/from", "local/to");
@@ -694,7 +699,7 @@ describe("useListing", () => {
 	it("ignores stale responses when the url changes before fetch completes", async () => {
 		const device = makeDevice("local");
 		let resolveSlow: any;
-		device.getListing.mockImplementation((path) => {
+		asMock(device.getListing).mockImplementation((path) => {
 			if (path === "/slow") {
 				return new Promise((resolve) => {
 					resolveSlow = resolve;
@@ -721,7 +726,7 @@ describe("useListing", () => {
 
 	it("loads a listing and reports loading transitions", async () => {
 		const device = makeDevice("local");
-		device.getListing.mockResolvedValue([{ name: "a" }]);
+		asMock(device.getListing).mockResolvedValue([{ name: "a" }]);
 		storageDevices.push(device);
 
 		const { result } = renderHook(() => useListing("local/root"));
@@ -734,7 +739,7 @@ describe("useListing", () => {
 	it("surfaces errors from the storage layer", async () => {
 		const device = makeDevice("local");
 		const err = new Error("listing failed");
-		device.getListing.mockRejectedValue(err);
+		asMock(device.getListing).mockRejectedValue(err);
 		storageDevices.push(device);
 
 		const { result } = renderHook(() => useListing("local/root"));
@@ -746,7 +751,7 @@ describe("useListing", () => {
 	it("does not replace listing state when the fetched listing is unchanged", async () => {
 		const device = makeDevice("local");
 		const listing = [{ name: "a" }];
-		device.getListing.mockResolvedValue(listing);
+		asMock(device.getListing).mockResolvedValue(listing);
 		storageDevices.push(device);
 
 		const { result } = renderHook(() => useListing("local/root"));
@@ -758,7 +763,7 @@ describe("useListing", () => {
 describe("useFile", () => {
 	it("resolves to null data when the file does not exist", async () => {
 		const device = makeDevice("local");
-		device.exists.mockResolvedValue(false);
+		asMock(device.exists).mockResolvedValue(false);
 		storageDevices.push(device);
 
 		const { result } = renderHook(() => useFile("local/missing.json"));
@@ -769,8 +774,8 @@ describe("useFile", () => {
 
 	it("applies a mapping function to loaded data", async () => {
 		const device = makeDevice("local");
-		device.exists.mockResolvedValue(true);
-		device.readFile.mockResolvedValue("42");
+		asMock(device.exists).mockResolvedValue(true);
+		asMock(device.readFile).mockResolvedValue("42");
 		storageDevices.push(device);
 
 		const { result } = renderHook(() =>
@@ -783,11 +788,11 @@ describe("useFile", () => {
 
 	it("surfaces read errors", async () => {
 		const device = makeDevice("local");
-		device.exists.mockResolvedValue(true);
+		asMock(device.exists).mockResolvedValue(true);
 		const err = new Error("read failed");
 		// Reject on a later macrotask so it settles after the hook's own
 		// error-reset timer (scheduled with setTimeout(0)) has already run.
-		device.readFile.mockImplementation(
+		asMock(device.readFile).mockImplementation(
 			() => new Promise((_resolve, reject) => setTimeout(() => reject(err), 5)),
 		);
 		storageDevices.push(device);
@@ -800,7 +805,7 @@ describe("useFile", () => {
 	it("surfaces existence-check errors", async () => {
 		const device = makeDevice("local");
 		const err = new Error("exists failed");
-		device.exists.mockImplementation(
+		asMock(device.exists).mockImplementation(
 			() => new Promise((_resolve, reject) => setTimeout(() => reject(err), 5)),
 		);
 		storageDevices.push(device);
@@ -812,7 +817,7 @@ describe("useFile", () => {
 
 	it("writes string data to storage and updates local state", async () => {
 		const device = makeDevice("local");
-		device.exists.mockResolvedValue(false);
+		asMock(device.exists).mockResolvedValue(false);
 		storageDevices.push(device);
 
 		const { result } = renderHook(() => useFile("local/data.json"));
@@ -829,7 +834,7 @@ describe("useFile", () => {
 
 	it("serializes non-string data before writing", async () => {
 		const device = makeDevice("local");
-		device.exists.mockResolvedValue(false);
+		asMock(device.exists).mockResolvedValue(false);
 		storageDevices.push(device);
 
 		const { result } = renderHook(() => useFile("local/data.json"));
@@ -865,7 +870,7 @@ describe("useFile", () => {
 
 	it("sets directory size to zero when recursive listing throws", async () => {
 		const device = makeDevice("local");
-		device.getListing.mockResolvedValueOnce([
+		asMock(device.getListing).mockResolvedValueOnce([
 			{
 				name: "sub",
 				type: "dir",
@@ -883,13 +888,13 @@ describe("useFile", () => {
 		});
 
 		expect(items[0].size).toBe(0);
-		storage.getRecursiveList.mockRestore();
+		asMock(storage.getRecursiveList).mockRestore();
 	});
 
 	it("supports a functional updater that reads previous state", async () => {
 		const device = makeDevice("local");
-		device.exists.mockResolvedValue(true);
-		device.readFile.mockResolvedValue("1");
+		asMock(device.exists).mockResolvedValue(true);
+		asMock(device.readFile).mockResolvedValue("1");
 		storageDevices.push(device);
 
 		const { result } = renderHook(() =>
@@ -908,8 +913,8 @@ describe("useFile", () => {
 
 	it("writes string data returned from a functional updater without re-serializing", async () => {
 		const device = makeDevice("local");
-		device.exists.mockResolvedValue(true);
-		device.readFile.mockResolvedValue("seed");
+		asMock(device.exists).mockResolvedValue(true);
+		asMock(device.readFile).mockResolvedValue("seed");
 		storageDevices.push(device);
 
 		const { result } = renderHook(() => useFile("local/data.json"));
@@ -924,7 +929,7 @@ describe("useFile", () => {
 
 	it("applies mapping when the file does not exist", async () => {
 		const device = makeDevice("local");
-		device.exists.mockResolvedValue(false);
+		asMock(device.exists).mockResolvedValue(false);
 		storageDevices.push(device);
 		const mapping = jest.fn((_data, url) => ({ fromMapping: url }));
 
@@ -944,8 +949,8 @@ describe("useFile", () => {
 
 	it("serializes objects returned from a functional updater", async () => {
 		const device = makeDevice("local");
-		device.exists.mockResolvedValue(true);
-		device.readFile.mockResolvedValue("{}");
+		asMock(device.exists).mockResolvedValue(true);
+		asMock(device.readFile).mockResolvedValue("{}");
 		storageDevices.push(device);
 
 		const { result } = renderHook(() =>
@@ -973,7 +978,7 @@ describe("callMethod edge cases", () => {
 
 	it("counts zero items when getListing returns null", async () => {
 		const device = makeDevice("local");
-		device.getListing.mockResolvedValue(null);
+		asMock(device.getListing).mockResolvedValue(null);
 		storageDevices.push(device);
 
 		const [result] = await callMethod({ name: "getListing" }, "", {
@@ -1003,7 +1008,7 @@ describe("getRecursiveList manual fallback branches", () => {
 	it("warns and skips directories when listing throws in fallback mode", async () => {
 		const device = makeDevice("local");
 		delete device.getRecursiveList;
-		device.getListing.mockRejectedValue(new Error("list failed"));
+		asMock(device.getListing).mockRejectedValue(new Error("list failed"));
 		storageDevices.push(device);
 
 		const result = await storage.getRecursiveList("local/root");
@@ -1015,7 +1020,9 @@ describe("getRecursiveList manual fallback branches", () => {
 	it("skips items without paths during manual recursion", async () => {
 		const device = makeDevice("local");
 		delete device.getRecursiveList;
-		device.getListing.mockResolvedValue([{ name: "orphan.txt", type: "file" }]);
+		asMock(device.getListing).mockResolvedValue([
+			{ name: "orphan.txt", type: "file" },
+		]);
 		storageDevices.push(device);
 
 		const result = await storage.getRecursiveList("local/root");
@@ -1027,7 +1034,7 @@ describe("getRecursiveList manual fallback branches", () => {
 	it("warns when every entry fails path validation in non-strict mode", async () => {
 		const device = makeDevice("local");
 		delete device.getRecursiveList;
-		device.getListing.mockResolvedValue([
+		asMock(device.getListing).mockResolvedValue([
 			{
 				name: "escaped.txt",
 				type: "file",
@@ -1049,7 +1056,7 @@ describe("useListing duplicate responses", () => {
 	it("keeps the same listing reference when data is unchanged", async () => {
 		const device = makeDevice("local");
 		const listing = [{ name: "a" }];
-		device.getListing.mockResolvedValue(listing);
+		asMock(device.getListing).mockResolvedValue(listing);
 		storageDevices.push(device);
 
 		const { result, rerender } = renderHook(({ url }) => useListing(url), {

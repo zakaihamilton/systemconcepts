@@ -22,8 +22,8 @@ describe("Toolbar menu interactions", () => {
 		ToolbarStore.update((s) => {
 			s.sections = [];
 		});
-		useTranslations.mockReturnValue({ MENU: "Menu" });
-		useDeviceType.mockReturnValue("desktop");
+		asMock(useTranslations).mockReturnValue({ MENU: "Menu" });
+		asMock(useDeviceType).mockReturnValue("desktop");
 	});
 
 	it("opens overflow menu and runs item onClick", () => {

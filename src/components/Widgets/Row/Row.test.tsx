@@ -7,7 +7,7 @@ jest.mock("@util/data/direction");
 describe("Row Widget", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
-		useDirection.mockReturnValue("ltr");
+		asMock(useDirection).mockReturnValue("ltr");
 	});
 
 	it("renders children and icons", () => {

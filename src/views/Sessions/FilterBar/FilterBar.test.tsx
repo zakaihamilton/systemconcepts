@@ -109,9 +109,13 @@ describe("FilterBar", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
 		state = makeState();
-		useTranslations.mockReturnValue(translations);
-		SessionsStore.useState = jest.fn((selector) => selector(state));
-		SessionsStore.update = jest.fn((updater) => updater(state));
+		asMock(useTranslations).mockReturnValue(translations);
+		asMock(SessionsStore.useState).mockImplementation((selector: any) =>
+			selector(state),
+		);
+		asMock(SessionsStore.update).mockImplementation((updater: any) =>
+			updater(state),
+		);
 	});
 
 	it("renders attribute/year/group labels when filters are empty", () => {
@@ -130,9 +134,11 @@ describe("FilterBar", () => {
 
 	it("applies hide class when filter dialog is closed", () => {
 		state = makeState({ showFilterDialog: false });
-		SessionsStore.useState = jest.fn((selector) => selector(state));
+		asMock(SessionsStore.useState).mockImplementation((selector: any) =>
+			selector(state),
+		);
 		const { container } = render(<FilterBar />);
-		expect(container.firstChild.className).toMatch(/hide/);
+		expect((container.firstChild as HTMLElement).className).toMatch(/hide/);
 	});
 
 	it("shows single-selection labels for type, year, and group", () => {
@@ -141,7 +147,9 @@ describe("FilterBar", () => {
 			yearFilter: ["2024"],
 			groupFilter: ["alpha"],
 		});
-		SessionsStore.useState = jest.fn((selector) => selector(state));
+		asMock(SessionsStore.useState).mockImplementation((selector: any) =>
+			selector(state),
+		);
 		render(<FilterBar />);
 		expect(screen.getAllByText("Audio").length).toBeGreaterThan(0);
 		expect(screen.getByText("Attribute")).toBeInTheDocument();
@@ -157,7 +165,9 @@ describe("FilterBar", () => {
 			yearFilter: ["2024", "2023"],
 			groupFilter: ["alpha", "beta"],
 		});
-		SessionsStore.useState = jest.fn((selector) => selector(state));
+		asMock(SessionsStore.useState).mockImplementation((selector: any) =>
+			selector(state),
+		);
 		render(<FilterBar />);
 		expect(screen.getAllByText("2 selected")).toHaveLength(3);
 		expect(screen.getByText("Attributes")).toBeInTheDocument();
@@ -176,7 +186,9 @@ describe("FilterBar", () => {
 
 	it("selects radio filters and clears sibling radios", () => {
 		state = makeState({ typeFilter: ["without_thumbnail"] });
-		SessionsStore.useState = jest.fn((selector) => selector(state));
+		asMock(SessionsStore.useState).mockImplementation((selector: any) =>
+			selector(state),
+		);
 		render(<FilterBar />);
 
 		fireEvent.click(screen.getByRole("button", { name: "With thumbnail" }));
@@ -193,7 +205,9 @@ describe("FilterBar", () => {
 		["languages_all", "Both", ["with_english", "with_hebrew"]],
 	])("clears related filters when selecting %s", (id, label, related) => {
 		state = makeState({ typeFilter: [...related, "audio"] });
-		SessionsStore.useState = jest.fn((selector) => selector(state));
+		asMock(SessionsStore.useState).mockImplementation((selector: any) =>
+			selector(state),
+		);
 		render(<FilterBar />);
 
 		const buttons = screen.getAllByRole("button", { name: label });
@@ -231,7 +245,9 @@ describe("FilterBar", () => {
 				"with_english",
 			],
 		});
-		SessionsStore.useState = jest.fn((selector) => selector(state));
+		asMock(SessionsStore.useState).mockImplementation((selector: any) =>
+			selector(state),
+		);
 		render(<FilterBar />);
 		expect(screen.getByTestId("highlight-category_header")).toBeInTheDocument();
 		expect(screen.getByTestId("highlight-image_header")).toBeInTheDocument();
@@ -262,7 +278,9 @@ describe("FilterBar", () => {
 
 	it("handles empty sessions and groups safely", () => {
 		state = makeState({ sessions: null, groups: null });
-		SessionsStore.useState = jest.fn((selector) => selector(state));
+		asMock(SessionsStore.useState).mockImplementation((selector: any) =>
+			selector(state),
+		);
 		render(<FilterBar />);
 		expect(screen.getByText("Years")).toBeInTheDocument();
 		expect(screen.getByText("Groups")).toBeInTheDocument();
@@ -282,7 +300,9 @@ describe("FilterBar", () => {
 			yearFilter: ["2024"],
 			groupFilter: ["alpha"],
 		});
-		SessionsStore.useState = jest.fn((selector) => selector(state));
+		asMock(SessionsStore.useState).mockImplementation((selector: any) =>
+			selector(state),
+		);
 		const { container } = render(<FilterBar />);
 		const clearIcons = container.querySelectorAll('[title="Clear filter"] svg');
 		expect(clearIcons.length).toBeGreaterThanOrEqual(3);
@@ -332,7 +352,9 @@ describe("FilterBar", () => {
 
 	it("shows checked markers for active checkbox filters", () => {
 		state = makeState({ typeFilter: ["exclude_image_only", "ai"] });
-		SessionsStore.useState = jest.fn((selector) => selector(state));
+		asMock(SessionsStore.useState).mockImplementation((selector: any) =>
+			selector(state),
+		);
 		render(<FilterBar />);
 		expect(
 			screen.getByTestId("checked-exclude_image_only"),
@@ -342,7 +364,9 @@ describe("FilterBar", () => {
 
 	it("resolves unknown single type filter label gracefully", () => {
 		state = makeState({ typeFilter: ["unknown_type"] });
-		SessionsStore.useState = jest.fn((selector) => selector(state));
+		asMock(SessionsStore.useState).mockImplementation((selector: any) =>
+			selector(state),
+		);
 		render(<FilterBar />);
 		expect(screen.getByText("Attribute")).toBeInTheDocument();
 	});

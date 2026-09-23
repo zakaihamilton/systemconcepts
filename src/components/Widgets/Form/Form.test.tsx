@@ -38,12 +38,12 @@ describe("Form Widget", () => {
 			</FormGroup>,
 		);
 
-		const input = getByTestId("mock-input");
+		const input = getByTestId("mock-input") as HTMLInputElement;
 		expect(input.value).toBe("Initial");
 
 		fireEvent.change(input, { target: { value: "New Name" } });
 		expect(setRecord).toHaveBeenCalled();
-		const updater = setRecord.mock.calls[0][0];
+		const updater = asMock(setRecord).mock.calls[0][0];
 		expect(updater({ name: "Initial" })).toEqual({ name: "New Name" });
 	});
 
@@ -72,7 +72,7 @@ describe("Form Widget", () => {
 		);
 		fireEvent.change(getByTestId("nested"), { target: { value: "Bob" } });
 		expect(setRecord).toHaveBeenCalled();
-		const updater = setRecord.mock.calls[0][0];
+		const updater = asMock(setRecord).mock.calls[0][0];
 		expect(updater({ user: { name: "Ada" } })).toEqual({
 			user: { name: "Bob" },
 		});

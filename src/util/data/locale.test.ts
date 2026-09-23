@@ -8,7 +8,7 @@ jest.mock("@util/domain/language", () => ({
 
 describe("useLocale", () => {
 	it("returns the regional locale", () => {
-		useRegionalLocale.mockReturnValue("fr-FR");
+		asMock(useRegionalLocale).mockReturnValue("fr-FR");
 		const { result } = renderHook(() => useLocale());
 		expect(result.current).toBe("fr-FR");
 	});
@@ -16,7 +16,7 @@ describe("useLocale", () => {
 
 describe("useDateFormatter", () => {
 	beforeEach(() => {
-		useRegionalLocale.mockReturnValue("en-US");
+		asMock(useRegionalLocale).mockReturnValue("en-US");
 	});
 
 	afterEach(() => {
@@ -34,7 +34,7 @@ describe("useDateFormatter", () => {
 	});
 
 	it("falls back to the app locale when none is provided", () => {
-		useRegionalLocale.mockReturnValue("en-GB");
+		asMock(useRegionalLocale).mockReturnValue("en-GB");
 		const { result } = renderHook(() =>
 			useDateFormatter({ year: "numeric", month: "2-digit", day: "2-digit" }),
 		);
@@ -94,7 +94,7 @@ describe("useDateFormatter", () => {
 	});
 
 	it("falls back to en-US when no locale is configured", () => {
-		useRegionalLocale.mockReturnValue(null);
+		asMock(useRegionalLocale).mockReturnValue(null);
 		const { result } = renderHook(() =>
 			useDateFormatter({ year: "numeric", month: "2-digit", day: "2-digit" }),
 		);

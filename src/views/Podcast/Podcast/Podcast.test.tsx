@@ -20,9 +20,9 @@ describe("Podcast View", () => {
 
 	beforeEach(() => {
 		jest.clearAllMocks();
-		useTranslations.mockReturnValue(mockTranslations);
-		Cookies.get.mockReturnValue(null);
-		getOrigin.mockReturnValue("http://localhost");
+		asMock(useTranslations).mockReturnValue(mockTranslations);
+		asMock(Cookies.get).mockReturnValue(null);
+		asMock(getOrigin).mockReturnValue("http://localhost");
 	});
 
 	it("renders nothing if not signed in", () => {
@@ -31,12 +31,12 @@ describe("Podcast View", () => {
 	});
 
 	it("renders podcast feed when signed in and user has rssToken", async () => {
-		Cookies.get.mockImplementation((key: any) => {
+		asMock(Cookies.get).mockImplementation((key: any) => {
 			if (key === "id") return "testuser";
 			if (key === "hash") return "testhash";
 			return null;
 		});
-		fetchJSON.mockResolvedValue({
+		asMock(fetchJSON).mockResolvedValue({
 			id: "testuser",
 			rssToken: "token123",
 			role: "user",
@@ -53,12 +53,12 @@ describe("Podcast View", () => {
 	});
 
 	it("copies URL to clipboard when Copy URL is clicked", async () => {
-		Cookies.get.mockImplementation((key: any) => {
+		asMock(Cookies.get).mockImplementation((key: any) => {
 			if (key === "id") return "testuser";
 			if (key === "hash") return "testhash";
 			return null;
 		});
-		fetchJSON.mockResolvedValue({
+		asMock(fetchJSON).mockResolvedValue({
 			id: "testuser",
 			rssToken: "token123",
 			role: "user",

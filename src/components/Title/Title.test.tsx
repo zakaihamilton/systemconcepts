@@ -24,11 +24,11 @@ jest.mock("@components/Breadcrumbs", () => (props: any) => (
 describe("Title Component", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
-		ScheduleStore.useState.mockReturnValue({ viewMode: "list" });
-		SessionsStore.useState.mockReturnValue({ viewMode: "grid" });
-		LibraryStore.useState.mockReturnValue({ tags: [] });
-		useActivePages.mockReturnValue([{ id: "home", name: "Home" }]);
-		useDeviceType.mockReturnValue("desktop");
+		asMock(ScheduleStore.useState).mockReturnValue({ viewMode: "list" });
+		asMock(SessionsStore.useState).mockReturnValue({ viewMode: "grid" });
+		asMock(LibraryStore.useState).mockReturnValue({ tags: [] });
+		asMock(useActivePages).mockReturnValue([{ id: "home", name: "Home" }]);
+		asMock(useDeviceType).mockReturnValue("desktop");
 	});
 
 	it("renders breadcrumbs with pages", () => {
@@ -41,7 +41,7 @@ describe("Title Component", () => {
 	});
 
 	it("hides root on mobile", () => {
-		useDeviceType.mockReturnValue("phone");
+		asMock(useDeviceType).mockReturnValue("phone");
 		const { getByTestId } = render(<Title />);
 		const breadcrumbs = getByTestId("breadcrumbs");
 		const props = JSON.parse(breadcrumbs.getAttribute("data-props"));

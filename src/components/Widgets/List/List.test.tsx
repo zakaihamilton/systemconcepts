@@ -16,7 +16,7 @@ describe("List Widget", () => {
 
 	beforeEach(() => {
 		jest.clearAllMocks();
-		MainStore.useState.mockReturnValue({ direction: "ltr" });
+		asMock(MainStore.useState).mockReturnValue({ direction: "ltr" });
 	});
 
 	it("renders list items", () => {
@@ -63,7 +63,7 @@ describe("List Widget", () => {
 	it("renders icons, avatars, actions, content, and reverse dividers", () => {
 		const action = jest.fn();
 		const onToggle = jest.fn();
-		MainStore.useState.mockReturnValue({ direction: "rtl" });
+		asMock(MainStore.useState).mockReturnValue({ direction: "rtl" });
 
 		render(
 			<ListWidget

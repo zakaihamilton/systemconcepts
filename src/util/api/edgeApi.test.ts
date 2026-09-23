@@ -37,7 +37,7 @@ describe("authenticateEdge", () => {
 	});
 
 	it("returns true when the verify endpoint confirms the token", async () => {
-		global.fetch.mockResolvedValue(jsonResponse({ ok: true }));
+		asMock(global.fetch).mockResolvedValue(jsonResponse({ ok: true }));
 		await expect(
 			authenticateEdge(searchParamsOf({ id: "user", token: "abc" })),
 		).resolves.toBe(true);
@@ -48,21 +48,21 @@ describe("authenticateEdge", () => {
 	});
 
 	it("returns false when the verify endpoint responds with ok: false", async () => {
-		global.fetch.mockResolvedValue(jsonResponse({ ok: false }));
+		asMock(global.fetch).mockResolvedValue(jsonResponse({ ok: false }));
 		await expect(
 			authenticateEdge(searchParamsOf({ id: "user", token: "abc" })),
 		).resolves.toBe(false);
 	});
 
 	it("returns false when the verify endpoint returns a non-ok status", async () => {
-		global.fetch.mockResolvedValue(jsonResponse(null, false, 401));
+		asMock(global.fetch).mockResolvedValue(jsonResponse(null, false, 401));
 		await expect(
 			authenticateEdge(searchParamsOf({ id: "user", token: "abc" })),
 		).resolves.toBe(false);
 	});
 
 	it("returns false when the fetch call throws", async () => {
-		global.fetch.mockRejectedValue(new Error("network down"));
+		asMock(global.fetch).mockRejectedValue(new Error("network down"));
 		await expect(
 			authenticateEdge(searchParamsOf({ id: "user", token: "abc" })),
 		).resolves.toBe(false);
@@ -76,14 +76,15 @@ describe("enforceRateLimitEdge", () => {
 	beforeEach(() => {
 		originalNodeEnv = process.env.NODE_ENV;
 		originalPlaywright = process.env.PLAYWRIGHT;
-		process.env.NODE_ENV = "production";
+		Reflect.set(process.env, "NODE_ENV", "production");
 		delete process.env.PLAYWRIGHT;
 		global.fetch = jest.fn();
 	});
 
 	afterEach(() => {
-		if (originalNodeEnv === undefined) delete process.env.NODE_ENV;
-		else process.env.NODE_ENV = originalNodeEnv;
+		if (originalNodeEnv === undefined)
+			Reflect.deleteProperty(process.env, "NODE_ENV");
+		else Reflect.set(process.env, "NODE_ENV", originalNodeEnv);
 		if (originalPlaywright === undefined) delete process.env.PLAYWRIGHT;
 		else process.env.PLAYWRIGHT = originalPlaywright;
 		jest.restoreAllMocks();
@@ -95,7 +96,7 @@ describe("enforceRateLimitEdge", () => {
 		expect(global.fetch).not.toHaveBeenCalled();
 
 		process.env.PLAYWRIGHT = "0";
-		process.env.NODE_ENV = "development";
+		Reflect.set(process.env, "NODE_ENV", "development");
 		await expect(enforceRateLimitEdge("203.0.113.1")).resolves.toBe(true);
 		expect(global.fetch).not.toHaveBeenCalled();
 	});
@@ -106,7 +107,7 @@ describe("enforceRateLimitEdge", () => {
 	});
 
 	it("checks each request when the endpoint allows it", async () => {
-		global.fetch.mockResolvedValue(jsonResponse({ ok: true }));
+		asMock(global.fetch).mockResolvedValue(jsonResponse({ ok: true }));
 		await expect(enforceRateLimitEdge("203.0.113.2")).resolves.toBe(true);
 		expect(global.fetch).toHaveBeenCalledTimes(1);
 
@@ -115,26 +116,26 @@ describe("enforceRateLimitEdge", () => {
 	});
 
 	it("checks every request after the endpoint denies it", async () => {
-		global.fetch.mockResolvedValue(jsonResponse({ ok: false }));
+		asMock(global.fetch).mockResolvedValue(jsonResponse({ ok: false }));
 		await expect(enforceRateLimitEdge("203.0.113.3")).resolves.toBe(false);
 		await expect(enforceRateLimitEdge("203.0.113.3")).resolves.toBe(false);
 		expect(global.fetch).toHaveBeenCalledTimes(2);
 	});
 
 	it("returns false when the endpoint responds with a non-ok status", async () => {
-		global.fetch.mockResolvedValue(jsonResponse(null, false, 500));
+		asMock(global.fetch).mockResolvedValue(jsonResponse(null, false, 500));
 		await expect(enforceRateLimitEdge("203.0.113.4")).resolves.toBe(false);
 	});
 
 	it("fails closed when the fetch call throws", async () => {
-		global.fetch.mockRejectedValue(new Error("network down"));
+		asMock(global.fetch).mockRejectedValue(new Error("network down"));
 		await expect(enforceRateLimitEdge("203.0.113.5")).resolves.toBe(false);
 	});
 
 	it("passes the configured limit and window to the endpoint", async () => {
-		global.fetch.mockResolvedValue(jsonResponse({ ok: true }));
+		asMock(global.fetch).mockResolvedValue(jsonResponse({ ok: true }));
 		await enforceRateLimitEdge("203.0.113.6", { limit: 10, windowMs: 5000 });
-		const [, options] = global.fetch.mock.calls[0];
+		const [, options] = asMock(global.fetch).mock.calls[0];
 		expect(JSON.parse(options.body)).toEqual({
 			ip: "203.0.113.6",
 			limit: 10,
@@ -143,7 +144,7 @@ describe("enforceRateLimitEdge", () => {
 	});
 
 	it("does not cache a rate-limit result for the request window", async () => {
-		global.fetch.mockResolvedValue(jsonResponse({ ok: true }));
+		asMock(global.fetch).mockResolvedValue(jsonResponse({ ok: true }));
 		await enforceRateLimitEdge("203.0.113.7");
 		await enforceRateLimitEdge("203.0.113.7");
 		expect(global.fetch).toHaveBeenCalledTimes(2);
@@ -160,7 +161,7 @@ describe("scheduleApiCacheWrite", () => {
 	});
 
 	it("posts the cache write payload to the internal endpoint", () => {
-		global.fetch.mockResolvedValue({ ok: true });
+		asMock(global.fetch).mockResolvedValue({ ok: true });
 		scheduleApiCacheWrite("rss", "abc", "<xml/>");
 		expect(global.fetch).toHaveBeenCalledWith(
 			expect.stringContaining("/api/internal/api-cache"),
@@ -172,7 +173,7 @@ describe("scheduleApiCacheWrite", () => {
 	});
 
 	it("swallows errors from the fetch call", async () => {
-		global.fetch.mockRejectedValue(new Error("network down"));
+		asMock(global.fetch).mockRejectedValue(new Error("network down"));
 		expect(() => scheduleApiCacheWrite("rss", "abc", "<xml/>")).not.toThrow();
 		await Promise.resolve();
 		await Promise.resolve();

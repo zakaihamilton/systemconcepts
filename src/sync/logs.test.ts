@@ -25,7 +25,7 @@ describe("addSyncLog", () => {
 			.mockImplementation(() => {});
 		addSyncLog("Something broke", "error");
 		expect(spy).toHaveBeenCalledWith("[Sync] Something broke");
-		spy.mockRestore();
+		asMock(spy).mockRestore();
 	});
 
 	it("routes warning-typed messages through logger.warn", () => {
@@ -34,7 +34,7 @@ describe("addSyncLog", () => {
 			.mockImplementation(() => {});
 		addSyncLog("Careful", "warning");
 		expect(spy).toHaveBeenCalledWith("[Sync] Careful");
-		spy.mockRestore();
+		asMock(spy).mockRestore();
 	});
 
 	it("suppresses verbose logs from the UI unless verbose debugging is enabled", () => {
@@ -70,7 +70,7 @@ describe("addSyncLog", () => {
 			.mockImplementation(() => {});
 		addSyncLog("Routine update");
 		expect(spy).toHaveBeenCalledWith("[Sync] Routine update");
-		spy.mockRestore();
+		asMock(spy).mockRestore();
 	});
 
 	it("logs verbose messages to the console when verbose mode is off", () => {
@@ -79,6 +79,6 @@ describe("addSyncLog", () => {
 			.mockImplementation(() => {});
 		addSyncLog("Hidden detail", "verbose");
 		expect(spy).toHaveBeenCalledWith("[Sync-Verbose] Hidden detail");
-		spy.mockRestore();
+		asMock(spy).mockRestore();
 	});
 });

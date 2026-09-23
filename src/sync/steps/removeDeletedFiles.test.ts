@@ -19,8 +19,7 @@ describe("removeDeletedFiles", () => {
 	});
 
 	it("preserves previously synced files absent from the manifest for admins", async () => {
-		const remoteManifest: any = [];
-		remoteManifest.loadedFromManifest = true;
+		const remoteManifest = Object.assign([], { loadedFromManifest: true });
 		const localManifest = [
 			{ path: "/bundle.json", version: "4" },
 			{ path: "/american/2026.json", version: "3" },
@@ -57,8 +56,9 @@ describe("removeDeletedFiles", () => {
 
 	it("skips deletion when the remote manifest came from a listing", async () => {
 		const localManifest = [{ path: "/bundle.json" }];
-		const remoteManifest = [{ path: "/bundle.json" }];
-		remoteManifest.loadedFromManifest = false;
+		const remoteManifest = Object.assign([{ path: "/bundle.json" }], {
+			loadedFromManifest: false,
+		});
 
 		await removeDeletedFiles(localManifest, remoteManifest);
 
@@ -70,8 +70,9 @@ describe("removeDeletedFiles", () => {
 
 	it("reports when every local file remains in the remote manifest", async () => {
 		const localManifest = [{ path: "/bundle.json" }];
-		const remoteManifest = [{ path: "/bundle.json" }];
-		remoteManifest.loadedFromManifest = true;
+		const remoteManifest = Object.assign([{ path: "/bundle.json" }], {
+			loadedFromManifest: true,
+		});
 
 		const result = await removeDeletedFiles(localManifest, remoteManifest);
 

@@ -56,7 +56,7 @@ describe("FixedSizeGrid Component", () => {
 			</FixedSizeGrid>,
 		);
 
-		const scrollContainer = container.firstChild;
+		const scrollContainer = container.firstChild as HTMLElement;
 		fireEvent.scroll(scrollContainer, {
 			target: { scrollTop: 50, scrollLeft: 50 },
 		});
@@ -69,7 +69,7 @@ describe("FixedSizeGrid Component", () => {
 	});
 
 	it("supports imperative ref scrollTo for left and top", () => {
-		const ref = createRef();
+		const ref = createRef<any>();
 		const { container } = render(
 			<FixedSizeGrid
 				ref={ref}
@@ -91,7 +91,7 @@ describe("FixedSizeGrid Component", () => {
 		);
 
 		expect(ref.current).toBeDefined();
-		const scrollContainer = container.firstChild;
+		const scrollContainer = container.firstChild as HTMLElement;
 		Object.defineProperty(scrollContainer, "scrollLeft", {
 			writable: true,
 			value: 0,

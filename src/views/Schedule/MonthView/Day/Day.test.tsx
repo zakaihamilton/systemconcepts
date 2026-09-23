@@ -46,12 +46,12 @@ describe("MonthView Day", () => {
 
 	beforeEach(() => {
 		jest.clearAllMocks();
-		useTranslations.mockReturnValue({ SESSIONS: "Sessions" });
-		getDateString.mockReturnValue("2024-06-15");
-		isDateToday.mockReturnValue(true);
-		isDateMonth.mockReturnValue(true);
-		getSessionTextColor.mockReturnValue("#fff");
-		toPath.mockImplementation((p: any) => p);
+		asMock(useTranslations).mockReturnValue({ SESSIONS: "Sessions" });
+		asMock(getDateString).mockReturnValue("2024-06-15");
+		asMock(isDateToday).mockReturnValue(true);
+		asMock(isDateMonth).mockReturnValue(true);
+		asMock(getSessionTextColor).mockReturnValue("#fff");
+		asMock(toPath).mockImplementation((p: any) => p);
 	});
 
 	it("opens day and renders session dots up to 12", () => {

@@ -22,18 +22,18 @@ describe("Toolbar Component", () => {
 
 	beforeEach(() => {
 		jest.clearAllMocks();
-		useTranslations.mockReturnValue({
+		asMock(useTranslations).mockReturnValue({
 			SPEED: "Speed",
 			FULLSCREEN: "Fullscreen",
 		});
-		useDeviceType.mockReturnValue("desktop");
+		asMock(useDeviceType).mockReturnValue("desktop");
 		mockPlayer = {
 			addEventListener: jest.fn(),
 			removeEventListener: jest.fn(),
 			playbackRate: 1.0,
 			requestFullscreen: jest.fn(),
 		};
-		PlayerStore.useState.mockReturnValue({ showSpeed: false });
+		asMock(PlayerStore.useState).mockReturnValue({ showSpeed: false });
 	});
 
 	it("calls useToolbar on render", () => {

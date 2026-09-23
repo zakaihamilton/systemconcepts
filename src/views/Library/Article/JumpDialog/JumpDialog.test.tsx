@@ -77,7 +77,7 @@ describe("JumpDialog", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
 		jest.useFakeTimers();
-		useTranslations.mockReturnValue(translations);
+		asMock(useTranslations).mockReturnValue(translations);
 	});
 
 	afterEach(() => {
@@ -194,6 +194,6 @@ describe("JumpDialog", () => {
 		);
 		jest.advanceTimersByTime(100);
 		expect(focus).toHaveBeenCalled();
-		HTMLElement.prototype.focus.mockRestore();
+		asMock(HTMLElement.prototype.focus).mockRestore();
 	});
 });

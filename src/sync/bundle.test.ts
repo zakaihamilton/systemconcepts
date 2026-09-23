@@ -41,7 +41,7 @@ describe("strict compressed reads", () => {
 	});
 
 	it("propagates transient storage failures instead of treating them as missing", async () => {
-		storage.readFile.mockRejectedValue(new Error("network failed"));
+		asMock(storage.readFile).mockRejectedValue(new Error("network failed"));
 
 		await expect(
 			readCompressedFile("aws/sync/files.json.gz", { strict: true }),
@@ -49,7 +49,9 @@ describe("strict compressed reads", () => {
 	});
 
 	it("still treats a confirmed 404 as missing", async () => {
-		storage.readFile.mockRejectedValue(new Error("Failed to fetch file: 404"));
+		asMock(storage.readFile).mockRejectedValue(
+			new Error("Failed to fetch file: 404"),
+		);
 
 		await expect(
 			readCompressedFile("aws/sync/files.json.gz", { strict: true }),
@@ -63,20 +65,20 @@ describe("readCompressedFileRaw", () => {
 	});
 
 	it("returns null for empty or missing data", async () => {
-		storage.readFile.mockResolvedValueOnce(null);
+		asMock(storage.readFile).mockResolvedValueOnce(null);
 		await expect(readCompressedFileRaw("path.gz")).resolves.toBeNull();
 
-		storage.readFile.mockResolvedValueOnce("");
+		asMock(storage.readFile).mockResolvedValueOnce("");
 		await expect(readCompressedFileRaw("path.gz")).resolves.toBeNull();
 	});
 
 	it("returns JSON strings for .json paths", async () => {
-		storage.readFile.mockResolvedValue('{"a":1}');
+		asMock(storage.readFile).mockResolvedValue('{"a":1}');
 		await expect(readCompressedFileRaw("data.json")).resolves.toBe('{"a":1}');
 	});
 
 	it("returns Buffer contents as utf8 for .json paths that look like JSON", async () => {
-		storage.readFile.mockResolvedValue(Buffer.from('{"a":1}', "utf8"));
+		asMock(storage.readFile).mockResolvedValue(Buffer.from('{"a":1}', "utf8"));
 		// .json early-return only inspects string payloads; Buffers fall through to
 		// ungzip then utf-8 fallback (TextDecoder must be available).
 		global.TextDecoder = require("util").TextDecoder;
@@ -84,7 +86,7 @@ describe("readCompressedFileRaw", () => {
 	});
 
 	it("returns plain JSON strings even for .gz paths", async () => {
-		storage.readFile.mockResolvedValue('{"plain":true}');
+		asMock(storage.readFile).mockResolvedValue('{"plain":true}');
 		await expect(readCompressedFileRaw("data.json.gz")).resolves.toBe(
 			'{"plain":true}',
 		);
@@ -93,7 +95,7 @@ describe("readCompressedFileRaw", () => {
 	it("decompresses base64-encoded gzip strings", async () => {
 		const payload = { ok: true };
 		const gzipped = Buffer.from(pako.gzip(JSON.stringify(payload)));
-		storage.readFile.mockResolvedValue(gzipped.toString("base64"));
+		asMock(storage.readFile).mockResolvedValue(gzipped.toString("base64"));
 
 		await expect(readCompressedFileRaw("data.json.gz")).resolves.toBe(
 			JSON.stringify(payload),
@@ -102,7 +104,7 @@ describe("readCompressedFileRaw", () => {
 
 	it("decompresses Buffer gzip payloads", async () => {
 		const payload = { from: "buffer" };
-		storage.readFile.mockResolvedValue(
+		asMock(storage.readFile).mockResolvedValue(
 			Buffer.from(pako.gzip(JSON.stringify(payload))),
 		);
 
@@ -113,7 +115,9 @@ describe("readCompressedFileRaw", () => {
 
 	it("decompresses Uint8Array gzip payloads", async () => {
 		const payload = { from: "uint8" };
-		storage.readFile.mockResolvedValue(pako.gzip(JSON.stringify(payload)));
+		asMock(storage.readFile).mockResolvedValue(
+			pako.gzip(JSON.stringify(payload)),
+		);
 
 		await expect(readCompressedFileRaw("data.json.gz")).resolves.toBe(
 			JSON.stringify(payload),
@@ -121,27 +125,27 @@ describe("readCompressedFileRaw", () => {
 	});
 
 	it("returns null for unexpected data types", async () => {
-		storage.readFile.mockResolvedValue(42);
+		asMock(storage.readFile).mockResolvedValue(42);
 		await expect(readCompressedFileRaw("data.json.gz")).resolves.toBeNull();
 	});
 
 	it("falls back to utf-8 text when ungzip fails and strict is false", async () => {
 		global.TextDecoder = require("util").TextDecoder;
-		storage.readFile.mockResolvedValue(Buffer.from("not-gzip", "utf8"));
+		asMock(storage.readFile).mockResolvedValue(Buffer.from("not-gzip", "utf8"));
 		await expect(readCompressedFileRaw("data.json.gz")).resolves.toBe(
 			"not-gzip",
 		);
 	});
 
 	it("rethrows ungzip failures when strict is true", async () => {
-		storage.readFile.mockResolvedValue(Buffer.from("not-gzip", "utf8"));
+		asMock(storage.readFile).mockResolvedValue(Buffer.from("not-gzip", "utf8"));
 		await expect(
 			readCompressedFileRaw("data.json.gz", { strict: true }),
 		).rejects.toBeTruthy();
 	});
 
 	it("returns null and logs for non-strict unexpected read errors", async () => {
-		storage.readFile.mockRejectedValue(new Error("boom"));
+		asMock(storage.readFile).mockRejectedValue(new Error("boom"));
 		await expect(readCompressedFileRaw("data.json.gz")).resolves.toBeNull();
 	});
 });
@@ -153,7 +157,7 @@ describe("readCompressedFile", () => {
 
 	it("parses decompressed JSON", async () => {
 		const payload = { hello: "world" };
-		storage.readFile.mockResolvedValue(
+		asMock(storage.readFile).mockResolvedValue(
 			Buffer.from(pako.gzip(JSON.stringify(payload))).toString("base64"),
 		);
 
@@ -161,12 +165,12 @@ describe("readCompressedFile", () => {
 	});
 
 	it("returns null for invalid JSON when not strict", async () => {
-		storage.readFile.mockResolvedValue("{not-json");
+		asMock(storage.readFile).mockResolvedValue("{not-json");
 		await expect(readCompressedFile("file.json")).resolves.toBeNull();
 	});
 
 	it("throws invalid JSON when strict", async () => {
-		storage.readFile.mockResolvedValue("{not-json");
+		asMock(storage.readFile).mockResolvedValue("{not-json");
 		await expect(
 			readCompressedFile("file.json", { strict: true }),
 		).rejects.toThrow();
@@ -176,8 +180,8 @@ describe("readCompressedFile", () => {
 describe("writeCompressedFile", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
-		storage.createFolderPath.mockResolvedValue(undefined);
-		storage.writeFile.mockResolvedValue(undefined);
+		asMock(storage.createFolderPath).mockResolvedValue(undefined);
+		asMock(storage.writeFile).mockResolvedValue(undefined);
 	});
 
 	it("writes pretty JSON for .json paths", async () => {
@@ -201,7 +205,7 @@ describe("writeCompressedFile", () => {
 	it("writes gzipped base64 for non-json paths", async () => {
 		await writeCompressedFile("local/sync/group.json.gz", { a: 1 });
 
-		const [, content] = storage.writeFile.mock.calls[0];
+		const [, content] = asMock(storage.writeFile).mock.calls[0];
 		const decoded = JSON.parse(
 			pako.ungzip(Buffer.from(content, "base64"), { to: "string" }),
 		);
@@ -213,14 +217,14 @@ describe("writeCompressedFile", () => {
 			"local/sync/blob.gz",
 			Buffer.from("hello", "utf8"),
 		);
-		const [, content] = storage.writeFile.mock.calls[0];
+		const [, content] = asMock(storage.writeFile).mock.calls[0];
 		expect(pako.ungzip(Buffer.from(content, "base64"), { to: "string" })).toBe(
 			"hello",
 		);
 	});
 
 	it("skips createFolderPath when the folder is already cached", async () => {
-		const folderCache = new Set();
+		const folderCache = new Set<string>();
 		await writeCompressedFile("local/sync/a.json", { n: 1 }, folderCache);
 		await writeCompressedFile("local/sync/b.json", { n: 2 }, folderCache);
 

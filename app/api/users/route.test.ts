@@ -30,7 +30,7 @@ jest.mock("@util/auth/requestSecurity", () => ({
 jest.mock("bcryptjs", () => ({ hash: jest.fn() }));
 jest.mock("next/server", () => ({
 	NextResponse: {
-		json: (body: any, init = {}) => ({
+		json: (body: any, init: ResponseInit = {}) => ({
 			status: init.status || 200,
 			json: async () => body,
 		}),
@@ -56,12 +56,15 @@ function request({ method, id = "attacker", body }: any) {
 describe("/api/users authorization and import handling", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
-		getSessionUser.mockResolvedValue({ id: "attacker", role: "student" });
-		handleRequest.mockResolvedValue({});
+		asMock(getSessionUser).mockResolvedValue({
+			id: "attacker",
+			role: "student",
+		});
+		asMock(handleRequest).mockResolvedValue({});
 	});
 
 	it("does not allow a non-admin to delete another user's account", async () => {
-		roleAuth.mockReturnValue(false);
+		asMock(roleAuth).mockReturnValue(false);
 
 		const response = await DELETE(
 			request({ method: "DELETE", body: [{ id: "victim" }] }),
@@ -72,8 +75,8 @@ describe("/api/users authorization and import handling", () => {
 	});
 
 	it("preserves existing auth fields during admin bulk import", async () => {
-		roleAuth.mockReturnValue(true);
-		findRecord.mockResolvedValue({
+		asMock(roleAuth).mockReturnValue(true);
+		asMock(findRecord).mockResolvedValue({
 			id: "user",
 			hash: "bcrypt-hash",
 			salt: 10,
@@ -104,10 +107,13 @@ describe("/api/users authorization and import handling", () => {
 	});
 
 	it("rejects a user update that attempts to change their role", async () => {
-		getAuthErrorStatus.mockReturnValue(403);
-		getSessionUser.mockResolvedValue({ id: "attacker", role: "student" });
-		roleAuth.mockReturnValue(false);
-		findRecord.mockResolvedValue({
+		asMock(getAuthErrorStatus).mockReturnValue(403);
+		asMock(getSessionUser).mockResolvedValue({
+			id: "attacker",
+			role: "student",
+		});
+		asMock(roleAuth).mockReturnValue(false);
+		asMock(findRecord).mockResolvedValue({
 			id: "attacker",
 			hash: "old-hash",
 			salt: 10,
@@ -122,8 +128,8 @@ describe("/api/users authorization and import handling", () => {
 	});
 
 	it("hashes passwords and revokes sessions during nested admin imports", async () => {
-		roleAuth.mockReturnValue(true);
-		findRecord.mockResolvedValue({
+		asMock(roleAuth).mockReturnValue(true);
+		asMock(findRecord).mockResolvedValue({
 			id: "user",
 			hash: "old-hash",
 			salt: 10,
@@ -131,7 +137,7 @@ describe("/api/users authorization and import handling", () => {
 			date: "date",
 			utc: 123,
 		});
-		bcryptHash.mockResolvedValue("new-hash");
+		asMock(bcryptHash).mockResolvedValue("new-hash");
 
 		const body = {
 			users: [null, { id: "user", password: "new-password", rssToken: "old" }],

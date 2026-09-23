@@ -34,7 +34,7 @@ describe("Video Component", () => {
 		);
 
 		expect(load).toHaveBeenCalledTimes(1);
-		load.mockRestore();
+		asMock(load).mockRestore();
 	});
 
 	it("renews the url on media errors and reports a load failure after three attempts", () => {
@@ -92,6 +92,6 @@ describe("Video Component", () => {
 
 		expect(renewUrl).toHaveBeenCalledTimes(3);
 		expect(onLoadError).toHaveBeenCalledTimes(1);
-		load.mockRestore();
+		asMock(load).mockRestore();
 	});
 });

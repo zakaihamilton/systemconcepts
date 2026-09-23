@@ -9,7 +9,9 @@ jest.mock("../logs", () => ({ addSyncLog: jest.fn() }));
 
 describe("getLocalFiles", () => {
 	it("uses strict discovery and propagates listing failures", async () => {
-		storage.getRecursiveList.mockRejectedValue(new Error("listing failed"));
+		asMock(storage.getRecursiveList).mockRejectedValue(
+			new Error("listing failed"),
+		);
 
 		await expect(getLocalFiles("local/sync")).rejects.toThrow("listing failed");
 		expect(storage.getRecursiveList).toHaveBeenCalledWith("local/sync", {
@@ -18,7 +20,7 @@ describe("getLocalFiles", () => {
 	});
 
 	it("excludes recoverable trash from sync discovery", async () => {
-		storage.getRecursiveList.mockResolvedValue([
+		asMock(storage.getRecursiveList).mockResolvedValue([
 			{
 				type: "file",
 				name: "old.json",

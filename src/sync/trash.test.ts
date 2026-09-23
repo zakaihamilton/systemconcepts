@@ -38,8 +38,8 @@ describe("moveFileToTrash", () => {
 	});
 
 	it("moves the file into the trash folder and reports success", async () => {
-		storage.createFolderPath.mockResolvedValue(undefined);
-		storage.moveFile.mockResolvedValue(undefined);
+		asMock(storage.createFolderPath).mockResolvedValue(undefined);
+		asMock(storage.moveFile).mockResolvedValue(undefined);
 
 		const result = await moveFileToTrash("local/sync", "sync-1", "/a.json");
 
@@ -59,8 +59,10 @@ describe("moveFileToTrash", () => {
 	});
 
 	it("reports a missing (non-fatal) file instead of throwing on a 404", async () => {
-		storage.createFolderPath.mockResolvedValue(undefined);
-		storage.moveFile.mockRejectedValue(new Error("Failed to fetch file: 404"));
+		asMock(storage.createFolderPath).mockResolvedValue(undefined);
+		asMock(storage.moveFile).mockRejectedValue(
+			new Error("Failed to fetch file: 404"),
+		);
 
 		const result = await moveFileToTrash("local/sync", "sync-1", "/a.json");
 
@@ -69,8 +71,8 @@ describe("moveFileToTrash", () => {
 	});
 
 	it("propagates unexpected (non-missing) errors", async () => {
-		storage.createFolderPath.mockResolvedValue(undefined);
-		storage.moveFile.mockRejectedValue(new Error("permission denied"));
+		asMock(storage.createFolderPath).mockResolvedValue(undefined);
+		asMock(storage.moveFile).mockRejectedValue(new Error("permission denied"));
 
 		await expect(
 			moveFileToTrash("local/sync", "sync-1", "/a.json"),
@@ -84,8 +86,8 @@ describe("moveFolderToTrash", () => {
 	});
 
 	it("moves the folder into the trash folder and reports success", async () => {
-		storage.createFolderPath.mockResolvedValue(undefined);
-		storage.moveFolder.mockResolvedValue(undefined);
+		asMock(storage.createFolderPath).mockResolvedValue(undefined);
+		asMock(storage.moveFolder).mockResolvedValue(undefined);
 
 		const result = await moveFolderToTrash("local/sync", "sync-1", "/adir");
 
@@ -97,8 +99,8 @@ describe("moveFolderToTrash", () => {
 	});
 
 	it("reports a missing folder instead of throwing on ENOENT", async () => {
-		storage.createFolderPath.mockResolvedValue(undefined);
-		storage.moveFolder.mockRejectedValue(
+		asMock(storage.createFolderPath).mockResolvedValue(undefined);
+		asMock(storage.moveFolder).mockRejectedValue(
 			Object.assign(new Error("not found"), { code: "ENOENT" }),
 		);
 
@@ -113,8 +115,8 @@ describe("moveFolderToTrash", () => {
 	});
 
 	it("propagates unexpected errors", async () => {
-		storage.createFolderPath.mockResolvedValue(undefined);
-		storage.moveFolder.mockRejectedValue(new Error("disk exploded"));
+		asMock(storage.createFolderPath).mockResolvedValue(undefined);
+		asMock(storage.moveFolder).mockRejectedValue(new Error("disk exploded"));
 
 		await expect(
 			moveFolderToTrash("local/sync", "sync-1", "/adir"),

@@ -40,16 +40,16 @@ jest.mock("@util/data/binary", () => ({
 describe("downloadUpdates", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
-		storage.exists.mockResolvedValue(false);
-		storage.writeFile.mockResolvedValue(undefined);
-		storage.createFolderPath.mockResolvedValue(undefined);
+		asMock(storage.exists).mockResolvedValue(false);
+		asMock(storage.writeFile).mockResolvedValue(undefined);
+		asMock(storage.createFolderPath).mockResolvedValue(undefined);
 		SyncActiveStore.update((state) => {
 			state.stopping = false;
 		});
 	});
 
 	it("downloads a new file, writes it locally and updates the local manifest", async () => {
-		readCompressedFileRaw.mockResolvedValue('{"a":1}');
+		asMock(readCompressedFileRaw).mockResolvedValue('{"a":1}');
 
 		const result = await downloadUpdates(
 			[],
@@ -73,7 +73,7 @@ describe("downloadUpdates", () => {
 	});
 
 	it("completes a mixed groups and split-year download batch", async () => {
-		readCompressedFileRaw.mockResolvedValue('{"sessions":[]}');
+		asMock(readCompressedFileRaw).mockResolvedValue('{"sessions":[]}');
 		const remoteManifest = [
 			{ path: "/groups.json", version: "1" },
 			...Array.from({ length: 6 }, (_, index) => ({
@@ -104,12 +104,12 @@ describe("downloadUpdates", () => {
 	});
 
 	it("writes independent downloaded files in parallel", async () => {
-		readCompressedFileRaw.mockResolvedValue('{"sessions":[]}');
+		asMock(readCompressedFileRaw).mockResolvedValue('{"sessions":[]}');
 		let releaseFirstWrite;
 		const firstWrite = new Promise((resolve) => {
 			releaseFirstWrite = resolve;
 		});
-		storage.writeFile.mockImplementationOnce(() => firstWrite);
+		asMock(storage.writeFile).mockImplementationOnce(() => firstWrite);
 
 		const sync = downloadUpdates(
 			[],
@@ -130,7 +130,7 @@ describe("downloadUpdates", () => {
 	});
 
 	it("treats a confirmed 404 as missing and cleans it out of the remote manifest", async () => {
-		readCompressedFileRaw.mockResolvedValue(null);
+		asMock(readCompressedFileRaw).mockResolvedValue(null);
 
 		const remoteManifest = [{ path: "/gone.json", version: "2" }];
 		const result = await downloadUpdates(
@@ -190,7 +190,7 @@ describe("downloadUpdates", () => {
 	});
 
 	it("force-restores a locally deleted file when restoreMissingFiles is set", async () => {
-		readCompressedFileRaw.mockResolvedValue('{"restored":true}');
+		asMock(readCompressedFileRaw).mockResolvedValue('{"restored":true}');
 		const localManifest = [
 			{ path: "/deleted.json", version: "5", deleted: true },
 		];
@@ -235,7 +235,7 @@ describe("downloadUpdates", () => {
 	});
 
 	it("restores a locally deleted file for read-only roles (student/visitor)", async () => {
-		readCompressedFileRaw.mockResolvedValue('{"restored":true}');
+		asMock(readCompressedFileRaw).mockResolvedValue('{"restored":true}');
 		const localManifest = [
 			{ path: "/deleted.json", version: "5", deleted: true },
 		];
@@ -254,9 +254,9 @@ describe("downloadUpdates", () => {
 	});
 
 	it("detects a local edit conflict and bumps the version instead of overwriting", async () => {
-		readCompressedFileRaw.mockResolvedValue("remote content");
-		storage.exists.mockResolvedValue(true);
-		storage.readFile.mockResolvedValue("local edited content");
+		asMock(readCompressedFileRaw).mockResolvedValue("remote content");
+		asMock(storage.exists).mockResolvedValue(true);
+		asMock(storage.readFile).mockResolvedValue("local edited content");
 
 		const localManifest = [
 			{ path: "/conflict.json", version: "1", hash: "local-hash-value" },
@@ -275,7 +275,7 @@ describe("downloadUpdates", () => {
 		// Because the local file's hash differs from the manifest entry, we must
 		// treat this as a conflict and avoid clobbering the local edit.
 		expect(
-			storage.writeFile.mock.calls.some(
+			asMock(storage.writeFile).mock.calls.some(
 				(call: any) => call[0] === "/local/sync/conflict.json",
 			),
 		).toBe(false);
@@ -283,14 +283,14 @@ describe("downloadUpdates", () => {
 	});
 
 	it("moves a directory to trash and retries the write when EISDIR is thrown", async () => {
-		readCompressedFileRaw.mockResolvedValue('{"a":1}');
-		storage.writeFile
+		asMock(readCompressedFileRaw).mockResolvedValue('{"a":1}');
+		asMock(storage.writeFile)
 			.mockRejectedValueOnce(
 				new Error("EISDIR: illegal operation on a directory"),
 			)
 			.mockResolvedValueOnce(undefined)
 			.mockResolvedValueOnce(undefined);
-		moveFolderToTrash.mockResolvedValue({ moved: true });
+		asMock(moveFolderToTrash).mockResolvedValue({ moved: true });
 
 		await downloadUpdates(
 			[],
@@ -307,7 +307,9 @@ describe("downloadUpdates", () => {
 	});
 
 	it("marks a download as failed when a non-404 error occurs, without throwing", async () => {
-		readCompressedFileRaw.mockRejectedValue(new Error("network failed"));
+		asMock(readCompressedFileRaw).mockRejectedValue(
+			new Error("network failed"),
+		);
 
 		const result = await downloadUpdates(
 			[],
@@ -325,14 +327,14 @@ describe("downloadUpdates", () => {
 	});
 
 	it("stops processing further batches once a stop is requested", async () => {
-		readCompressedFileRaw.mockResolvedValue('{"a":1}');
+		asMock(readCompressedFileRaw).mockResolvedValue('{"a":1}');
 		const remoteManifest = Array.from({ length: 12 }, (_, i) => ({
 			path: `/file-${i}.json`,
 			version: "1",
 		}));
 
 		let callCount = 0;
-		storage.writeFile.mockImplementation(async (path: any) => {
+		asMock(storage.writeFile).mockImplementation(async (path: any) => {
 			callCount++;
 			if (callCount === 1 && path.startsWith("/local/sync/file-")) {
 				SyncActiveStore.update((state) => {
@@ -356,7 +358,7 @@ describe("downloadUpdates", () => {
 	});
 
 	it("reports progress via an injected progress tracker", async () => {
-		readCompressedFileRaw.mockResolvedValue('{"a":1}');
+		asMock(readCompressedFileRaw).mockResolvedValue('{"a":1}');
 		const progressTracker = { updateProgress: jest.fn() };
 
 		await downloadUpdates(
@@ -375,8 +377,8 @@ describe("downloadUpdates", () => {
 	});
 
 	it("propagates unexpected top-level errors", async () => {
-		readCompressedFileRaw.mockResolvedValue('{"a":1}');
-		storage.writeFile.mockRejectedValue(new Error("disk full"));
+		asMock(readCompressedFileRaw).mockResolvedValue('{"a":1}');
+		asMock(storage.writeFile).mockRejectedValue(new Error("disk full"));
 
 		await expect(
 			downloadUpdates(
@@ -393,7 +395,7 @@ describe("downloadUpdates", () => {
 	});
 
 	it("downloads binary files directly without JSON decompression", async () => {
-		storage.readFile.mockResolvedValue("YmluYXJ5ZGF0YQ==");
+		asMock(storage.readFile).mockResolvedValue("YmluYXJ5ZGF0YQ==");
 
 		const result = await downloadUpdates(
 			[],
@@ -411,8 +413,8 @@ describe("downloadUpdates", () => {
 	});
 
 	it("falls back to legacy .gz binary downloads when the raw file is missing", async () => {
-		storage.readFile.mockResolvedValue(null);
-		readCompressedFileRaw.mockResolvedValue("legacy-binary");
+		asMock(storage.readFile).mockResolvedValue(null);
+		asMock(readCompressedFileRaw).mockResolvedValue("legacy-binary");
 
 		const result = await downloadUpdates(
 			[],
@@ -429,7 +431,7 @@ describe("downloadUpdates", () => {
 	});
 
 	it("retries non-binary downloads without the .gz suffix", async () => {
-		readCompressedFileRaw
+		asMock(readCompressedFileRaw)
 			.mockResolvedValueOnce(null)
 			.mockResolvedValueOnce('{"fallback":true}');
 
@@ -448,7 +450,7 @@ describe("downloadUpdates", () => {
 	});
 
 	it("writes ArrayBuffer binary content without re-encoding", async () => {
-		storage.readFile.mockResolvedValue(new Uint8Array([1, 2, 3]));
+		asMock(storage.readFile).mockResolvedValue(new Uint8Array([1, 2, 3]));
 
 		await downloadUpdates(
 			[],
@@ -465,7 +467,7 @@ describe("downloadUpdates", () => {
 
 	it("writes raw content when remote hash matches the uncompressed payload", async () => {
 		const payload = '{"keep":"raw"}';
-		readCompressedFileRaw.mockResolvedValue(payload);
+		asMock(readCompressedFileRaw).mockResolvedValue(payload);
 		const { getFileInfo } = require("../hash");
 		const info = await getFileInfo(payload);
 
@@ -484,7 +486,7 @@ describe("downloadUpdates", () => {
 	});
 
 	it("pretty-prints small json when no remote hash is provided", async () => {
-		readCompressedFileRaw.mockResolvedValue('{"a":1}');
+		asMock(readCompressedFileRaw).mockResolvedValue('{"a":1}');
 
 		await downloadUpdates(
 			[],
@@ -493,7 +495,7 @@ describe("downloadUpdates", () => {
 			"aws/sync",
 		);
 
-		const contentWrite = storage.writeFile.mock.calls.find(
+		const contentWrite = asMock(storage.writeFile).mock.calls.find(
 			(call: any) => call[0] === "/local/sync/pretty.json",
 		)?.[1];
 		expect(contentWrite).toContain("\n");
@@ -501,7 +503,7 @@ describe("downloadUpdates", () => {
 
 	it("skips pretty-printing for very large json payloads", async () => {
 		const large = JSON.stringify({ data: "x".repeat(600 * 1024) });
-		readCompressedFileRaw.mockResolvedValue(large);
+		asMock(readCompressedFileRaw).mockResolvedValue(large);
 
 		await downloadUpdates(
 			[],
@@ -517,7 +519,7 @@ describe("downloadUpdates", () => {
 	});
 
 	it("downloads when local manifest is null and skips deleted remote entries", async () => {
-		readCompressedFileRaw.mockResolvedValue('{"ok":true}');
+		asMock(readCompressedFileRaw).mockResolvedValue('{"ok":true}');
 
 		const result = await downloadUpdates(
 			null,
@@ -534,7 +536,7 @@ describe("downloadUpdates", () => {
 	});
 
 	it("downloads a newer remote file when local entry is missing", async () => {
-		readCompressedFileRaw.mockResolvedValue('{"fresh":true}');
+		asMock(readCompressedFileRaw).mockResolvedValue('{"fresh":true}');
 
 		const result = await downloadUpdates(
 			[],
@@ -549,9 +551,9 @@ describe("downloadUpdates", () => {
 
 	it("writes local file when manifest entry exists and on-disk hash still matches", async () => {
 		const payload = '{"same":true}';
-		readCompressedFileRaw.mockResolvedValue(payload);
-		storage.exists.mockResolvedValue(true);
-		storage.readFile.mockResolvedValue(payload);
+		asMock(readCompressedFileRaw).mockResolvedValue(payload);
+		asMock(storage.exists).mockResolvedValue(true);
+		asMock(storage.readFile).mockResolvedValue(payload);
 		const { getFileInfo } = require("../hash");
 		const info = await getFileInfo(payload);
 
@@ -563,7 +565,7 @@ describe("downloadUpdates", () => {
 		);
 
 		expect(
-			storage.writeFile.mock.calls.some(
+			asMock(storage.writeFile).mock.calls.some(
 				(call: any) => call[0] === "/local/sync/same.json",
 			),
 		).toBe(true);
@@ -571,8 +573,8 @@ describe("downloadUpdates", () => {
 	});
 
 	it("rethrows non-EISDIR write failures", async () => {
-		readCompressedFileRaw.mockResolvedValue('{"a":1}');
-		storage.writeFile.mockRejectedValue(new Error("ENOSPC: no space"));
+		asMock(readCompressedFileRaw).mockResolvedValue('{"a":1}');
+		asMock(storage.writeFile).mockRejectedValue(new Error("ENOSPC: no space"));
 
 		await expect(
 			downloadUpdates(

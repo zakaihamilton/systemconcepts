@@ -29,7 +29,7 @@ describe("structured logger", () => {
 		const cause = new Error("root");
 		const err = new Error("broken");
 		err.cause = cause;
-		const circular = { a: 1 };
+		const circular: Record<string, any> = { a: 1 };
 		circular.self = circular;
 		const result = redact({
 			token: "secret",
@@ -60,7 +60,7 @@ describe("structured logger", () => {
 	it("defaults to warn in production when LOG_LEVEL is unset", () => {
 		delete process.env.LOG_LEVEL;
 		delete process.env.NEXT_PUBLIC_LOG_LEVEL;
-		process.env.NODE_ENV = "production";
+		Reflect.set(process.env, "NODE_ENV", "production");
 		jest.resetModules();
 		const { shouldLog: shouldLogFresh } = require("@util/api/logger");
 		expect(shouldLogFresh("debug")).toBe(false);
@@ -70,7 +70,7 @@ describe("structured logger", () => {
 	it("defaults to debug outside production when LOG_LEVEL is unset", () => {
 		delete process.env.LOG_LEVEL;
 		delete process.env.NEXT_PUBLIC_LOG_LEVEL;
-		process.env.NODE_ENV = "development";
+		Reflect.set(process.env, "NODE_ENV", "development");
 		jest.resetModules();
 		const { shouldLog: shouldLogFresh } = require("@util/api/logger");
 		expect(shouldLogFresh("debug")).toBe(true);
@@ -125,7 +125,7 @@ describe("structured logger", () => {
 				message: "plain",
 			}),
 		);
-		const last = spy.mock.calls.at(-1)[0];
+		const last = asMock(spy).mock.calls.at(-1)[0];
 		expect(last.context).toBeUndefined();
 	});
 
@@ -186,10 +186,10 @@ describe("structured logger", () => {
 
 	it("respects NEXT_PUBLIC_LOG_LEVEL in browser environments", () => {
 		const originalWindow = global.window;
-		global.window = {};
+		Reflect.set(globalThis, "window", {});
 		delete process.env.LOG_LEVEL;
 		process.env.NEXT_PUBLIC_LOG_LEVEL = "error";
-		process.env.NODE_ENV = "development";
+		Reflect.set(process.env, "NODE_ENV", "development");
 		jest.resetModules();
 		const { shouldLog: browserShouldLog } = require("@util/api/logger");
 		expect(browserShouldLog("warn")).toBe(false);

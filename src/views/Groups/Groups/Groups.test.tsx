@@ -108,10 +108,10 @@ describe("Groups View", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
 		toolbarItems = [];
-		useToolbar.mockImplementation(({ items }: any) => {
+		asMock(useToolbar).mockImplementation(({ items }: any) => {
 			toolbarItems = (items || []).filter(Boolean);
 		});
-		useTranslations.mockReturnValue({
+		asMock(useTranslations).mockReturnValue({
 			NAME: "Name",
 			PROGRESS: "Progress",
 			STORAGE: "Storage",
@@ -137,8 +137,8 @@ describe("Groups View", () => {
 			IMPORT_GROUPS: "Import Groups",
 			IMPORT: "Import",
 		});
-		useSessions.mockReturnValue([[], false, [], jest.fn()]);
-		useUpdateSessions.mockReturnValue({
+		asMock(useSessions).mockReturnValue([[], false, [], jest.fn()]);
+		asMock(useUpdateSessions).mockReturnValue({
 			status: [],
 			busy: false,
 			start: null,
@@ -148,11 +148,14 @@ describe("Groups View", () => {
 			updateRecentSessions: jest.fn(),
 			updateGroup: jest.fn(),
 		});
-		useOnline.mockReturnValue(true);
-		useDeviceType.mockReturnValue("desktop");
-		GroupsStore.useState.mockReturnValue({ counter: 1, showDisabled: false });
-		Cookies.get.mockReturnValue("test");
-		storage.exists.mockResolvedValue(false);
+		asMock(useOnline).mockReturnValue(true);
+		asMock(useDeviceType).mockReturnValue("desktop");
+		asMock(GroupsStore.useState).mockReturnValue({
+			counter: 1,
+			showDisabled: false,
+		});
+		asMock(Cookies.get).mockReturnValue("test");
+		asMock(storage.exists).mockResolvedValue(false);
 	});
 
 	it("renders groups table and progress dialog", () => {
@@ -163,8 +166,8 @@ describe("Groups View", () => {
 
 	it("does not show a group-list progress indicator after its update completes", async () => {
 		const group = { name: "archive", disabled: false };
-		useSessions.mockReturnValue([[], false, [group], jest.fn()]);
-		useUpdateSessions.mockReturnValue({
+		asMock(useSessions).mockReturnValue([[], false, [group], jest.fn()]);
+		asMock(useUpdateSessions).mockReturnValue({
 			status: [{ name: "archive", progress: 2, count: 2 }],
 			busy: false,
 			start: null,
@@ -182,8 +185,8 @@ describe("Groups View", () => {
 
 	it("shows a group-list progress indicator while a group update is unfinished", async () => {
 		const group = { name: "archive", disabled: false };
-		useSessions.mockReturnValue([[], false, [group], jest.fn()]);
-		useUpdateSessions.mockReturnValue({
+		asMock(useSessions).mockReturnValue([[], false, [group], jest.fn()]);
+		asMock(useUpdateSessions).mockReturnValue({
 			status: [{ name: "archive", progress: 1, count: 2 }],
 			busy: true,
 			start: Date.now(),
@@ -208,7 +211,7 @@ describe("Groups View", () => {
 	});
 
 	it("allocates a list column for both progress and color", () => {
-		useUpdateSessions.mockReturnValue({
+		asMock(useUpdateSessions).mockReturnValue({
 			status: [{ name: "archive", progress: 1, count: 2 }],
 			busy: false,
 			start: Date.now(),
@@ -248,14 +251,14 @@ describe("Groups View", () => {
 	});
 
 	it("invokes update session toolbar actions", async () => {
-		const updateAllSessions = jest.fn().mockResolvedValue();
-		const updateRecentSessions = jest.fn().mockResolvedValue();
-		const updateAllMetadataCurrentYear = jest.fn().mockResolvedValue();
-		useUpdateSessions.mockReturnValue({
+		const updateAllSessions = jest.fn().mockResolvedValue(undefined);
+		const updateRecentSessions = jest.fn().mockResolvedValue(undefined);
+		const updateAllMetadataCurrentYear = jest.fn().mockResolvedValue(undefined);
+		asMock(useUpdateSessions).mockReturnValue({
 			status: [],
 			busy: false,
 			start: null,
-			updateSessions: jest.fn().mockResolvedValue(),
+			updateSessions: jest.fn().mockResolvedValue(undefined),
 			updateAllSessions,
 			updateAllMetadataCurrentYear,
 			updateRecentSessions,
@@ -271,17 +274,17 @@ describe("Groups View", () => {
 	});
 
 	it("keeps sync toolbar visible when the browser reports offline", () => {
-		useOnline.mockReturnValue(false);
+		asMock(useOnline).mockReturnValue(false);
 		render(<Groups />);
 		expect(toolbarItems.map((i) => i.id)).toContain("sync_sessions");
 	});
 
 	it("calculates sizes for split groups", async () => {
 		const group = { name: "archive", disabled: false };
-		useSessions.mockReturnValue([[], false, [group], jest.fn()]);
-		storage.exists.mockResolvedValue(true);
-		storage.getListing.mockResolvedValue([{ name: "2024.json" }]);
-		storage.readFile.mockResolvedValue("x".repeat(100));
+		asMock(useSessions).mockReturnValue([[], false, [group], jest.fn()]);
+		asMock(storage.exists).mockResolvedValue(true);
+		asMock(storage.getListing).mockResolvedValue([{ name: "2024.json" }]);
+		asMock(storage.readFile).mockResolvedValue("x".repeat(100));
 
 		render(<Groups />);
 		await act(async () => {});
@@ -290,9 +293,9 @@ describe("Groups View", () => {
 
 	it("calculates sizes for merged groups", async () => {
 		const group = { name: "archive", disabled: true, merged: true };
-		useSessions.mockReturnValue([[], false, [group], jest.fn()]);
-		storage.exists.mockResolvedValue(true);
-		storage.readFile.mockResolvedValue("merged-content");
+		asMock(useSessions).mockReturnValue([[], false, [group], jest.fn()]);
+		asMock(storage.exists).mockResolvedValue(true);
+		asMock(storage.readFile).mockResolvedValue("merged-content");
 
 		render(<Groups />);
 		await act(async () => {});
@@ -301,9 +304,9 @@ describe("Groups View", () => {
 
 	it("calculates sizes for bundled groups", async () => {
 		const group = { name: "archive", bundled: true, disabled: false };
-		useSessions.mockReturnValue([[], false, [group], jest.fn()]);
-		storage.exists.mockResolvedValue(true);
-		storage.readFile.mockResolvedValue(
+		asMock(useSessions).mockReturnValue([[], false, [group], jest.fn()]);
+		asMock(storage.exists).mockResolvedValue(true);
+		asMock(storage.readFile).mockResolvedValue(
 			JSON.stringify({
 				sessions: [{ group: "archive", name: "s1" }],
 			}),
@@ -315,21 +318,24 @@ describe("Groups View", () => {
 	});
 
 	it("uses mobile device type", () => {
-		useDeviceType.mockReturnValue("phone");
+		asMock(useDeviceType).mockReturnValue("phone");
 		render(<Groups />);
 		expect(screen.getByTestId("table")).toBeInTheDocument();
 	});
 
 	it("shows loading state from sessions", () => {
-		useSessions.mockReturnValue([[], true, [], jest.fn()]);
+		asMock(useSessions).mockReturnValue([[], true, [], jest.fn()]);
 		render(<Groups />);
 		expect(screen.getByTestId("table").dataset.loading).toBe("true");
 	});
 
 	it("invokes sync sessions with showDisabled from toolbar", async () => {
-		const updateSessions = jest.fn().mockResolvedValue();
-		GroupsStore.useState.mockReturnValue({ counter: 1, showDisabled: true });
-		useUpdateSessions.mockReturnValue({
+		const updateSessions = jest.fn().mockResolvedValue(undefined);
+		asMock(GroupsStore.useState).mockReturnValue({
+			counter: 1,
+			showDisabled: true,
+		});
+		asMock(useUpdateSessions).mockReturnValue({
 			status: [],
 			busy: false,
 			start: null,
@@ -345,8 +351,8 @@ describe("Groups View", () => {
 	});
 
 	it("invokes update metadata for current year from toolbar", async () => {
-		const updateAllMetadataCurrentYear = jest.fn().mockResolvedValue();
-		useUpdateSessions.mockReturnValue({
+		const updateAllMetadataCurrentYear = jest.fn().mockResolvedValue(undefined);
+		asMock(useUpdateSessions).mockReturnValue({
 			status: [],
 			busy: false,
 			start: null,
@@ -366,7 +372,7 @@ describe("Groups View", () => {
 	it("shows busy toolbar with syncing duration", () => {
 		jest.useFakeTimers();
 		const start = Date.now() - 5000;
-		useUpdateSessions.mockReturnValue({
+		asMock(useUpdateSessions).mockReturnValue({
 			status: [],
 			busy: true,
 			start,
@@ -386,9 +392,9 @@ describe("Groups View", () => {
 
 	it("logs bundle read errors and continues size calculation", async () => {
 		const group = { name: "archive", bundled: true, disabled: false };
-		useSessions.mockReturnValue([[], false, [group], jest.fn()]);
-		storage.exists.mockResolvedValue(true);
-		storage.readFile.mockRejectedValue(new Error("bundle read failed"));
+		asMock(useSessions).mockReturnValue([[], false, [group], jest.fn()]);
+		asMock(storage.exists).mockResolvedValue(true);
+		asMock(storage.readFile).mockRejectedValue(new Error("bundle read failed"));
 
 		render(<Groups />);
 		await act(async () => {});
@@ -400,9 +406,9 @@ describe("Groups View", () => {
 
 	it("logs per-group size errors and falls back to zero", async () => {
 		const group = { name: "broken", disabled: false };
-		useSessions.mockReturnValue([[], false, [group], jest.fn()]);
-		storage.exists.mockResolvedValue(true);
-		storage.getListing.mockRejectedValue(new Error("listing failed"));
+		asMock(useSessions).mockReturnValue([[], false, [group], jest.fn()]);
+		asMock(storage.exists).mockResolvedValue(true);
+		asMock(storage.getListing).mockRejectedValue(new Error("listing failed"));
 
 		render(<Groups />);
 		await act(async () => {});
@@ -415,13 +421,13 @@ describe("Groups View", () => {
 	it("maps session counts and row widgets for groups", async () => {
 		const group = { name: "archive", disabled: false, color: "#111" };
 		const setGroups = jest.fn();
-		useSessions.mockReturnValue([
+		asMock(useSessions).mockReturnValue([
 			[{ group: "archive" }, { group: "archive" }],
 			false,
 			[group],
 			setGroups,
 		]);
-		useUpdateSessions.mockReturnValue({
+		asMock(useUpdateSessions).mockReturnValue({
 			status: [{ name: "archive", progress: 1, count: 2, index: 1 }],
 			busy: false,
 			start: null,
@@ -431,9 +437,9 @@ describe("Groups View", () => {
 			updateRecentSessions: jest.fn(),
 			updateGroup: jest.fn(),
 		});
-		storage.exists.mockResolvedValue(true);
-		storage.getListing.mockResolvedValue([{ name: "2024.json" }]);
-		storage.readFile.mockResolvedValue("x".repeat(50));
+		asMock(storage.exists).mockResolvedValue(true);
+		asMock(storage.getListing).mockResolvedValue([{ name: "2024.json" }]);
+		asMock(storage.readFile).mockResolvedValue("x".repeat(50));
 
 		render(<Groups />);
 		await act(async () => {});
@@ -448,7 +454,7 @@ describe("Groups View", () => {
 		const setGroups = jest.fn((updater) =>
 			updater([{ name: "archive", color: "#000" }]),
 		);
-		useSessions.mockReturnValue([[], false, [], setGroups]);
+		asMock(useSessions).mockReturnValue([[], false, [], setGroups]);
 		const { container } = render(<Groups />);
 
 		toolbarItems.find((i) => i.id === "import_groups")?.onClick();
@@ -473,7 +479,7 @@ describe("Groups View", () => {
 
 	it("imports groups from an object map json file", async () => {
 		const setGroups = jest.fn((updater) => updater([]));
-		useSessions.mockReturnValue([[], false, [], setGroups]);
+		asMock(useSessions).mockReturnValue([[], false, [], setGroups]);
 		const { container } = render(<Groups />);
 
 		const input = container.querySelector('input[type="file"]');
@@ -493,7 +499,7 @@ describe("Groups View", () => {
 
 	it("imports groups from a groups wrapper object", async () => {
 		const setGroups = jest.fn((updater) => updater([]));
-		useSessions.mockReturnValue([[], false, [], setGroups]);
+		asMock(useSessions).mockReturnValue([[], false, [], setGroups]);
 		const { container } = render(<Groups />);
 
 		const input = container.querySelector('input[type="file"]');
@@ -515,7 +521,7 @@ describe("Groups View", () => {
 
 	it("alerts when group import fails", async () => {
 		const alertSpy = jest.spyOn(window, "alert").mockImplementation(() => {});
-		useSessions.mockReturnValue([[], false, [], jest.fn()]);
+		asMock(useSessions).mockReturnValue([[], false, [], jest.fn()]);
 		const { container } = render(<Groups />);
 
 		const input = container.querySelector('input[type="file"]');
@@ -534,12 +540,12 @@ describe("Groups View", () => {
 			"Error importing groups:",
 			expect.any(Error),
 		);
-		alertSpy.mockRestore();
+		asMock(alertSpy).mockRestore();
 	});
 
 	it("alerts when imported file has no groups", async () => {
 		const alertSpy = jest.spyOn(window, "alert").mockImplementation(() => {});
-		useSessions.mockReturnValue([[], false, [], jest.fn()]);
+		asMock(useSessions).mockReturnValue([[], false, [], jest.fn()]);
 		const { container } = render(<Groups />);
 
 		const input = container.querySelector('input[type="file"]');
@@ -554,7 +560,7 @@ describe("Groups View", () => {
 		expect(alertSpy).toHaveBeenCalledWith(
 			expect.stringContaining("no groups found"),
 		);
-		alertSpy.mockRestore();
+		asMock(alertSpy).mockRestore();
 	});
 
 	it("updates group color through the table mapper", async () => {
@@ -564,8 +570,8 @@ describe("Groups View", () => {
 			expect(next[0].color).toBe("#aabbcc");
 			return next;
 		});
-		useSessions.mockReturnValue([[], false, [group], setGroups]);
-		storage.exists.mockResolvedValue(false);
+		asMock(useSessions).mockReturnValue([[], false, [group], setGroups]);
+		asMock(storage.exists).mockResolvedValue(false);
 
 		render(<Groups />);
 		await act(async () => {});
@@ -581,7 +587,7 @@ describe("Groups View", () => {
 
 	it("ignores file input changes when no file is selected", async () => {
 		const setGroups = jest.fn();
-		useSessions.mockReturnValue([[], false, [], setGroups]);
+		asMock(useSessions).mockReturnValue([[], false, [], setGroups]);
 		const { container } = render(<Groups />);
 		const input = container.querySelector('input[type="file"]');
 		await act(async () => {
@@ -591,23 +597,26 @@ describe("Groups View", () => {
 	});
 
 	it("shows hide-disabled label when disabled groups are visible", () => {
-		GroupsStore.useState.mockReturnValue({ counter: 1, showDisabled: true });
+		asMock(GroupsStore.useState).mockReturnValue({
+			counter: 1,
+			showDisabled: true,
+		});
 		render(<Groups />);
 		const toggle: any = toolbarItems.find((i) => i.id === "showDisabled");
 		expect(toggle.name).toBe("Hide disabled groups");
 	});
 
 	it("hides sync toolbar when cookies are missing", () => {
-		Cookies.get.mockReturnValue(null);
+		asMock(Cookies.get).mockReturnValue(null);
 		render(<Groups />);
 		expect(toolbarItems.every((i) => i.id !== "sync_sessions")).toBe(true);
 	});
 
 	it("skips bundled size when bundle has no sessions for the group", async () => {
 		const group = { name: "archive", bundled: true, disabled: false };
-		useSessions.mockReturnValue([[], false, [group], jest.fn()]);
-		storage.exists.mockResolvedValue(true);
-		storage.readFile.mockResolvedValue(
+		asMock(useSessions).mockReturnValue([[], false, [group], jest.fn()]);
+		asMock(storage.exists).mockResolvedValue(true);
+		asMock(storage.readFile).mockResolvedValue(
 			JSON.stringify({ sessions: [{ group: "other", name: "s1" }] }),
 		);
 
@@ -618,9 +627,9 @@ describe("Groups View", () => {
 
 	it("treats disabled groups as merged for storage size", async () => {
 		const group = { name: "archive", disabled: true };
-		useSessions.mockReturnValue([[], false, [group], jest.fn()]);
-		storage.exists.mockResolvedValue(true);
-		storage.readFile.mockResolvedValue("");
+		asMock(useSessions).mockReturnValue([[], false, [group], jest.fn()]);
+		asMock(storage.exists).mockResolvedValue(true);
+		asMock(storage.readFile).mockResolvedValue("");
 
 		render(<Groups />);
 		await act(async () => {});
@@ -629,13 +638,13 @@ describe("Groups View", () => {
 
 	it("sums split storage only from json year files", async () => {
 		const group = { name: "archive", disabled: false };
-		useSessions.mockReturnValue([[], false, [group], jest.fn()]);
-		storage.exists.mockResolvedValue(true);
-		storage.getListing.mockResolvedValue([
+		asMock(useSessions).mockReturnValue([[], false, [group], jest.fn()]);
+		asMock(storage.exists).mockResolvedValue(true);
+		asMock(storage.getListing).mockResolvedValue([
 			{ name: "2024.json" },
 			{ name: "readme.txt" },
 		]);
-		storage.readFile.mockResolvedValue("abcd");
+		asMock(storage.readFile).mockResolvedValue("abcd");
 
 		render(<Groups />);
 		await act(async () => {});
@@ -651,13 +660,13 @@ describe("Groups View", () => {
 			{ name: "split", disabled: false, color: "#333" },
 			{ name: "hidden", disabled: true, color: "#444" },
 		];
-		useSessions.mockReturnValue([
+		asMock(useSessions).mockReturnValue([
 			[{ group: "split" }],
 			false,
 			groups,
 			jest.fn(),
 		]);
-		useUpdateSessions.mockReturnValue({
+		asMock(useUpdateSessions).mockReturnValue({
 			status: [{ name: "split", progress: -1, count: 2, index: 0 }],
 			busy: true,
 			start: Date.now(),
@@ -667,8 +676,11 @@ describe("Groups View", () => {
 			updateRecentSessions: jest.fn(),
 			updateGroup: jest.fn(),
 		});
-		GroupsStore.useState.mockReturnValue({ counter: 1, showDisabled: true });
-		storage.exists.mockResolvedValue(false);
+		asMock(GroupsStore.useState).mockReturnValue({
+			counter: 1,
+			showDisabled: true,
+		});
+		asMock(storage.exists).mockResolvedValue(false);
 
 		render(<Groups />);
 		await act(async () => {});
@@ -686,8 +698,8 @@ describe("Groups View", () => {
 
 	it("uses busy list layout without progress column when sync is idle", async () => {
 		const group = { name: "archive", disabled: false };
-		useSessions.mockReturnValue([[], false, [group], jest.fn()]);
-		useUpdateSessions.mockReturnValue({
+		asMock(useSessions).mockReturnValue([[], false, [group], jest.fn()]);
+		asMock(useUpdateSessions).mockReturnValue({
 			status: [{ name: "archive", progress: 1, count: 2 }],
 			busy: true,
 			start: Date.now(),

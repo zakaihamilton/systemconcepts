@@ -33,8 +33,8 @@ jest.mock("js-cookie", () => ({
 describe("uploadManifest", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
-		purgeApiCacheFromStorage.mockResolvedValue(1);
-		writeCompressedFile.mockResolvedValue(undefined);
+		asMock(purgeApiCacheFromStorage).mockResolvedValue(1);
+		asMock(writeCompressedFile).mockResolvedValue(undefined);
 	});
 
 	it("purges api-cache after a successful manifest upload", async () => {
@@ -66,7 +66,7 @@ describe("uploadManifest", () => {
 		expect(logger.debug).toHaveBeenCalledWith(
 			expect.stringContaining("Removed"),
 		);
-		const [, normalized] = writeCompressedFile.mock.calls[0];
+		const [, normalized] = asMock(writeCompressedFile).mock.calls[0];
 		expect(normalized.find((e: any) => e.path === "/a.json").version).toBe("3");
 	});
 
@@ -79,7 +79,9 @@ describe("uploadManifest", () => {
 	});
 
 	it("logs purge failures without failing the upload", async () => {
-		purgeApiCacheFromStorage.mockRejectedValue(new Error("purge failed"));
+		asMock(purgeApiCacheFromStorage).mockRejectedValue(
+			new Error("purge failed"),
+		);
 		await uploadManifest([{ path: "/a.json", version: "1" }]);
 		await Promise.resolve();
 		expect(logger.error).toHaveBeenCalledWith(
@@ -89,8 +91,8 @@ describe("uploadManifest", () => {
 	});
 
 	it("warns visitors on ACCESS_DENIED without throwing", async () => {
-		Cookies.get.mockReturnValue("visitor");
-		writeCompressedFile.mockRejectedValue(
+		asMock(Cookies.get).mockReturnValue("visitor");
+		asMock(writeCompressedFile).mockRejectedValue(
 			Object.assign(new Error("ACCESS_DENIED"), { status: 403 }),
 		);
 		await expect(
@@ -103,8 +105,8 @@ describe("uploadManifest", () => {
 	});
 
 	it("warns non-visitors on numeric 403 without throwing", async () => {
-		Cookies.get.mockReturnValue("user");
-		writeCompressedFile.mockRejectedValue(403);
+		asMock(Cookies.get).mockReturnValue("user");
+		asMock(writeCompressedFile).mockRejectedValue(403);
 		await expect(
 			uploadManifest([{ path: "/a.json", version: "1" }]),
 		).resolves.toBeUndefined();
@@ -116,7 +118,7 @@ describe("uploadManifest", () => {
 
 	it("rethrows unexpected upload errors after logging", async () => {
 		const err = new Error("network");
-		writeCompressedFile.mockRejectedValue(err);
+		asMock(writeCompressedFile).mockRejectedValue(err);
 		await expect(
 			uploadManifest([{ path: "/a.json", version: "1" }]),
 		).rejects.toBe(err);

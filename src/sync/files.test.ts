@@ -18,7 +18,7 @@ describe("files.readFile", () => {
 	});
 
 	it("returns the default value when the file does not exist", async () => {
-		storage.exists.mockResolvedValue(false);
+		asMock(storage.exists).mockResolvedValue(false);
 
 		const result = await readFile("groups.json", { fallback: true });
 
@@ -27,8 +27,8 @@ describe("files.readFile", () => {
 	});
 
 	it("returns the parsed contents when the file exists", async () => {
-		storage.exists.mockResolvedValue(true);
-		readCompressedFile.mockResolvedValue({ groups: [] });
+		asMock(storage.exists).mockResolvedValue(true);
+		asMock(readCompressedFile).mockResolvedValue({ groups: [] });
 
 		const result = await readFile("groups.json");
 
@@ -37,8 +37,8 @@ describe("files.readFile", () => {
 	});
 
 	it("falls back to the default value when the compressed file resolves to null", async () => {
-		storage.exists.mockResolvedValue(true);
-		readCompressedFile.mockResolvedValue(null);
+		asMock(storage.exists).mockResolvedValue(true);
+		asMock(readCompressedFile).mockResolvedValue(null);
 
 		const result = await readFile("groups.json", { fallback: true });
 
@@ -46,7 +46,7 @@ describe("files.readFile", () => {
 	});
 
 	it("returns the default value and swallows errors from the storage layer", async () => {
-		storage.exists.mockRejectedValue(new Error("storage unavailable"));
+		asMock(storage.exists).mockRejectedValue(new Error("storage unavailable"));
 
 		const result = await readFile("groups.json", { fallback: true });
 
@@ -60,7 +60,7 @@ describe("files.writeFile", () => {
 	});
 
 	it("writes compressed content to the local sync base path", async () => {
-		writeCompressedFile.mockResolvedValue(undefined);
+		asMock(writeCompressedFile).mockResolvedValue(undefined);
 
 		await writeFile("groups.json", { groups: [] });
 
@@ -71,7 +71,7 @@ describe("files.writeFile", () => {
 	});
 
 	it("propagates errors from the storage layer", async () => {
-		writeCompressedFile.mockRejectedValue(new Error("disk full"));
+		asMock(writeCompressedFile).mockRejectedValue(new Error("disk full"));
 
 		await expect(writeFile("groups.json", {})).rejects.toThrow("disk full");
 	});

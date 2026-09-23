@@ -6,7 +6,7 @@ describe("Select Widget", () => {
 		const item = { id: "1" };
 		const select = [{ id: "1" }];
 		const { getByRole } = render(<SelectWidget item={item} select={select} />);
-		const checkbox = getByRole("checkbox");
+		const checkbox = getByRole("checkbox") as HTMLInputElement;
 		expect(checkbox.checked).toBe(true);
 	});
 
@@ -14,7 +14,7 @@ describe("Select Widget", () => {
 		const item = { id: "2" };
 		const select = [{ id: "1" }];
 		const { getByRole } = render(<SelectWidget item={item} select={select} />);
-		const checkbox = getByRole("checkbox");
+		const checkbox = getByRole("checkbox") as HTMLInputElement;
 		expect(checkbox.checked).toBe(false);
 	});
 

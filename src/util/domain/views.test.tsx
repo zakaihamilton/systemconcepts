@@ -16,7 +16,7 @@ jest.mock("@util/domain/translations", () => ({
 	useTranslations: jest.fn(() => ({})),
 }));
 
-const FIXTURE_PAGES = [
+const FIXTURE_PAGES: any[] = [
 	{ id: "home", root: true, name: "HOME" },
 	{ id: "settings", name: "SETTINGS" },
 	{
@@ -84,8 +84,8 @@ function renderHook(hook: any) {
 
 beforeEach(() => {
 	jest.clearAllMocks();
-	useLanguage.mockReturnValue("eng");
-	useTranslations.mockReturnValue({});
+	asMock(useLanguage).mockReturnValue("eng");
+	asMock(useTranslations).mockReturnValue({});
 	MainStore.update((s) => {
 		s.hash = "";
 	});
@@ -161,7 +161,7 @@ describe("getOrigin / reloadPage", () => {
 			.spyOn(console, "error")
 			.mockImplementation(() => {});
 		expect(() => reloadPage()).not.toThrow();
-		consoleError.mockRestore();
+		asMock(consoleError).mockRestore();
 	});
 });
 
@@ -469,7 +469,7 @@ describe("useParentPath / useParentParams", () => {
 
 describe("usePages / useActivePages / useCurrentPage / useCurrentPageTitle", () => {
 	it("usePages maps translation keys and filters hidden pages", async () => {
-		useTranslations.mockReturnValue({ SETTINGS: "Settings Label" });
+		asMock(useTranslations).mockReturnValue({ SETTINGS: "Settings Label" });
 		const getResult = renderHook(() => usePages());
 		await waitFor(() => {
 			const pages = getResult();
@@ -501,8 +501,8 @@ describe("usePages / useActivePages / useCurrentPage / useCurrentPageTitle", () 
 			name: "UNDEF",
 		});
 
-		useLanguage.mockReturnValue("eng");
-		useTranslations.mockReturnValue({ SIDEBAR_NAME: "Side Name" });
+		asMock(useLanguage).mockReturnValue("eng");
+		asMock(useTranslations).mockReturnValue({ SIDEBAR_NAME: "Side Name" });
 		const getResult = renderHook(() => usePages("sidebar"));
 		await waitFor(() => {
 			const pages = getResult();
@@ -518,7 +518,7 @@ describe("usePages / useActivePages / useCurrentPage / useCurrentPageTitle", () 
 	});
 
 	it("usePages maps Hebrew object names when language is heb", async () => {
-		useLanguage.mockReturnValue("heb");
+		asMock(useLanguage).mockReturnValue("heb");
 		FIXTURE_PAGES.push({
 			id: "hebrew",
 			name: { eng: "English", heb: "Hebrew" },
@@ -535,7 +535,7 @@ describe("usePages / useActivePages / useCurrentPage / useCurrentPageTitle", () 
 			FIXTURE_PAGES.findIndex((p) => p.id === "hebrew"),
 			1,
 		);
-		useLanguage.mockReturnValue("eng");
+		asMock(useLanguage).mockReturnValue("eng");
 	});
 
 	it("setPath encodes segments that do not start with #", () => {

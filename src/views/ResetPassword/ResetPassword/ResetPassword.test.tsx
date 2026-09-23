@@ -65,9 +65,9 @@ describe("ResetPassword View", () => {
 
 	beforeEach(() => {
 		jest.clearAllMocks();
-		useTranslations.mockReturnValue(mockTranslations);
-		MainStore.useState.mockReturnValue({ direction: "ltr" });
-		Cookies.get.mockReturnValue(null);
+		asMock(useTranslations).mockReturnValue(mockTranslations);
+		asMock(MainStore.useState).mockReturnValue({ direction: "ltr" });
+		asMock(Cookies.get).mockReturnValue(null);
 	});
 
 	it("renders reset password form when no code is provided", () => {
@@ -85,7 +85,7 @@ describe("ResetPassword View", () => {
 	});
 
 	it("requests a password reset with a JSON action", async () => {
-		fetchJSON.mockResolvedValue({});
+		asMock(fetchJSON).mockResolvedValue({});
 		render(<ResetPassword />);
 
 		fireEvent.change(screen.getByTestId("input-userid"), {
@@ -105,7 +105,7 @@ describe("ResetPassword View", () => {
 	});
 
 	it("confirms a password reset with a JSON action", async () => {
-		fetchJSON.mockResolvedValue({ hash: "newhash" });
+		asMock(fetchJSON).mockResolvedValue({ hash: "newhash" });
 		render(<ResetPassword path="code123" />);
 
 		fireEvent.change(screen.getByTestId("input-userid"), {
@@ -133,7 +133,7 @@ describe("ResetPassword View", () => {
 	});
 
 	it("shows reset email confirmation after a successful request", async () => {
-		fetchJSON.mockResolvedValue({});
+		asMock(fetchJSON).mockResolvedValue({});
 		render(<ResetPassword />);
 		fireEvent.change(screen.getByTestId("input-userid"), {
 			target: { value: "testuser" },
@@ -160,7 +160,7 @@ describe("ResetPassword View", () => {
 	});
 
 	it("submits confirm on Enter and navigates home on success", async () => {
-		fetchJSON.mockResolvedValue({});
+		asMock(fetchJSON).mockResolvedValue({});
 		render(<ResetPassword path="code123" />);
 		fireEvent.change(screen.getByTestId("input-userid"), {
 			target: { value: "testuser" },
@@ -177,7 +177,7 @@ describe("ResetPassword View", () => {
 	});
 
 	it("shows translated errors from the API response", async () => {
-		fetchJSON.mockResolvedValue({ err: "ACCESS_DENIED" });
+		asMock(fetchJSON).mockResolvedValue({ err: "ACCESS_DENIED" });
 		render(<ResetPassword />);
 		fireEvent.change(screen.getByTestId("input-userid"), {
 			target: { value: "testuser" },
@@ -189,7 +189,7 @@ describe("ResetPassword View", () => {
 	});
 
 	it("renders RTL layout with remember-me when a code is present", () => {
-		MainStore.useState.mockReturnValue({ direction: "rtl" });
+		asMock(MainStore.useState).mockReturnValue({ direction: "rtl" });
 		render(<ResetPassword path="code123" />);
 		fireEvent.click(screen.getByRole("checkbox"));
 		expect(screen.getByTestId("input-newpassword")).toBeInTheDocument();

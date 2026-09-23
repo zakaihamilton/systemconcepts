@@ -25,7 +25,7 @@ jest.mock("../mutex", () => ({
 describe("updateLocalManifest", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
-		storage.writeFile.mockResolvedValue(undefined);
+		asMock(storage.writeFile).mockResolvedValue(undefined);
 		SyncActiveStore.update((state) => {
 			state.stopping = false;
 			state.progress = { total: 0, processed: 0 };
@@ -33,8 +33,8 @@ describe("updateLocalManifest", () => {
 	});
 
 	it("adds a new file to an empty manifest, versioned above the remote entry", async () => {
-		storage.readFile.mockResolvedValueOnce(null);
-		storage.readFile.mockResolvedValueOnce("hello");
+		asMock(storage.readFile).mockResolvedValueOnce(null);
+		asMock(storage.readFile).mockResolvedValueOnce("hello");
 
 		const localFiles = [
 			{ path: "/alpha.json", fullPath: "/local/sync/alpha.json" },
@@ -57,12 +57,12 @@ describe("updateLocalManifest", () => {
 	});
 
 	it("bumps the version when an existing file's hash has changed", async () => {
-		storage.readFile.mockResolvedValueOnce(
+		asMock(storage.readFile).mockResolvedValueOnce(
 			JSON.stringify([
 				{ path: "/alpha.json", hash: "old-hash", size: 3, version: "2" },
 			]),
 		);
-		storage.readFile.mockResolvedValueOnce("hello");
+		asMock(storage.readFile).mockResolvedValueOnce("hello");
 
 		const localFiles = [
 			{ path: "/alpha.json", fullPath: "/local/sync/alpha.json" },
@@ -79,12 +79,12 @@ describe("updateLocalManifest", () => {
 	});
 
 	it("leaves the manifest unchanged when the hash matches and skips the disk write", async () => {
-		storage.readFile.mockResolvedValueOnce(
+		asMock(storage.readFile).mockResolvedValueOnce(
 			JSON.stringify([
 				{ path: "/alpha.json", hash: "4f9f2cab", size: 5, version: "2" },
 			]),
 		);
-		storage.readFile.mockResolvedValueOnce("hello");
+		asMock(storage.readFile).mockResolvedValueOnce("hello");
 
 		const localFiles = [
 			{ path: "/alpha.json", fullPath: "/local/sync/alpha.json" },
@@ -97,7 +97,7 @@ describe("updateLocalManifest", () => {
 	});
 
 	it("marks a file as deleted when it disappears locally, then restores it when it returns", async () => {
-		storage.readFile.mockResolvedValueOnce(
+		asMock(storage.readFile).mockResolvedValueOnce(
 			JSON.stringify([
 				{ path: "/gone.json", hash: "abc", size: 3, version: "2" },
 			]),
@@ -107,8 +107,8 @@ describe("updateLocalManifest", () => {
 		expect(deletedManifest[0]).toMatchObject({ deleted: true, version: "3" });
 
 		jest.clearAllMocks();
-		storage.writeFile.mockResolvedValue(undefined);
-		storage.readFile.mockResolvedValueOnce(
+		asMock(storage.writeFile).mockResolvedValue(undefined);
+		asMock(storage.readFile).mockResolvedValueOnce(
 			JSON.stringify([
 				{
 					path: "/gone.json",
@@ -119,7 +119,7 @@ describe("updateLocalManifest", () => {
 				},
 			]),
 		);
-		storage.readFile.mockResolvedValueOnce("abc");
+		asMock(storage.readFile).mockResolvedValueOnce("abc");
 
 		const restoredManifest = await updateLocalManifest(
 			[{ path: "/gone.json", fullPath: "/local/sync/gone.json" }],
@@ -130,12 +130,12 @@ describe("updateLocalManifest", () => {
 	});
 
 	it("converts a legacy dictionary-style manifest into array form", async () => {
-		storage.readFile.mockResolvedValueOnce(
+		asMock(storage.readFile).mockResolvedValueOnce(
 			JSON.stringify({
 				"/legacy.json": { hash: "abc", size: 1, version: "1" },
 			}),
 		);
-		storage.readFile.mockResolvedValueOnce("abc");
+		asMock(storage.readFile).mockResolvedValueOnce("abc");
 
 		const manifest = await updateLocalManifest(
 			[{ path: "/legacy.json", fullPath: "/local/sync/legacy.json" }],
@@ -147,7 +147,7 @@ describe("updateLocalManifest", () => {
 	});
 
 	it("throws with a cause when the existing local manifest cannot be parsed", async () => {
-		storage.readFile.mockResolvedValueOnce("{not json");
+		asMock(storage.readFile).mockResolvedValueOnce("{not json");
 
 		await expect(updateLocalManifest([], "local/sync", [])).rejects.toThrow(
 			"Invalid local sync manifest",
@@ -160,7 +160,7 @@ describe("updateLocalManifest", () => {
 
 	it("returns the manifest unchanged and skips hashing when skipHashing is set", async () => {
 		const cached = [{ path: "/cached.json", hash: "x", version: "1" }];
-		storage.readFile.mockResolvedValueOnce(JSON.stringify(cached));
+		asMock(storage.readFile).mockResolvedValueOnce(JSON.stringify(cached));
 
 		const manifest = await updateLocalManifest(
 			[{ path: "/cached.json", fullPath: "/local/sync/cached.json" }],
@@ -174,7 +174,7 @@ describe("updateLocalManifest", () => {
 	});
 
 	it("stops hashing and throws a SYNC_STOPPED error when the user cancels", async () => {
-		storage.readFile.mockResolvedValueOnce(null);
+		asMock(storage.readFile).mockResolvedValueOnce(null);
 		SyncActiveStore.update((state) => {
 			state.stopping = true;
 		});
@@ -193,8 +193,8 @@ describe("updateLocalManifest", () => {
 	});
 
 	it("skips files whose content could not be read", async () => {
-		storage.readFile.mockResolvedValueOnce(null);
-		storage.readFile.mockResolvedValueOnce(null);
+		asMock(storage.readFile).mockResolvedValueOnce(null);
+		asMock(storage.readFile).mockResolvedValueOnce(null);
 
 		const manifest = await updateLocalManifest(
 			[{ path: "/missing-content.json", fullPath: "/local/sync/x.json" }],
@@ -206,8 +206,8 @@ describe("updateLocalManifest", () => {
 	});
 
 	it("propagates a read failure while computing file info", async () => {
-		storage.readFile.mockResolvedValueOnce(null);
-		storage.readFile.mockRejectedValueOnce(new Error("disk error"));
+		asMock(storage.readFile).mockResolvedValueOnce(null);
+		asMock(storage.readFile).mockRejectedValueOnce(new Error("disk error"));
 
 		await expect(
 			updateLocalManifest(
@@ -219,8 +219,8 @@ describe("updateLocalManifest", () => {
 	});
 
 	it("treats a null remote manifest like an empty list", async () => {
-		storage.readFile.mockResolvedValueOnce(null);
-		storage.readFile.mockResolvedValueOnce("hello");
+		asMock(storage.readFile).mockResolvedValueOnce(null);
+		asMock(storage.readFile).mockResolvedValueOnce("hello");
 
 		const manifest = await updateLocalManifest(
 			[{ path: "/alpha.json", fullPath: "/local/sync/alpha.json" }],
@@ -232,7 +232,7 @@ describe("updateLocalManifest", () => {
 	});
 
 	it("does not re-mark files that are already deleted", async () => {
-		storage.readFile.mockResolvedValueOnce(
+		asMock(storage.readFile).mockResolvedValueOnce(
 			JSON.stringify([
 				{
 					path: "/gone.json",
@@ -251,7 +251,7 @@ describe("updateLocalManifest", () => {
 	});
 
 	it("uses remote versions when bumping deleted file versions", async () => {
-		storage.readFile.mockResolvedValueOnce(
+		asMock(storage.readFile).mockResolvedValueOnce(
 			JSON.stringify([
 				{ path: "/gone.json", hash: "abc", size: 3, version: "2" },
 			]),
@@ -265,12 +265,12 @@ describe("updateLocalManifest", () => {
 	});
 
 	it("stops mid-batch when the user cancels during hashing", async () => {
-		storage.readFile.mockResolvedValueOnce(null);
+		asMock(storage.readFile).mockResolvedValueOnce(null);
 		const localFiles = Array.from({ length: 3 }, (_v, i) => ({
 			path: `/file-${i}.json`,
 			fullPath: `/local/sync/file-${i}.json`,
 		}));
-		storage.readFile.mockImplementation(async (path: any) => {
+		asMock(storage.readFile).mockImplementation(async (path: any) => {
 			if (String(path).includes("file-1")) {
 				SyncActiveStore.update((state) => {
 					state.stopping = true;
@@ -286,7 +286,7 @@ describe("updateLocalManifest", () => {
 
 	it("logs the skip-hashing path and returns the cached manifest", async () => {
 		const cached = [{ path: "/cached.json", hash: "x", version: "1" }];
-		storage.readFile.mockResolvedValueOnce(JSON.stringify(cached));
+		asMock(storage.readFile).mockResolvedValueOnce(JSON.stringify(cached));
 
 		const manifest = await updateLocalManifest(
 			[{ path: "/cached.json", fullPath: "/local/sync/cached.json" }],
@@ -303,12 +303,12 @@ describe("updateLocalManifest", () => {
 	});
 
 	it("bumps versions using the higher of local and remote entries when content changes", async () => {
-		storage.readFile.mockResolvedValueOnce(
+		asMock(storage.readFile).mockResolvedValueOnce(
 			JSON.stringify([
 				{ path: "/alpha.json", hash: "old-hash", size: 3, version: "8" },
 			]),
 		);
-		storage.readFile.mockResolvedValueOnce("hello");
+		asMock(storage.readFile).mockResolvedValueOnce("hello");
 
 		const manifest = await updateLocalManifest(
 			[{ path: "/alpha.json", fullPath: "/local/sync/alpha.json" }],

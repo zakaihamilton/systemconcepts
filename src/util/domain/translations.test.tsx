@@ -42,7 +42,7 @@ describe("useTranslations", () => {
 	});
 
 	it("builds a translations map keyed by id for the current language", async () => {
-		useLanguage.mockReturnValue("eng");
+		asMock(useLanguage).mockReturnValue("eng");
 		const getResult = renderHook(useTranslations);
 		await waitFor(() =>
 			expect(getResult()).toEqual({ HELLO: "Hello", BYE: "Bye" }),
@@ -50,19 +50,19 @@ describe("useTranslations", () => {
 	});
 
 	it("returns a different map when the language changes", async () => {
-		useLanguage.mockReturnValue("heb");
+		asMock(useLanguage).mockReturnValue("heb");
 		const getResult = renderHook(useTranslations);
 		await waitFor(() => expect(getResult()).toEqual({ HELLO: "שלום" }));
 	});
 
 	it("returns an empty object when the language has no translations defined", async () => {
-		useLanguage.mockReturnValue("empty");
+		asMock(useLanguage).mockReturnValue("empty");
 		const getResult = renderHook(useTranslations);
 		await waitFor(() => expect(getResult()).toEqual({}));
 	});
 
 	it("returns an empty object when the language is not found", async () => {
-		useLanguage.mockReturnValue("unknown");
+		asMock(useLanguage).mockReturnValue("unknown");
 		const getResult = renderHook(useTranslations);
 		await waitFor(() => expect(getResult()).toEqual({}));
 	});

@@ -52,7 +52,7 @@ describe("AppErrorBoundary", () => {
 		.mockImplementation(() => {});
 
 	afterAll(() => {
-		consoleError.mockRestore();
+		asMock(consoleError).mockRestore();
 	});
 
 	it("hides the splash and offers a reload when a child crashes", () => {
@@ -60,7 +60,7 @@ describe("AppErrorBoundary", () => {
 		splash.id = "app-splash";
 		document.body.appendChild(splash);
 
-		function Boom() {
+		function Boom(): null {
 			throw new Error("render failed");
 		}
 

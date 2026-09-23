@@ -19,7 +19,7 @@ const manifest = [
 describe("compactLegacySessionThumbnails", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
-		storage.readFile.mockImplementation(async (path: any) => {
+		asMock(storage.readFile).mockImplementation(async (path: any) => {
 			if (path === "/local/sync/files.json") return JSON.stringify(manifest);
 			if (path === "/local/sync/group/2026.json") {
 				return JSON.stringify({
@@ -34,7 +34,7 @@ describe("compactLegacySessionThumbnails", () => {
 			}
 			return null;
 		});
-		getFileInfo.mockResolvedValue({ hash: "after", size: 8 });
+		asMock(getFileInfo).mockResolvedValue({ hash: "after", size: 8 });
 	});
 
 	it("removes only legacy data URLs and preserves the manifest version", async () => {
@@ -43,7 +43,7 @@ describe("compactLegacySessionThumbnails", () => {
 			skipped: false,
 		});
 
-		const [, compactedContent] = storage.writeFile.mock.calls.find(
+		const [, compactedContent] = asMock(storage.writeFile).mock.calls.find(
 			([path]: any) => path === "/local/sync/group/2026.json",
 		);
 		expect(JSON.parse(compactedContent).sessions).toEqual([
@@ -51,7 +51,7 @@ describe("compactLegacySessionThumbnails", () => {
 			{ id: "path", thumbnail: "/aws/image.jpg" },
 		]);
 
-		const [, manifestContent] = storage.writeFile.mock.calls.find(
+		const [, manifestContent] = asMock(storage.writeFile).mock.calls.find(
 			([path]: any) => path === "/local/sync/files.json",
 		);
 		expect(JSON.parse(manifestContent)).toEqual([
@@ -65,7 +65,7 @@ describe("compactLegacySessionThumbnails", () => {
 	});
 
 	it("uses its marker to skip a completed compaction", async () => {
-		storage.readFile.mockImplementation(async (path: any) => {
+		asMock(storage.readFile).mockImplementation(async (path: any) => {
 			if (path === "/local/sync/files.json") return JSON.stringify(manifest);
 			if (path === "/local/session-thumbnail-compaction.json") {
 				return JSON.stringify({
@@ -85,7 +85,9 @@ describe("compactLegacySessionThumbnails", () => {
 	});
 
 	it("returns skipped when the manifest cannot be read", async () => {
-		storage.readFile.mockRejectedValue(new Error("manifest read failed"));
+		asMock(storage.readFile).mockRejectedValue(
+			new Error("manifest read failed"),
+		);
 
 		await expect(compactLegacySessionThumbnails()).resolves.toEqual({
 			compacted: 0,
@@ -94,7 +96,9 @@ describe("compactLegacySessionThumbnails", () => {
 	});
 
 	it("returns skipped when the manifest is not an array", async () => {
-		storage.readFile.mockResolvedValue(JSON.stringify({ not: "array" }));
+		asMock(storage.readFile).mockResolvedValue(
+			JSON.stringify({ not: "array" }),
+		);
 
 		await expect(compactLegacySessionThumbnails()).resolves.toEqual({
 			compacted: 0,
@@ -103,7 +107,7 @@ describe("compactLegacySessionThumbnails", () => {
 	});
 
 	it("warns and retries when a session file cannot be read", async () => {
-		storage.readFile.mockImplementation(async (path: any) => {
+		asMock(storage.readFile).mockImplementation(async (path: any) => {
 			if (path === "/local/sync/files.json") return JSON.stringify(manifest);
 			if (path === "/local/sync/group/2026.json") {
 				throw new Error("unreadable");

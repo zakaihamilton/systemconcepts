@@ -113,21 +113,24 @@ jest.mock("@ui/LinearProgress", () => (props: any) => (
 describe("SideBar Component", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
-		useTranslations.mockReturnValue({
+		asMock(useTranslations).mockReturnValue({
 			LIBRARY: "Library",
 			BOOKMARKS: "Bookmarks",
 		});
-		useDeviceType.mockReturnValue("desktop");
-		MainStore.useState.mockReturnValue({
+		asMock(useDeviceType).mockReturnValue("desktop");
+		asMock(MainStore.useState).mockReturnValue({
 			direction: "ltr",
 			showSlider: false,
 			hash: "sessions",
 			libraryExpanded: false,
 		});
-		ResearchStore.useState.mockReturnValue({ indexing: false, progress: 0 });
-		useBookmarks.mockReturnValue([]);
-		useActivePages.mockReturnValue([]);
-		usePages.mockReturnValue([
+		asMock(ResearchStore.useState).mockReturnValue({
+			indexing: false,
+			progress: 0,
+		});
+		asMock(useBookmarks).mockReturnValue([]);
+		asMock(useActivePages).mockReturnValue([]);
+		asMock(usePages).mockReturnValue([
 			{ id: "sessions", name: "Sessions", sidebar: true, apps: true },
 			{ id: "library", name: "Library", sidebar: true, apps: true },
 			{ id: "account", name: "Account", sidebar: true, path: "account" },
@@ -142,8 +145,8 @@ describe("SideBar Component", () => {
 	});
 
 	it("renders drawer on mobile when showSlider is true", () => {
-		useDeviceType.mockReturnValue("phone");
-		MainStore.useState.mockReturnValue({
+		asMock(useDeviceType).mockReturnValue("phone");
+		asMock(MainStore.useState).mockReturnValue({
 			direction: "ltr",
 			showSlider: true,
 			hash: "",
@@ -156,13 +159,16 @@ describe("SideBar Component", () => {
 	});
 
 	it("auto-expands library when library page is active", () => {
-		useActivePages.mockReturnValue([{ id: "library", custom: true }]);
+		asMock(useActivePages).mockReturnValue([{ id: "library", custom: true }]);
 		render(<SideBar />);
 		expect(MainStore.update).toHaveBeenCalled();
 	});
 
 	it("shows research indexing progress in the research item", () => {
-		ResearchStore.useState.mockReturnValue({ indexing: true, progress: 55 });
+		asMock(ResearchStore.useState).mockReturnValue({
+			indexing: true,
+			progress: 55,
+		});
 		render(<SideBar />);
 		expect(screen.getByTestId("linear-progress")).toHaveAttribute(
 			"data-value",
@@ -176,7 +182,7 @@ describe("SideBar Component", () => {
 	});
 
 	it("includes bookmarks section when bookmarks exist", () => {
-		useBookmarks.mockReturnValue([
+		asMock(useBookmarks).mockReturnValue([
 			{ id: "bm1", name: "Saved", path: "sessions" },
 		]);
 		render(<SideBar />);
@@ -190,7 +196,7 @@ describe("SideBar Component", () => {
 	});
 
 	it("falls back to hash update when page is missing", () => {
-		usePages.mockReturnValue([
+		asMock(usePages).mockReturnValue([
 			{ id: "library", name: "Library", sidebar: true, apps: true },
 		]);
 		render(<SideBar />);
@@ -200,7 +206,7 @@ describe("SideBar Component", () => {
 	});
 
 	it("toggles library expansion", () => {
-		MainStore.useState.mockReturnValue({
+		asMock(MainStore.useState).mockReturnValue({
 			direction: "ltr",
 			showSlider: false,
 			hash: "",
@@ -220,26 +226,28 @@ describe("SideBar Component", () => {
 	});
 
 	it("falls back to hash update when page is not in pages list", () => {
-		usePages.mockReturnValue([]);
+		asMock(usePages).mockReturnValue([]);
 		render(<SideBar />);
 		fireEvent.click(screen.getByTestId("unknown-nav"));
 		expect(MainStore.update).toHaveBeenCalled();
 	});
 
 	it("does not treat pages with sectionIndex as selected", () => {
-		useActivePages.mockReturnValue([{ id: "sessions", sectionIndex: 0 }]);
+		asMock(useActivePages).mockReturnValue([
+			{ id: "sessions", sectionIndex: 0 },
+		]);
 		render(<SideBar />);
 		expect(screen.getByTestId("item-sessions")).toBeInTheDocument();
 	});
 
 	it("appends redirect target for account when hash starts with hash symbol", () => {
-		MainStore.useState.mockReturnValue({
+		asMock(MainStore.useState).mockReturnValue({
 			direction: "ltr",
 			showSlider: false,
 			hash: "#sessions",
 			libraryExpanded: false,
 		});
-		usePages.mockReturnValue([
+		asMock(usePages).mockReturnValue([
 			{ id: "account", name: "Account", sidebar: true, path: "account" },
 		]);
 		render(<SideBar />);
@@ -250,10 +258,10 @@ describe("SideBar Component", () => {
 	});
 
 	it("maps bookmark pages into the bookmarks section", () => {
-		useBookmarks.mockReturnValue([
+		asMock(useBookmarks).mockReturnValue([
 			{ id: "bm1", name: "Saved", path: "sessions" },
 		]);
-		usePages.mockReturnValue([
+		asMock(usePages).mockReturnValue([
 			{
 				id: "bookmark-page",
 				name: "Pinned",
@@ -281,14 +289,14 @@ describe("SideBar Component", () => {
 	});
 
 	it("closes desktop drawer when closeDrawer is invoked", () => {
-		useDeviceType.mockReturnValue("desktop");
+		asMock(useDeviceType).mockReturnValue("desktop");
 		render(<SideBar />);
 		fireEvent.click(screen.getByTestId("close-drawer"));
 		expect(MainStore.update).toHaveBeenCalled();
 	});
 
 	it("marks active pages without sectionIndex as selected", () => {
-		useActivePages.mockReturnValue([{ id: "sessions" }]);
+		asMock(useActivePages).mockReturnValue([{ id: "sessions" }]);
 		render(<SideBar />);
 		expect(screen.getByTestId("item-sessions")).toHaveAttribute(
 			"data-selected",
@@ -297,13 +305,13 @@ describe("SideBar Component", () => {
 	});
 
 	it("appends redirect target for account in apps list", () => {
-		MainStore.useState.mockReturnValue({
+		asMock(MainStore.useState).mockReturnValue({
 			direction: "ltr",
 			showSlider: false,
 			hash: "sessions",
 			libraryExpanded: false,
 		});
-		usePages.mockReturnValue([
+		asMock(usePages).mockReturnValue([
 			{
 				id: "account",
 				name: "Account",
@@ -326,7 +334,7 @@ describe("SideBar Component", () => {
 	});
 
 	it("renders rtl layout class", () => {
-		MainStore.useState.mockReturnValue({
+		asMock(MainStore.useState).mockReturnValue({
 			direction: "rtl",
 			showSlider: false,
 			hash: "",
@@ -337,13 +345,13 @@ describe("SideBar Component", () => {
 	});
 
 	it("does not append redirect when already on account routes", () => {
-		MainStore.useState.mockReturnValue({
+		asMock(MainStore.useState).mockReturnValue({
 			direction: "ltr",
 			showSlider: false,
 			hash: "account",
 			libraryExpanded: false,
 		});
-		usePages.mockReturnValue([
+		asMock(usePages).mockReturnValue([
 			{ id: "account", name: "Account", sidebar: true, path: "account" },
 		]);
 		render(<SideBar />);
@@ -354,7 +362,7 @@ describe("SideBar Component", () => {
 	});
 
 	it("uses translated library name when available", () => {
-		usePages.mockReturnValue([
+		asMock(usePages).mockReturnValue([
 			{ id: "library", name: "LIBRARY", sidebar: true, apps: true },
 		]);
 		render(<SideBar />);

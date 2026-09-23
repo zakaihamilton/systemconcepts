@@ -12,8 +12,8 @@ describe("ClientHead Component", () => {
 	});
 
 	it("updates document title with app name and page title", () => {
-		useTranslations.mockReturnValue({ APP_NAME: "System Concepts" });
-		useCurrentPageTitle.mockReturnValue("Dashboard");
+		asMock(useTranslations).mockReturnValue({ APP_NAME: "System Concepts" });
+		asMock(useCurrentPageTitle).mockReturnValue("Dashboard");
 
 		render(<ClientHead />);
 
@@ -21,8 +21,8 @@ describe("ClientHead Component", () => {
 	});
 
 	it("updates document title with only app name if page title is missing", () => {
-		useTranslations.mockReturnValue({ APP_NAME: "System Concepts" });
-		useCurrentPageTitle.mockReturnValue("");
+		asMock(useTranslations).mockReturnValue({ APP_NAME: "System Concepts" });
+		asMock(useCurrentPageTitle).mockReturnValue("");
 
 		render(<ClientHead />);
 

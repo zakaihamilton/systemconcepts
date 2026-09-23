@@ -23,6 +23,7 @@ jest.mock("@util/api/logger", () => ({
 }));
 
 jest.mock("@util/browser/store", () => ({
+	...jest.requireActual("@util/browser/store"),
 	useLocalStorage: jest.fn(),
 }));
 
@@ -64,7 +65,7 @@ function Harness({ depends = [], options = {} }) {
 	return null;
 }
 
-function renderHarness(props: any) {
+function renderHarness(props: any = {}) {
 	return render(<Harness {...props} />);
 }
 
@@ -91,23 +92,23 @@ describe("useSessions", () => {
 			s.showFilterDialog = false;
 			s.filterBarManuallyEnabled = false;
 		});
-		useGroups.mockReturnValue([GROUP_METADATA, false, jest.fn()]);
-		compactLegacySessionThumbnails.mockResolvedValue();
-		storage.exists.mockResolvedValue(false);
-		storage.readFile.mockResolvedValue("");
-		storage.getListing.mockResolvedValue([]);
-		storage.getRecursiveList.mockResolvedValue([]);
+		asMock(useGroups).mockReturnValue([GROUP_METADATA, false, jest.fn()]);
+		asMock(compactLegacySessionThumbnails).mockResolvedValue(undefined);
+		asMock(storage.exists).mockResolvedValue(false);
+		asMock(storage.readFile).mockResolvedValue("");
+		asMock(storage.getListing).mockResolvedValue([]);
+		asMock(storage.getRecursiveList).mockResolvedValue([]);
 	});
 
 	it("loads sessions for a non-bundled group using year files found via the manifest", async () => {
-		storage.exists.mockImplementation(async (path: any) => {
+		asMock(storage.exists).mockImplementation(async (path: any) => {
 			return (
 				path === "/local/sync/groups.json" ||
 				path === "/local/sync/files.json" ||
 				path === "/local/sync/american/2024.json"
 			);
 		});
-		storage.readFile.mockImplementation(async (path: any) => {
+		asMock(storage.readFile).mockImplementation(async (path: any) => {
 			if (path === "/local/sync/groups.json") {
 				return JSON.stringify({ groups: [{ name: "american" }] });
 			}
@@ -144,13 +145,13 @@ describe("useSessions", () => {
 	});
 
 	it("loads a merged group from its single json file", async () => {
-		storage.exists.mockImplementation(async (path: any) => {
+		asMock(storage.exists).mockImplementation(async (path: any) => {
 			return (
 				path === "/local/sync/groups.json" ||
 				path === "/local/sync/american.json"
 			);
 		});
-		storage.readFile.mockImplementation(async (path: any) => {
+		asMock(storage.readFile).mockImplementation(async (path: any) => {
 			if (path === "/local/sync/groups.json") {
 				return JSON.stringify({ groups: [{ name: "american" }] });
 			}
@@ -182,12 +183,12 @@ describe("useSessions", () => {
 	});
 
 	it("loads bundled sessions from bundle.json and skips per-year fetching", async () => {
-		storage.exists.mockImplementation(async (path: any) => {
+		asMock(storage.exists).mockImplementation(async (path: any) => {
 			return (
 				path === "/local/sync/groups.json" || path === "/local/sync/bundle.json"
 			);
 		});
-		storage.readFile.mockImplementation(async (path: any) => {
+		asMock(storage.readFile).mockImplementation(async (path: any) => {
 			if (path === "/local/sync/groups.json") {
 				return JSON.stringify({
 					groups: [{ name: "bundledgroup", bundled: true }],
@@ -222,16 +223,16 @@ describe("useSessions", () => {
 	});
 
 	it("falls back to storage.getListing for year files when no manifest exists", async () => {
-		storage.exists.mockImplementation(async (path: any) => {
+		asMock(storage.exists).mockImplementation(async (path: any) => {
 			return path === "/local/sync/groups.json";
 		});
-		storage.getListing.mockImplementation(async (path: any) => {
+		asMock(storage.getListing).mockImplementation(async (path: any) => {
 			if (path === "/local/sync/american") {
 				return [{ name: "2024.json" }];
 			}
 			return [];
 		});
-		storage.readFile.mockImplementation(async (path: any) => {
+		asMock(storage.readFile).mockImplementation(async (path: any) => {
 			if (path === "/local/sync/groups.json") {
 				return JSON.stringify({ groups: [{ name: "american" }] });
 			}
@@ -251,7 +252,7 @@ describe("useSessions", () => {
 			}
 			return "";
 		});
-		storage.exists.mockImplementation(async (path: any) => {
+		asMock(storage.exists).mockImplementation(async (path: any) => {
 			return (
 				path === "/local/sync/groups.json" ||
 				path === "/local/sync/american/2024.json"
@@ -269,7 +270,7 @@ describe("useSessions", () => {
 	});
 
 	it("merges personal metadata (position/duration) for split group sessions", async () => {
-		storage.exists.mockImplementation(async (path: any) => {
+		asMock(storage.exists).mockImplementation(async (path: any) => {
 			return (
 				path === "/local/sync/groups.json" ||
 				path === "/local/sync/files.json" ||
@@ -277,7 +278,7 @@ describe("useSessions", () => {
 				path === "local/personal"
 			);
 		});
-		storage.readFile.mockImplementation(async (path: any) => {
+		asMock(storage.readFile).mockImplementation(async (path: any) => {
 			if (path === "/local/sync/groups.json") {
 				return JSON.stringify({ groups: [{ name: "american" }] });
 			}
@@ -305,7 +306,7 @@ describe("useSessions", () => {
 			}
 			return "";
 		});
-		storage.getRecursiveList.mockResolvedValue([
+		asMock(storage.getRecursiveList).mockResolvedValue([
 			file("local/personal/american/2024.json", "2024.json"),
 		]);
 
@@ -320,10 +321,10 @@ describe("useSessions", () => {
 	});
 
 	it("recovers gracefully when a personal metadata file fails to parse", async () => {
-		storage.exists.mockImplementation(async (path: any) => {
+		asMock(storage.exists).mockImplementation(async (path: any) => {
 			return path === "/local/sync/groups.json" || path === "local/personal";
 		});
-		storage.readFile.mockImplementation(async (path: any) => {
+		asMock(storage.readFile).mockImplementation(async (path: any) => {
 			if (path === "/local/sync/groups.json") {
 				return JSON.stringify({ groups: [] });
 			}
@@ -332,7 +333,7 @@ describe("useSessions", () => {
 			}
 			return "";
 		});
-		storage.getRecursiveList.mockResolvedValue([
+		asMock(storage.getRecursiveList).mockResolvedValue([
 			file("local/personal/broken.json", "broken.json"),
 		]);
 
@@ -345,13 +346,13 @@ describe("useSessions", () => {
 	});
 
 	it("continues loading when legacy thumbnail compaction fails", async () => {
-		compactLegacySessionThumbnails.mockRejectedValue(
+		asMock(compactLegacySessionThumbnails).mockRejectedValue(
 			new Error("compaction failed"),
 		);
-		storage.exists.mockImplementation(
+		asMock(storage.exists).mockImplementation(
 			async (path: any) => path === "/local/sync/groups.json",
 		);
-		storage.readFile.mockImplementation(async (path: any) => {
+		asMock(storage.readFile).mockImplementation(async (path: any) => {
 			if (path === "/local/sync/groups.json") {
 				return JSON.stringify({ groups: [] });
 			}
@@ -372,11 +373,11 @@ describe("useSessions", () => {
 	});
 
 	it("sets sessions to an empty array and logs when loading throws unexpectedly", async () => {
-		storage.exists.mockImplementation(async (path: any) => {
+		asMock(storage.exists).mockImplementation(async (path: any) => {
 			if (path === "/local/sync/groups.json") return true;
 			throw new Error("boom");
 		});
-		storage.readFile.mockImplementation(async (path: any) => {
+		asMock(storage.readFile).mockImplementation(async (path: any) => {
 			if (path === "/local/sync/groups.json") {
 				return "not valid json{{{";
 			}
@@ -394,7 +395,7 @@ describe("useSessions", () => {
 	});
 
 	it("returns an empty groups array when groups.json does not exist", async () => {
-		storage.exists.mockResolvedValue(false);
+		asMock(storage.exists).mockResolvedValue(false);
 
 		renderHarness();
 
@@ -408,7 +409,7 @@ describe("useSessions", () => {
 
 	it("does not reload while a load is already in progress (busy guard)", async () => {
 		let resolveExists;
-		storage.exists.mockImplementation(
+		asMock(storage.exists).mockImplementation(
 			() =>
 				new Promise((resolve) => {
 					resolveExists = resolve;
@@ -663,7 +664,7 @@ describe("useSessions", () => {
 			const { useToolbar } = require("@components/Toolbar");
 			renderHarness();
 			await waitFor(() => expect(useToolbar).toHaveBeenCalled());
-			const toolbarArgs = useToolbar.mock.calls.at(-1)[0];
+			const toolbarArgs = asMock(useToolbar).mock.calls.at(-1)[0];
 			expect(toolbarArgs.id).toBe("Sessions");
 			const filterItem = toolbarArgs.items.find(
 				(item: any) => item.id === "filter",
@@ -693,10 +694,10 @@ describe("useSessions", () => {
 		});
 
 		it("builds groupsItems with click handlers that toggle the group filter", async () => {
-			storage.exists.mockImplementation(
+			asMock(storage.exists).mockImplementation(
 				async (path: any) => path === "/local/sync/groups.json",
 			);
-			storage.readFile.mockImplementation(async (path: any) => {
+			asMock(storage.readFile).mockImplementation(async (path: any) => {
 				if (path === "/local/sync/groups.json") {
 					return JSON.stringify({
 						groups: [{ name: "american" }, { name: "hebrew" }],
@@ -711,7 +712,7 @@ describe("useSessions", () => {
 			});
 			const { useToolbar } = require("@components/Toolbar");
 			await waitFor(() => expect(useToolbar).toHaveBeenCalled());
-			const toolbarArgs = useToolbar.mock.calls.at(-1)[0];
+			const toolbarArgs = asMock(useToolbar).mock.calls.at(-1)[0];
 			const groupsItems = toolbarArgs.depends[1];
 			const americanItem = groupsItems.find(
 				(item: any) => item.id === "american",
@@ -734,7 +735,7 @@ describe("useSessions", () => {
 	it("skips a second load while the first update is still busy", async () => {
 		let resolveGroupsExists;
 		let blocked = true;
-		storage.exists.mockImplementation(async (path: any) => {
+		asMock(storage.exists).mockImplementation(async (path: any) => {
 			if (blocked && path === "/local/sync/groups.json") {
 				return new Promise((resolve) => {
 					resolveGroupsExists = () => resolve(true);
@@ -742,7 +743,7 @@ describe("useSessions", () => {
 			}
 			return false;
 		});
-		storage.readFile.mockImplementation(async (path: any) => {
+		asMock(storage.readFile).mockImplementation(async (path: any) => {
 			if (path === "/local/sync/groups.json") {
 				return JSON.stringify({ groups: [] });
 			}
@@ -754,7 +755,7 @@ describe("useSessions", () => {
 
 		const { logger } = require("@util/api/logger");
 		const loadingLogs = () =>
-			logger.debug.mock.calls.filter((call: any) =>
+			asMock(logger.debug).mock.calls.filter((call: any) =>
 				String(call[0]).includes("Loading sessions"),
 			).length;
 		const beforeCounter = loadingLogs();
@@ -770,12 +771,12 @@ describe("useSessions", () => {
 	});
 
 	it("logs when bundle.json cannot be parsed", async () => {
-		storage.exists.mockImplementation(async (path: any) => {
+		asMock(storage.exists).mockImplementation(async (path: any) => {
 			return (
 				path === "/local/sync/groups.json" || path === "/local/sync/bundle.json"
 			);
 		});
-		storage.readFile.mockImplementation(async (path: any) => {
+		asMock(storage.readFile).mockImplementation(async (path: any) => {
 			if (path === "/local/sync/groups.json") {
 				return JSON.stringify({
 					groups: [{ name: "bundledgroup", bundled: true }],
@@ -799,7 +800,7 @@ describe("useSessions", () => {
 	});
 
 	it("loads personal metadata from merged group files and bundle.json", async () => {
-		useGroups.mockReturnValue([
+		asMock(useGroups).mockReturnValue([
 			[
 				{ name: "american", color: "#fff", merged: true },
 				{ name: "bundledgroup", bundled: true },
@@ -807,7 +808,7 @@ describe("useSessions", () => {
 			false,
 			jest.fn(),
 		]);
-		storage.exists.mockImplementation(async (path: any) => {
+		asMock(storage.exists).mockImplementation(async (path: any) => {
 			return (
 				path === "/local/sync/groups.json" ||
 				path === "/local/sync/american.json" ||
@@ -815,7 +816,7 @@ describe("useSessions", () => {
 				path === "local/personal"
 			);
 		});
-		storage.readFile.mockImplementation(async (path: any) => {
+		asMock(storage.readFile).mockImplementation(async (path: any) => {
 			if (path === "/local/sync/groups.json") {
 				return JSON.stringify({
 					groups: [
@@ -870,7 +871,7 @@ describe("useSessions", () => {
 			}
 			return "";
 		});
-		storage.getRecursiveList.mockResolvedValue([
+		asMock(storage.getRecursiveList).mockResolvedValue([
 			file("local/personal/american.json", "american.json"),
 			file("local/personal/bundle.json", "bundle.json"),
 			file("local/personal/unknown/deep/nested.json", "nested.json"),
@@ -890,13 +891,15 @@ describe("useSessions", () => {
 	});
 
 	it("logs when personal metadata listing fails", async () => {
-		storage.exists.mockImplementation(async (path: any) => {
+		asMock(storage.exists).mockImplementation(async (path: any) => {
 			return path === "/local/sync/groups.json" || path === "local/personal";
 		});
-		storage.readFile.mockResolvedValue(
+		asMock(storage.readFile).mockResolvedValue(
 			JSON.stringify({ groups: [{ name: "american" }] }),
 		);
-		storage.getRecursiveList.mockRejectedValue(new Error("personal list fail"));
+		asMock(storage.getRecursiveList).mockRejectedValue(
+			new Error("personal list fail"),
+		);
 
 		renderHarness();
 
@@ -912,17 +915,17 @@ describe("useSessions", () => {
 	});
 
 	it("reloads when the manual counter changes", async () => {
-		storage.exists.mockImplementation(
+		asMock(storage.exists).mockImplementation(
 			async (path: any) => path === "/local/sync/groups.json",
 		);
-		storage.readFile.mockResolvedValue(
+		asMock(storage.readFile).mockResolvedValue(
 			JSON.stringify({ groups: [{ name: "american" }] }),
 		);
 
 		renderHarness();
 		await waitFor(() => expect(getSessionsState()[0]).toEqual([]));
 
-		storage.readFile.mockResolvedValue(
+		asMock(storage.readFile).mockResolvedValue(
 			JSON.stringify({
 				groups: [{ name: "american" }],
 			}),
@@ -935,14 +938,14 @@ describe("useSessions", () => {
 	});
 
 	it("returns empty results when a year file is missing sessions", async () => {
-		storage.exists.mockImplementation(async (path: any) => {
+		asMock(storage.exists).mockImplementation(async (path: any) => {
 			return (
 				path === "/local/sync/groups.json" ||
 				path === "/local/sync/files.json" ||
 				path === "/local/sync/american/2024.json"
 			);
 		});
-		storage.readFile.mockImplementation(async (path: any) => {
+		asMock(storage.readFile).mockImplementation(async (path: any) => {
 			if (path === "/local/sync/groups.json") {
 				return JSON.stringify({ groups: [{ name: "american" }] });
 			}
@@ -964,14 +967,14 @@ describe("useSessions", () => {
 	});
 
 	it("logs and continues when a year file read throws", async () => {
-		storage.exists.mockImplementation(async (path: any) => {
+		asMock(storage.exists).mockImplementation(async (path: any) => {
 			return (
 				path === "/local/sync/groups.json" ||
 				path === "/local/sync/files.json" ||
 				path === "/local/sync/american/2024.json"
 			);
 		});
-		storage.readFile.mockImplementation(async (path: any) => {
+		asMock(storage.readFile).mockImplementation(async (path: any) => {
 			if (path === "/local/sync/groups.json") {
 				return JSON.stringify({ groups: [{ name: "american" }] });
 			}
@@ -999,14 +1002,14 @@ describe("useSessions", () => {
 		const groups = Array.from({ length: 5 }, (_, index) => ({
 			name: `group${index}`,
 		}));
-		storage.exists.mockImplementation(async (path: any) => {
+		asMock(storage.exists).mockImplementation(async (path: any) => {
 			return (
 				path === "/local/sync/groups.json" ||
 				path === "/local/sync/files.json" ||
 				groups.some((group) => path === `/local/sync/${group.name}/2024.json`)
 			);
 		});
-		storage.readFile.mockImplementation(async (path: any) => {
+		asMock(storage.readFile).mockImplementation(async (path: any) => {
 			if (path === "/local/sync/groups.json") {
 				return JSON.stringify({ groups });
 			}
@@ -1043,7 +1046,7 @@ describe("useSessions", () => {
 	});
 
 	it("skips personal metadata files with unknown directory structures", async () => {
-		storage.exists.mockImplementation(async (path: any) => {
+		asMock(storage.exists).mockImplementation(async (path: any) => {
 			return (
 				path === "/local/sync/groups.json" ||
 				path === "/local/sync/files.json" ||
@@ -1051,7 +1054,7 @@ describe("useSessions", () => {
 				path === "local/personal"
 			);
 		});
-		storage.readFile.mockImplementation(async (path: any) => {
+		asMock(storage.readFile).mockImplementation(async (path: any) => {
 			if (path === "/local/sync/groups.json") {
 				return JSON.stringify({ groups: [{ name: "american" }] });
 			}
@@ -1077,7 +1080,7 @@ describe("useSessions", () => {
 			}
 			return "";
 		});
-		storage.getRecursiveList.mockResolvedValue([
+		asMock(storage.getRecursiveList).mockResolvedValue([
 			{
 				type: "file",
 				name: "deep.json",

@@ -17,8 +17,8 @@ describe("SidebarIcon Component", () => {
 	});
 
 	it("renders SidebarIcon with translations", () => {
-		useTranslations.mockReturnValue({ SIDEBAR: "Sidebar Option" });
-		useDeviceType.mockReturnValue("desktop");
+		asMock(useTranslations).mockReturnValue({ SIDEBAR: "Sidebar Option" });
+		asMock(useDeviceType).mockReturnValue("desktop");
 
 		const { getByLabelText } = render(<SidebarIcon />);
 		const button = getByLabelText("Sidebar Option");
@@ -26,8 +26,8 @@ describe("SidebarIcon Component", () => {
 	});
 
 	it("toggles showSideBar on desktop click", () => {
-		useTranslations.mockReturnValue({ SIDEBAR: "Sidebar" });
-		useDeviceType.mockReturnValue("desktop");
+		asMock(useTranslations).mockReturnValue({ SIDEBAR: "Sidebar" });
+		asMock(useDeviceType).mockReturnValue("desktop");
 
 		const { getByLabelText } = render(<SidebarIcon />);
 		const button = getByLabelText("Sidebar");
@@ -41,8 +41,8 @@ describe("SidebarIcon Component", () => {
 	});
 
 	it("toggles showSlider on mobile click", () => {
-		useTranslations.mockReturnValue({ SIDEBAR: "Sidebar" });
-		useDeviceType.mockReturnValue("phone");
+		asMock(useTranslations).mockReturnValue({ SIDEBAR: "Sidebar" });
+		asMock(useDeviceType).mockReturnValue("phone");
 
 		const { getByLabelText } = render(<SidebarIcon />);
 		const button = getByLabelText("Sidebar");

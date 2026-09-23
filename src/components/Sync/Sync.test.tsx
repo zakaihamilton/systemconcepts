@@ -23,8 +23,11 @@ jest.mock("@sync/syncState", () => ({
 describe("Sync Component", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
-		useTranslations.mockReturnValue({ SYNC: "Sync", SYNCING: "Syncing..." });
-		useSyncFeature.mockReturnValue({
+		asMock(useTranslations).mockReturnValue({
+			SYNC: "Sync",
+			SYNCING: "Syncing...",
+		});
+		asMock(useSyncFeature).mockReturnValue({
 			sync: jest.fn(),
 			busy: false,
 			error: null,
@@ -33,8 +36,8 @@ describe("Sync Component", () => {
 			percentage: 0,
 			phase: "idle",
 		});
-		UpdateSessionsStore.useState.mockReturnValue({ busy: false });
-		SyncActiveStore.useState.mockReturnValue({
+		asMock(UpdateSessionsStore.useState).mockReturnValue({ busy: false });
+		asMock(SyncActiveStore.useState).mockReturnValue({
 			personalSyncBusy: false,
 			personalSyncError: null,
 		});
@@ -56,12 +59,12 @@ describe("Sync Component", () => {
 			</Sync>,
 		);
 		expect(useToolbar).toHaveBeenCalled();
-		const toolbarArgs = useToolbar.mock.calls[0][0];
+		const toolbarArgs = asMock(useToolbar).mock.calls[0][0];
 		expect(toolbarArgs.id).toBe("Sync");
 	});
 
 	it("shows syncing label when busy", () => {
-		useSyncFeature.mockReturnValue({
+		asMock(useSyncFeature).mockReturnValue({
 			sync: jest.fn(),
 			busy: true,
 			error: null,
@@ -70,21 +73,21 @@ describe("Sync Component", () => {
 			percentage: 50,
 			phase: "main",
 		});
-		useTranslations.mockReturnValue({ SYNCING_MAIN: "Syncing Main" });
+		asMock(useTranslations).mockReturnValue({ SYNCING_MAIN: "Syncing Main" });
 
 		render(
 			<Sync>
 				<div>Test</div>
 			</Sync>,
 		);
-		const toolbarArgs = useToolbar.mock.calls[0][0];
+		const toolbarArgs = asMock(useToolbar).mock.calls[0][0];
 		const name = toolbarArgs.items[0].ariaLabel;
 		expect(name).toContain("Syncing Main");
 		expect(name).toContain("50%");
 	});
 
 	it("opens the sync view when the toolbar item is clicked during a sync", () => {
-		useSyncFeature.mockReturnValue({
+		asMock(useSyncFeature).mockReturnValue({
 			sync: jest.fn(),
 			busy: true,
 			duration: 0,
@@ -97,31 +100,31 @@ describe("Sync Component", () => {
 				<div>Test</div>
 			</Sync>,
 		);
-		useToolbar.mock.calls[0][0].items[0].onClick();
+		asMock(useToolbar).mock.calls[0][0].items[0].onClick();
 
 		expect(setPath).toHaveBeenCalledWith("sync");
 	});
 
 	it("opens the session update dialog while sessions are busy", () => {
-		UpdateSessionsStore.useState.mockReturnValue({ busy: true });
+		asMock(UpdateSessionsStore.useState).mockReturnValue({ busy: true });
 
 		render(
 			<Sync>
 				<div>Test</div>
 			</Sync>,
 		);
-		useToolbar.mock.calls[0][0].items[0].onClick();
+		asMock(useToolbar).mock.calls[0][0].items[0].onClick();
 
 		expect(UpdateSessionsStore.update).toHaveBeenCalled();
-		const update = UpdateSessionsStore.update.mock.calls[0][0];
-		const state = {};
+		const update = asMock(UpdateSessionsStore.update).mock.calls[0][0];
+		const state: Record<string, any> = {};
 		update(state);
 		expect(state.showUpdateDialog).toBe(true);
 	});
 
 	it("starts a sync when the toolbar item is idle", () => {
 		const sync = jest.fn();
-		useSyncFeature.mockReturnValue({
+		asMock(useSyncFeature).mockReturnValue({
 			sync,
 			busy: false,
 			duration: 0,
@@ -133,20 +136,20 @@ describe("Sync Component", () => {
 				<div>Test</div>
 			</Sync>,
 		);
-		useToolbar.mock.calls[0][0].items[0].onClick();
+		asMock(useToolbar).mock.calls[0][0].items[0].onClick();
 
 		expect(sync).toHaveBeenCalledTimes(1);
 	});
 
 	it("reports a failed sync through the toolbar label", () => {
-		useSyncFeature.mockReturnValue({
+		asMock(useSyncFeature).mockReturnValue({
 			sync: jest.fn(),
 			busy: false,
 			error: new Error("incomplete"),
 			duration: 0,
 			percentage: 0,
 		});
-		useTranslations.mockReturnValue({
+		asMock(useTranslations).mockReturnValue({
 			SYNC: "Sync",
 			SYNC_FAILED: "Sync failed",
 		});
@@ -157,6 +160,8 @@ describe("Sync Component", () => {
 			</Sync>,
 		);
 
-		expect(useToolbar.mock.calls[0][0].items[0].ariaLabel).toBe("Sync failed");
+		expect(asMock(useToolbar).mock.calls[0][0].items[0].ariaLabel).toBe(
+			"Sync failed",
+		);
 	});
 });

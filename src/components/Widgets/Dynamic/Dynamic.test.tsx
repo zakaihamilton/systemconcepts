@@ -14,13 +14,13 @@ describe("Dynamic Widget", () => {
 	});
 
 	it("renders ToggleButtonGroup for few items on desktop", () => {
-		useDeviceType.mockReturnValue("desktop");
+		asMock(useDeviceType).mockReturnValue("desktop");
 		const { getByTestId } = render(<DynamicWidget items={Array(5).fill({})} />);
 		expect(getByTestId("toggle-button-group")).toBeInTheDocument();
 	});
 
 	it("renders Input for many items on desktop", () => {
-		useDeviceType.mockReturnValue("desktop");
+		asMock(useDeviceType).mockReturnValue("desktop");
 		const { getByTestId } = render(
 			<DynamicWidget items={Array(10).fill({})} />,
 		);
@@ -28,7 +28,7 @@ describe("Dynamic Widget", () => {
 	});
 
 	it("renders Input for few items on phone", () => {
-		useDeviceType.mockReturnValue("phone");
+		asMock(useDeviceType).mockReturnValue("phone");
 		const { getByTestId } = render(<DynamicWidget items={Array(5).fill({})} />);
 		expect(getByTestId("input-select")).toBeInTheDocument();
 	});

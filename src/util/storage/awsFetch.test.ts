@@ -30,7 +30,17 @@ afterAll(() => {
 	process.env = originalEnv;
 });
 
-function mockResponse({ ok = true, status = 200, text, arrayBuffer } = {}) {
+function mockResponse({
+	ok = true,
+	status = 200,
+	text,
+	arrayBuffer,
+}: {
+	ok?: boolean;
+	status?: number;
+	text?: () => Promise<string>;
+	arrayBuffer?: () => Promise<ArrayBuffer>;
+} = {}) {
 	return {
 		ok,
 		status,
@@ -43,12 +53,12 @@ function mockResponse({ ok = true, status = 200, text, arrayBuffer } = {}) {
 
 describe("downloadDataEdge", () => {
 	it("fetches binary content as a Uint8Array by default", async () => {
-		global.fetch.mockResolvedValue(mockResponse());
+		asMock(global.fetch).mockResolvedValue(mockResponse());
 
 		const result = await downloadDataEdge({ path: "sessions/file.bin" });
 
 		expect(result).toBeInstanceOf(Uint8Array);
-		const [url] = global.fetch.mock.calls[0];
+		const [url] = asMock(global.fetch).mock.calls[0];
 		expect(url).toMatch(
 			/^https:\/\/sfo3\.digitaloceanspaces\.com\/my-bucket\/sessions\/file\.bin\?/,
 		);
@@ -57,7 +67,7 @@ describe("downloadDataEdge", () => {
 	});
 
 	it("fetches text content when binary is false", async () => {
-		global.fetch.mockResolvedValue(
+		asMock(global.fetch).mockResolvedValue(
 			mockResponse({ text: jest.fn().mockResolvedValue("hello text") }),
 		);
 
@@ -70,45 +80,47 @@ describe("downloadDataEdge", () => {
 	});
 
 	it("strips a leading slash from the path when building the key", async () => {
-		global.fetch.mockResolvedValue(mockResponse());
+		asMock(global.fetch).mockResolvedValue(mockResponse());
 
 		await downloadDataEdge({ path: "/sessions/file.bin" });
 
-		const [url] = global.fetch.mock.calls[0];
+		const [url] = asMock(global.fetch).mock.calls[0];
 		expect(url).toContain("/my-bucket/sessions/file.bin?");
 	});
 
 	it("uses a custom bucket name when provided", async () => {
-		global.fetch.mockResolvedValue(mockResponse());
+		asMock(global.fetch).mockResolvedValue(mockResponse());
 
 		await downloadDataEdge({ path: "file.bin", bucketName: "other-bucket" });
 
-		const [url] = global.fetch.mock.calls[0];
+		const [url] = asMock(global.fetch).mock.calls[0];
 		expect(url).toContain("/other-bucket/file.bin?");
 	});
 
 	it("defaults to the DigitalOcean endpoint and adds https:// when missing a protocol", async () => {
 		delete process.env.AWS_ENDPOINT;
-		global.fetch.mockResolvedValue(mockResponse());
+		asMock(global.fetch).mockResolvedValue(mockResponse());
 
 		await downloadDataEdge({ path: "file.bin" });
 
-		const [url] = global.fetch.mock.calls[0];
+		const [url] = asMock(global.fetch).mock.calls[0];
 		expect(url).toMatch(/^https:\/\/sfo3\.digitaloceanspaces\.com\//);
 	});
 
 	it("keeps a custom endpoint that already declares an http(s) protocol", async () => {
 		process.env.AWS_ENDPOINT = "http://localhost:9000";
-		global.fetch.mockResolvedValue(mockResponse());
+		asMock(global.fetch).mockResolvedValue(mockResponse());
 
 		await downloadDataEdge({ path: "file.bin" });
 
-		const [url] = global.fetch.mock.calls[0];
+		const [url] = asMock(global.fetch).mock.calls[0];
 		expect(url).toMatch(/^http:\/\/localhost:9000\//);
 	});
 
 	it("throws a generic error for non-404 failures", async () => {
-		global.fetch.mockResolvedValue(mockResponse({ ok: false, status: 500 }));
+		asMock(global.fetch).mockResolvedValue(
+			mockResponse({ ok: false, status: 500 }),
+		);
 
 		await expect(downloadDataEdge({ path: "file.bin" })).rejects.toThrow(
 			'S3 fetch failed: 500 for key "file.bin"',
@@ -116,7 +128,9 @@ describe("downloadDataEdge", () => {
 	});
 
 	it("throws a NoSuchKey-named error for 404 failures", async () => {
-		global.fetch.mockResolvedValue(mockResponse({ ok: false, status: 404 }));
+		asMock(global.fetch).mockResolvedValue(
+			mockResponse({ ok: false, status: 404 }),
+		);
 
 		await expect(downloadDataEdge({ path: "file.bin" })).rejects.toMatchObject({
 			name: "NoSuchKey",

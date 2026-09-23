@@ -40,12 +40,12 @@ jest.mock("./Session", () => (props: any) => (
 describe("MonthView Sessions", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
-		useDeviceType.mockReturnValue("desktop");
-		useSwipe.mockReturnValue({
+		asMock(useDeviceType).mockReturnValue("desktop");
+		asMock(useSwipe).mockReturnValue({
 			onSwipeLeft: jest.fn(),
 			onSwipeRight: jest.fn(),
 		});
-		useDateFormatter.mockReturnValue({
+		asMock(useDateFormatter).mockReturnValue({
 			format: () => "Monday, June 10, 2024",
 		});
 	});
@@ -66,7 +66,7 @@ describe("MonthView Sessions", () => {
 		const onClose = jest.fn();
 		const onSwipeLeft = jest.fn();
 		const onSwipeRight = jest.fn();
-		useSwipe.mockReturnValue({ onSwipeLeft, onSwipeRight });
+		asMock(useSwipe).mockReturnValue({ onSwipeLeft, onSwipeRight });
 
 		render(
 			<Sessions
@@ -123,7 +123,7 @@ describe("MonthView Sessions", () => {
 	});
 
 	it("applies mobile list class on phone", () => {
-		useDeviceType.mockReturnValue("phone");
+		asMock(useDeviceType).mockReturnValue("phone");
 		render(
 			<Sessions
 				open
@@ -143,10 +143,10 @@ describe("MonthView Sessions", () => {
 	});
 
 	it("passes swipe handlers through to the dialog on mobile", () => {
-		useDeviceType.mockReturnValue("phone");
+		asMock(useDeviceType).mockReturnValue("phone");
 		const onSwipeLeft = jest.fn();
 		const onSwipeRight = jest.fn();
-		useSwipe.mockReturnValue({ onSwipeLeft, onSwipeRight });
+		asMock(useSwipe).mockReturnValue({ onSwipeLeft, onSwipeRight });
 
 		render(
 			<Sessions

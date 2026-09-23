@@ -7,11 +7,11 @@ jest.mock("../trash", () => ({ moveFileToTrash: jest.fn() }));
 describe("deleteRemoteFiles", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
-		moveFileToTrash.mockResolvedValue({ moved: false, missing: true });
+		asMock(moveFileToTrash).mockResolvedValue({ moved: false, missing: true });
 	});
 
 	it("moves both possible remote representations to recoverable trash", async () => {
-		moveFileToTrash
+		asMock(moveFileToTrash)
 			.mockResolvedValueOnce({ moved: false, missing: true })
 			.mockResolvedValueOnce({ moved: true, missing: false });
 
@@ -37,7 +37,7 @@ describe("deleteRemoteFiles", () => {
 	});
 
 	it("reports an incomplete result without hard deletion when a move fails", async () => {
-		moveFileToTrash.mockRejectedValue(new Error("network failed"));
+		asMock(moveFileToTrash).mockRejectedValue(new Error("network failed"));
 
 		const result = await deleteRemoteFiles(
 			[{ path: "/bundle.json", deleted: true }],

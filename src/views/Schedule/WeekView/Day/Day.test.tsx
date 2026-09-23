@@ -22,8 +22,8 @@ describe("WeekView Day", () => {
 
 	beforeEach(() => {
 		jest.clearAllMocks();
-		useDeviceType.mockReturnValue("desktop");
-		getDateString.mockReturnValue("2024-06-10");
+		asMock(useDeviceType).mockReturnValue("desktop");
+		asMock(getDateString).mockReturnValue("2024-06-10");
 	});
 
 	it("renders grouped sessions sorted by group and typeOrder", () => {
@@ -108,7 +108,7 @@ describe("WeekView Day", () => {
 	});
 
 	it("applies mobile styles when phone", () => {
-		useDeviceType.mockReturnValue("phone");
+		asMock(useDeviceType).mockReturnValue("phone");
 		const { container } = render(
 			<Day
 				column={1}

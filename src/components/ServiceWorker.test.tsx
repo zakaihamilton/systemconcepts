@@ -7,7 +7,7 @@ describe("ServiceWorker", () => {
 	afterEach(() => {
 		cleanup();
 		Object.defineProperty(process.env, "NODE_ENV", { value: originalEnv });
-		delete navigator.serviceWorker;
+		Reflect.deleteProperty(navigator, "serviceWorker");
 	});
 
 	it("registers the native worker in production", async () => {
@@ -40,7 +40,7 @@ describe("ServiceWorker", () => {
 			window.dispatchEvent(new Event("load"));
 			await waitFor(() => expect(register).toHaveBeenCalledWith("/sw.js"));
 		} finally {
-			delete document.readyState;
+			Reflect.deleteProperty(document, "readyState");
 		}
 	});
 

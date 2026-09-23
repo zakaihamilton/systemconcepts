@@ -21,7 +21,7 @@ jest.mock("@util/domain/views", () => ({
 describe("Session Tabs", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
-		useTranslations.mockReturnValue({
+		asMock(useTranslations).mockReturnValue({
 			DETAILS: "Details",
 			AUDIO: "Audio",
 			VIDEO: "Video",
@@ -29,10 +29,10 @@ describe("Session Tabs", () => {
 			IMAGE: "Image",
 			TRANSCRIPT: "Transcript",
 		});
-		usePathItems.mockReturnValue([
+		asMock(usePathItems).mockReturnValue([
 			"session?group=test&year=2024&date=2024-05-05&name=Test Session",
 		]);
-		useParentParams.mockReturnValue({
+		asMock(useParentParams).mockReturnValue({
 			group: "test",
 			year: "2024",
 			date: "2024-05-05",
@@ -41,7 +41,7 @@ describe("Session Tabs", () => {
 	});
 
 	it("shows transcript tab when a transcript path is present", () => {
-		useSessions.mockReturnValue([
+		asMock(useSessions).mockReturnValue([
 			[
 				{
 					group: "test",
@@ -62,7 +62,7 @@ describe("Session Tabs", () => {
 	});
 
 	it("shows transcript tab when transcript files are present", () => {
-		useSessions.mockReturnValue([
+		asMock(useSessions).mockReturnValue([
 			[
 				{
 					group: "test",
@@ -83,7 +83,7 @@ describe("Session Tabs", () => {
 	});
 
 	it("does not show transcript tab for media sessions without transcript metadata", () => {
-		useSessions.mockReturnValue([
+		asMock(useSessions).mockReturnValue([
 			[
 				{
 					group: "test",

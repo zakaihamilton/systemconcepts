@@ -7,7 +7,7 @@
  */
 
 jest.mock("next/dynamic", () => {
-	return (loader: any, options = {}) => {
+	return (loader: any, options: Record<string, any> = {}) => {
 		if (typeof options.loading === "function") {
 			options.loading();
 		}
@@ -258,7 +258,7 @@ import pages from "./views";
 
 describe("data/views", () => {
 	beforeEach(() => {
-		Cookies.get.mockReset();
+		asMock(Cookies.get).mockReset();
 	});
 
 	it("exports a non-empty pages array with unique ids", () => {
@@ -306,10 +306,10 @@ describe("data/views", () => {
 				}
 			}
 			if (typeof page.visible === "function") {
-				Cookies.get.mockReturnValue(undefined);
+				asMock(Cookies.get).mockReturnValue(undefined);
 				expect(page.visible()).toBeFalsy();
 
-				Cookies.get.mockImplementation((key: any) =>
+				asMock(Cookies.get).mockImplementation((key: any) =>
 					key === "id" || key === "hash" ? "value" : undefined,
 				);
 				expect(page.visible()).toBeTruthy();
@@ -328,17 +328,17 @@ describe("data/views", () => {
 		expect(withVisible.length).toBeGreaterThan(0);
 
 		for (const page of withVisible) {
-			Cookies.get.mockImplementation((key: any) =>
+			asMock(Cookies.get).mockImplementation((key: any) =>
 				key === "id" ? "x" : undefined,
 			);
 			expect(page.visible()).toBeFalsy();
 
-			Cookies.get.mockImplementation((key: any) =>
+			asMock(Cookies.get).mockImplementation((key: any) =>
 				key === "hash" ? "y" : undefined,
 			);
 			expect(page.visible()).toBeFalsy();
 
-			Cookies.get.mockImplementation((key: any) =>
+			asMock(Cookies.get).mockImplementation((key: any) =>
 				key === "id" || key === "hash" ? "z" : undefined,
 			);
 			expect(page.visible()).toBeTruthy();
@@ -348,7 +348,7 @@ describe("data/views", () => {
 	it("includes expected core pages", () => {
 		const byId = Object.fromEntries(
 			pages.filter((p) => p.id).map((p) => [p.id, p]),
-		);
+		) as Record<string, any>;
 		expect(byId.home.root).toBe(true);
 		expect(byId.storage.contained).toEqual(["editor", "image"]);
 		expect(byId.image.useParentName).toBe(1);

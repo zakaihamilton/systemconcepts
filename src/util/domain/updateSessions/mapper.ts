@@ -12,11 +12,11 @@ export function createSessionItem(
 	fileList: any,
 	yearName: any,
 	groupName: any,
-	sessionTags: any,
-	sessionDuration: any,
-	sessionSummaryText: any,
-	sessionTranscription: any,
-	sessionTranscriptPath: any,
+	sessionTags: any = [],
+	sessionDuration: any = undefined,
+	sessionSummaryText: any = undefined,
+	sessionTranscription: any = false,
+	sessionTranscriptPath: any = null,
 ) {
 	const [, date, sessionName] = id.trim().match(/(\d+-\d+-\d+) (.*)/) || [];
 	if (!date || !sessionName) {

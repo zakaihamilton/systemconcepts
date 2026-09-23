@@ -12,6 +12,8 @@ jest.mock("next/cache", () => ({
 
 jest.mock("next/server", () => {
 	class TestHeaders {
+		values: Map<string, string>;
+
 		constructor(values = {}) {
 			this.values = new Map(
 				Object.entries(values).map(([key, value]) => [
@@ -27,7 +29,11 @@ jest.mock("next/server", () => {
 	}
 
 	class TestResponse {
-		constructor(body: any, init = {}) {
+		body: any;
+		status: number;
+		headers: TestHeaders;
+
+		constructor(body: any, init: ResponseInit = {}) {
 			this.body = body;
 			this.status = init.status || 200;
 			this.headers = new TestHeaders(init.headers);
@@ -37,7 +43,7 @@ jest.mock("next/server", () => {
 			return JSON.parse(this.body);
 		}
 
-		static json(body: any, init = {}) {
+		static json(body: any, init: ResponseInit = {}) {
 			return new TestResponse(JSON.stringify(body), init);
 		}
 	}
@@ -68,7 +74,7 @@ describe("POST /api/rss/verify", () => {
 	});
 
 	it("caches token verification by id and a token digest", async () => {
-		authenticateTokenRequest.mockResolvedValue({ id: "user-1" });
+		asMock(authenticateTokenRequest).mockResolvedValue({ id: "user-1" });
 		const response = await POST(
 			makeRequest({
 				internalKey: "internal-secret",
@@ -83,7 +89,7 @@ describe("POST /api/rss/verify", () => {
 			["rss-auth", "user-1", expect.stringMatching(/^[a-f0-9]{64}$/)],
 			{ revalidate: 60 },
 		);
-		expect(unstable_cache.mock.calls[0][1]).not.toContain("raw-token");
+		expect(asMock(unstable_cache).mock.calls[0][1]).not.toContain("raw-token");
 		expect(authenticateTokenRequest).toHaveBeenCalledWith(
 			new URLSearchParams({ id: "user-1", token: "raw-token" }),
 		);
@@ -112,7 +118,7 @@ describe("POST /api/rss/verify", () => {
 	});
 
 	it("returns ok false when token verification fails", async () => {
-		authenticateTokenRequest.mockResolvedValue(false);
+		asMock(authenticateTokenRequest).mockResolvedValue(false);
 
 		const response = await POST(
 			makeRequest({
@@ -125,7 +131,7 @@ describe("POST /api/rss/verify", () => {
 	});
 
 	it("returns ok false for unexpected verification errors", async () => {
-		authenticateTokenRequest.mockRejectedValue(new Error("db down"));
+		asMock(authenticateTokenRequest).mockRejectedValue(new Error("db down"));
 
 		const response = await POST(
 			makeRequest({

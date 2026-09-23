@@ -23,6 +23,7 @@ jest.mock("@util/storage/storage", () => ({
 }));
 jest.mock("@util/browser/styles");
 jest.mock("@util/browser/store", () => ({
+	...jest.requireActual("@util/browser/store"),
 	useLocalStorage: jest.fn(),
 }));
 jest.mock("@util/data/locale", () => ({
@@ -94,7 +95,7 @@ jest.mock("../ItemMenu", () => () => <div data-testid="item-menu" />);
 describe("Storage View", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
-		useTranslations.mockReturnValue({
+		asMock(useTranslations).mockReturnValue({
 			NAME: "Name",
 			SIZE: "Size",
 			DATE: "Date",
@@ -104,9 +105,9 @@ describe("Storage View", () => {
 			BYTES: "bytes",
 			local: "Local",
 		});
-		useDeviceType.mockReturnValue("desktop");
-		useLocalStorage.mockImplementation(() => {});
-		useListing.mockReturnValue([
+		asMock(useDeviceType).mockReturnValue("desktop");
+		asMock(useLocalStorage).mockImplementation(() => {});
+		asMock(useListing).mockReturnValue([
 			[
 				{
 					name: "folder",
@@ -145,13 +146,13 @@ describe("Storage View", () => {
 	});
 
 	it("shows loading state from useListing", () => {
-		useListing.mockReturnValue([[], true, null]);
+		asMock(useListing).mockReturnValue([[], true, null]);
 		const { getByTestId } = render(<Storage path="local" />);
 		expect(getByTestId("table").dataset.loading).toBe("true");
 	});
 
 	it("shows error from useListing", () => {
-		useListing.mockReturnValue([[], false, "Denied"]);
+		asMock(useListing).mockReturnValue([[], false, "Denied"]);
 		render(<Storage path="local" />);
 		expect(screen.getByTestId("table").dataset.error).toBe("Denied");
 	});
@@ -179,7 +180,7 @@ describe("Storage View", () => {
 	});
 
 	it("hides size/date columns on phone", () => {
-		useDeviceType.mockReturnValue("phone");
+		asMock(useDeviceType).mockReturnValue("phone");
 		render(<Storage path="local" />);
 		expect(screen.getByTestId("table")).toBeInTheDocument();
 	});
@@ -199,7 +200,7 @@ describe("Storage View", () => {
 	});
 
 	it("handles empty listing", () => {
-		useListing.mockReturnValue([[], false, null]);
+		asMock(useListing).mockReturnValue([[], false, null]);
 		render(<Storage path="local" />);
 		expect(screen.getByTestId("table")).toBeInTheDocument();
 	});
@@ -212,7 +213,7 @@ describe("Storage View", () => {
 			size: 1024,
 			mtimeMs: Date.now(),
 		};
-		useListing.mockReturnValue([[file], false, null]);
+		asMock(useListing).mockReturnValue([[file], false, null]);
 		const { rerender } = render(<Storage path="local" />);
 		StorageStore.update((s) => {
 			s.select = [file];
@@ -223,7 +224,7 @@ describe("Storage View", () => {
 	});
 
 	it("opens images in the image viewer", () => {
-		useListing.mockReturnValue([
+		asMock(useListing).mockReturnValue([
 			[
 				{
 					name: "photo.png",
@@ -242,7 +243,7 @@ describe("Storage View", () => {
 	});
 
 	it("opens json.gz files in the editor", () => {
-		useListing.mockReturnValue([
+		asMock(useListing).mockReturnValue([
 			[
 				{
 					name: "data.json.gz",
@@ -267,7 +268,7 @@ describe("Storage View", () => {
 	});
 
 	it("does not navigate for binary media files", () => {
-		useListing.mockReturnValue([
+		asMock(useListing).mockReturnValue([
 			[
 				{
 					name: "audio.m4a",
@@ -286,7 +287,7 @@ describe("Storage View", () => {
 	});
 
 	it("maps root storage devices with translated names", () => {
-		useListing.mockReturnValue([
+		asMock(useListing).mockReturnValue([
 			[{ name: "local", id: "local", size: 1000, mtimeMs: Date.now() }],
 			false,
 			null,
@@ -296,7 +297,7 @@ describe("Storage View", () => {
 	});
 
 	it("shows edit widget when renaming an item", async () => {
-		useListing.mockReturnValue([
+		asMock(useListing).mockReturnValue([
 			[
 				{
 					name: "file.txt",
@@ -322,7 +323,7 @@ describe("Storage View", () => {
 	});
 
 	it("increments counter after successful import", async () => {
-		storage.importFolder.mockResolvedValue();
+		asMock(storage.importFolder).mockResolvedValue(undefined);
 		const before = StorageStore.getRawState().counter;
 		render(<Storage path="local" />);
 		fireEvent.click(screen.getByTestId("table-import"));
@@ -332,7 +333,7 @@ describe("Storage View", () => {
 	});
 
 	it("stores import errors in the storage store", async () => {
-		storage.importFolder.mockRejectedValue("import failed");
+		asMock(storage.importFolder).mockRejectedValue("import failed");
 		render(<Storage path="local" />);
 		fireEvent.click(screen.getByTestId("table-import"));
 		await waitFor(() => {
@@ -344,7 +345,7 @@ describe("Storage View", () => {
 	});
 
 	it("exports the current folder as a zip", async () => {
-		storage.exportFolderAsZip.mockResolvedValue("zip-data");
+		asMock(storage.exportFolderAsZip).mockResolvedValue("zip-data");
 		render(<Storage path="local/docs" />);
 		fireEvent.click(screen.getByTestId("table-export"));
 		await waitFor(() => {
@@ -360,7 +361,7 @@ describe("Storage View", () => {
 	});
 
 	it("shows edit widget when creating a new item", async () => {
-		useListing.mockReturnValue([
+		asMock(useListing).mockReturnValue([
 			[
 				{
 					name: "new-folder",

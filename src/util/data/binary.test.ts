@@ -57,14 +57,14 @@ describe("readBinary", () => {
 	});
 
 	it("throws when the file does not exist", async () => {
-		storage.readFile.mockResolvedValue(null);
+		asMock(storage.readFile).mockResolvedValue(null);
 		await expect(readBinary("path/to/missing.png")).rejects.toBe(
 			"FILE_NOT_FOUND - path/to/missing.png",
 		);
 	});
 
 	it("returns a blob with the mime type inferred from the path", async () => {
-		storage.readFile.mockResolvedValue("aGVsbG8=");
+		asMock(storage.readFile).mockResolvedValue("aGVsbG8=");
 		const blob = await readBinary("path/to/image.png");
 		expect(blob.type).toBe(getImageMimeType("path/to/image.png"));
 		expect(await readBlobAsText(blob)).toBe("hello");
@@ -77,7 +77,7 @@ describe("writeBinary", () => {
 	});
 
 	it("encodes the blob and writes it to storage", async () => {
-		storage.writeFile.mockResolvedValue(undefined);
+		asMock(storage.writeFile).mockResolvedValue(undefined);
 		await writeBinary("path/to/file.txt", fakeBlob("hello"));
 		expect(storage.writeFile).toHaveBeenCalledWith(
 			"path/to/file.txt",

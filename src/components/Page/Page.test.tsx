@@ -13,7 +13,7 @@ describe("Page Component", () => {
 	});
 
 	it("renders tabs at the top for desktop", () => {
-		useDeviceType.mockReturnValue("desktop");
+		asMock(useDeviceType).mockReturnValue("desktop");
 		const { getByTestId } = render(<Page />);
 		const tabs = getByTestId("tabs");
 		const content = getByTestId("content");
@@ -23,7 +23,7 @@ describe("Page Component", () => {
 	});
 
 	it("renders tabs at the bottom for phone", () => {
-		useDeviceType.mockReturnValue("phone");
+		asMock(useDeviceType).mockReturnValue("phone");
 		const { getByTestId } = render(<Page />);
 		const tabs = getByTestId("tabs");
 		const content = getByTestId("content");

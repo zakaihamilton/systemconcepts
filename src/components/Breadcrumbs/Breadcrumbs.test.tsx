@@ -21,8 +21,8 @@ jest.mock("@widgets/Tooltip", () => ({ children, title }: any) => (
 
 describe("BreadcrumbItem Component", () => {
 	beforeEach(() => {
-		MainStore.useState.mockReturnValue({ direction: "ltr" });
-		useDeviceType.mockReturnValue("desktop");
+		asMock(MainStore.useState).mockReturnValue({ direction: "ltr" });
+		asMock(useDeviceType).mockReturnValue("desktop");
 		jest.clearAllMocks();
 	});
 
@@ -113,13 +113,13 @@ describe("BreadcrumbItem Component", () => {
 	});
 
 	it("uses rtl separator icon", () => {
-		MainStore.useState.mockReturnValue({ direction: "rtl" });
+		asMock(MainStore.useState).mockReturnValue({ direction: "rtl" });
 		render(<BreadcrumbItem index={0} count={2} label="Home" href="#home" />);
 		expect(screen.getByRole("link")).toBeInTheDocument();
 	});
 
 	it("collapses middle items on phone with many crumbs", () => {
-		useDeviceType.mockReturnValue("phone");
+		asMock(useDeviceType).mockReturnValue("phone");
 		const items = Array.from({ length: 7 }, (_, i) => ({
 			label: `L${i}`,
 			name: `n${i}`,
@@ -138,7 +138,7 @@ describe("BreadcrumbItem Component", () => {
 	});
 
 	it("shows MoreHoriz ellipsis for near-end collapsed index", () => {
-		useDeviceType.mockReturnValue("phone");
+		asMock(useDeviceType).mockReturnValue("phone");
 		const items = Array.from({ length: 7 }, (_, i) => ({
 			label: `L${i}`,
 			name: `n${i}`,
@@ -156,7 +156,7 @@ describe("BreadcrumbItem Component", () => {
 	});
 
 	it("shows labels on tablet for short breadcrumb trails", () => {
-		useDeviceType.mockReturnValue("tablet");
+		asMock(useDeviceType).mockReturnValue("tablet");
 		render(
 			<BreadcrumbItem
 				index={1}
@@ -170,7 +170,7 @@ describe("BreadcrumbItem Component", () => {
 	});
 
 	it("collapses middle crumbs on desktop when count is high", () => {
-		useDeviceType.mockReturnValue("desktop");
+		asMock(useDeviceType).mockReturnValue("desktop");
 		const items = Array.from({ length: 10 }, (_, i) => ({
 			label: `L${i}`,
 			name: `n${i}`,
@@ -226,8 +226,8 @@ describe("BreadcrumbItem Component", () => {
 
 describe("BreadcrumbsWidget Component", () => {
 	beforeEach(() => {
-		useDeviceType.mockReturnValue("desktop");
-		MainStore.useState.mockReturnValue({ direction: "ltr" });
+		asMock(useDeviceType).mockReturnValue("desktop");
+		asMock(MainStore.useState).mockReturnValue({ direction: "ltr" });
 		jest.clearAllMocks();
 	});
 
@@ -263,7 +263,7 @@ describe("BreadcrumbsWidget Component", () => {
 	});
 
 	it("keeps library root on phone and hides children", () => {
-		useDeviceType.mockReturnValue("phone");
+		asMock(useDeviceType).mockReturnValue("phone");
 		const items = [
 			{ id: "home", name: "Home", url: "home" },
 			{ id: "library", name: "Library", url: "library", custom: true },
@@ -286,7 +286,7 @@ describe("BreadcrumbsWidget Component", () => {
 	});
 
 	it("renders dual header toolbars on desktop when bar is set", () => {
-		useDeviceType.mockReturnValue("desktop");
+		asMock(useDeviceType).mockReturnValue("desktop");
 		render(
 			<BreadcrumbsWidget
 				bar

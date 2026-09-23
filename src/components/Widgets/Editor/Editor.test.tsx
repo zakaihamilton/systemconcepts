@@ -7,7 +7,7 @@ describe("Editor Widget", () => {
 		const mockState = ["initial content", setValue];
 
 		const { getByRole } = render(<EditorWidget state={mockState} />);
-		const textarea = getByRole("textbox");
+		const textarea = getByRole("textbox") as HTMLTextAreaElement;
 
 		// Verify auto focus
 		expect(document.activeElement).toBe(textarea);

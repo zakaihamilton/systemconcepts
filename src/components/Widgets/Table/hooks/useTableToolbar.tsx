@@ -152,7 +152,7 @@ export function useTableToolbar({
 				items: itemsPerPageItems,
 				divider: true,
 			},
-	].filter(Boolean);
+	].filter(Boolean) as Array<Record<string, any>>;
 
 	const viewOptions = viewModesList.map((item) => ({
 		...item,

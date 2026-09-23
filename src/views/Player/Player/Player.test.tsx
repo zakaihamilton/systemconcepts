@@ -23,6 +23,7 @@ jest.mock("@components/Toolbar", () => ({
 	useToolbar: jest.fn(),
 }));
 jest.mock("@util/browser/store", () => ({
+	...jest.requireActual("@util/browser/store"),
 	useLocalStorage: jest.fn(),
 }));
 jest.mock("@util/api/fetch");
@@ -91,10 +92,10 @@ describe("Player View", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
 		toolbarItems = [];
-		useToolbar.mockImplementation(({ items }: any) => {
+		asMock(useToolbar).mockImplementation(({ items }: any) => {
 			toolbarItems = (items || []).filter(Boolean);
 		});
-		useTranslations.mockReturnValue({
+		asMock(useTranslations).mockReturnValue({
 			SUBTITLES: "Subtitles",
 			SUBTITLES_OFF: "Subtitles off",
 			DETAILS: "Details",
@@ -103,7 +104,7 @@ describe("Player View", () => {
 			SESSION_LOAD_ERROR:
 				"We couldn't load this session. Please contact Zakai and mention: {session}.",
 		});
-		useFetchJSON.mockReturnValue([
+		asMock(useFetchJSON).mockReturnValue([
 			{
 				path: "test.mp4",
 				downloadUrl: "https://example.com/file.mp4",
@@ -114,15 +115,19 @@ describe("Player View", () => {
 			null,
 			jest.fn(),
 		]);
-		useSessions.mockReturnValue([[], false, [{ name: "test", color: "#f00" }]]);
-		useParentParams.mockReturnValue({
+		asMock(useSessions).mockReturnValue([
+			[],
+			false,
+			[{ name: "test", color: "#f00" }],
+		]);
+		asMock(useParentParams).mockReturnValue({
 			group: "test",
 			year: "2021",
 			date: "01-01",
 			name: "session",
 		});
-		Cookies.get.mockReturnValue("test");
-		MainStore.useState.mockReturnValue({ speedToolbar: "bottom" });
+		asMock(Cookies.get).mockReturnValue("test");
+		asMock(MainStore.useState).mockReturnValue({ speedToolbar: "bottom" });
 		PlayerStore.update((state) => {
 			Object.assign(state, {
 				path: "",
@@ -175,7 +180,7 @@ describe("Player View", () => {
 
 	it("waits for history to load before recording the current session", () => {
 		const addToHistory = jest.fn();
-		useRecentHistory.mockReturnValue([[], addToHistory, undefined]);
+		asMock(useRecentHistory).mockReturnValue([[], addToHistory, undefined]);
 
 		const { rerender } = render(
 			<ContentSize.Provider value={mockSize}>
@@ -192,7 +197,7 @@ describe("Player View", () => {
 
 		expect(addToHistory).not.toHaveBeenCalled();
 
-		useRecentHistory.mockReturnValue([[], addToHistory, false]);
+		asMock(useRecentHistory).mockReturnValue([[], addToHistory, false]);
 		rerender(
 			<ContentSize.Provider value={mockSize}>
 				<PlayerPage
@@ -229,7 +234,7 @@ describe("Player View", () => {
 		);
 		const audio = getByTestId("audio");
 
-		useFetchJSON.mockReturnValue([
+		asMock(useFetchJSON).mockReturnValue([
 			{ path: "test.mp4", subtitles: "signed-subtitles.vtt" },
 			false,
 			false,
@@ -244,7 +249,7 @@ describe("Player View", () => {
 	});
 
 	it("shows a reportable message when the session URL cannot be loaded", async () => {
-		useFetchJSON.mockReturnValue([null, false, false, 403, jest.fn()]);
+		asMock(useFetchJSON).mockReturnValue([null, false, false, 403, jest.fn()]);
 
 		renderPlayer();
 
@@ -258,7 +263,7 @@ describe("Player View", () => {
 	});
 
 	it("requires sign in when cookies are missing", async () => {
-		Cookies.get.mockReturnValue(null);
+		asMock(Cookies.get).mockReturnValue(null);
 		renderPlayer();
 		await waitFor(() => {
 			expect(PlayerStore.getRawState()).toMatchObject({
@@ -287,7 +292,7 @@ describe("Player View", () => {
 	});
 
 	it("uses bundled metadata key for bundled groups", async () => {
-		useSessions.mockReturnValue([
+		asMock(useSessions).mockReturnValue([
 			[],
 			false,
 			[{ name: "test", bundled: true, color: "#f00" }],
@@ -302,7 +307,7 @@ describe("Player View", () => {
 	});
 
 	it("uses merged metadata key for merged groups", async () => {
-		useSessions.mockReturnValue([
+		asMock(useSessions).mockReturnValue([
 			[],
 			false,
 			[{ name: "test", merged: true, color: "#f00" }],
@@ -317,7 +322,11 @@ describe("Player View", () => {
 	});
 
 	it("uses split metadata key for standard groups", async () => {
-		useSessions.mockReturnValue([[], false, [{ name: "test", color: "#f00" }]]);
+		asMock(useSessions).mockReturnValue([
+			[],
+			false,
+			[{ name: "test", color: "#f00" }],
+		]);
 		const { getByTestId } = renderPlayer({ name: "session.mp4" });
 		await waitFor(() => {
 			expect(getByTestId("video")).toHaveAttribute(
@@ -349,9 +358,8 @@ describe("Player View", () => {
 			s.hash = "#sessions/test";
 			s.session = { group: "test", date: "01-01", name: "session.mp4" };
 		});
-		const originalLocation = window.location;
-		delete window.location;
-		window.location = { hash: "" };
+		const originalHash = window.location.hash;
+		window.location.hash = "";
 
 		renderPlayer({ show: false });
 		await waitFor(() => {
@@ -360,11 +368,11 @@ describe("Player View", () => {
 		const playerItem: any = toolbarItems.find((item) => item.id === "player");
 		playerItem.onClick();
 		expect(window.location.hash).toBe("#sessions/test");
-		window.location = originalLocation;
+		window.location.hash = originalHash;
 	});
 
 	it("shows speed slider at top when configured", () => {
-		MainStore.useState.mockReturnValue({ speedToolbar: "top" });
+		asMock(MainStore.useState).mockReturnValue({ speedToolbar: "top" });
 		const { getByTestId } = renderPlayer();
 		expect(getByTestId("speed-slider")).toBeInTheDocument();
 	});
@@ -387,7 +395,7 @@ describe("Player View", () => {
 	});
 
 	it("clears stale store data when path changes before fetch resolves", () => {
-		useFetchJSON.mockReturnValue([null, false, true, null, jest.fn()]);
+		asMock(useFetchJSON).mockReturnValue([null, false, true, null, jest.fn()]);
 		PlayerStore.update((s) => {
 			s.path = "sessions/old/path";
 			s.mediaPath = "old.mp4";
@@ -402,12 +410,11 @@ describe("Player View", () => {
 	});
 
 	it("stores hash when player becomes visible", () => {
-		const originalLocation = window.location;
-		delete window.location;
-		window.location = { hash: "#sessions/test" };
+		const originalHash = window.location.hash;
+		window.location.hash = "#sessions/test";
 		renderPlayer({ show: true });
 		expect(PlayerStore.getRawState().hash).toBe("#sessions/test");
-		window.location = originalLocation;
+		window.location.hash = originalHash;
 	});
 
 	it("updates player store when fetch data arrives", async () => {
@@ -446,7 +453,7 @@ describe("Player View", () => {
 	});
 
 	it("skips download when no download url is available", () => {
-		useFetchJSON.mockReturnValue([
+		asMock(useFetchJSON).mockReturnValue([
 			{ path: "test.mp4", downloadUrl: "", subtitles: "" },
 			false,
 			false,
@@ -458,7 +465,7 @@ describe("Player View", () => {
 	});
 
 	it("renders subtitle tracks for video playback", async () => {
-		useFetchJSON.mockReturnValue([
+		asMock(useFetchJSON).mockReturnValue([
 			{
 				path: "/media/video.mp4",
 				subtitles: "/media/subs.vtt",
@@ -480,7 +487,7 @@ describe("Player View", () => {
 
 	it("shows speed slider at the top when configured in MainStore", () => {
 		const { MainStore } = require("@components/Main");
-		MainStore.useState.mockReturnValue({ speedToolbar: "top" });
+		asMock(MainStore.useState).mockReturnValue({ speedToolbar: "top" });
 		PlayerStore.update((s) => {
 			s.showSpeed = true;
 		});
@@ -489,7 +496,13 @@ describe("Player View", () => {
 	});
 
 	it("omits metadata keys while player data is still loading", () => {
-		useFetchJSON.mockReturnValue([null, jest.fn(), true, null, jest.fn()]);
+		asMock(useFetchJSON).mockReturnValue([
+			null,
+			jest.fn(),
+			true,
+			null,
+			jest.fn(),
+		]);
 		const { getByTestId } = renderPlayer({ name: "session.m4a" });
 		expect(getByTestId("audio").getAttribute("data-metadata")).toBeNull();
 	});

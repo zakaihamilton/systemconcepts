@@ -11,7 +11,7 @@ jest.mock("@widgets/Label", () => ({ name }: any) => (
 describe("FontSizes View", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
-		useTranslations.mockReturnValue({
+		asMock(useTranslations).mockReturnValue({
 			NAME: "Name",
 			FONT_SIZE: "Font Size",
 			DEVICES: "Devices",

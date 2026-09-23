@@ -18,7 +18,7 @@ describe("Zoom Component", () => {
 
 	beforeEach(() => {
 		jest.clearAllMocks();
-		useTranslations.mockReturnValue(mockTranslations);
+		asMock(useTranslations).mockReturnValue(mockTranslations);
 		ZoomStore.update((s) => {
 			s.scale = 1.0;
 		});
@@ -32,13 +32,13 @@ describe("Zoom Component", () => {
 			</ContentSize.Provider>,
 		);
 		expect(useToolbar).toHaveBeenCalled();
-		const toolbarArgs = useToolbar.mock.calls[0][0];
+		const toolbarArgs = asMock(useToolbar).mock.calls[0][0];
 		expect(toolbarArgs.items).toHaveLength(2);
 	});
 
 	it("updates scale and ref style on zoom in", async () => {
 		let toolbarItems: any = [];
-		useToolbar.mockImplementation(({ items }: any) => {
+		asMock(useToolbar).mockImplementation(({ items }: any) => {
 			toolbarItems = items;
 		});
 

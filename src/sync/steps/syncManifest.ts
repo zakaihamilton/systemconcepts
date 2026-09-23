@@ -9,6 +9,7 @@ import {
 } from "../constants";
 import { addSyncLog } from "../logs";
 import { readFileIfExists } from "../storageReads";
+import type { Manifest } from "../types";
 
 /**
  * Normalize a file path to ensure it starts with a leading slash
@@ -22,7 +23,7 @@ function normalizePath(path: any) {
  * Normalize and deduplicate manifest entries
  * Ensures all paths have leading slashes and removes duplicates (keeping highest version)
  */
-function normalizeManifest(manifest: any) {
+function normalizeManifest(manifest: any): Manifest {
 	if (!manifest || !Array.isArray(manifest)) return [];
 
 	const pathMap = new Map<any, any>();
@@ -57,7 +58,7 @@ function normalizeManifest(manifest: any) {
 		}
 	}
 
-	return Array.from(pathMap.values());
+	return Array.from(pathMap.values()) as Manifest;
 }
 
 /**
@@ -75,7 +76,7 @@ export async function syncManifest(
 	const remoteManifestPathJson = makePath(remotePath, FILES_MANIFEST);
 
 	try {
-		let remoteManifest = [];
+		let remoteManifest: Manifest = [];
 		let loadedFromManifest = false;
 		let authoritative = false;
 

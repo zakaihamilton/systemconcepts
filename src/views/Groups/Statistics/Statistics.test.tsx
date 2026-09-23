@@ -16,7 +16,7 @@ describe("Statistics Component", () => {
 
 	beforeEach(() => {
 		jest.clearAllMocks();
-		useTranslations.mockReturnValue({
+		asMock(useTranslations).mockReturnValue({
 			STATISTICS: "Statistics",
 			SESSIONS: "Sessions",
 			CLOSE: "Close",

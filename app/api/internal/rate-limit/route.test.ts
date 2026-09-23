@@ -4,13 +4,17 @@ import { POST } from "./route";
 jest.mock("@util/auth/rateLimit", () => ({ checkRateLimit: jest.fn() }));
 jest.mock("next/server", () => {
 	class TestResponse {
-		constructor(body: any, init = {}) {
+		body: any;
+		status: number;
+		headers: Map<string, string>;
+
+		constructor(body: any, init: ResponseInit = {}) {
 			this.body = body;
 			this.status = init.status || 200;
-			this.headers = new Map(
+			this.headers = new Map<string, string>(
 				Object.entries(init.headers || {}).map(([key, value]) => [
 					key.toLowerCase(),
-					value,
+					String(value),
 				]),
 			);
 		}
@@ -19,7 +23,7 @@ jest.mock("next/server", () => {
 			return JSON.parse(this.body);
 		}
 
-		static json(body: any, init = {}) {
+		static json(body: any, init: ResponseInit = {}) {
 			return new TestResponse(JSON.stringify(body), init);
 		}
 	}
@@ -49,7 +53,7 @@ describe("POST /api/internal/rate-limit", () => {
 	});
 
 	it("checks the rate limit on every request", async () => {
-		checkRateLimit.mockResolvedValue();
+		asMock(checkRateLimit).mockResolvedValue(undefined);
 		const body = { ip: "203.0.113.8", limit: 60, windowMs: 60000 };
 		const firstResponse = await POST(request(body));
 		const secondResponse = await POST(request(body));
@@ -64,7 +68,7 @@ describe("POST /api/internal/rate-limit", () => {
 	});
 
 	it("preserves rate-limit denials", async () => {
-		checkRateLimit.mockRejectedValue("RATE_LIMIT_EXCEEDED");
+		asMock(checkRateLimit).mockRejectedValue("RATE_LIMIT_EXCEEDED");
 
 		const response = await POST(request({ ip: "203.0.113.8" }));
 
@@ -86,7 +90,7 @@ describe("POST /api/internal/rate-limit", () => {
 	});
 
 	it("returns ok false for unexpected rate-limit errors", async () => {
-		checkRateLimit.mockRejectedValue(new Error("database unavailable"));
+		asMock(checkRateLimit).mockRejectedValue(new Error("database unavailable"));
 
 		const response = await POST(request({ ip: "203.0.113.8" }));
 

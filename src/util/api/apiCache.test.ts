@@ -26,7 +26,7 @@ describe("apiCache", () => {
 	it("reads and writes gzipped cache objects", async () => {
 		const pako = require("pako");
 		const payload = JSON.stringify([{ id: "one" }]);
-		downloadData.mockResolvedValue(Buffer.from(pako.gzip(payload)));
+		asMock(downloadData).mockResolvedValue(Buffer.from(pako.gzip(payload)));
 
 		await expect(readApiCache("sessions", "abc")).resolves.toBe(payload);
 		await writeApiCache("sessions", "abc", payload);
@@ -39,7 +39,7 @@ describe("apiCache", () => {
 	});
 
 	it("returns a cache miss when the object cannot be read", async () => {
-		downloadData.mockRejectedValue(new Error("not found"));
+		asMock(downloadData).mockRejectedValue(new Error("not found"));
 
 		await expect(readApiCache("sessions", "missing")).resolves.toBeNull();
 	});
@@ -51,7 +51,7 @@ describe("apiCache", () => {
 				Contents: [{ Key: "api-cache/rss/a.xml.gz" }],
 			})
 			.mockResolvedValue({});
-		getS3.mockResolvedValue({ send });
+		asMock(getS3).mockResolvedValue({ send });
 
 		await expect(purgeApiCache()).resolves.toBe(1);
 		expect(send).toHaveBeenCalledTimes(2);
@@ -59,7 +59,7 @@ describe("apiCache", () => {
 
 	it("returns zero when the cache is empty", async () => {
 		const send = jest.fn().mockResolvedValue({});
-		getS3.mockResolvedValue({ send });
+		asMock(getS3).mockResolvedValue({ send });
 
 		await expect(purgeApiCache()).resolves.toBe(0);
 		expect(send).toHaveBeenCalledTimes(1);
@@ -73,7 +73,7 @@ describe("apiCache", () => {
 				NextContinuationToken: "next-page",
 			})
 			.mockResolvedValueOnce({ Contents: [] });
-		getS3.mockResolvedValue({ send });
+		asMock(getS3).mockResolvedValue({ send });
 
 		await expect(purgeApiCache()).resolves.toBe(1);
 		expect(send).toHaveBeenCalledTimes(3);

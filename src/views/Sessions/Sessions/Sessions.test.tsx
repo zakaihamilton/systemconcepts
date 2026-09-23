@@ -17,6 +17,7 @@ jest.mock("@util/domain/sessions", () => ({
 	},
 }));
 jest.mock("@util/browser/store", () => ({
+	...jest.requireActual("@util/browser/store"),
 	useLocalStorage: jest.fn(),
 }));
 jest.mock("@util/browser/styles");
@@ -256,7 +257,7 @@ describe("Sessions View", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
 		lastTableProps = null;
-		useTranslations.mockReturnValue({
+		asMock(useTranslations).mockReturnValue({
 			SESSIONS: "Sessions",
 			THUMBNAIL: "Thumbnail",
 			NAME: "Name",
@@ -270,12 +271,12 @@ describe("Sessions View", () => {
 			SYNCING: "Syncing",
 			REQUIRE_SIGNIN: "Sign in required",
 		});
-		useDeviceType.mockReturnValue("desktop");
-		useSessions.mockReturnValue([[], false]);
-		SessionsStore.useState.mockImplementation((selector: any) =>
+		asMock(useDeviceType).mockReturnValue("desktop");
+		asMock(useSessions).mockReturnValue([[], false]);
+		asMock(SessionsStore.useState).mockImplementation((selector: any) =>
 			selector(baseStoreState),
 		);
-		SessionsStore.update.mockImplementation((fn: any) => {
+		asMock(SessionsStore.update).mockImplementation((fn: any) => {
 			const state = {
 				groupFilter: [],
 				typeFilter: [],
@@ -289,9 +290,9 @@ describe("Sessions View", () => {
 			fn(state);
 			return state;
 		});
-		Cookies.get.mockReturnValue("test");
-		SyncActiveStore.useState.mockReturnValue(false);
-		PlayerStore.useState.mockReturnValue({ session: null });
+		asMock(Cookies.get).mockReturnValue("test");
+		asMock(SyncActiveStore.useState).mockReturnValue(false);
+		asMock(PlayerStore.useState).mockReturnValue({ session: null });
 	});
 
 	it("renders table and bars", () => {
@@ -302,8 +303,8 @@ describe("Sessions View", () => {
 	});
 
 	it("shows loading and empty labels", () => {
-		useSessions.mockReturnValue([[], true]);
-		SyncActiveStore.useState.mockImplementation((selector: any) =>
+		asMock(useSessions).mockReturnValue([[], true]);
+		asMock(SyncActiveStore.useState).mockImplementation((selector: any) =>
 			typeof selector === "function"
 				? selector({ needsSessionReload: false, busy: true })
 				: false,
@@ -314,7 +315,7 @@ describe("Sessions View", () => {
 	});
 
 	it("passes session data into the table", () => {
-		useSessions.mockReturnValue([sampleSessions, false]);
+		asMock(useSessions).mockReturnValue([sampleSessions, false]);
 		render(<SessionsPage />);
 		expect(screen.getByTestId("data-count")).toHaveTextContent("4");
 		expect(lastTableProps.name).toBe("Sessions");
@@ -327,7 +328,7 @@ describe("Sessions View", () => {
 	])("shows the filter bar when filtering by %s from the session list", (_, label) => {
 		const { getByRole } = render(<SessionsPage />);
 		fireEvent.click(getByRole("button", { name: label }));
-		const update = SessionsStore.update.mock.calls.at(-1)[0];
+		const update = asMock(SessionsStore.update).mock.calls.at(-1)[0];
 		const state = {
 			groupFilter: [],
 			typeFilter: [],
@@ -340,12 +341,12 @@ describe("Sessions View", () => {
 	});
 
 	it("removes an active group filter when clicked again", () => {
-		SessionsStore.useState.mockImplementation((selector: any) =>
+		asMock(SessionsStore.useState).mockImplementation((selector: any) =>
 			selector({ ...baseStoreState, groupFilter: ["test"] }),
 		);
 		render(<SessionsPage />);
 		fireEvent.click(screen.getByRole("button", { name: "Filter group" }));
-		const update = SessionsStore.update.mock.calls.at(-1)[0];
+		const update = asMock(SessionsStore.update).mock.calls.at(-1)[0];
 		const state = {
 			groupFilter: ["test"],
 			showFilterDialog: false,
@@ -356,12 +357,12 @@ describe("Sessions View", () => {
 	});
 
 	it("removes an active type filter when icon is clicked again", () => {
-		SessionsStore.useState.mockImplementation((selector: any) =>
+		asMock(SessionsStore.useState).mockImplementation((selector: any) =>
 			selector({ ...baseStoreState, typeFilter: ["audio"] }),
 		);
 		render(<SessionsPage />);
 		fireEvent.click(screen.getByRole("button", { name: "Filter type" }));
-		const update = SessionsStore.update.mock.calls.at(-1)[0];
+		const update = asMock(SessionsStore.update).mock.calls.at(-1)[0];
 		const state = {
 			typeFilter: ["audio"],
 			showFilterDialog: false,
@@ -372,16 +373,16 @@ describe("Sessions View", () => {
 	});
 
 	it("places filter bar after table on mobile", () => {
-		useDeviceType.mockReturnValue("phone");
+		asMock(useDeviceType).mockReturnValue("phone");
 		render(<SessionsPage />);
 		expect(screen.getByTestId("filter-bar")).toBeInTheDocument();
 	});
 
 	it("sets sign-in mode when cookies are missing", () => {
-		Cookies.get.mockReturnValue("");
+		asMock(Cookies.get).mockReturnValue("");
 		render(<SessionsPage />);
 		expect(SessionsStore.update).toHaveBeenCalled();
-		const update = SessionsStore.update.mock.calls.find((call: any) => {
+		const update = asMock(SessionsStore.update).mock.calls.find((call: any) => {
 			const state = { mode: "", message: "" };
 			call[0](state);
 			return state.mode === "signin";
@@ -390,9 +391,9 @@ describe("Sessions View", () => {
 	});
 
 	it("clears sign-in mode when signed in", () => {
-		Cookies.get.mockReturnValue("ok");
+		asMock(Cookies.get).mockReturnValue("ok");
 		render(<SessionsPage />);
-		const update = SessionsStore.update.mock.calls.find((call: any) => {
+		const update = asMock(SessionsStore.update).mock.calls.find((call: any) => {
 			const state = { mode: "signin", message: "x" };
 			call[0](state);
 			return state.mode === "";
@@ -401,7 +402,7 @@ describe("Sessions View", () => {
 	});
 
 	it("reloads sessions after sync completes", () => {
-		SyncActiveStore.useState.mockImplementation((selector: any) => {
+		asMock(SyncActiveStore.useState).mockImplementation((selector: any) => {
 			if (typeof selector === "function") {
 				return selector({ needsSessionReload: true, busy: false });
 			}
@@ -410,22 +411,22 @@ describe("Sessions View", () => {
 		render(<SessionsPage />);
 		expect(SessionsStore.update).toHaveBeenCalled();
 		expect(SyncActiveStore.update).toHaveBeenCalled();
-		const syncUpdate = SyncActiveStore.update.mock.calls[0][0];
+		const syncUpdate = asMock(SyncActiveStore.update).mock.calls[0][0];
 		const syncState = { needsSessionReload: true };
 		syncUpdate(syncState);
 		expect(syncState.needsSessionReload).toBe(false);
 	});
 
 	it("maps sessions and renders all column types", () => {
-		useSessions.mockReturnValue([sampleSessions, false]);
-		PlayerStore.useState.mockReturnValue({
+		asMock(useSessions).mockReturnValue([sampleSessions, false]);
+		asMock(PlayerStore.useState).mockReturnValue({
 			session: {
 				group: "alpha",
 				date: "2024-01-15",
 				name: "Session A - Part 1",
 			},
 		});
-		SessionsStore.useState.mockImplementation((selector: any) =>
+		asMock(SessionsStore.useState).mockImplementation((selector: any) =>
 			selector({ ...baseStoreState, viewMode: "grid" }),
 		);
 		render(<SessionsPage />);
@@ -447,8 +448,8 @@ describe("Sessions View", () => {
 	});
 
 	it("renders list/tree name, thumbnail, date, tags, and group columns", () => {
-		useSessions.mockReturnValue([sampleSessions, false]);
-		SessionsStore.useState.mockImplementation((selector: any) =>
+		asMock(useSessions).mockReturnValue([sampleSessions, false]);
+		asMock(SessionsStore.useState).mockImplementation((selector: any) =>
 			selector({ ...baseStoreState, viewMode: "list" }),
 		);
 		render(<SessionsPage />);
@@ -471,7 +472,7 @@ describe("Sessions View", () => {
 		});
 		const headerUtils = render(<div data-testid="header-wrap">{header}</div>);
 		fireEvent.click(headerUtils.getByTestId("row-click"));
-		const expandUpdate = SessionsStore.update.mock.calls.at(-1)[0];
+		const expandUpdate = asMock(SessionsStore.update).mock.calls.at(-1)[0];
 		const expandState = { expandedTreeGroups: [] };
 		expandUpdate(expandState);
 		expect(expandState.expandedTreeGroups).toContain(
@@ -491,7 +492,7 @@ describe("Sessions View", () => {
 			</div>,
 		);
 		fireEvent.click(headerUtils.getByTestId("row-click"));
-		const collapseUpdate = SessionsStore.update.mock.calls.at(-1)[0];
+		const collapseUpdate = asMock(SessionsStore.update).mock.calls.at(-1)[0];
 		const collapseState = {
 			expandedTreeGroups: ["alpha||2024-01-15||Session A"],
 		};
@@ -522,9 +523,9 @@ describe("Sessions View", () => {
 	});
 
 	it("formats mobile dates and grid thumbnails with ai/progress", () => {
-		useDeviceType.mockReturnValue("phone");
-		useSessions.mockReturnValue([sampleSessions, false]);
-		SessionsStore.useState.mockImplementation((selector: any) =>
+		asMock(useDeviceType).mockReturnValue("phone");
+		asMock(useSessions).mockReturnValue([sampleSessions, false]);
+		asMock(SessionsStore.useState).mockImplementation((selector: any) =>
 			selector({ ...baseStoreState, viewMode: "grid", orderBy: "duration" }),
 		);
 		render(<SessionsPage />);
@@ -553,7 +554,7 @@ describe("Sessions View", () => {
 	});
 
 	it("builds tree groups and expands them", () => {
-		useSessions.mockReturnValue([sampleSessions, false]);
+		asMock(useSessions).mockReturnValue([sampleSessions, false]);
 		render(<SessionsPage />);
 		const wrappers: any = sampleSessions.map((raw) => ({
 			raw,
@@ -575,7 +576,7 @@ describe("Sessions View", () => {
 	});
 
 	it("computes separators and row class names", () => {
-		useSessions.mockReturnValue([sampleSessions, false]);
+		asMock(useSessions).mockReturnValue([sampleSessions, false]);
 		render(<SessionsPage />);
 		const a: any = lastTableProps.mapper(sampleSessions[0]);
 		const b: any = lastTableProps.mapper(sampleSessions[2]);
@@ -602,7 +603,7 @@ describe("Sessions View", () => {
 	});
 
 	it("derives hyphen prefixes when prefix map has no entry", () => {
-		useSessions.mockReturnValue([[], false]);
+		asMock(useSessions).mockReturnValue([[], false]);
 		render(<SessionsPage />);
 		const mapped: any = lastTableProps.mapper({
 			...sampleSessions[0],
@@ -614,16 +615,16 @@ describe("Sessions View", () => {
 	});
 
 	it("shows sign-in guidance when cookies are missing", () => {
-		Cookies.get.mockReturnValue(undefined);
+		asMock(Cookies.get).mockReturnValue(undefined);
 		render(<SessionsPage />);
 		expect(screen.getByTestId("empty-label")).toBeInTheDocument();
 	});
 
 	it("renders list view names through Row instead of Label", () => {
-		SessionsStore.useState.mockImplementation((selector: any) =>
+		asMock(SessionsStore.useState).mockImplementation((selector: any) =>
 			selector({ ...baseStoreState, viewMode: "list" }),
 		);
-		useSessions.mockReturnValue([sampleSessions, false]);
+		asMock(useSessions).mockReturnValue([sampleSessions, false]);
 		render(<SessionsPage />);
 		const mapped: any = lastTableProps.mapper(sampleSessions[0]);
 		const name: any = lastTableProps.renderColumn("nameWidget", mapped);
@@ -633,7 +634,7 @@ describe("Sessions View", () => {
 	});
 
 	it("extracts tree prefixes from hyphenated session titles", () => {
-		useSessions.mockReturnValue([
+		asMock(useSessions).mockReturnValue([
 			[
 				{
 					name: "Alpha-Beta-Gamma",
@@ -661,7 +662,7 @@ describe("Sessions View", () => {
 	});
 
 	it("expands grouped tree rows with child sessions", () => {
-		useSessions.mockReturnValue([sampleSessions, false]);
+		asMock(useSessions).mockReturnValue([sampleSessions, false]);
 		render(<SessionsPage />);
 		const wrappers: any = sampleSessions.map((raw) => ({
 			raw,
@@ -677,11 +678,11 @@ describe("Sessions View", () => {
 	});
 
 	it("does not reset scroll on the initial sessions load", () => {
-		useSessions.mockReturnValue([sampleSessions, false]);
+		asMock(useSessions).mockReturnValue([sampleSessions, false]);
 		render(<SessionsPage />);
 		expect(lastTableProps.resetScrollDeps.at(-1)).toBe(0);
 		expect(
-			SessionsStore.update.mock.calls.some((call: any) => {
+			asMock(SessionsStore.update).mock.calls.some((call: any) => {
 				const state = { offset: 1 };
 				call[0](state);
 				return state.offset === 0;
@@ -690,13 +691,13 @@ describe("Sessions View", () => {
 	});
 
 	it("resets scroll when new session ids are synced", () => {
-		useSessions.mockReturnValue([sampleSessions, false]);
+		asMock(useSessions).mockReturnValue([sampleSessions, false]);
 		const { rerender } = render(<SessionsPage />);
 		const depsBefore: any = lastTableProps.resetScrollDeps;
 		expect(depsBefore.at(-1)).toBe(0);
 
-		SessionsStore.update.mockClear();
-		useSessions.mockReturnValue([
+		asMock(SessionsStore.update).mockClear();
+		asMock(useSessions).mockReturnValue([
 			[
 				...sampleSessions,
 				{
@@ -714,17 +715,17 @@ describe("Sessions View", () => {
 		expect(lastTableProps.resetScrollDeps.at(-1)).toBe(1);
 		expect(SessionsStore.update).toHaveBeenCalled();
 		const offsetState = { offset: 4 };
-		SessionsStore.update.mock.calls[0][0](offsetState);
+		asMock(SessionsStore.update).mock.calls[0][0](offsetState);
 		expect(offsetState.offset).toBe(0);
 	});
 
 	it("does not reset scroll when a reload keeps the same session ids", () => {
-		useSessions.mockReturnValue([sampleSessions, false]);
+		asMock(useSessions).mockReturnValue([sampleSessions, false]);
 		const { rerender } = render(<SessionsPage />);
 		const depsBefore: any = lastTableProps.resetScrollDeps;
 
-		SessionsStore.update.mockClear();
-		useSessions.mockReturnValue([
+		asMock(SessionsStore.update).mockClear();
+		asMock(useSessions).mockReturnValue([
 			sampleSessions.map((session) => ({ ...session })),
 			false,
 		]);
@@ -736,25 +737,25 @@ describe("Sessions View", () => {
 	});
 
 	it("does not treat the loading empty list as a baseline for new sessions", () => {
-		useSessions.mockReturnValue([[], true]);
+		asMock(useSessions).mockReturnValue([[], true]);
 		const { rerender } = render(<SessionsPage />);
 		expect(lastTableProps.resetScrollDeps.at(-1)).toBe(0);
 
-		useSessions.mockReturnValue([sampleSessions, false]);
+		asMock(useSessions).mockReturnValue([sampleSessions, false]);
 		rerender(<SessionsPage />);
 
 		expect(lastTableProps.resetScrollDeps.at(-1)).toBe(0);
 	});
 
 	it("resets scroll when a new session is identified only by key", () => {
-		useSessions.mockReturnValue([
+		asMock(useSessions).mockReturnValue([
 			[{ key: "k1", name: "Existing", date: "2024-01-15" }],
 			false,
 		]);
 		const { rerender } = render(<SessionsPage />);
 		expect(lastTableProps.resetScrollDeps.at(-1)).toBe(0);
 
-		useSessions.mockReturnValue([
+		asMock(useSessions).mockReturnValue([
 			[
 				{ key: "k1", name: "Existing", date: "2024-01-15" },
 				{ key: "k2", name: "Newly synced", date: "2024-03-01" },
@@ -767,11 +768,11 @@ describe("Sessions View", () => {
 	});
 
 	it("does not reset scroll when sessions are only removed", () => {
-		useSessions.mockReturnValue([sampleSessions, false]);
+		asMock(useSessions).mockReturnValue([sampleSessions, false]);
 		const { rerender } = render(<SessionsPage />);
 		const depsBefore: any = lastTableProps.resetScrollDeps;
 
-		useSessions.mockReturnValue([sampleSessions.slice(1), false]);
+		asMock(useSessions).mockReturnValue([sampleSessions.slice(1), false]);
 		rerender(<SessionsPage />);
 
 		expect(lastTableProps.resetScrollDeps).toEqual(depsBefore);

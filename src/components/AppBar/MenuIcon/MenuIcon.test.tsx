@@ -17,8 +17,8 @@ describe("MenuIcon Component", () => {
 	});
 
 	it("renders MenuIcon with translations", () => {
-		useTranslations.mockReturnValue({ MENU: "Menu Option" });
-		useDeviceType.mockReturnValue("desktop");
+		asMock(useTranslations).mockReturnValue({ MENU: "Menu Option" });
+		asMock(useDeviceType).mockReturnValue("desktop");
 
 		const { getByLabelText } = render(<Menu />);
 		const button = getByLabelText("Menu Option");
@@ -26,8 +26,8 @@ describe("MenuIcon Component", () => {
 	});
 
 	it("toggles showSideBar on desktop click", () => {
-		useTranslations.mockReturnValue({ MENU: "Menu" });
-		useDeviceType.mockReturnValue("desktop");
+		asMock(useTranslations).mockReturnValue({ MENU: "Menu" });
+		asMock(useDeviceType).mockReturnValue("desktop");
 
 		const { getByLabelText } = render(<Menu />);
 		const button = getByLabelText("Menu");
@@ -41,8 +41,8 @@ describe("MenuIcon Component", () => {
 	});
 
 	it("toggles showSlider on mobile click", () => {
-		useTranslations.mockReturnValue({ MENU: "Menu" });
-		useDeviceType.mockReturnValue("phone");
+		asMock(useTranslations).mockReturnValue({ MENU: "Menu" });
+		asMock(useDeviceType).mockReturnValue("phone");
 
 		const { getByLabelText } = render(<Menu />);
 		const button = getByLabelText("Menu");

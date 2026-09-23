@@ -21,7 +21,7 @@ describe("SpeedDial Widget", () => {
 
 	beforeEach(() => {
 		jest.clearAllMocks();
-		useTranslations.mockReturnValue({ MENU: "Menu" });
+		asMock(useTranslations).mockReturnValue({ MENU: "Menu" });
 	});
 
 	it("renders and opens on click", () => {

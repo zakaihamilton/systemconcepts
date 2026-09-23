@@ -9,7 +9,7 @@ describe("Grid", () => {
 			</Grid>,
 		);
 
-		const gridContainer = container.firstChild;
+		const gridContainer = container.firstChild as HTMLElement;
 		expect(gridContainer).toHaveStyle({ gap: "24px" });
 		expect(gridContainer.className).toMatch(/container/);
 		expect(container.querySelector('[class*="spanXs12"]')).toBeTruthy();
@@ -34,7 +34,7 @@ describe("Grid", () => {
 			</Grid>,
 		);
 
-		const item = container.querySelector('[class*="spanXs12"]');
+		const item = container.querySelector<HTMLElement>('[class*="spanXs12"]');
 		expect(item).toBeTruthy();
 		expect(item.className).toMatch(/spanSm6/);
 	});
@@ -57,10 +57,10 @@ describe("Grid", () => {
 				item
 			</Grid>,
 		);
-		expect(container.firstChild.style.gridTemplateColumns).toBe(
-			"repeat(3, minmax(0, 1fr))",
-		);
-		expect(container.firstChild.style.color).toBe("red");
+		expect(
+			(container.firstChild as HTMLElement).style.gridTemplateColumns,
+		).toBe("repeat(3, minmax(0, 1fr))");
+		expect((container.firstChild as HTMLElement).style.color).toBe("red");
 	});
 
 	it("merges size object overrides with legacy breakpoint props", () => {
@@ -69,7 +69,7 @@ describe("Grid", () => {
 				cell
 			</Grid>,
 		);
-		const el = container.firstChild;
+		const el = container.firstChild as HTMLElement;
 		expect(el.className).toMatch(/spanXs6/);
 		expect(el.className).toMatch(/spanSm4/);
 		expect(el.className).toMatch(/spanMd3/);
@@ -77,7 +77,7 @@ describe("Grid", () => {
 
 	it("ignores falsy span values", () => {
 		const { container } = render(<Grid item xs={0} sm={null} md={undefined} />);
-		expect(container.firstChild.className).toMatch(/item/);
+		expect((container.firstChild as HTMLElement).className).toMatch(/item/);
 	});
 
 	it("renders a plain div when neither container nor item props apply", () => {

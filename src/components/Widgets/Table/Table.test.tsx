@@ -219,7 +219,10 @@ const data = [
 	{ id: 3, name: "Gamma", date: "2024-03-01", tagsString: "three" },
 ];
 
-function renderTable(props = {}, storeOverrides = {}) {
+function renderTable(
+	props: Record<string, any> = {},
+	storeOverrides: Record<string, any> = {},
+) {
 	const store = createStore(storeOverrides);
 	const utils = render(
 		<ContentSize.Provider
@@ -241,7 +244,7 @@ describe("Table Widget", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
 		jest.useRealTimers();
-		useTranslations.mockReturnValue({
+		asMock(useTranslations).mockReturnValue({
 			LOADING: "Loading",
 			NO_ITEMS: "No items",
 			TABLE_VIEW: "Table",
@@ -255,9 +258,9 @@ describe("Table Widget", () => {
 			EXPORT: "Export",
 			REFRESH: "Refresh",
 		});
-		useDeviceType.mockReturnValue("desktop");
-		useSearch.mockReturnValue("");
-		StatusBarStore.useState.mockReturnValue(0);
+		asMock(useDeviceType).mockReturnValue("desktop");
+		asMock(useSearch).mockReturnValue("");
+		asMock(StatusBarStore.useState).mockReturnValue(0);
 	});
 
 	it("renders table mode with rows and navigator", () => {
@@ -391,13 +394,13 @@ describe("Table Widget", () => {
 	});
 
 	it("filters via search AND/OR and quoted terms", () => {
-		useSearch.mockReturnValue('Alpha OR "Beta  Item"');
+		asMock(useSearch).mockReturnValue('Alpha OR "Beta  Item"');
 		renderTable();
 		expect(screen.getAllByTestId("table-row")).toHaveLength(2);
 	});
 
 	it("filters @doublespace special search", () => {
-		useSearch.mockReturnValue("@doublespace");
+		asMock(useSearch).mockReturnValue("@doublespace");
 		renderTable();
 		const rows = screen.getAllByTestId("table-row");
 		expect(rows).toHaveLength(1);
@@ -475,19 +478,19 @@ describe("Table Widget", () => {
 		);
 
 		expect(useToolbar).toHaveBeenCalled();
-		const toolbar = useToolbar.mock.calls.at(-1)[0];
+		const toolbar = asMock(useToolbar).mock.calls.at(-1)[0];
 		const byId = Object.fromEntries(
 			toolbar.items.map((item: any) => [item.id, item]),
 		);
 
-		importData.mockResolvedValueOnce({ body: '{"ok":true}' });
+		asMock(importData).mockResolvedValueOnce({ body: '{"ok":true}' });
 		await byId.import.onClick();
 		expect(onImport).toHaveBeenCalledWith({ ok: true });
 
-		importData.mockRejectedValueOnce(new Error("cancel"));
+		asMock(importData).mockRejectedValueOnce(new Error("cancel"));
 		await byId.import.onClick();
 
-		importData.mockResolvedValueOnce({ body: "not-json" });
+		asMock(importData).mockResolvedValueOnce({ body: "not-json" });
 		await byId.import.onClick();
 
 		await byId.export.onClick();
@@ -512,7 +515,7 @@ describe("Table Widget", () => {
 			onImport: jest.fn(),
 			viewModes: { table: null },
 		});
-		const toolbar = useToolbar.mock.calls.at(-1)[0];
+		const toolbar = asMock(useToolbar).mock.calls.at(-1)[0];
 		const exportItem = toolbar.items.find((item: any) => item.id === "export");
 		await exportItem.onClick();
 		expect(exportData).toHaveBeenCalledWith(
@@ -526,7 +529,7 @@ describe("Table Widget", () => {
 		renderTable({
 			onExport: jest.fn().mockResolvedValue("plain-body"),
 		});
-		const toolbar = useToolbar.mock.calls.at(-1)[0];
+		const toolbar = asMock(useToolbar).mock.calls.at(-1)[0];
 		const exportItem = toolbar.items.find((item: any) => item.id === "export");
 		await exportItem.onClick();
 		expect(exportData).toHaveBeenCalledWith(
@@ -544,7 +547,7 @@ describe("Table Widget", () => {
 			tagsString: "",
 		}));
 		const { store } = renderTable({ data: many }, { viewMode: "table" });
-		const toolbar = useToolbar.mock.calls.at(-1)[0];
+		const toolbar = asMock(useToolbar).mock.calls.at(-1)[0];
 		const rows = toolbar.items.find((item: any) => item.id === "itemsPerPage");
 		expect(rows).toBeTruthy();
 		rows.items.find((item: any) => item.id === 25).onClick();
@@ -552,11 +555,11 @@ describe("Table Widget", () => {
 	});
 
 	it("does not register desktop view group on mobile", () => {
-		useDeviceType.mockReturnValue("phone");
+		asMock(useDeviceType).mockReturnValue("phone");
 		renderTable({
 			viewModes: { table: null, list: {} },
 		});
-		const toolbar = useToolbar.mock.calls.at(-1)[0];
+		const toolbar = asMock(useToolbar).mock.calls.at(-1)[0];
 		expect(
 			toolbar.items.find((item: any) => item.id === "viewGroup"),
 		).toBeFalsy();
@@ -623,7 +626,7 @@ describe("Table Widget", () => {
 	});
 
 	it("applies status bar height when status bar is active", () => {
-		StatusBarStore.useState.mockReturnValue(1);
+		asMock(StatusBarStore.useState).mockReturnValue(1);
 		renderTable({
 			statusBar: <div data-testid="status">bar</div>,
 			statusBarHeight: "2em",
@@ -655,7 +658,7 @@ describe("Table Widget", () => {
 
 	it("resets search offset via useSearch callback", () => {
 		let searchCb;
-		useSearch.mockImplementation((name: any, cb: any) => {
+		asMock(useSearch).mockImplementation((name: any, cb: any) => {
 			searchCb = cb;
 			return "";
 		});
@@ -756,13 +759,13 @@ describe("Table Widget", () => {
 	});
 
 	it("uses searchable string keys for filtering", () => {
-		useSearch.mockReturnValue("one");
+		asMock(useSearch).mockReturnValue("one");
 		renderTable();
 		expect(screen.getAllByTestId("table-row")).toHaveLength(1);
 	});
 
 	it("filters out falsy columns and uses sortable string search keys", () => {
-		useSearch.mockReturnValue("tagged");
+		asMock(useSearch).mockReturnValue("tagged");
 		renderTable({
 			columns: [
 				{ id: "name", title: "Name", sortable: true },
@@ -818,7 +821,7 @@ describe("Table Widget", () => {
 	});
 
 	it("omits mobile export toolbar and sort when showSort is false", () => {
-		useDeviceType.mockReturnValue("phone");
+		asMock(useDeviceType).mockReturnValue("phone");
 		renderTable(
 			{
 				data: Array.from({ length: 12 }, (_, i) => ({
@@ -833,7 +836,7 @@ describe("Table Widget", () => {
 			},
 			{ viewMode: "list" },
 		);
-		const toolbar = useToolbar.mock.calls.at(-1)[0];
+		const toolbar = asMock(useToolbar).mock.calls.at(-1)[0];
 		const ids = toolbar.items.map((item: any) => item.id);
 		expect(ids).not.toContain("export");
 		expect(ids).not.toContain("sort");
@@ -842,15 +845,15 @@ describe("Table Widget", () => {
 	it("skips import when importData returns a falsy error", async () => {
 		const onImport = jest.fn();
 		renderTable({ onImport });
-		const toolbar = useToolbar.mock.calls.at(-1)[0];
+		const toolbar = asMock(useToolbar).mock.calls.at(-1)[0];
 		const importItem = toolbar.items.find((item: any) => item.id === "import");
-		importData.mockRejectedValueOnce(null);
+		asMock(importData).mockRejectedValueOnce(null);
 		await importItem.onClick();
 		expect(onImport).not.toHaveBeenCalled();
 	});
 
 	it("searches via sortable string keys when searchable is undefined", () => {
-		useSearch.mockReturnValue("codesearch");
+		asMock(useSearch).mockReturnValue("codesearch");
 		renderTable({
 			columns: [
 				{ id: "name", title: "Name" },
@@ -880,7 +883,7 @@ describe("Table Widget", () => {
 	});
 
 	it("shows phone sort and rows-per-page menus in list and table modes", () => {
-		useDeviceType.mockReturnValue("phone");
+		asMock(useDeviceType).mockReturnValue("phone");
 		const longData = Array.from({ length: 12 }, (_, i) => ({
 			id: i + 1,
 			name: `Item ${i + 1}`,
@@ -895,7 +898,7 @@ describe("Table Widget", () => {
 			},
 			{ viewMode: "list" },
 		);
-		let toolbar = useToolbar.mock.calls.at(-1)[0];
+		let toolbar = asMock(useToolbar).mock.calls.at(-1)[0];
 		expect(toolbar.items.map((item: any) => item.id)).toContain("sort");
 
 		renderTable(
@@ -906,7 +909,7 @@ describe("Table Widget", () => {
 			},
 			{ viewMode: "table" },
 		);
-		toolbar = useToolbar.mock.calls.at(-1)[0];
+		toolbar = asMock(useToolbar).mock.calls.at(-1)[0];
 		expect(toolbar.items.map((item: any) => item.id)).toContain("itemsPerPage");
 	});
 

@@ -42,9 +42,12 @@ describe("Content", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
 		jest.useFakeTimers();
-		useSize.mockReturnValue({ width: 800, height: 600 });
-		useParentParams.mockReturnValue({ group: "g", name: "n" });
-		MainStore.useState.mockReturnValue({ hash: "library", showSideBar: true });
+		asMock(useSize).mockReturnValue({ width: 800, height: 600 });
+		asMock(useParentParams).mockReturnValue({ group: "g", name: "n" });
+		asMock(MainStore.useState).mockReturnValue({
+			hash: "library",
+			showSideBar: true,
+		});
 	});
 
 	afterEach(() => {
@@ -52,14 +55,14 @@ describe("Content", () => {
 	});
 
 	it("returns null without active page", () => {
-		useActivePages.mockReturnValue([]);
+		asMock(useActivePages).mockReturnValue([]);
 		const { container } = render(<Content />);
 		expect(container.firstChild).toBeNull();
 	});
 
 	it("renders page component via ViewTransition", () => {
 		const Page = (props: any) => <div data-testid="page">{props.id}</div>;
-		useActivePages.mockReturnValue([
+		asMock(useActivePages).mockReturnValue([
 			{ id: "sessions", Component: Page, url: "sessions" },
 		]);
 		render(<Content />);
@@ -68,7 +71,7 @@ describe("Content", () => {
 	});
 
 	it("shows player when active page is player and keeps stable page identity", () => {
-		useActivePages.mockReturnValue([
+		asMock(useActivePages).mockReturnValue([
 			{ id: "player", url: "u1", group: "g", name: "n" },
 		]);
 		const { rerender } = render(<Content />);
@@ -77,7 +80,7 @@ describe("Content", () => {
 		});
 		expect(screen.getByTestId("player")).toHaveAttribute("data-show", "true");
 
-		useActivePages.mockReturnValue([
+		asMock(useActivePages).mockReturnValue([
 			{ id: "player", url: "u1", group: "g", name: "n" },
 		]);
 		rerender(<Content />);
@@ -88,7 +91,7 @@ describe("Content", () => {
 	});
 
 	it("updates player page when key params change", () => {
-		useActivePages.mockReturnValue([
+		asMock(useActivePages).mockReturnValue([
 			{ id: "player", url: "u1", group: "g", name: "n" },
 		]);
 		const { rerender } = render(<Content />);
@@ -96,10 +99,10 @@ describe("Content", () => {
 			jest.runAllTimers();
 		});
 
-		useActivePages.mockReturnValue([
+		asMock(useActivePages).mockReturnValue([
 			{ id: "player", url: "u2", group: "g2", name: "n2" },
 		]);
-		useParentParams.mockReturnValue({ group: "g2", name: "n2" });
+		asMock(useParentParams).mockReturnValue({ group: "g2", name: "n2" });
 		rerender(<Content />);
 		act(() => {
 			jest.runAllTimers();
@@ -108,7 +111,7 @@ describe("Content", () => {
 	});
 
 	it("hides page component for player-only active page without Component", () => {
-		useActivePages.mockReturnValue([{ id: "player", url: "u1" }]);
+		asMock(useActivePages).mockReturnValue([{ id: "player", url: "u1" }]);
 		render(<Content />);
 		act(() => {
 			jest.runAllTimers();
@@ -118,7 +121,9 @@ describe("Content", () => {
 
 	it("uses the page id as the transition key when url is missing", () => {
 		const Page = (props: any) => <div data-testid="page">{props.id}</div>;
-		useActivePages.mockReturnValue([{ id: "library", Component: Page }]);
+		asMock(useActivePages).mockReturnValue([
+			{ id: "library", Component: Page },
+		]);
 		render(<Content />);
 		expect(screen.getByTestId("view-transition")).toBeInTheDocument();
 	});

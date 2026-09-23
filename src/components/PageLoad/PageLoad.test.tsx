@@ -7,7 +7,7 @@ jest.mock("@widgets/Progress", () => () => <div data-testid="progress" />);
 
 describe("PageLoad Component", () => {
 	it("does not show progress initially", () => {
-		useTimeout.mockImplementation((callback: any) => {
+		asMock(useTimeout).mockImplementation((callback: any) => {
 			// Don't call callback yet
 		});
 		const { queryByTestId } = render(<PageLoad />);
@@ -16,7 +16,7 @@ describe("PageLoad Component", () => {
 
 	it("shows progress after timeout", () => {
 		let timeoutCallback: any;
-		useTimeout.mockImplementation((callback: any) => {
+		asMock(useTimeout).mockImplementation((callback: any) => {
 			timeoutCallback = callback;
 		});
 

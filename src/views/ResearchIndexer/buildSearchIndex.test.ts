@@ -2,18 +2,19 @@ import { LIBRARY_LOCAL_PATH } from "@sync/constants";
 import { makePath } from "@util/data/path";
 import { buildSearchIndex, INDEX_FILE, STOP_WORDS } from "./buildSearchIndex";
 
-function createMockStorage(files = {}) {
+function createMockStorage(files: Record<string, string> = {}) {
 	return {
+		_files: files,
 		exists: jest.fn(async (path) => Object.hasOwn(files, path)),
 		readFile: jest.fn(async (path) => {
 			if (!Object.hasOwn(files, path)) throw new Error(`missing ${path}`);
 			return files[path];
 		}),
-		writeFile: jest.fn(async (path, data) => {
+		writeFile: jest.fn(async (path: string, data: string) => {
 			files[path] = data;
 		}),
 		createFolderPath: jest.fn(async () => {}),
-		getListing: jest.fn(async () => []),
+		getListing: jest.fn(async (_path: string): Promise<any[]> => []),
 	};
 }
 
@@ -167,7 +168,7 @@ describe("buildSearchIndex", () => {
 			}),
 		});
 		let cancel = false;
-		storage.writeFile = jest.fn(async () => {
+		storage.writeFile = jest.fn(async (_path: string, _data: string) => {
 			cancel = true;
 		});
 
@@ -202,7 +203,7 @@ describe("buildSearchIndex", () => {
 				],
 			}),
 		});
-		storage.getListing = jest.fn(async (path) => {
+		storage.getListing = jest.fn(async (path: string): Promise<any[]> => {
 			if (path.endsWith("/study") || path.endsWith("study")) {
 				return [{ name: "2024.json" }];
 			}
@@ -408,7 +409,7 @@ describe("buildSearchIndex", () => {
 				message: expect.stringContaining("Failed to index file"),
 			}),
 		);
-		warnSpy.mockRestore();
+		asMock(warnSpy).mockRestore();
 	});
 
 	it("skips short tokens and indexes numeric tokens", async () => {
@@ -472,7 +473,7 @@ describe("buildSearchIndex", () => {
 				],
 			}),
 		});
-		storage.getListing = jest.fn(async (path) => {
+		storage.getListing = jest.fn(async (path: string): Promise<any[]> => {
 			if (path.endsWith("/study") || path.endsWith("study")) {
 				return [{ name: "2024.json" }];
 			}

@@ -21,6 +21,7 @@ jest.mock("@util/domain/sessions", () => ({
 }));
 jest.mock("@components/Search");
 jest.mock("@util/browser/store", () => ({
+	...jest.requireActual("@util/browser/store"),
 	useLocalStorage: jest.fn(),
 }));
 jest.mock("@sync/syncState", () => {
@@ -76,9 +77,9 @@ jest.mock(
 describe("Schedule View", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
-		useDeviceType.mockReturnValue("desktop");
-		Cookies.get.mockReturnValue("test");
-		useTranslations.mockReturnValue({
+		asMock(useDeviceType).mockReturnValue("desktop");
+		asMock(Cookies.get).mockReturnValue("test");
+		asMock(useTranslations).mockReturnValue({
 			LOADING: "Loading",
 			YEAR_VIEW: "Year",
 			MONTH_VIEW: "Month",
@@ -89,18 +90,18 @@ describe("Schedule View", () => {
 			FILTER: "Filter",
 			REQUIRE_SIGNIN: "Sign in required",
 		});
-		useSessions.mockReturnValue([[], false]);
-		useSearch.mockReturnValue("");
+		asMock(useSessions).mockReturnValue([[], false]);
+		asMock(useSearch).mockReturnValue("");
 		ScheduleStore.update((s) => {
 			s.viewMode = "week";
 			s.date = new Date("2024-06-10");
 			s.lastViewMode = null;
 		});
-		SyncActiveStore.useState.mockImplementation((selector: any) => {
+		asMock(SyncActiveStore.useState).mockImplementation((selector: any) => {
 			const state = { needsSessionReload: false, busy: false };
 			return typeof selector === "function" ? selector(state) : state;
 		});
-		SessionsStore.useState.mockReturnValue({ showFilterDialog: false });
+		asMock(SessionsStore.useState).mockReturnValue({ showFilterDialog: false });
 	});
 
 	it("renders status bar and filter bar", () => {
@@ -124,7 +125,7 @@ describe("Schedule View", () => {
 	});
 
 	it("renders loading message when sessions are loading", () => {
-		useSessions.mockReturnValue([[], true]);
+		asMock(useSessions).mockReturnValue([[], true]);
 		render(<SchedulePage />);
 		expect(screen.getByTestId("message")).toBeInTheDocument();
 	});
@@ -138,8 +139,8 @@ describe("Schedule View", () => {
 		["week", "week-view"],
 	])("switches to %s view from toolbar items", (mode, testId) => {
 		render(<SchedulePage />);
-		const viewGroup = useToolbar.mock.calls
-			.at(-1)[0]
+		const viewGroup = asMock(useToolbar)
+			.mock.calls.at(-1)[0]
 			.items.find((i: any) => i.id === "viewGroup");
 		const { getByLabelText } = render(viewGroup.element);
 		const labels = {
@@ -155,8 +156,8 @@ describe("Schedule View", () => {
 	});
 
 	it("filters sessions by search name and tags", () => {
-		useSearch.mockReturnValue("alpha");
-		useSessions.mockReturnValue([
+		asMock(useSearch).mockReturnValue("alpha");
+		asMock(useSessions).mockReturnValue([
 			[
 				{ name: "Alpha Talk", tags: [] },
 				{ name: "Other", tags: ["alpha-tag"] },
@@ -170,18 +171,18 @@ describe("Schedule View", () => {
 
 	it("toggles filter dialog from toolbar", () => {
 		render(<SchedulePage />);
-		const filterItem = useToolbar.mock.calls
-			.at(-1)[0]
+		const filterItem = asMock(useToolbar)
+			.mock.calls.at(-1)[0]
 			.items.find((i: any) => i.id === "filter");
 		filterItem.onClick();
 		expect(SessionsStore.update).toHaveBeenCalled();
 		const state = { showFilterDialog: false, filterBarManuallyEnabled: false };
-		SessionsStore.update.mock.calls.at(-1)[0](state);
+		asMock(SessionsStore.update).mock.calls.at(-1)[0](state);
 		expect(state.showFilterDialog).toBe(true);
 	});
 
 	it("reloads sessions after sync completes", () => {
-		SyncActiveStore.useState.mockImplementation((selector: any) => {
+		asMock(SyncActiveStore.useState).mockImplementation((selector: any) => {
 			const state = { needsSessionReload: true, busy: false };
 			return typeof selector === "function" ? selector(state) : state;
 		});
@@ -191,13 +192,13 @@ describe("Schedule View", () => {
 	});
 
 	it("sets signin mode when not signed in", () => {
-		Cookies.get.mockReturnValue(null);
+		asMock(Cookies.get).mockReturnValue(null);
 		render(<SchedulePage />);
 		expect(ScheduleStore.getRawState().mode).toBe("signin");
 	});
 
 	it("places filter bar on mobile and omits view group", () => {
-		useDeviceType.mockReturnValue("phone");
+		asMock(useDeviceType).mockReturnValue("phone");
 		ScheduleStore.update((s) => {
 			s.viewMode = "tracks";
 		});
@@ -206,13 +207,13 @@ describe("Schedule View", () => {
 			"data-hide-years",
 			"false",
 		);
-		const items = useToolbar.mock.calls.at(-1)[0].items;
+		const items = asMock(useToolbar).mock.calls.at(-1)[0].items;
 		expect(items.find((i: any) => i.id === "viewGroup")).toBeUndefined();
 		expect(items.find((i: any) => i.id === "filter").location).toBe("mobile");
 	});
 
 	it("clears signin mode when signed in", () => {
-		Cookies.get.mockReturnValue("ok");
+		asMock(Cookies.get).mockReturnValue("ok");
 		render(<SchedulePage />);
 		expect(ScheduleStore.getRawState().mode).toBe("");
 	});

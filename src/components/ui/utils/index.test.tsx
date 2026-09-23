@@ -33,12 +33,15 @@ describe("ui utils", () => {
 	it("Popper portals children when open", () => {
 		const anchor = document.createElement("div");
 		anchor.getBoundingClientRect = () => ({
+			x: 0,
+			y: 0,
 			top: 0,
 			left: 0,
 			bottom: 10,
 			right: 10,
 			height: 10,
 			width: 10,
+			toJSON: () => ({}),
 		});
 		document.body.appendChild(anchor);
 

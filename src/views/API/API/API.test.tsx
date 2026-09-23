@@ -31,8 +31,8 @@ describe("API View", () => {
 
 	beforeEach(() => {
 		jest.clearAllMocks();
-		useTranslations.mockReturnValue(mockTranslations);
-		Cookies.get.mockReturnValue(null);
+		asMock(useTranslations).mockReturnValue(mockTranslations);
+		asMock(Cookies.get).mockReturnValue(null);
 	});
 
 	it("renders nothing if not signed in", () => {
@@ -41,24 +41,24 @@ describe("API View", () => {
 	});
 
 	it("renders loading indicator while fetching user data", () => {
-		Cookies.get.mockImplementation((key: any) => {
+		asMock(Cookies.get).mockImplementation((key: any) => {
 			if (key === "id") return "testuser";
 			if (key === "hash") return "testhash";
 			return null;
 		});
-		fetchJSON.mockReturnValue(new Promise(() => {})); // Never resolves
+		asMock(fetchJSON).mockReturnValue(new Promise(() => {})); // Never resolves
 
 		const { getByTestId } = render(<API />);
 		expect(getByTestId("page-load")).toBeInTheDocument();
 	});
 
 	it("renders access denied state for visitor role", async () => {
-		Cookies.get.mockImplementation((key: any) => {
+		asMock(Cookies.get).mockImplementation((key: any) => {
 			if (key === "id") return "visitoruser";
 			if (key === "hash") return "testhash";
 			return null;
 		});
-		fetchJSON.mockResolvedValue({
+		asMock(fetchJSON).mockResolvedValue({
 			id: "visitoruser",
 			role: "visitor",
 		});
@@ -70,12 +70,12 @@ describe("API View", () => {
 	});
 
 	it("renders API documentation when signed in and user has rssToken", async () => {
-		Cookies.get.mockImplementation((key: any) => {
+		asMock(Cookies.get).mockImplementation((key: any) => {
 			if (key === "id") return "testuser";
 			if (key === "hash") return "testhash";
 			return null;
 		});
-		fetchJSON.mockResolvedValue({
+		asMock(fetchJSON).mockResolvedValue({
 			id: "testuser",
 			rssToken: "token123",
 			role: "user",
@@ -93,12 +93,12 @@ describe("API View", () => {
 	});
 
 	it("copies API URL to clipboard when Copy URL is clicked", async () => {
-		Cookies.get.mockImplementation((key: any) => {
+		asMock(Cookies.get).mockImplementation((key: any) => {
 			if (key === "id") return "testuser";
 			if (key === "hash") return "testhash";
 			return null;
 		});
-		fetchJSON.mockResolvedValue({
+		asMock(fetchJSON).mockResolvedValue({
 			id: "testuser",
 			rssToken: "token123",
 			role: "user",
@@ -118,12 +118,12 @@ describe("API View", () => {
 	});
 
 	it("switches tabs when tab buttons are clicked", async () => {
-		Cookies.get.mockImplementation((key: any) => {
+		asMock(Cookies.get).mockImplementation((key: any) => {
 			if (key === "id") return "testuser";
 			if (key === "hash") return "testhash";
 			return null;
 		});
-		fetchJSON.mockResolvedValue({
+		asMock(fetchJSON).mockResolvedValue({
 			id: "testuser",
 			rssToken: "token123",
 			role: "user",
@@ -151,12 +151,12 @@ describe("API View", () => {
 	});
 
 	it("jumps to sessions API sections without changing the route hash", async () => {
-		Cookies.get.mockImplementation((key: any) => {
+		asMock(Cookies.get).mockImplementation((key: any) => {
 			if (key === "id") return "testuser";
 			if (key === "hash") return "testhash";
 			return null;
 		});
-		fetchJSON.mockResolvedValue({
+		asMock(fetchJSON).mockResolvedValue({
 			id: "testuser",
 			rssToken: "token123",
 			role: "user",
@@ -185,12 +185,12 @@ describe("API View", () => {
 	});
 
 	it("denies access when rssToken is missing", async () => {
-		Cookies.get.mockImplementation((key: any) => {
+		asMock(Cookies.get).mockImplementation((key: any) => {
 			if (key === "id") return "testuser";
 			if (key === "hash") return "testhash";
 			return null;
 		});
-		fetchJSON.mockResolvedValue({
+		asMock(fetchJSON).mockResolvedValue({
 			id: "testuser",
 			role: "user",
 		});
@@ -202,12 +202,12 @@ describe("API View", () => {
 	});
 
 	it("keeps loading when user fetch fails", async () => {
-		Cookies.get.mockImplementation((key: any) => {
+		asMock(Cookies.get).mockImplementation((key: any) => {
 			if (key === "id") return "testuser";
 			if (key === "hash") return "testhash";
 			return null;
 		});
-		fetchJSON.mockRejectedValue(new Error("network"));
+		asMock(fetchJSON).mockRejectedValue(new Error("network"));
 
 		const { getByTestId } = render(<API />);
 		expect(getByTestId("page-load")).toBeInTheDocument();
@@ -218,12 +218,12 @@ describe("API View", () => {
 	});
 
 	it("allows admin role access", async () => {
-		Cookies.get.mockImplementation((key: any) => {
+		asMock(Cookies.get).mockImplementation((key: any) => {
 			if (key === "id") return "admin";
 			if (key === "hash") return "testhash";
 			return null;
 		});
-		fetchJSON.mockResolvedValue({
+		asMock(fetchJSON).mockResolvedValue({
 			id: "admin",
 			rssToken: "tok",
 			role: "admin",
@@ -236,12 +236,12 @@ describe("API View", () => {
 	});
 
 	it("denies access when user fetch returns err", async () => {
-		Cookies.get.mockImplementation((key: any) => {
+		asMock(Cookies.get).mockImplementation((key: any) => {
 			if (key === "id") return "testuser";
 			if (key === "hash") return "testhash";
 			return null;
 		});
-		fetchJSON.mockResolvedValue({ err: "not found" });
+		asMock(fetchJSON).mockResolvedValue({ err: "not found" });
 
 		const { getByText } = render(<API />);
 		await waitFor(() => {
@@ -250,12 +250,12 @@ describe("API View", () => {
 	});
 
 	it("renders query parameters table and JSON schema sections", async () => {
-		Cookies.get.mockImplementation((key: any) => {
+		asMock(Cookies.get).mockImplementation((key: any) => {
 			if (key === "id") return "testuser";
 			if (key === "hash") return "testhash";
 			return null;
 		});
-		fetchJSON.mockResolvedValue({
+		asMock(fetchJSON).mockResolvedValue({
 			id: "testuser",
 			rssToken: "token123",
 			role: "user",
@@ -272,12 +272,12 @@ describe("API View", () => {
 	});
 
 	it("copies code example when Copy Code is clicked", async () => {
-		Cookies.get.mockImplementation((key: any) => {
+		asMock(Cookies.get).mockImplementation((key: any) => {
 			if (key === "id") return "testuser";
 			if (key === "hash") return "testhash";
 			return null;
 		});
-		fetchJSON.mockResolvedValue({
+		asMock(fetchJSON).mockResolvedValue({
 			id: "testuser",
 			rssToken: "token123",
 			role: "user",
@@ -299,17 +299,17 @@ describe("API View", () => {
 
 	it("shows copied feedback after copying URL then resets", async () => {
 		jest.useFakeTimers();
-		Cookies.get.mockImplementation((key: any) => {
+		asMock(Cookies.get).mockImplementation((key: any) => {
 			if (key === "id") return "testuser";
 			if (key === "hash") return "testhash";
 			return null;
 		});
-		fetchJSON.mockResolvedValue({
+		asMock(fetchJSON).mockResolvedValue({
 			id: "testuser",
 			rssToken: "token123",
 			role: "user",
 		});
-		useTranslations.mockReturnValue({
+		asMock(useTranslations).mockReturnValue({
 			...mockTranslations,
 			API_COPIED: "Copied!",
 			API_COPY_CODE: "Copy Code",
@@ -335,12 +335,12 @@ describe("API View", () => {
 	});
 
 	it("pins section nav on scroll and updates active section", async () => {
-		Cookies.get.mockImplementation((key: any) => {
+		asMock(Cookies.get).mockImplementation((key: any) => {
 			if (key === "id") return "testuser";
 			if (key === "hash") return "testhash";
 			return null;
 		});
-		fetchJSON.mockResolvedValue({
+		asMock(fetchJSON).mockResolvedValue({
 			id: "testuser",
 			rssToken: "token123",
 			role: "user",
@@ -350,18 +350,50 @@ describe("API View", () => {
 			addEventListener: jest.fn(),
 			removeEventListener: jest.fn(),
 		};
-		jest.spyOn(document, "querySelector").mockReturnValue(scrollParent);
+		jest
+			.spyOn(document, "querySelector")
+			.mockReturnValue(scrollParent as unknown as Element);
 
 		const originalGetBoundingClientRect =
 			HTMLElement.prototype.getBoundingClientRect;
 		HTMLElement.prototype.getBoundingClientRect = jest.fn(function () {
 			if (this.id === "api-sessions-parameters") {
-				return { top: 90, bottom: 200, left: 0, width: 400, height: 40 };
+				return {
+					x: 0,
+					y: 90,
+					top: 90,
+					bottom: 200,
+					left: 0,
+					right: 400,
+					width: 400,
+					height: 40,
+					toJSON: () => ({}),
+				};
 			}
 			if (this.id === "api-sessions-endpoint") {
-				return { top: 200, bottom: 300, left: 0, width: 400, height: 40 };
+				return {
+					x: 0,
+					y: 200,
+					top: 200,
+					bottom: 300,
+					left: 0,
+					right: 400,
+					width: 400,
+					height: 40,
+					toJSON: () => ({}),
+				};
 			}
-			return { top: 0, bottom: 50, left: 10, width: 300, height: 40 };
+			return {
+				x: 10,
+				y: 0,
+				top: 0,
+				bottom: 50,
+				left: 10,
+				right: 310,
+				width: 300,
+				height: 40,
+				toJSON: () => ({}),
+			};
 		});
 
 		global.ResizeObserver = jest.fn().mockImplementation(() => ({
@@ -387,16 +419,16 @@ describe("API View", () => {
 		fireEvent(window, new Event("resize"));
 
 		HTMLElement.prototype.getBoundingClientRect = originalGetBoundingClientRect;
-		document.querySelector.mockRestore();
+		asMock(document.querySelector).mockRestore();
 	});
 
 	it("renders fixed section nav in a portal when pinned", async () => {
-		Cookies.get.mockImplementation((key: any) => {
+		asMock(Cookies.get).mockImplementation((key: any) => {
 			if (key === "id") return "testuser";
 			if (key === "hash") return "testhash";
 			return null;
 		});
-		fetchJSON.mockResolvedValue({
+		asMock(fetchJSON).mockResolvedValue({
 			id: "testuser",
 			rssToken: "token123",
 			role: "user",
@@ -406,12 +438,24 @@ describe("API View", () => {
 			addEventListener: jest.fn(),
 			removeEventListener: jest.fn(),
 		};
-		jest.spyOn(document, "querySelector").mockReturnValue(scrollParent);
+		jest
+			.spyOn(document, "querySelector")
+			.mockReturnValue(scrollParent as unknown as Element);
 
 		const originalGetBoundingClientRect =
 			HTMLElement.prototype.getBoundingClientRect;
 		HTMLElement.prototype.getBoundingClientRect = jest.fn(function () {
-			return { top: 0, bottom: 48, left: 12, width: 320, height: 48 };
+			return {
+				x: 12,
+				y: 0,
+				top: 0,
+				bottom: 48,
+				left: 12,
+				right: 332,
+				width: 320,
+				height: 48,
+				toJSON: () => ({}),
+			};
 		});
 
 		global.ResizeObserver = jest.fn().mockImplementation(() => ({
@@ -434,22 +478,22 @@ describe("API View", () => {
 		});
 
 		HTMLElement.prototype.getBoundingClientRect = originalGetBoundingClientRect;
-		document.querySelector.mockRestore();
+		asMock(document.querySelector).mockRestore();
 	});
 
 	it("shows copied feedback after copying code", async () => {
 		jest.useFakeTimers();
-		Cookies.get.mockImplementation((key: any) => {
+		asMock(Cookies.get).mockImplementation((key: any) => {
 			if (key === "id") return "testuser";
 			if (key === "hash") return "testhash";
 			return null;
 		});
-		fetchJSON.mockResolvedValue({
+		asMock(fetchJSON).mockResolvedValue({
 			id: "testuser",
 			rssToken: "token123",
 			role: "user",
 		});
-		useTranslations.mockReturnValue({
+		asMock(useTranslations).mockReturnValue({
 			...mockTranslations,
 			API_COPY_CODE: "Copy Code",
 			API_COPIED_CODE: "Copied Code!",

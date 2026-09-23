@@ -64,7 +64,7 @@ jest.mock("./utils", () => ({
 }));
 
 function file(name: any, path: any) {
-	return { name, path };
+	return { id: path, name, type: "file" as const, path };
 }
 
 describe("updateGroupProcess", () => {
@@ -77,18 +77,18 @@ describe("updateGroupProcess", () => {
 			s.needsSessionReload = false;
 		});
 
-		storage.exists.mockResolvedValue(false);
-		storage.readFile.mockImplementation(async (path: any) => {
+		asMock(storage.exists).mockResolvedValue(false);
+		asMock(storage.readFile).mockImplementation(async (path: any) => {
 			if (path.endsWith(".duration")) return "123";
 			if (path.endsWith(".md")) return "Summary from DigitalOcean";
 			if (path.endsWith(".tags")) return JSON.stringify(["ai", "sync"]);
 			return "";
 		});
-		loadTags.mockResolvedValue({});
-		loadDurations.mockResolvedValue({});
-		loadSummaries.mockResolvedValue({});
-		loadTranscriptions.mockResolvedValue({});
-		fetchSessionMetadata.mockResolvedValue({
+		asMock(loadTags).mockResolvedValue({});
+		asMock(loadDurations).mockResolvedValue({});
+		asMock(loadSummaries).mockResolvedValue({});
+		asMock(loadTranscriptions).mockResolvedValue({});
+		asMock(fetchSessionMetadata).mockResolvedValue({
 			items: [
 				file(
 					"2024-05-05 Test Session.duration",
@@ -121,7 +121,7 @@ describe("updateGroupProcess", () => {
 			transcriptions: {},
 		});
 
-		getListing.mockImplementation(async (path: any) => {
+		asMock(getListing).mockImplementation(async (path: any) => {
 			if (path === "wasabi/test") {
 				return [{ name: "2024", type: "dir", path: "wasabi/test/2024" }];
 			}
@@ -168,7 +168,7 @@ describe("updateGroupProcess", () => {
 			return [];
 		});
 
-		updateYearSync.mockResolvedValue({
+		asMock(updateYearSync).mockResolvedValue({
 			counter: 0,
 			newCount: 0,
 			newSessions: [],
@@ -186,7 +186,7 @@ describe("updateGroupProcess", () => {
 			expect.any(Boolean),
 		);
 		expect(updateYearSync).toHaveBeenCalledTimes(1);
-		const [, year, sessions] = updateYearSync.mock.calls[0];
+		const [, year, sessions] = asMock(updateYearSync).mock.calls[0];
 		expect(year).toBe("2024");
 		expect(sessions).toHaveLength(1);
 
@@ -211,13 +211,17 @@ describe("updateGroupProcess", () => {
 	});
 
 	it("falls back to legacy metadata loaders when aggregated metadata fails", async () => {
-		fetchSessionMetadata.mockRejectedValueOnce(new Error("backend busy"));
-		loadTags.mockResolvedValue({ "2024-05-05 Test Session": ["legacy"] });
-		loadDurations.mockResolvedValue({ "2024-05-05 Test Session": 456 });
-		loadSummaries.mockResolvedValue({
+		asMock(fetchSessionMetadata).mockRejectedValueOnce(
+			new Error("backend busy"),
+		);
+		asMock(loadTags).mockResolvedValue({
+			"2024-05-05 Test Session": ["legacy"],
+		});
+		asMock(loadDurations).mockResolvedValue({ "2024-05-05 Test Session": 456 });
+		asMock(loadSummaries).mockResolvedValue({
 			"2024-05-05 Test Session": "Legacy summary",
 		});
-		loadTranscriptions.mockResolvedValue({
+		asMock(loadTranscriptions).mockResolvedValue({
 			"2024-05-05 Test Session": true,
 		});
 
@@ -231,7 +235,7 @@ describe("updateGroupProcess", () => {
 			expect.stringContaining("Aggregated metadata fetch failed"),
 			expect.any(Error),
 		);
-		const [, , sessions] = updateYearSync.mock.calls[0];
+		const [, , sessions] = asMock(updateYearSync).mock.calls[0];
 		expect(sessions[0].tags).toEqual(["legacy"]);
 		expect(sessions[0].duration).toBe(456);
 		expect(sessions[0].summaryText).toBe("Legacy summary");
@@ -239,7 +243,7 @@ describe("updateGroupProcess", () => {
 	});
 
 	it("skips legacy metadata fallback after a metadata timeout", async () => {
-		fetchSessionMetadata.mockRejectedValueOnce(
+		asMock(fetchSessionMetadata).mockRejectedValueOnce(
 			new Error("Timed out loading session metadata for test/2024"),
 		);
 
@@ -256,7 +260,7 @@ describe("updateGroupProcess", () => {
 
 	it("uses cached metadata for non-forced updates without calling the aggregated endpoint", async () => {
 		const currentYear = String(new Date().getFullYear());
-		getListing.mockImplementation(async (path: any) => {
+		asMock(getListing).mockImplementation(async (path: any) => {
 			if (path === "wasabi/test") {
 				return [
 					{
@@ -277,10 +281,10 @@ describe("updateGroupProcess", () => {
 			return [];
 		});
 		const localYearPath = `/local/sync/test/${currentYear}.json`;
-		storage.exists.mockImplementation(
+		asMock(storage.exists).mockImplementation(
 			async (path: any) => path === localYearPath,
 		);
-		storage.readFile.mockImplementation(async (path: any) => {
+		asMock(storage.readFile).mockImplementation(async (path: any) => {
 			if (path.includes(".group-update-cache")) {
 				return "";
 			}
@@ -310,7 +314,7 @@ describe("updateGroupProcess", () => {
 		expect(loadSummaries).not.toHaveBeenCalled();
 		expect(loadTranscriptions).not.toHaveBeenCalled();
 
-		const [, year, sessions] = updateYearSync.mock.calls[0];
+		const [, year, sessions] = asMock(updateYearSync).mock.calls[0];
 		expect(year).toBe(currentYear);
 		expect(sessions[0].tags).toEqual(["cached"]);
 		expect(sessions[0].duration).toBe(321);
@@ -333,7 +337,7 @@ describe("updateGroupProcess", () => {
 		);
 		const localYearPath = `/local/sync/test/${currentYear}.json`;
 
-		getListing.mockImplementation(async (path: any) => {
+		asMock(getListing).mockImplementation(async (path: any) => {
 			if (path === "wasabi/test") {
 				return [
 					{
@@ -352,10 +356,10 @@ describe("updateGroupProcess", () => {
 			return [];
 		});
 
-		storage.exists.mockImplementation(
+		asMock(storage.exists).mockImplementation(
 			async (path: any) => path === localYearPath,
 		);
-		storage.readFile.mockImplementation(async (path: any) => {
+		asMock(storage.readFile).mockImplementation(async (path: any) => {
 			if (path.includes(`.group-update-cache/test/${currentYear}.json`)) {
 				return JSON.stringify({
 					fingerprint: yearFingerprint,
@@ -383,14 +387,14 @@ describe("updateGroupProcess", () => {
 			}
 			return "";
 		});
-		fetchSessionMetadata.mockResolvedValue({
+		asMock(fetchSessionMetadata).mockResolvedValue({
 			items: [],
 			tags: {},
 			durations: {},
 			summaries: {},
 			transcriptions: {},
 		});
-		updateYearSync.mockResolvedValue({
+		asMock(updateYearSync).mockResolvedValue({
 			counter: 1,
 			newCount: 1,
 			newSessions: [{ id: newId }],
@@ -409,7 +413,7 @@ describe("updateGroupProcess", () => {
 		// Fingerprint matched — reuse cached metadata instead of refetching.
 		expect(fetchSessionMetadata).not.toHaveBeenCalled();
 		expect(updateYearSync).toHaveBeenCalledTimes(1);
-		const [, year, sessions] = updateYearSync.mock.calls[0];
+		const [, year, sessions] = asMock(updateYearSync).mock.calls[0];
 		expect(year).toBe(currentYear);
 		expect(sessions.map((session: any) => session.id)).toEqual(
 			expect.arrayContaining([existingId, newId]),
@@ -423,14 +427,18 @@ describe("updateGroupProcess", () => {
 		const newId = `${currentYear}-07-23 Conclusion`;
 		const yearItems = [
 			{
+				id: `wasabi/test/${currentYear}/${existingId}.mp4`,
+				type: "file" as const,
 				name: `${existingId}.mp4`,
 				path: `wasabi/test/${currentYear}/${existingId}.mp4`,
-				stat: { type: "file", size: 10, mtimeMs: 1 },
+				stat: { type: "file" as const, size: 10, mtimeMs: 1 },
 			},
 			{
+				id: `wasabi/test/${currentYear}/${newId}.mp4`,
+				type: "file" as const,
 				name: `${newId}.mp4`,
 				path: `wasabi/test/${currentYear}/${newId}.mp4`,
-				stat: { type: "file", size: 20, mtimeMs: 2 },
+				stat: { type: "file" as const, size: 20, mtimeMs: 2 },
 			},
 		];
 		const metadataFingerprint = [null, null, null, null];
@@ -440,7 +448,7 @@ describe("updateGroupProcess", () => {
 		);
 		const localYearPath = `/local/sync/test/${currentYear}.json`;
 
-		getListing.mockImplementation(async (path: any) => {
+		asMock(getListing).mockImplementation(async (path: any) => {
 			if (path === "wasabi/test") {
 				return [
 					{
@@ -455,10 +463,10 @@ describe("updateGroupProcess", () => {
 			}
 			return [];
 		});
-		storage.exists.mockImplementation(
+		asMock(storage.exists).mockImplementation(
 			async (path: any) => path === localYearPath,
 		);
-		storage.readFile.mockImplementation(async (path: any) => {
+		asMock(storage.readFile).mockImplementation(async (path: any) => {
 			if (path.includes(`.group-update-cache/test/${currentYear}.json`)) {
 				return JSON.stringify({
 					fingerprint: staleFingerprint,
@@ -498,14 +506,14 @@ describe("updateGroupProcess", () => {
 			}
 			return "";
 		});
-		fetchSessionMetadata.mockResolvedValue({
+		asMock(fetchSessionMetadata).mockResolvedValue({
 			items: [],
 			tags: {},
 			durations: {},
 			summaries: {},
 			transcriptions: {},
 		});
-		updateYearSync.mockResolvedValue({
+		asMock(updateYearSync).mockResolvedValue({
 			counter: 1,
 			newCount: 1,
 			newSessions: [{ id: newId }],
@@ -518,7 +526,7 @@ describe("updateGroupProcess", () => {
 			"info",
 		);
 		expect(updateYearSync).toHaveBeenCalledTimes(1);
-		const [, , sessions] = updateYearSync.mock.calls[0];
+		const [, , sessions] = asMock(updateYearSync).mock.calls[0];
 		expect(sessions.map((session: any) => session.id).sort()).toEqual(
 			[existingId, newId].sort(),
 		);
@@ -540,7 +548,7 @@ describe("updateGroupProcess", () => {
 			{ name: "2024.zip", type: "", size: 100, mtimeMs: 1 },
 		];
 
-		getListing.mockImplementation(async (path: any) => {
+		asMock(getListing).mockImplementation(async (path: any) => {
 			if (path === "wasabi/test") {
 				return [{ name: "2024", type: "dir", path: "wasabi/test/2024" }];
 			}
@@ -562,7 +570,7 @@ describe("updateGroupProcess", () => {
 			return [];
 		});
 
-		storage.readFile.mockImplementation(async (path: any) => {
+		asMock(storage.readFile).mockImplementation(async (path: any) => {
 			if (path.includes(".group-update-cache/test/2024.json")) {
 				return JSON.stringify({
 					fingerprint: "stale-combined-fingerprint",
@@ -587,7 +595,7 @@ describe("updateGroupProcess", () => {
 		await updateGroupProcess("test", true, false);
 
 		expect(fetchSessionMetadata).not.toHaveBeenCalled();
-		const [, , sessions] = updateYearSync.mock.calls[0];
+		const [, , sessions] = asMock(updateYearSync).mock.calls[0];
 		expect(sessions[0].tags).toEqual(["cached-tag"]);
 		expect(sessions[0].duration).toBe(999);
 		expect(sessions[0].summaryText).toBe("Cached summary");
@@ -601,7 +609,7 @@ describe("updateGroupProcess", () => {
 			{ name: "2024.zip", type: "", size: 100, mtimeMs: 1 },
 		];
 
-		getListing.mockImplementation(async (path: any) => {
+		asMock(getListing).mockImplementation(async (path: any) => {
 			if (path === "wasabi/test") {
 				return [{ name: "2024", type: "dir", path: "wasabi/test/2024" }];
 			}
@@ -624,7 +632,7 @@ describe("updateGroupProcess", () => {
 			return [];
 		});
 
-		storage.readFile.mockImplementation(async (path: any) => {
+		asMock(storage.readFile).mockImplementation(async (path: any) => {
 			if (path.includes(".group-update-cache/test/2024.json")) {
 				return JSON.stringify({
 					fingerprint: "stale-combined-fingerprint",
@@ -640,7 +648,7 @@ describe("updateGroupProcess", () => {
 			}
 			return "";
 		});
-		fetchSessionMetadata.mockResolvedValueOnce({
+		asMock(fetchSessionMetadata).mockResolvedValueOnce({
 			items: [],
 			tags: { "2024-05-05 Test Session": ["fresh"] },
 			durations: { "2024-05-05 Test Session": 123 },
@@ -656,13 +664,13 @@ describe("updateGroupProcess", () => {
 			expect.any(Array),
 			true,
 		);
-		const [, , sessions] = updateYearSync.mock.calls[0];
+		const [, , sessions] = asMock(updateYearSync).mock.calls[0];
 		expect(sessions[0].tags).toEqual(["fresh"]);
 		expect(sessions[0].duration).toBe(123);
 	});
 
 	it("fetches remote metadata when metadata fingerprint changes", async () => {
-		getListing.mockImplementation(async (path: any) => {
+		asMock(getListing).mockImplementation(async (path: any) => {
 			if (path === "wasabi/test") {
 				return [{ name: "2024", type: "dir", path: "wasabi/test/2024" }];
 			}
@@ -680,7 +688,7 @@ describe("updateGroupProcess", () => {
 			return [];
 		});
 
-		storage.readFile.mockImplementation(async (path: any) => {
+		asMock(storage.readFile).mockImplementation(async (path: any) => {
 			if (path.includes(".group-update-cache/test/2024.json")) {
 				return JSON.stringify({
 					fingerprint: "old",
@@ -719,7 +727,7 @@ describe("updateGroupProcess", () => {
 		const recentId = `${recentDate} Recent Session`;
 		const localYearPath = `/local/sync/test/${currentYear}.json`;
 
-		getListing.mockImplementation(async (path: any) => {
+		asMock(getListing).mockImplementation(async (path: any) => {
 			if (path === "wasabi/test") {
 				return [
 					{
@@ -740,15 +748,15 @@ describe("updateGroupProcess", () => {
 			}
 			return [];
 		});
-		storage.exists.mockImplementation(
+		asMock(storage.exists).mockImplementation(
 			async (path: any) => path === localYearPath,
 		);
-		storage.readFile.mockImplementation(async (path: any) => {
+		asMock(storage.readFile).mockImplementation(async (path: any) => {
 			if (path === localYearPath)
 				return JSON.stringify({ sessions: [oldSession] });
 			return "";
 		});
-		fetchSessionMetadata.mockResolvedValue({
+		asMock(fetchSessionMetadata).mockResolvedValue({
 			items: [],
 			tags: { [recentId]: ["recent"] },
 			durations: {},
@@ -758,7 +766,7 @@ describe("updateGroupProcess", () => {
 
 		await updateGroupProcess("test", false, true, false, false, null, 30);
 
-		const [, year, sessions] = updateYearSync.mock.calls[0];
+		const [, year, sessions] = asMock(updateYearSync).mock.calls[0];
 		expect(year).toBe(currentYear);
 		expect(sessions).toEqual(
 			expect.arrayContaining([
@@ -776,10 +784,10 @@ describe("updateGroupProcess", () => {
 			group: "test",
 			year: "2022",
 		};
-		storage.exists.mockImplementation(async (path: any) =>
+		asMock(storage.exists).mockImplementation(async (path: any) =>
 			path.endsWith("/local/sync/bundle.json"),
 		);
-		storage.readFile.mockImplementation(async (path: any) => {
+		asMock(storage.readFile).mockImplementation(async (path: any) => {
 			if (path.endsWith("/local/sync/bundle.json")) {
 				return JSON.stringify({ sessions: [oldSession] });
 			}
@@ -810,10 +818,10 @@ describe("updateGroupProcess", () => {
 			group: "test",
 			year: "2022",
 		};
-		storage.exists.mockImplementation(async (path: any) =>
+		asMock(storage.exists).mockImplementation(async (path: any) =>
 			path.endsWith("/local/sync/test.json"),
 		);
-		storage.readFile.mockImplementation(async (path: any) => {
+		asMock(storage.readFile).mockImplementation(async (path: any) => {
 			if (path.endsWith("/local/sync/test.json")) {
 				return JSON.stringify({ sessions: [oldSession] });
 			}
@@ -826,7 +834,7 @@ describe("updateGroupProcess", () => {
 			expect.stringMatching(/\/local\/sync\/test\.json$/),
 			expect.any(String),
 		);
-		const [, mergedJson] = writeCompressedFile.mock.calls[0];
+		const [, mergedJson] = asMock(writeCompressedFile).mock.calls[0];
 		const mergedData = JSON.parse(mergedJson);
 		expect(mergedData.sessions).toEqual(
 			expect.arrayContaining([
@@ -854,16 +862,16 @@ describe("updateGroupProcess", () => {
 			group: "test",
 			year: "2022",
 		};
-		storage.exists.mockImplementation(async (path: any) =>
+		asMock(storage.exists).mockImplementation(async (path: any) =>
 			path.endsWith("/local/sync/bundle.json"),
 		);
-		storage.readFile.mockImplementation(async (path: any) => {
+		asMock(storage.readFile).mockImplementation(async (path: any) => {
 			if (path.endsWith("/local/sync/bundle.json")) {
 				return JSON.stringify({ sessions: [oldSession] });
 			}
 			return "";
 		});
-		getListing.mockImplementation(async (path: any) => {
+		asMock(getListing).mockImplementation(async (path: any) => {
 			if (path === "wasabi/test") {
 				return [{ name: "2024", type: "dir", path: "wasabi/test/2024" }];
 			}
@@ -884,7 +892,7 @@ describe("updateGroupProcess", () => {
 	});
 
 	it("aborts when the group listing fails", async () => {
-		getListing.mockRejectedValue(new Error("listing down"));
+		asMock(getListing).mockRejectedValue(new Error("listing down"));
 
 		await expect(updateGroupProcess("test", true)).resolves.toBeUndefined();
 		expect(updateYearSync).not.toHaveBeenCalled();
@@ -897,7 +905,7 @@ describe("updateGroupProcess", () => {
 		const targetId = `${currentYear}-02-02 Target Session`;
 		const localYearPath = `/local/sync/test/${currentYear}.json`;
 
-		getListing.mockImplementation(async (path: any) => {
+		asMock(getListing).mockImplementation(async (path: any) => {
 			if (path === "wasabi/test") {
 				return [
 					{
@@ -915,10 +923,10 @@ describe("updateGroupProcess", () => {
 			}
 			return [];
 		});
-		storage.exists.mockImplementation(
+		asMock(storage.exists).mockImplementation(
 			async (path: any) => path === localYearPath,
 		);
-		storage.readFile.mockImplementation(async (path: any) => {
+		asMock(storage.readFile).mockImplementation(async (path: any) => {
 			if (path === localYearPath) {
 				return JSON.stringify({
 					sessions: [
@@ -941,7 +949,7 @@ describe("updateGroupProcess", () => {
 			}
 			return "";
 		});
-		fetchSessionMetadata.mockResolvedValue({
+		asMock(fetchSessionMetadata).mockResolvedValue({
 			items: [],
 			tags: { [targetId]: ["fresh"], [keepId]: ["keep"] },
 			durations: {},
@@ -971,7 +979,7 @@ describe("updateGroupProcess", () => {
 			),
 			"info",
 		);
-		const [, , sessions] = updateYearSync.mock.calls[0];
+		const [, , sessions] = asMock(updateYearSync).mock.calls[0];
 		expect(sessions.map((s: any) => s.id).sort()).toEqual(
 			[keepId, targetId].sort(),
 		);
@@ -991,7 +999,7 @@ describe("updateGroupProcess", () => {
 		);
 		const localYearPath = `/local/sync/test/${currentYear}.json`;
 
-		getListing.mockImplementation(async (path: any) => {
+		asMock(getListing).mockImplementation(async (path: any) => {
 			if (path === "wasabi/test") {
 				return [
 					{
@@ -1006,10 +1014,10 @@ describe("updateGroupProcess", () => {
 			}
 			return [];
 		});
-		storage.exists.mockImplementation(
+		asMock(storage.exists).mockImplementation(
 			async (path: any) => path === localYearPath,
 		);
-		storage.readFile.mockImplementation(async (path: any) => {
+		asMock(storage.readFile).mockImplementation(async (path: any) => {
 			if (path.includes(`.group-update-cache/test/${currentYear}.json`)) {
 				return JSON.stringify({
 					fingerprint: yearFingerprint,
@@ -1048,17 +1056,17 @@ describe("updateGroupProcess", () => {
 	});
 
 	it("warns when an existing merged group file cannot be parsed", async () => {
-		storage.exists.mockImplementation(async (path: any) =>
+		asMock(storage.exists).mockImplementation(async (path: any) =>
 			path.endsWith("/local/sync/test.json"),
 		);
-		storage.readFile.mockImplementation(async (path: any) => {
+		asMock(storage.readFile).mockImplementation(async (path: any) => {
 			if (path.endsWith("/local/sync/test.json")) return "{bad";
 			return "";
 		});
-		getListing.mockResolvedValue([
+		asMock(getListing).mockResolvedValue([
 			{ name: "2024", type: "dir", path: "wasabi/test/2024" },
 		]);
-		getListing.mockImplementation(async (path: any) => {
+		asMock(getListing).mockImplementation(async (path: any) => {
 			if (path === "wasabi/test") {
 				return [{ name: "2024", type: "dir", path: "wasabi/test/2024" }];
 			}
@@ -1082,14 +1090,14 @@ describe("updateGroupProcess", () => {
 	});
 
 	it("warns when an existing bundle file cannot be parsed", async () => {
-		storage.exists.mockImplementation(async (path: any) =>
+		asMock(storage.exists).mockImplementation(async (path: any) =>
 			path.endsWith("/local/sync/bundle.json"),
 		);
-		storage.readFile.mockImplementation(async (path: any) => {
+		asMock(storage.readFile).mockImplementation(async (path: any) => {
 			if (path.endsWith("/local/sync/bundle.json")) return "{bad";
 			return "";
 		});
-		getListing.mockImplementation(async (path: any) => {
+		asMock(getListing).mockImplementation(async (path: any) => {
 			if (path === "wasabi/test") {
 				return [{ name: "2024", type: "dir", path: "wasabi/test/2024" }];
 			}
@@ -1113,7 +1121,7 @@ describe("updateGroupProcess", () => {
 	});
 
 	it("migrates leftover years from a merged file when switching to split", async () => {
-		getListing.mockImplementation(async (path: any) => {
+		asMock(getListing).mockImplementation(async (path: any) => {
 			if (path === "wasabi/test") {
 				return [{ name: "2024", type: "dir", path: "wasabi/test/2024" }];
 			}
@@ -1127,13 +1135,13 @@ describe("updateGroupProcess", () => {
 			}
 			return [];
 		});
-		storage.exists.mockImplementation(async (path: any) => {
+		asMock(storage.exists).mockImplementation(async (path: any) => {
 			return (
 				path.endsWith("/local/sync/test.json") ||
 				path.endsWith("/aws/sync/test.json.gz")
 			);
 		});
-		storage.readFile.mockImplementation(async (path: any) => {
+		asMock(storage.readFile).mockImplementation(async (path: any) => {
 			if (path.endsWith("/local/sync/test.json")) {
 				return JSON.stringify({
 					sessions: [
@@ -1173,7 +1181,7 @@ describe("updateGroupProcess", () => {
 	});
 
 	it("logs when migrating from merged file fails and still deletes local merged", async () => {
-		getListing.mockImplementation(async (path: any) => {
+		asMock(getListing).mockImplementation(async (path: any) => {
 			if (path === "wasabi/test") {
 				return [{ name: "2024", type: "dir", path: "wasabi/test/2024" }];
 			}
@@ -1187,10 +1195,10 @@ describe("updateGroupProcess", () => {
 			}
 			return [];
 		});
-		storage.exists.mockImplementation(async (path: any) =>
+		asMock(storage.exists).mockImplementation(async (path: any) =>
 			path.endsWith("/local/sync/test.json"),
 		);
-		storage.readFile.mockImplementation(async (path: any) => {
+		asMock(storage.readFile).mockImplementation(async (path: any) => {
 			if (path.endsWith("/local/sync/test.json")) return "{bad";
 			return "";
 		});
@@ -1207,7 +1215,7 @@ describe("updateGroupProcess", () => {
 	});
 
 	it("falls back to per-file tags/duration/summary when zip metadata is empty", async () => {
-		fetchSessionMetadata.mockResolvedValue({
+		asMock(fetchSessionMetadata).mockResolvedValue({
 			items: [
 				file(
 					"2024-05-05 Test Session.tags",
@@ -1231,7 +1239,7 @@ describe("updateGroupProcess", () => {
 			summaries: {},
 			transcriptions: {},
 		});
-		storage.readFile.mockImplementation(async (path: any) => {
+		asMock(storage.readFile).mockImplementation(async (path: any) => {
 			if (path.endsWith(".tags"))
 				return JSON.stringify({ tags: ["from-file"] });
 			if (path.endsWith(".duration")) return JSON.stringify({ duration: 55 });
@@ -1242,7 +1250,7 @@ describe("updateGroupProcess", () => {
 		await updateGroupProcess("test", true, true);
 
 		expect(updateYearSync).toHaveBeenCalled();
-		const [, , sessions] = updateYearSync.mock.calls[0];
+		const [, , sessions] = asMock(updateYearSync).mock.calls[0];
 		expect(sessions[0].tags).toEqual(["from-file"]);
 		expect(sessions[0].duration).toBe(55);
 		expect(sessions[0].summaryText || sessions[0].summary).toBeTruthy();
@@ -1250,7 +1258,7 @@ describe("updateGroupProcess", () => {
 	});
 
 	it("warns when per-file metadata reads fail", async () => {
-		fetchSessionMetadata.mockResolvedValue({
+		asMock(fetchSessionMetadata).mockResolvedValue({
 			items: [
 				file(
 					"2024-05-05 Test Session.tags",
@@ -1270,7 +1278,7 @@ describe("updateGroupProcess", () => {
 			summaries: {},
 			transcriptions: {},
 		});
-		storage.readFile.mockRejectedValue(new Error("meta read fail"));
+		asMock(storage.readFile).mockRejectedValue(new Error("meta read fail"));
 
 		await updateGroupProcess("test", true, true);
 
@@ -1289,7 +1297,7 @@ describe("updateGroupProcess", () => {
 	});
 
 	it("logs when remote merged file deletion fails after split migration", async () => {
-		getListing.mockImplementation(async (path: any) => {
+		asMock(getListing).mockImplementation(async (path: any) => {
 			if (path === "wasabi/test") {
 				return [{ name: "2024", type: "dir", path: "wasabi/test/2024" }];
 			}
@@ -1303,19 +1311,19 @@ describe("updateGroupProcess", () => {
 			}
 			return [];
 		});
-		storage.exists.mockImplementation(async (path: any) => {
+		asMock(storage.exists).mockImplementation(async (path: any) => {
 			return (
 				path.endsWith("/local/sync/test.json") ||
 				path.endsWith("/aws/sync/test.json.gz")
 			);
 		});
-		storage.readFile.mockImplementation(async (path: any) => {
+		asMock(storage.readFile).mockImplementation(async (path: any) => {
 			if (path.endsWith("/local/sync/test.json")) {
 				return JSON.stringify({ sessions: [] });
 			}
 			return "";
 		});
-		storage.deleteFile.mockImplementation(async (path: any) => {
+		asMock(storage.deleteFile).mockImplementation(async (path: any) => {
 			if (String(path).includes("test.json.gz")) {
 				throw new Error("remote delete fail");
 			}
@@ -1330,7 +1338,7 @@ describe("updateGroupProcess", () => {
 	});
 
 	it("strips resolution suffixes from video session ids", async () => {
-		getListing.mockImplementation(async (path: any) => {
+		asMock(getListing).mockImplementation(async (path: any) => {
 			if (path === "wasabi/test") {
 				return [{ name: "2024", type: "dir", path: "wasabi/test/2024" }];
 			}
@@ -1344,7 +1352,7 @@ describe("updateGroupProcess", () => {
 			}
 			return [];
 		});
-		fetchSessionMetadata.mockResolvedValue({
+		asMock(fetchSessionMetadata).mockResolvedValue({
 			items: [],
 			tags: { "2024-05-05 Test Session": ["hd"] },
 			durations: {},
@@ -1354,13 +1362,13 @@ describe("updateGroupProcess", () => {
 
 		await updateGroupProcess("test", true, false);
 
-		const [, , sessions] = updateYearSync.mock.calls[0];
+		const [, , sessions] = asMock(updateYearSync).mock.calls[0];
 		expect(sessions[0].id).toBe("2024-05-05 Test Session");
 		expect(sessions[0].tags).toEqual(["hd"]);
 	});
 
 	it("matches metadata keys with normalized punctuation and casing", async () => {
-		getListing.mockImplementation(async (path: any) => {
+		asMock(getListing).mockImplementation(async (path: any) => {
 			if (path === "wasabi/test") {
 				return [{ name: "2024", type: "dir", path: "wasabi/test/2024" }];
 			}
@@ -1374,7 +1382,7 @@ describe("updateGroupProcess", () => {
 			}
 			return [];
 		});
-		fetchSessionMetadata.mockResolvedValue({
+		asMock(fetchSessionMetadata).mockResolvedValue({
 			items: [],
 			tags: { "20240505testsession": ["normalized"] },
 			durations: { "2024-05-05 test session": 88 },
@@ -1384,13 +1392,13 @@ describe("updateGroupProcess", () => {
 
 		await updateGroupProcess("test", true, false);
 
-		const [, , sessions] = updateYearSync.mock.calls[0];
+		const [, , sessions] = asMock(updateYearSync).mock.calls[0];
 		expect(sessions[0].tags).toEqual(["normalized"]);
 		expect(sessions[0].duration).toBe(88);
 	});
 
 	it("ignores year-level metadata files when grouping session files", async () => {
-		getListing.mockImplementation(async (path: any) => {
+		asMock(getListing).mockImplementation(async (path: any) => {
 			if (path === "wasabi/test") {
 				return [{ name: "2024", type: "dir", path: "wasabi/test/2024" }];
 			}
@@ -1406,7 +1414,7 @@ describe("updateGroupProcess", () => {
 			}
 			return [];
 		});
-		fetchSessionMetadata.mockResolvedValue({
+		asMock(fetchSessionMetadata).mockResolvedValue({
 			items: [],
 			tags: {},
 			durations: {},
@@ -1416,13 +1424,13 @@ describe("updateGroupProcess", () => {
 
 		await updateGroupProcess("test", true, false);
 
-		const [, , sessions] = updateYearSync.mock.calls[0];
+		const [, , sessions] = asMock(updateYearSync).mock.calls[0];
 		expect(sessions).toHaveLength(1);
 		expect(sessions[0].id).toBe("2024-05-05 Test Session");
 	});
 
 	it("warns when group metadata listing fails but continues processing", async () => {
-		getListing.mockImplementation(async (path: any) => {
+		asMock(getListing).mockImplementation(async (path: any) => {
 			if (path === "/aws/sessions/test") {
 				throw new Error("metadata listing down");
 			}
@@ -1450,7 +1458,7 @@ describe("updateGroupProcess", () => {
 	});
 
 	it("warns when year cache read fails and continues with remote metadata", async () => {
-		storage.readFile.mockImplementation(async (path: any) => {
+		asMock(storage.readFile).mockImplementation(async (path: any) => {
 			if (path.includes(".group-update-cache/test/2024.json")) {
 				throw new Error("cache read fail");
 			}
@@ -1469,7 +1477,7 @@ describe("updateGroupProcess", () => {
 
 	it("warns when year cache write fails after processing", async () => {
 		jest.useFakeTimers();
-		storage.writeFile.mockRejectedValue(new Error("cache write fail"));
+		asMock(storage.writeFile).mockRejectedValue(new Error("cache write fail"));
 
 		const updatePromise = updateGroupProcess("test", true, false);
 		await updatePromise;
@@ -1489,10 +1497,10 @@ describe("updateGroupProcess", () => {
 			name: "2022-01-01 Historical Session",
 			group: "test",
 		};
-		storage.exists.mockImplementation(async (path: any) =>
+		asMock(storage.exists).mockImplementation(async (path: any) =>
 			path.endsWith("/local/sync/bundle.json"),
 		);
-		storage.readFile.mockImplementation(async (path: any) => {
+		asMock(storage.readFile).mockImplementation(async (path: any) => {
 			if (path.endsWith("/local/sync/bundle.json")) {
 				return JSON.stringify({ sessions: [oldSession] });
 			}
@@ -1508,8 +1516,8 @@ describe("updateGroupProcess", () => {
 	});
 
 	it("warns when legacy metadata folder listing fails", async () => {
-		fetchSessionMetadata.mockRejectedValue(new Error("backend busy"));
-		getListing.mockImplementation(async (path: any) => {
+		asMock(fetchSessionMetadata).mockRejectedValue(new Error("backend busy"));
+		asMock(getListing).mockImplementation(async (path: any) => {
 			if (path === "wasabi/test") {
 				return [{ name: "2024", type: "dir", path: "wasabi/test/2024" }];
 			}
@@ -1526,7 +1534,7 @@ describe("updateGroupProcess", () => {
 			}
 			return [];
 		});
-		loadTags.mockResolvedValue({});
+		asMock(loadTags).mockResolvedValue({});
 
 		await updateGroupProcess("test", true, false);
 
@@ -1554,7 +1562,7 @@ describe("updateGroupProcess", () => {
 			year: currentYear,
 		};
 
-		getListing.mockImplementation(async (path: any) => {
+		asMock(getListing).mockImplementation(async (path: any) => {
 			if (path === "wasabi/test") {
 				return [
 					{
@@ -1569,10 +1577,10 @@ describe("updateGroupProcess", () => {
 			}
 			return [];
 		});
-		storage.exists.mockImplementation(async (path: any) =>
+		asMock(storage.exists).mockImplementation(async (path: any) =>
 			path.endsWith("/local/sync/test.json"),
 		);
-		storage.readFile.mockImplementation(async (path: any) => {
+		asMock(storage.readFile).mockImplementation(async (path: any) => {
 			if (path.includes(`.group-update-cache/test/${currentYear}.json`)) {
 				return JSON.stringify({
 					fingerprint: yearFingerprint,
@@ -1591,7 +1599,7 @@ describe("updateGroupProcess", () => {
 			}
 			return "";
 		});
-		getFileInfo.mockResolvedValue({ hash: "abc", size: 10 });
+		asMock(getFileInfo).mockResolvedValue({ hash: "abc", size: 10 });
 
 		await updateGroupProcess("test", false, false, true, false);
 
@@ -1614,7 +1622,7 @@ describe("updateGroupProcess", () => {
 			.slice(0, 10);
 		const recentId = `${recentDate} Recent Session`;
 
-		getListing.mockImplementation(async (path: any) => {
+		asMock(getListing).mockImplementation(async (path: any) => {
 			if (path === "wasabi/test") {
 				return [
 					{
@@ -1631,8 +1639,8 @@ describe("updateGroupProcess", () => {
 			}
 			return [];
 		});
-		storage.exists.mockResolvedValue(false);
-		fetchSessionMetadata.mockResolvedValue({
+		asMock(storage.exists).mockResolvedValue(false);
+		asMock(fetchSessionMetadata).mockResolvedValue({
 			items: [],
 			tags: { [recentId]: ["recent"] },
 			durations: {},
@@ -1660,7 +1668,7 @@ describe("updateGroupProcess", () => {
 			yearItems,
 			metadataFingerprint,
 		);
-		storage.exists.mockImplementation(async (path: any) =>
+		asMock(storage.exists).mockImplementation(async (path: any) =>
 			path.endsWith("/local/sync/bundle.json"),
 		);
 
@@ -1668,10 +1676,10 @@ describe("updateGroupProcess", () => {
 		expect(sessions).toHaveLength(1);
 
 		jest.clearAllMocks();
-		storage.exists.mockImplementation(async (path: any) =>
+		asMock(storage.exists).mockImplementation(async (path: any) =>
 			path.endsWith("/local/sync/bundle.json"),
 		);
-		storage.readFile.mockImplementation(async (path: any) => {
+		asMock(storage.readFile).mockImplementation(async (path: any) => {
 			if (path.endsWith("/local/sync/bundle.json")) {
 				return JSON.stringify({ sessions });
 			}
@@ -1690,7 +1698,7 @@ describe("updateGroupProcess", () => {
 			}
 			return "";
 		});
-		getListing.mockImplementation(async (path: any) => {
+		asMock(getListing).mockImplementation(async (path: any) => {
 			if (path === "wasabi/test") {
 				return [{ name: "2024", type: "dir", path: "wasabi/test/2024" }];
 			}
@@ -1728,10 +1736,10 @@ describe("updateGroupProcess", () => {
 			yearItems,
 			metadataFingerprint,
 		);
-		storage.exists.mockImplementation(async (path: any) =>
+		asMock(storage.exists).mockImplementation(async (path: any) =>
 			path.endsWith("/local/sync/test.json"),
 		);
-		storage.readFile.mockImplementation(async (path: any) => {
+		asMock(storage.readFile).mockImplementation(async (path: any) => {
 			if (path.endsWith("/local/sync/test.json")) {
 				return JSON.stringify({ sessions: [] });
 			}
@@ -1741,17 +1749,17 @@ describe("updateGroupProcess", () => {
 		});
 
 		await updateGroupProcess("test", true, false, true, false);
-		const writtenPayload = writeCompressedFile.mock.calls.at(-1)[1];
+		const writtenPayload = asMock(writeCompressedFile).mock.calls.at(-1)[1];
 		const writtenSessions =
 			typeof writtenPayload === "string"
 				? JSON.parse(writtenPayload).sessions
 				: writtenPayload.sessions;
 
 		jest.clearAllMocks();
-		storage.exists.mockImplementation(async (path: any) =>
+		asMock(storage.exists).mockImplementation(async (path: any) =>
 			path.endsWith("/local/sync/test.json"),
 		);
-		storage.readFile.mockImplementation(async (path: any) => {
+		asMock(storage.readFile).mockImplementation(async (path: any) => {
 			if (path.endsWith("/local/sync/test.json")) {
 				return JSON.stringify({ sessions: writtenSessions });
 			}
@@ -1772,7 +1780,7 @@ describe("updateGroupProcess", () => {
 			if (path.endsWith(".md")) return "Summary from DigitalOcean";
 			return "";
 		});
-		getListing.mockImplementation(async (path: any) => {
+		asMock(getListing).mockImplementation(async (path: any) => {
 			if (path === "wasabi/test") {
 				return [{ name: "2024", type: "dir", path: "wasabi/test/2024" }];
 			}
@@ -1793,9 +1801,9 @@ describe("updateGroupProcess", () => {
 	});
 
 	it("updates the local manifest after writing a merged group file", async () => {
-		getFileInfo.mockResolvedValue({ hash: "merged-hash", size: 2048 });
-		updateManifestEntry.mockResolvedValue();
-		storage.readFile.mockImplementation(async (path: any) => {
+		asMock(getFileInfo).mockResolvedValue({ hash: "merged-hash", size: 2048 });
+		asMock(updateManifestEntry).mockResolvedValue(undefined);
+		asMock(storage.readFile).mockImplementation(async (path: any) => {
 			if (path.endsWith("/local/sync/test.json")) {
 				return JSON.stringify({ sessions: [] });
 			}
@@ -1819,7 +1827,7 @@ describe("updateGroupProcess", () => {
 	});
 
 	it("reads tags files that contain a raw JSON array", async () => {
-		fetchSessionMetadata.mockResolvedValue({
+		asMock(fetchSessionMetadata).mockResolvedValue({
 			items: [
 				file(
 					"2024-05-05 Test Session.tags",
@@ -1831,14 +1839,14 @@ describe("updateGroupProcess", () => {
 			summaries: {},
 			transcriptions: {},
 		});
-		storage.readFile.mockImplementation(async (path: any) => {
+		asMock(storage.readFile).mockImplementation(async (path: any) => {
 			if (path.endsWith(".tags")) return JSON.stringify(["raw-array-tag"]);
 			return "";
 		});
 
 		await updateGroupProcess("test", true, true);
 
-		const [, , sessions] = updateYearSync.mock.calls[0];
+		const [, , sessions] = asMock(updateYearSync).mock.calls[0];
 		expect(sessions[0].tags).toEqual(["raw-array-tag"]);
 	});
 
@@ -1865,7 +1873,7 @@ describe("updateGroupProcess", () => {
 			metadataFingerprint,
 		);
 
-		getListing.mockImplementation(async (path: any) => {
+		asMock(getListing).mockImplementation(async (path: any) => {
 			if (path === "wasabi/test") {
 				return [
 					{
@@ -1880,10 +1888,10 @@ describe("updateGroupProcess", () => {
 			}
 			return [];
 		});
-		storage.exists.mockImplementation(
+		asMock(storage.exists).mockImplementation(
 			async (path: any) => path === localYearPath,
 		);
-		storage.readFile.mockImplementation(async (path: any) => {
+		asMock(storage.readFile).mockImplementation(async (path: any) => {
 			if (path.includes(`.group-update-cache/test/${currentYear}.json`)) {
 				return JSON.stringify({
 					fingerprint: yearFingerprint,
@@ -1925,7 +1933,7 @@ describe("updateGroupProcess", () => {
 		const currentYear = String(new Date().getFullYear());
 		const sessionId = `${currentYear}-05-05 Grace Session`;
 		const _localYearPath = `/local/sync/test/${currentYear}.json`;
-		getListing.mockImplementation(async (path: any) => {
+		asMock(getListing).mockImplementation(async (path: any) => {
 			if (path === "wasabi/test") {
 				return [
 					{
@@ -1945,9 +1953,9 @@ describe("updateGroupProcess", () => {
 			}
 			return [];
 		});
-		storage.exists.mockResolvedValue(false);
-		storage.readFile.mockResolvedValue("");
-		updateYearSync.mockResolvedValue({
+		asMock(storage.exists).mockResolvedValue(false);
+		asMock(storage.readFile).mockResolvedValue("");
+		asMock(updateYearSync).mockResolvedValue({
 			sessions: [
 				{
 					id: sessionId,
@@ -1965,7 +1973,7 @@ describe("updateGroupProcess", () => {
 	});
 
 	it("resolves metadata by exact session id and session name keys", async () => {
-		getListing.mockImplementation(async (path: any) => {
+		asMock(getListing).mockImplementation(async (path: any) => {
 			if (path === "wasabi/test") {
 				return [{ name: "2024", type: "dir", path: "wasabi/test/2024" }];
 			}
@@ -1983,7 +1991,7 @@ describe("updateGroupProcess", () => {
 			}
 			return [];
 		});
-		fetchSessionMetadata.mockResolvedValue({
+		asMock(fetchSessionMetadata).mockResolvedValue({
 			items: [],
 			tags: {
 				"2024-05-05 Test Session": ["by-id"],
@@ -1999,7 +2007,7 @@ describe("updateGroupProcess", () => {
 
 		await updateGroupProcess("test", true, false);
 
-		const [, , sessions] = updateYearSync.mock.calls[0];
+		const [, , sessions] = asMock(updateYearSync).mock.calls[0];
 		const byId = sessions.find((s: any) => s.id === "2024-05-05 Test Session");
 		const byName = sessions.find(
 			(s: any) => s.id === "2024-05-06 Name Key Session",
@@ -2011,7 +2019,7 @@ describe("updateGroupProcess", () => {
 	});
 
 	it("processes digital-ocean-only image sessions without wasabi media", async () => {
-		getListing.mockImplementation(async (path: any) => {
+		asMock(getListing).mockImplementation(async (path: any) => {
 			if (path === "wasabi/test") {
 				return [{ name: "2024", type: "dir", path: "wasabi/test/2024" }];
 			}
@@ -2028,7 +2036,7 @@ describe("updateGroupProcess", () => {
 			}
 			return [];
 		});
-		fetchSessionMetadata.mockResolvedValue({
+		asMock(fetchSessionMetadata).mockResolvedValue({
 			items: [
 				file(
 					"2024-05-07 Orphan Cover.png",
@@ -2043,7 +2051,7 @@ describe("updateGroupProcess", () => {
 
 		await updateGroupProcess("test", true, false);
 
-		const [, , sessions] = updateYearSync.mock.calls[0];
+		const [, , sessions] = asMock(updateYearSync).mock.calls[0];
 		expect(sessions).toHaveLength(1);
 		expect(sessions[0].id).toBe("2024-05-07 Orphan Cover");
 		expect(sessions[0].image).toBeTruthy();
@@ -2051,7 +2059,7 @@ describe("updateGroupProcess", () => {
 	});
 
 	it("recognizes year folders listed with stat.type instead of type", async () => {
-		getListing.mockImplementation(async (path: any) => {
+		asMock(getListing).mockImplementation(async (path: any) => {
 			if (path === "wasabi/test") {
 				return [
 					{
@@ -2088,7 +2096,7 @@ describe("updateGroupProcess", () => {
 		const localYearPath = `/local/sync/test/${currentYear}.json`;
 		const metadataFingerprint = [null, null, null, null];
 
-		getListing.mockImplementation(async (path: any) => {
+		asMock(getListing).mockImplementation(async (path: any) => {
 			if (path === "wasabi/test") {
 				return [
 					{
@@ -2108,7 +2116,7 @@ describe("updateGroupProcess", () => {
 			}
 			return [];
 		});
-		storage.readFile.mockImplementation(async (path: any) => {
+		asMock(storage.readFile).mockImplementation(async (path: any) => {
 			if (path.includes(`.group-update-cache/test/${currentYear}.json`)) {
 				return JSON.stringify({
 					fingerprint: "stale",
@@ -2133,14 +2141,14 @@ describe("updateGroupProcess", () => {
 			}
 			return "";
 		});
-		storage.exists.mockImplementation(
+		asMock(storage.exists).mockImplementation(
 			async (path: any) => path === localYearPath,
 		);
 
 		await updateGroupProcess("test", false, false);
 
 		expect(fetchSessionMetadata).not.toHaveBeenCalled();
-		const [, , sessions] = updateYearSync.mock.calls[0];
+		const [, , sessions] = asMock(updateYearSync).mock.calls[0];
 		expect(sessions[0].tags).toEqual(["local-meta"]);
 		expect(sessions[0].duration).toBe(444);
 		expect(sessions[0].summaryText).toBe("From local year file");
@@ -2151,7 +2159,7 @@ describe("updateGroupProcess", () => {
 		const currentYear = String(new Date().getFullYear());
 		const localYearPath = `/local/sync/test/${currentYear}.json`;
 
-		getListing.mockImplementation(async (path: any) => {
+		asMock(getListing).mockImplementation(async (path: any) => {
 			if (path === "wasabi/test") {
 				return [
 					{
@@ -2171,10 +2179,10 @@ describe("updateGroupProcess", () => {
 			}
 			return [];
 		});
-		storage.exists.mockImplementation(
+		asMock(storage.exists).mockImplementation(
 			async (path: any) => path === localYearPath,
 		);
-		storage.readFile.mockImplementation(async (path: any) => {
+		asMock(storage.readFile).mockImplementation(async (path: any) => {
 			if (path === localYearPath) {
 				return JSON.stringify({ sessions: "not-an-array" });
 			}
@@ -2199,7 +2207,7 @@ describe("updateGroupProcess", () => {
 			thumbnail: true,
 			files: [{ name: "2024-05-05 Test Session.mp4" }],
 		};
-		updateYearSync.mockResolvedValue({
+		asMock(updateYearSync).mockResolvedValue({
 			counter: 1,
 			newCount: 1,
 			newSessions: [newSession],
@@ -2230,7 +2238,7 @@ describe("updateGroupProcess", () => {
 		const recentId = `${recentDate} Recent Session`;
 		const localYearPath = `/local/sync/test/${currentYear}.json`;
 
-		getListing.mockImplementation(async (path: any) => {
+		asMock(getListing).mockImplementation(async (path: any) => {
 			if (path === "wasabi/test") {
 				return [
 					{
@@ -2248,10 +2256,10 @@ describe("updateGroupProcess", () => {
 			}
 			return [];
 		});
-		storage.exists.mockImplementation(
+		asMock(storage.exists).mockImplementation(
 			async (path: any) => path === localYearPath,
 		);
-		storage.readFile.mockImplementation(async (path: any) => {
+		asMock(storage.readFile).mockImplementation(async (path: any) => {
 			if (path === localYearPath) {
 				return JSON.stringify({
 					sessions: [
@@ -2266,7 +2274,7 @@ describe("updateGroupProcess", () => {
 			}
 			return "";
 		});
-		fetchSessionMetadata.mockResolvedValue({
+		asMock(fetchSessionMetadata).mockResolvedValue({
 			items: [],
 			tags: { [recentId]: ["recent"] },
 			durations: {},
@@ -2276,7 +2284,7 @@ describe("updateGroupProcess", () => {
 
 		await updateGroupProcess("test", false, true, false, false, null, 30);
 
-		const [, , sessions] = updateYearSync.mock.calls[0];
+		const [, , sessions] = asMock(updateYearSync).mock.calls[0];
 		expect(sessions).toEqual(
 			expect.arrayContaining([
 				expect.objectContaining({ name: oldId, tags: ["preserve"] }),
@@ -2300,7 +2308,7 @@ describe("updateGroupProcess", () => {
 		);
 		const localYearPath = `/local/sync/test/${currentYear}.json`;
 
-		getListing.mockImplementation(async (path: any) => {
+		asMock(getListing).mockImplementation(async (path: any) => {
 			if (path === "wasabi/test") {
 				return [
 					{
@@ -2315,10 +2323,10 @@ describe("updateGroupProcess", () => {
 			}
 			return [];
 		});
-		storage.exists.mockImplementation(
+		asMock(storage.exists).mockImplementation(
 			async (path: any) => path === localYearPath,
 		);
-		storage.readFile.mockImplementation(async (path: any) => {
+		asMock(storage.readFile).mockImplementation(async (path: any) => {
 			if (path.includes(`.group-update-cache/test/${currentYear}.json`)) {
 				return JSON.stringify({
 					fingerprint: yearFingerprint,
@@ -2354,7 +2362,7 @@ describe("updateGroupProcess", () => {
 			"info",
 		);
 		expect(updateYearSync).toHaveBeenCalled();
-		const [, , sessions] = updateYearSync.mock.calls[0];
+		const [, , sessions] = asMock(updateYearSync).mock.calls[0];
 		expect(sessions.map((session: any) => session.id)).toEqual(
 			expect.arrayContaining([existingId, newAudioId]),
 		);
@@ -2367,7 +2375,7 @@ describe("updateGroupProcess", () => {
 		const localYearPath = `/local/sync/test/${currentYear}.json`;
 		const longSummary = "A".repeat(120);
 
-		getListing.mockImplementation(async (path: any) => {
+		asMock(getListing).mockImplementation(async (path: any) => {
 			if (path === "wasabi/test") {
 				return [
 					{
@@ -2385,10 +2393,10 @@ describe("updateGroupProcess", () => {
 			}
 			return [];
 		});
-		storage.exists.mockImplementation(
+		asMock(storage.exists).mockImplementation(
 			async (path: any) => path === localYearPath,
 		);
-		storage.readFile.mockImplementation(async (path: any) => {
+		asMock(storage.readFile).mockImplementation(async (path: any) => {
 			if (path === localYearPath) {
 				return JSON.stringify({
 					sessions: [
@@ -2411,7 +2419,7 @@ describe("updateGroupProcess", () => {
 			}
 			return "";
 		});
-		fetchSessionMetadata.mockResolvedValue({
+		asMock(fetchSessionMetadata).mockResolvedValue({
 			items: [],
 			tags: { [targetId]: ["fresh"] },
 			durations: { [targetId]: 321 },
@@ -2429,7 +2437,7 @@ describe("updateGroupProcess", () => {
 			expect.stringContaining("Targeted session metadata updated successfully"),
 			"success",
 		);
-		const [, , sessions] = updateYearSync.mock.calls[0];
+		const [, , sessions] = asMock(updateYearSync).mock.calls[0];
 		expect(sessions.find((session: any) => session.id === keepId).tags).toEqual(
 			["keep"],
 		);
@@ -2439,16 +2447,16 @@ describe("updateGroupProcess", () => {
 	});
 
 	it("records bundled new session metadata when sessions are added", async () => {
-		storage.exists.mockImplementation(async (path: any) =>
+		asMock(storage.exists).mockImplementation(async (path: any) =>
 			path.endsWith("/local/sync/bundle.json"),
 		);
-		storage.readFile.mockImplementation(async (path: any) => {
+		asMock(storage.readFile).mockImplementation(async (path: any) => {
 			if (path.endsWith("/local/sync/bundle.json")) {
 				return JSON.stringify({ sessions: [] });
 			}
 			return "";
 		});
-		getListing.mockImplementation(async (path: any) => {
+		asMock(getListing).mockImplementation(async (path: any) => {
 			if (path === "wasabi/test") {
 				return [{ name: "2024", type: "dir", path: "wasabi/test/2024" }];
 			}
@@ -2466,7 +2474,7 @@ describe("updateGroupProcess", () => {
 			}
 			return [];
 		});
-		fetchSessionMetadata.mockResolvedValue({
+		asMock(fetchSessionMetadata).mockResolvedValue({
 			items: [],
 			tags: { "2024-05-05 Test Session": ["bundle"] },
 			durations: { "2024-05-05 Test Session": 90 },
@@ -2490,10 +2498,10 @@ describe("updateGroupProcess", () => {
 	});
 
 	it("records merged new session metadata when sessions are added", async () => {
-		storage.exists.mockImplementation(async (path: any) =>
+		asMock(storage.exists).mockImplementation(async (path: any) =>
 			path.endsWith("/local/sync/test.json"),
 		);
-		storage.readFile.mockImplementation(async (path: any) => {
+		asMock(storage.readFile).mockImplementation(async (path: any) => {
 			if (path.endsWith("/local/sync/test.json")) {
 				return JSON.stringify({ sessions: [] });
 			}
@@ -2501,7 +2509,7 @@ describe("updateGroupProcess", () => {
 			if (path.endsWith(".md")) return "Summary from DigitalOcean";
 			return "";
 		});
-		getListing.mockImplementation(async (path: any) => {
+		asMock(getListing).mockImplementation(async (path: any) => {
 			if (path === "wasabi/test") {
 				return [{ name: "2024", type: "dir", path: "wasabi/test/2024" }];
 			}
@@ -2519,7 +2527,7 @@ describe("updateGroupProcess", () => {
 			}
 			return [];
 		});
-		fetchSessionMetadata.mockResolvedValue({
+		asMock(fetchSessionMetadata).mockResolvedValue({
 			items: [
 				file(
 					"2024-05-05 Test Session.png",
@@ -2566,7 +2574,7 @@ describe("updateGroupProcess", () => {
 			tags: ["year-field"],
 		};
 
-		getListing.mockImplementation(async (path: any) => {
+		asMock(getListing).mockImplementation(async (path: any) => {
 			if (path === "wasabi/test") {
 				return [
 					{
@@ -2581,10 +2589,10 @@ describe("updateGroupProcess", () => {
 			}
 			return [];
 		});
-		storage.exists.mockImplementation(async (path: any) =>
+		asMock(storage.exists).mockImplementation(async (path: any) =>
 			path.endsWith("/local/sync/bundle.json"),
 		);
-		storage.readFile.mockImplementation(async (path: any) => {
+		asMock(storage.readFile).mockImplementation(async (path: any) => {
 			if (path.includes(`.group-update-cache/test/${currentYear}.json`)) {
 				return JSON.stringify({
 					fingerprint: yearFingerprint,
@@ -2614,7 +2622,7 @@ describe("updateGroupProcess", () => {
 	});
 
 	it("continues when group metadata listing returns null", async () => {
-		getListing.mockImplementation(async (path: any) => {
+		asMock(getListing).mockImplementation(async (path: any) => {
 			if (path === "/aws/sessions/test") {
 				return null;
 			}
@@ -2638,7 +2646,7 @@ describe("updateGroupProcess", () => {
 	});
 
 	it("records year processing errors that lack a message property", async () => {
-		getListing.mockImplementation(async (path: any) => {
+		asMock(getListing).mockImplementation(async (path: any) => {
 			if (path === "wasabi/test") {
 				return [{ name: "2024", type: "dir", path: "wasabi/test/2024" }];
 			}
@@ -2661,7 +2669,7 @@ describe("updateGroupProcess", () => {
 	});
 
 	it("migrates merged sessions grouped by inferred year when year field is missing", async () => {
-		getListing.mockImplementation(async (path: any) => {
+		asMock(getListing).mockImplementation(async (path: any) => {
 			if (path === "wasabi/test") {
 				return [{ name: "2024", type: "dir", path: "wasabi/test/2024" }];
 			}
@@ -2675,10 +2683,10 @@ describe("updateGroupProcess", () => {
 			}
 			return [];
 		});
-		storage.exists.mockImplementation(async (path: any) =>
+		asMock(storage.exists).mockImplementation(async (path: any) =>
 			path.endsWith("/local/sync/test.json"),
 		);
-		storage.readFile.mockImplementation(async (path: any) => {
+		asMock(storage.readFile).mockImplementation(async (path: any) => {
 			if (path.endsWith("/local/sync/test.json")) {
 				return JSON.stringify({
 					sessions: [
@@ -2713,16 +2721,16 @@ describe("updateGroupProcess", () => {
 				year: "2024",
 			},
 		];
-		storage.exists.mockImplementation(async (path: any) =>
+		asMock(storage.exists).mockImplementation(async (path: any) =>
 			path.endsWith("/local/sync/bundle.json"),
 		);
-		storage.readFile.mockImplementation(async (path: any) => {
+		asMock(storage.readFile).mockImplementation(async (path: any) => {
 			if (path.endsWith("/local/sync/bundle.json")) {
 				return JSON.stringify({ sessions });
 			}
 			return "";
 		});
-		getListing.mockImplementation(async (path: any) => {
+		asMock(getListing).mockImplementation(async (path: any) => {
 			if (path === "wasabi/test") {
 				return [{ name: "2024", type: "dir", path: "wasabi/test/2024" }];
 			}
@@ -2762,7 +2770,7 @@ describe("updateGroupProcess", () => {
 			metadataFingerprint,
 		);
 
-		getListing.mockImplementation(async (path: any) => {
+		asMock(getListing).mockImplementation(async (path: any) => {
 			if (path === "wasabi/test") {
 				return [
 					{
@@ -2777,10 +2785,10 @@ describe("updateGroupProcess", () => {
 			}
 			return [];
 		});
-		storage.exists.mockImplementation(async (path: any) =>
+		asMock(storage.exists).mockImplementation(async (path: any) =>
 			path.endsWith("/local/sync/bundle.json"),
 		);
-		storage.readFile.mockImplementation(async (path: any) => {
+		asMock(storage.readFile).mockImplementation(async (path: any) => {
 			if (path.includes(`.group-update-cache/test/${currentYear}.json`)) {
 				return JSON.stringify({
 					fingerprint: yearFingerprint,
@@ -2822,7 +2830,7 @@ describe("updateGroupProcess", () => {
 		const targetId = `${currentYear}-05-06 Target Session`;
 		const localYearPath = `/local/sync/test/${currentYear}.json`;
 
-		getListing.mockImplementation(async (path: any) => {
+		asMock(getListing).mockImplementation(async (path: any) => {
 			if (path === "wasabi/test") {
 				return [
 					{
@@ -2840,10 +2848,10 @@ describe("updateGroupProcess", () => {
 			}
 			return [];
 		});
-		storage.exists.mockImplementation(
+		asMock(storage.exists).mockImplementation(
 			async (path: any) => path === localYearPath,
 		);
-		storage.readFile.mockImplementation(async (path: any) => {
+		asMock(storage.readFile).mockImplementation(async (path: any) => {
 			if (path === localYearPath) {
 				return JSON.stringify({
 					sessions: [
@@ -2865,7 +2873,7 @@ describe("updateGroupProcess", () => {
 			}
 			return "";
 		});
-		fetchSessionMetadata.mockResolvedValue({
+		asMock(fetchSessionMetadata).mockResolvedValue({
 			items: [],
 			tags: { [targetId]: ["fresh-target"] },
 			durations: {},
@@ -2875,7 +2883,7 @@ describe("updateGroupProcess", () => {
 
 		await updateGroupProcess("test", false, true, false, false, targetId, null);
 
-		const [, , sessions] = updateYearSync.mock.calls[0];
+		const [, , sessions] = asMock(updateYearSync).mock.calls[0];
 		expect(
 			sessions.find((session: any) => session.name === keepName).tags,
 		).toEqual(["cached-by-name"]);
@@ -2890,7 +2898,7 @@ describe("updateGroupProcess", () => {
 		const localYearPath = `/local/sync/test/${currentYear}.json`;
 		const metadataFingerprint = [null, null, null, null];
 
-		getListing.mockImplementation(async (path: any) => {
+		asMock(getListing).mockImplementation(async (path: any) => {
 			if (path === "wasabi/test") {
 				return [
 					{
@@ -2910,10 +2918,10 @@ describe("updateGroupProcess", () => {
 			}
 			return [];
 		});
-		storage.exists.mockImplementation(
+		asMock(storage.exists).mockImplementation(
 			async (path: any) => path === localYearPath,
 		);
-		storage.readFile.mockImplementation(async (path: any) => {
+		asMock(storage.readFile).mockImplementation(async (path: any) => {
 			if (path.includes(`.group-update-cache/test/${currentYear}.json`)) {
 				return JSON.stringify({
 					fingerprint: "stale",
@@ -2939,22 +2947,22 @@ describe("updateGroupProcess", () => {
 		await updateGroupProcess("test", false, false);
 
 		expect(fetchSessionMetadata).not.toHaveBeenCalled();
-		const [, , sessions] = updateYearSync.mock.calls[0];
+		const [, , sessions] = asMock(updateYearSync).mock.calls[0];
 		expect(sessions[0].tags).toEqual(["name-key"]);
 		expect(sessions[0].duration).toBe(12);
 	});
 
 	it("records bundled additions without thumbnails when no image is present", async () => {
-		storage.exists.mockImplementation(async (path: any) =>
+		asMock(storage.exists).mockImplementation(async (path: any) =>
 			path.endsWith("/local/sync/bundle.json"),
 		);
-		storage.readFile.mockImplementation(async (path: any) => {
+		asMock(storage.readFile).mockImplementation(async (path: any) => {
 			if (path.endsWith("/local/sync/bundle.json")) {
 				return JSON.stringify({ sessions: [] });
 			}
 			return "";
 		});
-		getListing.mockImplementation(async (path: any) => {
+		asMock(getListing).mockImplementation(async (path: any) => {
 			if (path === "wasabi/test") {
 				return [{ name: "2024", type: "dir", path: "wasabi/test/2024" }];
 			}
@@ -2968,7 +2976,7 @@ describe("updateGroupProcess", () => {
 			}
 			return [];
 		});
-		fetchSessionMetadata.mockResolvedValue({
+		asMock(fetchSessionMetadata).mockResolvedValue({
 			items: [],
 			tags: { "2024-05-05 Test Session": ["bundle"] },
 			durations: { "2024-05-05 Test Session": 1 },
@@ -2985,16 +2993,16 @@ describe("updateGroupProcess", () => {
 	});
 
 	it("records merged additions without thumbnails when no image is present", async () => {
-		storage.exists.mockImplementation(async (path: any) =>
+		asMock(storage.exists).mockImplementation(async (path: any) =>
 			path.endsWith("/local/sync/test.json"),
 		);
-		storage.readFile.mockImplementation(async (path: any) => {
+		asMock(storage.readFile).mockImplementation(async (path: any) => {
 			if (path.endsWith("/local/sync/test.json")) {
 				return JSON.stringify({ sessions: [] });
 			}
 			return "";
 		});
-		getListing.mockImplementation(async (path: any) => {
+		asMock(getListing).mockImplementation(async (path: any) => {
 			if (path === "wasabi/test") {
 				return [{ name: "2024", type: "dir", path: "wasabi/test/2024" }];
 			}
@@ -3008,7 +3016,7 @@ describe("updateGroupProcess", () => {
 			}
 			return [];
 		});
-		fetchSessionMetadata.mockResolvedValue({
+		asMock(fetchSessionMetadata).mockResolvedValue({
 			items: [],
 			tags: { "2024-05-05 Test Session": ["merged"] },
 			durations: { "2024-05-05 Test Session": 1 },
@@ -3025,7 +3033,7 @@ describe("updateGroupProcess", () => {
 	});
 
 	it("aborts split updates when the root listing throws without a message", async () => {
-		getListing.mockImplementation(async () => {
+		asMock(getListing).mockImplementation(async () => {
 			throw { toString: () => "listing failure without message" };
 		});
 
@@ -3040,7 +3048,7 @@ describe("updateGroupProcess", () => {
 	});
 
 	it("finishes with completion logs when split updates add sessions", async () => {
-		updateYearSync.mockResolvedValue({
+		asMock(updateYearSync).mockResolvedValue({
 			counter: 2,
 			newCount: 2,
 			newSessions: [
@@ -3063,16 +3071,16 @@ describe("updateGroupProcess", () => {
 	});
 
 	it("reads bundled group files that exist but omit a sessions array", async () => {
-		storage.exists.mockImplementation(async (path: any) =>
+		asMock(storage.exists).mockImplementation(async (path: any) =>
 			path.endsWith("/local/sync/bundle.json"),
 		);
-		storage.readFile.mockImplementation(async (path: any) => {
+		asMock(storage.readFile).mockImplementation(async (path: any) => {
 			if (path.endsWith("/local/sync/bundle.json")) {
 				return JSON.stringify({ version: 1 });
 			}
 			return "";
 		});
-		getListing.mockImplementation(async (path: any) => {
+		asMock(getListing).mockImplementation(async (path: any) => {
 			if (path === "wasabi/test") {
 				return [{ name: "2024", type: "dir", path: "wasabi/test/2024" }];
 			}
@@ -3097,16 +3105,16 @@ describe("updateGroupProcess", () => {
 	});
 
 	it("reads merged group files that exist but omit a sessions array", async () => {
-		storage.exists.mockImplementation(async (path: any) =>
+		asMock(storage.exists).mockImplementation(async (path: any) =>
 			path.endsWith("/local/sync/test.json"),
 		);
-		storage.readFile.mockImplementation(async (path: any) => {
+		asMock(storage.readFile).mockImplementation(async (path: any) => {
 			if (path.endsWith("/local/sync/test.json")) {
 				return JSON.stringify({ version: 1 });
 			}
 			return "";
 		});
-		getListing.mockImplementation(async (path: any) => {
+		asMock(getListing).mockImplementation(async (path: any) => {
 			if (path === "wasabi/test") {
 				return [{ name: "2024", type: "dir", path: "wasabi/test/2024" }];
 			}

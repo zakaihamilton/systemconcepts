@@ -49,8 +49,8 @@ jest.mock("./Week", () => (props: any) => (
 	</div>
 ));
 
-function createStore(initial = {}) {
-	const state = { lastViewMode: null, ...initial };
+function createStore(initial: Record<string, any> = {}) {
+	const state: Record<string, any> = { lastViewMode: null, ...initial };
 	return {
 		useState: jest.fn(() => ({ ...state })),
 		update: jest.fn((fn) => fn(state)),
@@ -59,8 +59,8 @@ function createStore(initial = {}) {
 }
 
 function getToolbarItem(id: any) {
-	return useToolbar.mock.calls
-		.at(-1)[0]
+	return asMock(useToolbar)
+		.mock.calls.at(-1)[0]
 		.items.find((item: any) => item.id === id);
 }
 
@@ -85,10 +85,10 @@ describe("WeekView", () => {
 
 	beforeEach(() => {
 		jest.clearAllMocks();
-		useDeviceType.mockReturnValue("desktop");
-		useDirection.mockReturnValue("ltr");
-		useTranslations.mockReturnValue(translations);
-		useDateFormatter.mockImplementation((opts = {}) => ({
+		asMock(useDeviceType).mockReturnValue("desktop");
+		asMock(useDirection).mockReturnValue("ltr");
+		asMock(useTranslations).mockReturnValue(translations);
+		asMock(useDateFormatter).mockImplementation((opts = {}) => ({
 			format: (date: any) => {
 				if (opts.weekday) return "Mon";
 				if (opts.month === "short") return "Jun";
@@ -100,7 +100,7 @@ describe("WeekView", () => {
 		}));
 	});
 
-	const renderWeek = (props = {}) => {
+	const renderWeek = (props: Record<string, any> = {}) => {
 		const store = props.store || createStore();
 		const date = props.date || new Date(2024, 5, 12);
 		return {
@@ -186,8 +186,8 @@ describe("WeekView", () => {
 	});
 
 	it("applies phone styles and rtl toolbar icons", () => {
-		useDeviceType.mockReturnValue("phone");
-		useDirection.mockReturnValue("rtl");
+		asMock(useDeviceType).mockReturnValue("phone");
+		asMock(useDirection).mockReturnValue("rtl");
 		renderWeek();
 		expect(useDateFormatter).toHaveBeenCalledWith({ month: "short" });
 		expect(getToolbarItem("previousWeek").icon).toBeTruthy();
@@ -202,12 +202,14 @@ describe("WeekView", () => {
 	it("clamps the year picker when the system year is before 2015", () => {
 		const RealDate = global.Date;
 		const mockedNow = new RealDate(2010, 0, 1).getTime();
-		const dateSpy = jest.spyOn(global, "Date").mockImplementation((...args) => {
-			if (args.length === 0) {
-				return new RealDate(2010, 0, 1);
-			}
-			return new RealDate(...args);
-		});
+		const dateSpy = jest
+			.spyOn(global, "Date")
+			.mockImplementation((...args: any[]) => {
+				if (args.length === 0) {
+					return new RealDate(2010, 0, 1);
+				}
+				return Reflect.construct(RealDate, args) as Date;
+			});
 		global.Date.now = jest.fn(() => mockedNow);
 		global.Date.UTC = RealDate.UTC;
 		global.Date.parse = RealDate.parse;
@@ -216,6 +218,6 @@ describe("WeekView", () => {
 		const years = getWidgetItems("yearWidget").map((item: any) => item.id);
 		expect(years).toContain(2015);
 
-		dateSpy.mockRestore();
+		asMock(dateSpy).mockRestore();
 	});
 });

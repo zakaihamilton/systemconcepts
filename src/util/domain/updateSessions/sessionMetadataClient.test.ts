@@ -31,7 +31,7 @@ describe("fetchSessionMetadata", () => {
 	});
 
 	it("aggregates metadata from presigned URLs without calling session-metadata", async () => {
-		fetchJSON.mockResolvedValue({
+		asMock(fetchJSON).mockResolvedValue({
 			group: "test",
 			year: "2024",
 			items: [
@@ -47,7 +47,7 @@ describe("fetchSessionMetadata", () => {
 				zip: null,
 			},
 		});
-		global.fetch.mockImplementation(async (url: any) => {
+		asMock(global.fetch).mockImplementation(async (url: any) => {
 			if (url === "https://signed/tags") {
 				return {
 					ok: true,
@@ -98,7 +98,7 @@ describe("fetchSessionMetadata", () => {
 	});
 
 	it("falls back to session-metadata when presign fetch fails", async () => {
-		fetchJSON
+		asMock(fetchJSON)
 			.mockRejectedValueOnce(new Error("presign failed"))
 			.mockResolvedValueOnce({
 				group: "test",
@@ -134,7 +134,7 @@ describe("fetchSessionMetadata", () => {
 		const fetchGate = new Promise((resolve) => {
 			resolveFetch = resolve;
 		});
-		fetchJSON.mockImplementation(async () => {
+		asMock(fetchJSON).mockImplementation(async () => {
 			await fetchGate;
 			return {
 				group: "test",
@@ -159,7 +159,7 @@ describe("fetchSessionMetadata", () => {
 		const fetchGate = new Promise((resolve) => {
 			resolveFetch = resolve;
 		});
-		fetchJSON.mockImplementation(async () => {
+		asMock(fetchJSON).mockImplementation(async () => {
 			await fetchGate;
 			return {
 				group: "test",
@@ -179,7 +179,7 @@ describe("fetchSessionMetadata", () => {
 	});
 
 	it("returns cached metadata within the TTL", async () => {
-		fetchJSON.mockResolvedValue({
+		asMock(fetchJSON).mockResolvedValue({
 			group: "test",
 			year: "2024",
 			items: [],
@@ -199,7 +199,7 @@ describe("fetchSessionMetadata", () => {
 	});
 
 	it("uses unknown fingerprint when metadataFingerprint is omitted", async () => {
-		fetchJSON.mockResolvedValue({
+		asMock(fetchJSON).mockResolvedValue({
 			group: "test",
 			year: "2024",
 			items: [],
@@ -210,7 +210,7 @@ describe("fetchSessionMetadata", () => {
 	});
 
 	it("treats 404 metadata URLs as null and throws on other failures", async () => {
-		fetchJSON
+		asMock(fetchJSON)
 			.mockResolvedValueOnce({
 				group: "test",
 				year: "2024",
@@ -223,7 +223,7 @@ describe("fetchSessionMetadata", () => {
 				},
 			})
 			.mockRejectedValueOnce(new Error("proxy also failed"));
-		global.fetch.mockImplementation(async (url: any) => {
+		asMock(global.fetch).mockImplementation(async (url: any) => {
 			if (url === "https://signed/tags") {
 				return { ok: false, status: 404 };
 			}
@@ -239,7 +239,7 @@ describe("fetchSessionMetadata", () => {
 	});
 
 	it("throws when the presign payload includes an err field", async () => {
-		fetchJSON
+		asMock(fetchJSON)
 			.mockResolvedValueOnce({ err: "no access" })
 			.mockResolvedValueOnce({
 				group: "test",
@@ -257,7 +257,7 @@ describe("fetchSessionMetadata", () => {
 	});
 
 	it("clears pending requests when a forceUpdate-false fetch fails", async () => {
-		fetchJSON
+		asMock(fetchJSON)
 			.mockRejectedValueOnce(new Error("presign"))
 			.mockRejectedValueOnce(new Error("proxy"))
 			.mockRejectedValueOnce(new Error("presign2"))
@@ -290,7 +290,7 @@ describe("fetchSessionMetadata", () => {
 		const cached = await fetchSessionMetadata("seed", "2024", "fp", false);
 		expect(cached.tags.a).toEqual(["b"]);
 
-		fetchJSON.mockResolvedValue({
+		asMock(fetchJSON).mockResolvedValue({
 			group: "test",
 			year: "2024",
 			items: [],
@@ -301,7 +301,7 @@ describe("fetchSessionMetadata", () => {
 				zip: "https://signed/zip",
 			},
 		});
-		global.fetch.mockResolvedValue({
+		asMock(global.fetch).mockResolvedValue({
 			ok: true,
 			status: 200,
 			arrayBuffer: async () => new ArrayBuffer(8),
@@ -317,7 +317,7 @@ describe("fetchSessionMetadata", () => {
 	it("times out hung metadata URL fetches", async () => {
 		jest.useFakeTimers();
 		try {
-			fetchJSON.mockImplementation(
+			asMock(fetchJSON).mockImplementation(
 				() =>
 					new Promise(() => {
 						/* never resolves */

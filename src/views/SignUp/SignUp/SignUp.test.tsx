@@ -70,8 +70,8 @@ describe("SignUp View", () => {
 
 	beforeEach(() => {
 		jest.clearAllMocks();
-		useTranslations.mockReturnValue(mockTranslations);
-		MainStore.useState.mockReturnValue({ direction: "ltr" });
+		asMock(useTranslations).mockReturnValue(mockTranslations);
+		asMock(MainStore.useState).mockReturnValue({ direction: "ltr" });
 	});
 
 	it("renders sign up form", () => {
@@ -85,7 +85,7 @@ describe("SignUp View", () => {
 	});
 
 	it("calls fetchJSON on submit", async () => {
-		fetchJSON.mockResolvedValue({ hash: "newhash" });
+		asMock(fetchJSON).mockResolvedValue({ hash: "newhash" });
 		render(<SignUp />);
 
 		fireEvent.change(screen.getByTestId("input-username"), {
@@ -144,7 +144,7 @@ describe("SignUp View", () => {
 	});
 
 	it("navigates home after a successful registration", async () => {
-		fetchJSON.mockResolvedValue({});
+		asMock(fetchJSON).mockResolvedValue({});
 		render(<SignUp />);
 		fireEvent.change(screen.getByTestId("input-username"), {
 			target: { value: "testuser" },
@@ -170,7 +170,7 @@ describe("SignUp View", () => {
 	});
 
 	it("clears cookies and shows translated errors on failure", async () => {
-		fetchJSON.mockResolvedValue({ err: "ACCESS_DENIED" });
+		asMock(fetchJSON).mockResolvedValue({ err: "ACCESS_DENIED" });
 		render(<SignUp />);
 		fireEvent.change(screen.getByTestId("input-username"), {
 			target: { value: "testuser" },
@@ -196,7 +196,7 @@ describe("SignUp View", () => {
 	});
 
 	it("renders RTL layout and toggles remember me", () => {
-		MainStore.useState.mockReturnValue({ direction: "rtl" });
+		asMock(MainStore.useState).mockReturnValue({ direction: "rtl" });
 		render(<SignUp />);
 		fireEvent.click(screen.getByRole("checkbox"));
 		expect(screen.getByTestId("input-username")).toBeInTheDocument();

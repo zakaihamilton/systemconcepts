@@ -29,11 +29,11 @@ jest.mock("@aws-sdk/client-s3", () => ({
 }));
 jest.mock("next/server", () => ({
 	NextResponse: {
-		json: (body: any, init = {}) => ({
+		json: (body: any, init: ResponseInit = {}) => ({
 			status: init.status || 200,
 			json: async () => body,
 			headers: {
-				get: (name: any) => init.headers?.get?.(name) || null,
+				get: (name: string) => new Headers(init.headers).get(name),
 			},
 		}),
 	},
@@ -51,17 +51,17 @@ function request(url: any, cookie = "id=user; hash=secret") {
 describe("/api/aws_download", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
-		getSessionUser.mockResolvedValue({ id: "user", role: "student" });
-		roleAuth.mockReturnValue(true);
-		getS3.mockResolvedValue({});
-		list.mockResolvedValue([
+		asMock(getSessionUser).mockResolvedValue({ id: "user", role: "student" });
+		asMock(roleAuth).mockReturnValue(true);
+		asMock(getS3).mockResolvedValue({});
+		asMock(list).mockResolvedValue([
 			{
 				name: "2024-05-05 Test Session.png",
 				type: "file",
 				stat: { type: "file", size: 100 },
 			},
 		]);
-		getSignedUrl.mockImplementation(async (_s3: any, command: any) => {
+		asMock(getSignedUrl).mockImplementation(async (_s3: any, command: any) => {
 			return `https://signed.example/${command.Key}`;
 		});
 	});
@@ -83,7 +83,7 @@ describe("/api/aws_download", () => {
 	});
 
 	it("rejects requests without credentials", async () => {
-		getSessionUser.mockRejectedValue("AUTHENTICATION_REQUIRED");
+		asMock(getSessionUser).mockRejectedValue("AUTHENTICATION_REQUIRED");
 
 		const response = await GET(
 			request("http://localhost/api/aws_download?group=test&year=2024", ""),
@@ -96,7 +96,7 @@ describe("/api/aws_download", () => {
 	});
 
 	it("rejects users without student access", async () => {
-		roleAuth.mockReturnValue(false);
+		asMock(roleAuth).mockReturnValue(false);
 
 		const response = await GET(
 			request("http://localhost/api/aws_download?group=test&year=2024"),
@@ -107,7 +107,7 @@ describe("/api/aws_download", () => {
 	});
 
 	it("returns null metadata URLs when presigning fails", async () => {
-		getSignedUrl.mockRejectedValue(new Error("presign failed"));
+		asMock(getSignedUrl).mockRejectedValue(new Error("presign failed"));
 
 		const response = await GET(
 			request("http://localhost/api/aws_download?group=test&year=2024"),

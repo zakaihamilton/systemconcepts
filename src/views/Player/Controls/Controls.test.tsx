@@ -39,7 +39,7 @@ describe("Controls Component", () => {
 		jest.useRealTimers();
 		eventListeners = {};
 		setMetadata = jest.fn();
-		useTranslations.mockReturnValue({
+		asMock(useTranslations).mockReturnValue({
 			TIME_LEFT: "Time left",
 			SEEK: "Seek",
 			REPLAY: "Replay",
@@ -51,9 +51,9 @@ describe("Controls Component", () => {
 			LOADING: "Loading",
 			PLAYING_ERROR: "Playback error",
 		});
-		MainStore.useState.mockReturnValue({ direction: "ltr" });
-		usePageVisibility.mockReturnValue(true);
-		useFile.mockReturnValue([{}, false, false, setMetadata]);
+		asMock(MainStore.useState).mockReturnValue({ direction: "ltr" });
+		asMock(usePageVisibility).mockReturnValue(true);
+		asMock(useFile).mockReturnValue([{}, false, false, setMetadata]);
 
 		mockPlayer = {
 			addEventListener: jest.fn((event, cb) => {
@@ -180,7 +180,7 @@ describe("Controls Component", () => {
 	});
 
 	it("swaps replay/forward icons for rtl direction", () => {
-		MainStore.useState.mockReturnValue({ direction: "rtl" });
+		asMock(MainStore.useState).mockReturnValue({ direction: "rtl" });
 		render(<Controls show playerRef={mockPlayer} />);
 		expect(screen.getByTestId("button-Forward")).toBeInTheDocument();
 		expect(screen.getByTestId("button-Replay")).toBeInTheDocument();
@@ -228,7 +228,17 @@ describe("Controls Component", () => {
 	it("supports mouse drag seeking on the progress bar", () => {
 		render(<Controls show playerRef={mockPlayer} />);
 		const slider = screen.getByRole("slider");
-		slider.getBoundingClientRect = () => ({ left: 0, width: 100 });
+		slider.getBoundingClientRect = () => ({
+			x: 0,
+			y: 0,
+			left: 0,
+			top: 0,
+			right: 100,
+			bottom: 10,
+			width: 100,
+			height: 10,
+			toJSON: () => ({}),
+		});
 		Object.defineProperty(slider, "clientWidth", { value: 100 });
 
 		fireEvent.mouseDown(slider, { clientX: 25 });
@@ -242,7 +252,17 @@ describe("Controls Component", () => {
 	it("supports touch drag seeking", () => {
 		render(<Controls show playerRef={mockPlayer} />);
 		const slider = screen.getByRole("slider");
-		slider.getBoundingClientRect = () => ({ left: 0, width: 100 });
+		slider.getBoundingClientRect = () => ({
+			x: 0,
+			y: 0,
+			left: 0,
+			top: 0,
+			right: 100,
+			bottom: 10,
+			width: 100,
+			height: 10,
+			toJSON: () => ({}),
+		});
 		Object.defineProperty(slider, "clientWidth", { value: 100 });
 
 		fireEvent.touchStart(slider, { touches: [{ clientX: 10 }] });
@@ -313,7 +333,7 @@ describe("Controls Component", () => {
 	});
 
 	it("restores metadata position on loadedmetadata", () => {
-		useFile.mockReturnValue([
+		asMock(useFile).mockReturnValue([
 			{ key1: { position: 33 } },
 			false,
 			false,
@@ -336,7 +356,12 @@ describe("Controls Component", () => {
 	});
 
 	it("skips metadata restore when metadataKey is missing", () => {
-		useFile.mockReturnValue([{ position: 10 }, false, false, setMetadata]);
+		asMock(useFile).mockReturnValue([
+			{ position: 10 },
+			false,
+			false,
+			setMetadata,
+		]);
 		render(<Controls show playerRef={mockPlayer} metadataPath="/meta.json" />);
 		act(() => {
 			eventListeners.loadedmetadata();
@@ -358,7 +383,7 @@ describe("Controls Component", () => {
 			eventListeners.timeupdate();
 		});
 		expect(setMetadata).toHaveBeenCalled();
-		const updater: any = setMetadata.mock.calls.at(-1)[0];
+		const updater: any = asMock(setMetadata).mock.calls.at(-1)[0];
 		expect(updater(null)).toEqual({
 			sess: { duration: 100, position: 12 },
 		});
@@ -392,9 +417,9 @@ describe("Controls Component", () => {
 		act(() => {
 			eventListeners.playing();
 		});
-		mockPlayer.pause.mockClear();
-		mockPlayer.load.mockClear();
-		mockPlayer.play.mockClear();
+		asMock(mockPlayer.pause).mockClear();
+		asMock(mockPlayer.load).mockClear();
+		asMock(mockPlayer.play).mockClear();
 
 		rerender(
 			<Controls
@@ -437,7 +462,7 @@ describe("Controls Component", () => {
 		act(() => {
 			eventListeners.timeupdate();
 		});
-		mockPlayer.play.mockClear();
+		asMock(mockPlayer.play).mockClear();
 
 		rerender(
 			<Controls
@@ -471,7 +496,7 @@ describe("Controls Component", () => {
 			eventListeners.playing();
 			eventListeners.timeupdate();
 		});
-		mockPlayer.play.mockClear();
+		asMock(mockPlayer.play).mockClear();
 		mockPlayer.error = { code: 2 };
 
 		// Expiry typically emits error then pause while renewing is still false.
@@ -518,7 +543,7 @@ describe("Controls Component", () => {
 		});
 		// User explicitly pauses while waiting for a fresh URL.
 		fireEvent.click(screen.getByTestId("button-Pause"));
-		mockPlayer.play.mockClear();
+		asMock(mockPlayer.play).mockClear();
 
 		rerender(
 			<Controls
@@ -559,7 +584,7 @@ describe("Controls Component", () => {
 		});
 		// Renew completed: error cleared, not renewing — headset pause must cancel.
 		mockPlayer.error = null;
-		mockPlayer.play.mockClear();
+		asMock(mockPlayer.play).mockClear();
 		act(() => {
 			eventListeners.pause();
 		});
@@ -580,7 +605,7 @@ describe("Controls Component", () => {
 	});
 
 	it("does not restore metadata bookmark when renew resume position is zero", () => {
-		useFile.mockReturnValue([
+		asMock(useFile).mockReturnValue([
 			{ key1: { position: 77 } },
 			false,
 			false,
@@ -706,7 +731,7 @@ describe("Controls Component", () => {
 		);
 		expect(mockPlayer.pause).toHaveBeenCalled();
 		expect(mockPlayer.currentTime).toBe(0);
-		mockPlayer.play.mockClear();
+		asMock(mockPlayer.play).mockClear();
 		act(() => {
 			eventListeners.loadedmetadata();
 			eventListeners.canplay();
@@ -715,7 +740,7 @@ describe("Controls Component", () => {
 	});
 
 	it("handles play rejection", async () => {
-		mockPlayer.play.mockRejectedValueOnce(new Error("blocked"));
+		asMock(mockPlayer.play).mockRejectedValueOnce(new Error("blocked"));
 		render(<Controls show playerRef={mockPlayer} />);
 		fireEvent.click(screen.getByTestId("button-Play"));
 		await act(async () => {
@@ -735,7 +760,7 @@ describe("Controls Component", () => {
 	});
 
 	it("throttles timeupdate when page is not visible", () => {
-		usePageVisibility.mockReturnValue(false);
+		asMock(usePageVisibility).mockReturnValue(false);
 		render(<Controls show={false} playerRef={mockPlayer} />);
 		mockPlayer.currentTime = 5;
 		act(() => {
@@ -807,7 +832,17 @@ describe("Controls Component", () => {
 	it("clamps seek position to duration bounds", () => {
 		render(<Controls show playerRef={mockPlayer} />);
 		const slider = screen.getByRole("slider");
-		slider.getBoundingClientRect = () => ({ left: 0, width: 100 });
+		slider.getBoundingClientRect = () => ({
+			x: 0,
+			y: 0,
+			left: 0,
+			top: 0,
+			right: 100,
+			bottom: 10,
+			width: 100,
+			height: 10,
+			toJSON: () => ({}),
+		});
 		Object.defineProperty(slider, "clientWidth", { value: 100 });
 		fireEvent.mouseDown(slider, { clientX: -10 });
 		expect(mockPlayer.currentTime).toBe(0);
@@ -835,7 +870,7 @@ describe("Controls Component", () => {
 		act(() => {
 			eventListeners.timeupdate();
 		});
-		const updater: any = setMetadata.mock.calls.at(-1)[0];
+		const updater: any = asMock(setMetadata).mock.calls.at(-1)[0];
 		expect(updater({ other: 1 })).toEqual({
 			other: 1,
 			sess: { duration: 100, position: 8 },
@@ -850,7 +885,7 @@ describe("Controls Component", () => {
 
 	it("shows play pending after a slow play() promise", async () => {
 		jest.useFakeTimers();
-		mockPlayer.play.mockImplementation(
+		asMock(mockPlayer.play).mockImplementation(
 			() => new Promise((resolve) => setTimeout(resolve, 2000)),
 		);
 		render(<Controls show playerRef={mockPlayer} />);

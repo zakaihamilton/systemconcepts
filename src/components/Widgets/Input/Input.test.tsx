@@ -28,7 +28,7 @@ jest.mock("@ui/Autocomplete", () => ({
 describe("Input Widget", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
-		useTranslations.mockReturnValue({
+		asMock(useTranslations).mockReturnValue({
 			SHOW_PASSWORD: "Show",
 			HIDE_PASSWORD: "Hide",
 		});
@@ -39,7 +39,7 @@ describe("Input Widget", () => {
 		const { getByLabelText } = render(
 			<InputWidget label="Username" state={["testuser", setValue]} />,
 		);
-		const input = getByLabelText("Username");
+		const input = getByLabelText("Username") as HTMLInputElement;
 		expect(input.value).toBe("testuser");
 	});
 

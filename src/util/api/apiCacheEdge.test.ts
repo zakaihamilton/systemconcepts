@@ -17,7 +17,7 @@ describe("readApiCacheEdge", () => {
 
 	it("decodes gzip-compressed cached bodies", async () => {
 		const payload = "<xml>hello</xml>";
-		downloadDataEdge.mockResolvedValue(
+		asMock(downloadDataEdge).mockResolvedValue(
 			Buffer.from(pako.gzip(Buffer.from(payload, "utf-8"))),
 		);
 
@@ -29,12 +29,12 @@ describe("readApiCacheEdge", () => {
 	});
 
 	it("returns null when the download fails", async () => {
-		downloadDataEdge.mockRejectedValue(new Error("not found"));
+		asMock(downloadDataEdge).mockRejectedValue(new Error("not found"));
 		await expect(readApiCacheEdge("rss", "missing")).resolves.toBeNull();
 	});
 
 	it("returns null when the downloaded data cannot be decoded", async () => {
-		downloadDataEdge.mockResolvedValue(Buffer.from("not gzipped data"));
+		asMock(downloadDataEdge).mockResolvedValue(Buffer.from("not gzipped data"));
 		await expect(readApiCacheEdge("rss", "broken")).resolves.toBeNull();
 	});
 });

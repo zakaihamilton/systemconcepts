@@ -118,7 +118,7 @@ describe("HistoryView", () => {
 
 	beforeEach(() => {
 		jest.clearAllMocks();
-		useTranslations.mockReturnValue({
+		asMock(useTranslations).mockReturnValue({
 			TODAY: "Today",
 			YESTERDAY: "Yesterday",
 			THIS_WEEK: "This week",
@@ -126,16 +126,22 @@ describe("HistoryView", () => {
 			OLDER: "Older",
 			REMOVE_FROM_HISTORY: "Remove",
 		});
-		useLanguage.mockReturnValue("en-US");
-		useSearch.mockReturnValue("");
-		SessionsStore.useState.mockReturnValue({ yearFilter: [] });
-		PlayerStore.useState.mockReturnValue({ session: null });
-		useSessions.mockReturnValue([sessions]);
-		useRecentHistory.mockReturnValue([[], null, null, null, removeFromHistory]);
+		asMock(useLanguage).mockReturnValue("en-US");
+		asMock(useSearch).mockReturnValue("");
+		asMock(SessionsStore.useState).mockReturnValue({ yearFilter: [] });
+		asMock(PlayerStore.useState).mockReturnValue({ session: null });
+		asMock(useSessions).mockReturnValue([sessions]);
+		asMock(useRecentHistory).mockReturnValue([
+			[],
+			null,
+			null,
+			null,
+			removeFromHistory,
+		]);
 	});
 
 	it("renders nothing when history or sessions are missing", () => {
-		useRecentHistory.mockReturnValue([
+		asMock(useRecentHistory).mockReturnValue([
 			null,
 			null,
 			null,
@@ -146,8 +152,14 @@ describe("HistoryView", () => {
 		expect(container.querySelectorAll("[class]").length).toBeGreaterThan(0);
 		expect(screen.queryByText("Today")).not.toBeInTheDocument();
 
-		useRecentHistory.mockReturnValue([[], null, null, null, removeFromHistory]);
-		useSessions.mockReturnValue([null]);
+		asMock(useRecentHistory).mockReturnValue([
+			[],
+			null,
+			null,
+			null,
+			removeFromHistory,
+		]);
+		asMock(useSessions).mockReturnValue([null]);
 		render(<HistoryView />);
 		expect(screen.queryByText("Today")).not.toBeInTheDocument();
 	});
@@ -202,7 +214,7 @@ describe("HistoryView", () => {
 				timestamp: hoursAgo(1),
 			},
 		];
-		useRecentHistory.mockReturnValue([
+		asMock(useRecentHistory).mockReturnValue([
 			history,
 			null,
 			null,
@@ -234,27 +246,27 @@ describe("HistoryView", () => {
 				timestamp: daysAgo(1),
 			},
 		];
-		useRecentHistory.mockReturnValue([
+		asMock(useRecentHistory).mockReturnValue([
 			history,
 			null,
 			null,
 			null,
 			removeFromHistory,
 		]);
-		useSearch.mockReturnValue("yesterday");
-		SessionsStore.useState.mockReturnValue({ yearFilter: [] });
+		asMock(useSearch).mockReturnValue("yesterday");
+		asMock(SessionsStore.useState).mockReturnValue({ yearFilter: [] });
 
 		const { rerender } = render(<HistoryView />);
 		expect(screen.getByTestId("card-Yesterday Session")).toBeInTheDocument();
 		expect(screen.queryByTestId("card-Today Session")).not.toBeInTheDocument();
 
-		useSearch.mockReturnValue("");
-		SessionsStore.useState.mockReturnValue({ yearFilter: ["2024"] });
+		asMock(useSearch).mockReturnValue("");
+		asMock(SessionsStore.useState).mockReturnValue({ yearFilter: ["2024"] });
 		rerender(<HistoryView />);
 		expect(screen.getByTestId("card-Today Session")).toBeInTheDocument();
 		expect(screen.getByTestId("card-Yesterday Session")).toBeInTheDocument();
 
-		SessionsStore.useState.mockReturnValue({ yearFilter: ["2099"] });
+		asMock(SessionsStore.useState).mockReturnValue({ yearFilter: ["2099"] });
 		rerender(<HistoryView />);
 		expect(screen.queryByTestId("card-Today Session")).not.toBeInTheDocument();
 	});
@@ -268,14 +280,14 @@ describe("HistoryView", () => {
 				timestamp: hoursAgo(1),
 			},
 		];
-		useRecentHistory.mockReturnValue([
+		asMock(useRecentHistory).mockReturnValue([
 			history,
 			null,
 			null,
 			null,
 			removeFromHistory,
 		]);
-		PlayerStore.useState.mockReturnValue({
+		asMock(PlayerStore.useState).mockReturnValue({
 			session: {
 				group: "alpha",
 				date: "2024-01-01",
@@ -295,14 +307,14 @@ describe("HistoryView", () => {
 			"session?group=alpha&year=2024&date=2024-01-01&name=Today%20Session",
 		);
 
-		addPath.mockClear();
+		asMock(addPath).mockClear();
 		const header = container.querySelector("[class*='timelineHeader']");
 		fireEvent.click(header);
 		expect(addPath).toHaveBeenCalledWith(
 			"session?group=alpha&year=2024&date=2024-01-01&name=Today%20Session",
 		);
 
-		addPath.mockClear();
+		asMock(addPath).mockClear();
 		const removeButton = container.querySelector("[class*='removeButton']");
 		fireEvent.click(removeButton);
 		expect(removeFromHistory).toHaveBeenCalled();
@@ -310,7 +322,7 @@ describe("HistoryView", () => {
 	});
 
 	it("renders empty timestamp text when timestamp is missing", () => {
-		useRecentHistory.mockReturnValue([
+		asMock(useRecentHistory).mockReturnValue([
 			[
 				{
 					group: "alpha",

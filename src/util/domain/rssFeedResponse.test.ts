@@ -16,10 +16,10 @@ jest.mock("@util/data/string", () => ({
 describe("rssFeedResponse", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
-		getSProxyUrl.mockResolvedValue(
+		asMock(getSProxyUrl).mockResolvedValue(
 			"https://systemconcepts.app/api/rss/s?p=encoded",
 		);
-		getTranscriptProxyUrlFast.mockResolvedValue(null);
+		asMock(getTranscriptProxyUrlFast).mockResolvedValue(null);
 	});
 
 	it("uses the canonical self URL without auth params", async () => {
@@ -73,7 +73,7 @@ describe("rssFeedResponse", () => {
 	});
 
 	it("builds mp4 video, m4a audio, and mpeg enclosures", async () => {
-		getSProxyUrl.mockImplementation(async (path: any) =>
+		asMock(getSProxyUrl).mockImplementation(async (path: any) =>
 			path ? `https://cdn/${path}` : null,
 		);
 
@@ -114,7 +114,7 @@ describe("rssFeedResponse", () => {
 	});
 
 	it("uses thumbnail when present and falls back to cover art", async () => {
-		getSProxyUrl.mockImplementation(async (path: any) => {
+		asMock(getSProxyUrl).mockImplementation(async (path: any) => {
 			if (!path) return null;
 			return `https://cdn/${path}`;
 		});
@@ -154,7 +154,7 @@ describe("rssFeedResponse", () => {
 	});
 
 	it("emits transcript tags for vtt and plain paths", async () => {
-		getTranscriptProxyUrlFast
+		asMock(getTranscriptProxyUrlFast)
 			.mockResolvedValueOnce("https://example.com/t.vtt")
 			.mockResolvedValueOnce("https://example.com/t.txt");
 
@@ -228,11 +228,15 @@ describe("rssFeedResponse", () => {
 			configurable: true,
 			value: { subtle: { digest } },
 		});
-		global.TextEncoder = class {
-			encode(value: any) {
-				return Buffer.from(String(value));
-			}
-		};
+		Reflect.set(
+			globalThis,
+			"TextEncoder",
+			class {
+				encode(value: any) {
+					return Buffer.from(String(value));
+				}
+			},
+		);
 
 		const etag = await buildRssEtag("<rss>hello</rss>");
 		expect(etag).toBe("0102ff");

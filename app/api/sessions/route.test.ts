@@ -27,6 +27,8 @@ jest.mock("@util/api/httpHeaders", () => ({
 
 jest.mock("next/server", () => {
 	class TestHeaders {
+		values: Map<string, string>;
+
 		constructor(values = {}) {
 			this.values = new Map(
 				Object.entries(values).map(([key, value]) => [
@@ -46,7 +48,11 @@ jest.mock("next/server", () => {
 	}
 
 	class TestResponse {
-		constructor(body: any, init = {}) {
+		body: any;
+		status: number;
+		headers: TestHeaders;
+
+		constructor(body: any, init: ResponseInit = {}) {
 			this.body = body;
 			this.status = init.status || 200;
 			this.headers = new TestHeaders(init.headers);
@@ -56,7 +62,7 @@ jest.mock("next/server", () => {
 			return JSON.parse(this.body);
 		}
 
-		static json(body: any, init = {}) {
+		static json(body: any, init: ResponseInit = {}) {
 			return new TestResponse(JSON.stringify(body), {
 				...init,
 				headers: {
@@ -67,7 +73,7 @@ jest.mock("next/server", () => {
 		}
 	}
 
-	global.Response = TestResponse;
+	global.Response = TestResponse as unknown as typeof Response;
 
 	return { NextResponse: TestResponse };
 });
@@ -117,11 +123,11 @@ function makeRequest(query = "") {
 describe("/api/sessions", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
-		enforceRateLimitEdge.mockResolvedValue(true);
-		authenticateEdge.mockResolvedValue(true);
-		loadManifest.mockResolvedValue([]);
-		getSessions.mockResolvedValue([]);
-		readApiCacheEdge.mockResolvedValue(null);
+		asMock(enforceRateLimitEdge).mockResolvedValue(true);
+		asMock(authenticateEdge).mockResolvedValue(true);
+		asMock(loadManifest).mockResolvedValue([]);
+		asMock(getSessions).mockResolvedValue([]);
+		asMock(readApiCacheEdge).mockResolvedValue(null);
 	});
 
 	it("caches successful responses in the browser and Vercel CDN", async () => {
@@ -139,8 +145,8 @@ describe("/api/sessions", () => {
 			{ id: "one", group: "alpha", tags: ["one"], date: "2025-01-01" },
 			{ id: "two", group: "alpha", tags: ["two"], date: "2025-01-02" },
 		];
-		getSessions.mockResolvedValue(sessions);
-		filterSessions.mockReturnValue([sessions[1]]);
+		asMock(getSessions).mockResolvedValue(sessions);
+		asMock(filterSessions).mockReturnValue([sessions[1]]);
 
 		const request = makeRequest(
 			"?id=user&token=token&group=alpha&tag=two&index=0&count=1",
@@ -156,7 +162,7 @@ describe("/api/sessions", () => {
 	});
 
 	it("reuses shared S3 cache for different authenticated users", async () => {
-		readApiCacheEdge.mockResolvedValue('[{"id":"cached"}]');
+		asMock(readApiCacheEdge).mockResolvedValue('[{"id":"cached"}]');
 
 		const first = await GET(
 			makeRequest("?id=user-a&token=token-a&group=alpha"),
@@ -196,12 +202,12 @@ describe("/api/sessions", () => {
 				"fingerprint",
 			);
 		} finally {
-			dateNow.mockRestore();
+			asMock(dateNow).mockRestore();
 		}
 	});
 
 	it("does not cache unauthorized responses", async () => {
-		authenticateEdge.mockResolvedValue(false);
+		asMock(authenticateEdge).mockResolvedValue(false);
 
 		const response = await GET(makeRequest("?id=user&token=bad"));
 
@@ -210,7 +216,7 @@ describe("/api/sessions", () => {
 	});
 
 	it("does not cache rate-limited responses", async () => {
-		enforceRateLimitEdge.mockResolvedValue(false);
+		asMock(enforceRateLimitEdge).mockResolvedValue(false);
 
 		const response = await GET(makeRequest("?id=user&token=token"));
 
@@ -220,7 +226,7 @@ describe("/api/sessions", () => {
 	});
 
 	it("does not cache generation failures", async () => {
-		getSessions.mockRejectedValue(new Error("storage unavailable"));
+		asMock(getSessions).mockRejectedValue(new Error("storage unavailable"));
 
 		const response = await GET(makeRequest("?id=user&token=token"));
 

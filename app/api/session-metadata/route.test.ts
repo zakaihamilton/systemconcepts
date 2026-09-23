@@ -20,7 +20,7 @@ jest.mock("@util/domain/updateSessions/sessionMetadataServer", () => ({
 }));
 jest.mock("next/server", () => ({
 	NextResponse: {
-		json: (body: any, init = {}) => ({
+		json: (body: any, init: { status?: number; headers?: Headers } = {}) => ({
 			status: init.status || 200,
 			json: async () => body,
 			headers: {
@@ -42,9 +42,9 @@ function request(url: any, cookie = "id=user; hash=secret") {
 describe("/api/session-metadata", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
-		getSessionUser.mockResolvedValue({ id: "user", role: "student" });
-		roleAuth.mockReturnValue(true);
-		aggregateSessionMetadata.mockResolvedValue({
+		asMock(getSessionUser).mockResolvedValue({ id: "user", role: "student" });
+		asMock(roleAuth).mockReturnValue(true);
+		asMock(aggregateSessionMetadata).mockResolvedValue({
 			group: "test",
 			year: "2024",
 			items: [],
@@ -73,7 +73,7 @@ describe("/api/session-metadata", () => {
 	});
 
 	it("rejects requests without credentials before reading metadata", async () => {
-		getSessionUser.mockRejectedValue("AUTHENTICATION_REQUIRED");
+		asMock(getSessionUser).mockRejectedValue("AUTHENTICATION_REQUIRED");
 
 		const response = await GET(
 			request("http://localhost/api/session-metadata?group=test&year=2024", ""),
@@ -87,7 +87,7 @@ describe("/api/session-metadata", () => {
 	});
 
 	it("rejects users without session metadata read access", async () => {
-		roleAuth.mockReturnValue(false);
+		asMock(roleAuth).mockReturnValue(false);
 
 		const response = await GET(
 			request("http://localhost/api/session-metadata?group=test&year=2024"),

@@ -8,7 +8,7 @@ jest.mock("@icons/Audio", () => () => <div data-testid="audio-icon" />);
 describe("SessionIcon Widget", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
-		useTranslations.mockReturnValue({ VIDEO: "Video", AUDIO: "Audio" });
+		asMock(useTranslations).mockReturnValue({ VIDEO: "Video", AUDIO: "Audio" });
 	});
 
 	it("renders correct icon for video", () => {

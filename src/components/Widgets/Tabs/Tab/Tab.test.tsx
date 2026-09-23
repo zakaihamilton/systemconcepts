@@ -11,7 +11,7 @@ describe("TabWidget Component", () => {
 	});
 
 	it("renders content with desktop styling when not on phone", () => {
-		useDeviceType.mockReturnValue("desktop");
+		asMock(useDeviceType).mockReturnValue("desktop");
 
 		const { getByText } = render(
 			<Tabs value="tab">
@@ -29,7 +29,7 @@ describe("TabWidget Component", () => {
 	});
 
 	it("renders content with mobile styling when on phone", () => {
-		useDeviceType.mockReturnValue("phone");
+		asMock(useDeviceType).mockReturnValue("phone");
 
 		const { getByText } = render(
 			<Tabs value="tab">

@@ -46,8 +46,8 @@ describe("AWS storage authentication", () => {
 			ok: false,
 			headers: { get: jest.fn(() => "application/json") },
 		};
-		global.fetch.mockResolvedValue(res);
-		requireRelogin.mockReturnValue(true);
+		asMock(global.fetch).mockResolvedValue(res);
+		asMock(requireRelogin).mockReturnValue(true);
 
 		await expect(
 			storage.readFile("aws/personal/user/manifest.json"),
@@ -57,7 +57,7 @@ describe("AWS storage authentication", () => {
 	});
 
 	it("requests directory counts in the original listing call", async () => {
-		fetchJSON.mockResolvedValue([
+		asMock(fetchJSON).mockResolvedValue([
 			{ type: "dir", name: "2025", count: 12 },
 			{ type: "dir", name: "2026", count: 4 },
 		]);
@@ -85,7 +85,7 @@ describe("getListing", () => {
 	});
 
 	it("maps device-prefixed ids and paths onto each entry", async () => {
-		fetchJSON.mockResolvedValue([
+		asMock(fetchJSON).mockResolvedValue([
 			{ name: "file.txt", stat: { type: "file", size: 12 } },
 		]);
 
@@ -101,7 +101,7 @@ describe("getListing", () => {
 	});
 
 	it("caches repeated listing requests for the same path", async () => {
-		fetchJSON.mockResolvedValue([]);
+		asMock(fetchJSON).mockResolvedValue([]);
 
 		await storage.getListing("listing-cache-test");
 		await storage.getListing("listing-cache-test");
@@ -117,7 +117,7 @@ describe("deleteFolder", () => {
 	});
 
 	it("recursively deletes file and directory children before removing itself", async () => {
-		fetchJSON.mockImplementation((url: any, options: any) => {
+		asMock(fetchJSON).mockImplementation((url: any, options: any) => {
 			if (options?.method === "DELETE") return Promise.resolve({});
 			if (getQueryPath(url) === "delete-folder-test") {
 				return Promise.resolve([
@@ -130,7 +130,7 @@ describe("deleteFolder", () => {
 
 		await storage.deleteFolder("delete-folder-test");
 
-		const deleteCalls = fetchJSON.mock.calls.filter(
+		const deleteCalls = asMock(fetchJSON).mock.calls.filter(
 			([, options]: any) => options?.method === "DELETE",
 		);
 		const deletedPaths = deleteCalls.map(([url]: any) =>
@@ -162,16 +162,18 @@ describe("deleteFile", () => {
 	});
 
 	it("issues a DELETE request and invalidates the read cache", async () => {
-		fetchJSON.mockResolvedValueOnce({ name: "file.txt" });
+		asMock(fetchJSON).mockResolvedValueOnce({ name: "file.txt" });
 		await storage.exists("delete-file-cache-test");
 		expect(fetchJSON).toHaveBeenCalledTimes(1);
 
-		fetchJSON.mockResolvedValueOnce({});
+		asMock(fetchJSON).mockResolvedValueOnce({});
 		await storage.deleteFile("delete-file-cache-test");
 		expect(fetchJSON).toHaveBeenCalledTimes(2);
-		expect(fetchJSON.mock.calls[1][1]).toMatchObject({ method: "DELETE" });
+		expect(asMock(fetchJSON).mock.calls[1][1]).toMatchObject({
+			method: "DELETE",
+		});
 
-		fetchJSON.mockResolvedValueOnce({ name: "file.txt" });
+		asMock(fetchJSON).mockResolvedValueOnce({ name: "file.txt" });
 		await storage.exists("delete-file-cache-test");
 		expect(fetchJSON).toHaveBeenCalledTimes(3);
 	});
@@ -181,11 +183,11 @@ describe("readFile", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
 		global.fetch = jest.fn();
-		requireRelogin.mockReturnValue(false);
+		asMock(requireRelogin).mockReturnValue(false);
 	});
 
 	it("returns text content for a plain-text file", async () => {
-		global.fetch.mockResolvedValue(
+		asMock(global.fetch).mockResolvedValue(
 			response({
 				contentType: "text/plain",
 				text: jest.fn().mockResolvedValue("hello"),
@@ -197,20 +199,22 @@ describe("readFile", () => {
 
 	it("converts binary blobs via binaryToString", async () => {
 		const blob = new Blob(["binary"]);
-		global.fetch.mockResolvedValue(
+		asMock(global.fetch).mockResolvedValue(
 			response({
 				contentType: "image/png",
 				blob: jest.fn().mockResolvedValue(blob),
 			}),
 		);
-		binaryToString.mockResolvedValue("encoded");
+		asMock(binaryToString).mockResolvedValue("encoded");
 
 		await expect(storage.readFile("aws/image.png")).resolves.toBe("encoded");
 		expect(binaryToString).toHaveBeenCalledWith(blob);
 	});
 
 	it("throws when the response status is not ok and not 401", async () => {
-		global.fetch.mockResolvedValue(response({ status: 500, ok: false }));
+		asMock(global.fetch).mockResolvedValue(
+			response({ status: 500, ok: false }),
+		);
 
 		await expect(storage.readFile("aws/broken.txt")).rejects.toThrow(
 			"Failed to fetch file: 500",
@@ -218,7 +222,7 @@ describe("readFile", () => {
 	});
 
 	it("follows a signed URL envelope and returns text content", async () => {
-		global.fetch
+		asMock(global.fetch)
 			.mockResolvedValueOnce(
 				response({
 					contentType: "application/json",
@@ -244,7 +248,7 @@ describe("readFile", () => {
 
 	it("follows a signed URL envelope for binary content", async () => {
 		const blob = new Blob(["binary"]);
-		global.fetch
+		asMock(global.fetch)
 			.mockResolvedValueOnce(
 				response({
 					contentType: "application/json",
@@ -258,7 +262,7 @@ describe("readFile", () => {
 			.mockResolvedValueOnce(
 				response({ blob: jest.fn().mockResolvedValue(blob) }),
 			);
-		binaryToString.mockResolvedValue("encoded-binary");
+		asMock(binaryToString).mockResolvedValue("encoded-binary");
 
 		await expect(storage.readFile("aws/redirected.png")).resolves.toBe(
 			"encoded-binary",
@@ -266,7 +270,7 @@ describe("readFile", () => {
 	});
 
 	it("throws when the signed URL fetch fails", async () => {
-		global.fetch
+		asMock(global.fetch)
 			.mockResolvedValueOnce(
 				response({
 					contentType: "application/json",
@@ -285,7 +289,7 @@ describe("readFile", () => {
 	});
 
 	it("throws when the JSON body is a directory listing", async () => {
-		global.fetch.mockResolvedValue(
+		asMock(global.fetch).mockResolvedValue(
 			response({
 				contentType: "application/json",
 				text: jest.fn().mockResolvedValue(JSON.stringify([{ name: "a" }])),
@@ -298,7 +302,7 @@ describe("readFile", () => {
 	});
 
 	it("falls back to text content when the JSON body cannot be parsed", async () => {
-		global.fetch.mockResolvedValue(
+		asMock(global.fetch).mockResolvedValue(
 			response({
 				contentType: "application/json",
 				text: jest.fn().mockResolvedValue("not actually json"),
@@ -315,11 +319,11 @@ describe("readFiles", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
 		global.fetch = jest.fn();
-		requireRelogin.mockReturnValue(false);
+		asMock(requireRelogin).mockReturnValue(false);
 	});
 
 	it("reads multiple files relative to a prefix and skips null content", async () => {
-		global.fetch.mockImplementation((url: any) => {
+		asMock(global.fetch).mockImplementation((url: any) => {
 			if (url.includes("a.txt")) {
 				return Promise.resolve(
 					response({
@@ -344,22 +348,24 @@ describe("readFiles", () => {
 	});
 
 	it("adds a trailing slash to the prefix when missing", async () => {
-		global.fetch.mockResolvedValue(response({ status: 404, ok: false }));
+		asMock(global.fetch).mockResolvedValue(
+			response({ status: 404, ok: false }),
+		);
 
 		await storage.readFiles("prefix-no-slash", ["a.txt"]);
 
-		expect(global.fetch.mock.calls[0][0]).toContain(
+		expect(asMock(global.fetch).mock.calls[0][0]).toContain(
 			encodeURIComponent("prefix-no-slash/a.txt"),
 		);
 	});
 
 	it("re-throws AUTHENTICATION_REQUIRED errors", async () => {
-		global.fetch.mockResolvedValue({
+		asMock(global.fetch).mockResolvedValue({
 			status: 401,
 			ok: false,
 			headers: { get: () => "application/json" },
 		});
-		requireRelogin.mockReturnValue(true);
+		asMock(requireRelogin).mockReturnValue(true);
 
 		await expect(storage.readFiles("prefix/", ["secure.txt"])).rejects.toThrow(
 			"AUTHENTICATION_REQUIRED",
@@ -368,7 +374,7 @@ describe("readFiles", () => {
 
 	it("logs unexpected read errors but continues", async () => {
 		const { logger } = require("@util/api/logger");
-		global.fetch.mockResolvedValue({
+		asMock(global.fetch).mockResolvedValue({
 			status: 500,
 			ok: false,
 			headers: { get: () => "" },
@@ -388,8 +394,10 @@ describe("writeFile", () => {
 	});
 
 	it("uploads directly to the signed URL for JSON content", async () => {
-		fetchJSON.mockResolvedValue({ url: "https://signed.example/upload" });
-		global.fetch.mockResolvedValue({ ok: true });
+		asMock(fetchJSON).mockResolvedValue({
+			url: "https://signed.example/upload",
+		});
+		asMock(global.fetch).mockResolvedValue({ ok: true });
 
 		await storage.writeFile("aws/data.json", '{"a":1}');
 
@@ -400,30 +408,32 @@ describe("writeFile", () => {
 	});
 
 	it("decodes base64 gzip payloads before uploading directly", async () => {
-		fetchJSON.mockResolvedValue({ url: "https://signed.example/upload.gz" });
-		global.fetch.mockResolvedValue({ ok: true });
+		asMock(fetchJSON).mockResolvedValue({
+			url: "https://signed.example/upload.gz",
+		});
+		asMock(global.fetch).mockResolvedValue({ ok: true });
 		const base64Body = Buffer.from("gzip-body").toString("base64");
 
 		await storage.writeFile("aws/archive.gz", base64Body);
 
-		const [, options] = global.fetch.mock.calls[0];
+		const [, options] = asMock(global.fetch).mock.calls[0];
 		expect(options.body).toBeInstanceOf(Uint8Array);
 	});
 
 	it("falls back to the proxy endpoint when the signed URL request fails", async () => {
-		fetchJSON.mockResolvedValueOnce({ err: "no signed url" });
-		fetchJSON.mockResolvedValueOnce({});
+		asMock(fetchJSON).mockResolvedValueOnce({ err: "no signed url" });
+		asMock(fetchJSON).mockResolvedValueOnce({});
 
 		await storage.writeFile("aws/fallback.json", "body");
 
 		expect(fetchJSON).toHaveBeenCalledTimes(2);
-		expect(fetchJSON.mock.calls[1][0]).toBe("/api/aws");
-		expect(fetchJSON.mock.calls[1][1]).toMatchObject({ method: "PUT" });
+		expect(asMock(fetchJSON).mock.calls[1][0]).toBe("/api/aws");
+		expect(asMock(fetchJSON).mock.calls[1][1]).toMatchObject({ method: "PUT" });
 	});
 
 	it("falls back to the proxy endpoint when no signed url is returned", async () => {
-		fetchJSON.mockResolvedValueOnce({});
-		fetchJSON.mockResolvedValueOnce({});
+		asMock(fetchJSON).mockResolvedValueOnce({});
+		asMock(fetchJSON).mockResolvedValueOnce({});
 
 		await storage.writeFile("aws/no-url.json", "body");
 
@@ -431,9 +441,11 @@ describe("writeFile", () => {
 	});
 
 	it("falls back to the proxy endpoint when the direct upload response is not ok", async () => {
-		fetchJSON.mockResolvedValueOnce({ url: "https://signed.example/upload" });
-		fetchJSON.mockResolvedValueOnce({});
-		global.fetch.mockResolvedValue({
+		asMock(fetchJSON).mockResolvedValueOnce({
+			url: "https://signed.example/upload",
+		});
+		asMock(fetchJSON).mockResolvedValueOnce({});
+		asMock(global.fetch).mockResolvedValue({
 			ok: false,
 			status: 500,
 			text: jest.fn().mockResolvedValue("server error"),
@@ -442,18 +454,18 @@ describe("writeFile", () => {
 		await storage.writeFile("aws/upload-fails.json", "body");
 
 		expect(fetchJSON).toHaveBeenCalledTimes(2);
-		expect(fetchJSON.mock.calls[1][1]).toMatchObject({ method: "PUT" });
+		expect(asMock(fetchJSON).mock.calls[1][1]).toMatchObject({ method: "PUT" });
 	});
 
 	it("base64-encodes binary bodies when falling back to the proxy", async () => {
-		fetchJSON.mockResolvedValueOnce({});
-		fetchJSON.mockResolvedValueOnce({});
-		binaryToString.mockResolvedValue("base64-body");
+		asMock(fetchJSON).mockResolvedValueOnce({});
+		asMock(fetchJSON).mockResolvedValueOnce({});
+		asMock(binaryToString).mockResolvedValue("base64-body");
 
 		await storage.writeFile("aws/image.png", new Uint8Array([1, 2, 3]));
 
 		expect(binaryToString).toHaveBeenCalled();
-		const body = JSON.parse(fetchJSON.mock.calls[1][1].body);
+		const body = JSON.parse(asMock(fetchJSON).mock.calls[1][1].body);
 		expect(body[0].body).toBe("base64-body");
 	});
 });
@@ -465,8 +477,10 @@ describe("writeFiles", () => {
 	});
 
 	it("writes every file in the map relative to the prefix", async () => {
-		fetchJSON.mockResolvedValue({ url: "https://signed.example/upload" });
-		global.fetch.mockResolvedValue({ ok: true });
+		asMock(fetchJSON).mockResolvedValue({
+			url: "https://signed.example/upload",
+		});
+		asMock(global.fetch).mockResolvedValue({ ok: true });
 
 		await storage.writeFiles("prefix/", { "a.txt": "one", "b.txt": "two" });
 
@@ -474,8 +488,10 @@ describe("writeFiles", () => {
 	});
 
 	it("defaults missing file bodies to an empty string", async () => {
-		fetchJSON.mockResolvedValue({ url: "https://signed.example/upload" });
-		global.fetch.mockResolvedValue({ ok: true });
+		asMock(fetchJSON).mockResolvedValue({
+			url: "https://signed.example/upload",
+		});
+		asMock(global.fetch).mockResolvedValue({ ok: true });
 
 		await storage.writeFiles("prefix/", { "empty.txt": null });
 
@@ -493,7 +509,7 @@ describe("getRecursiveList", () => {
 	});
 
 	it("flattens nested directories into a single file listing", async () => {
-		fetchJSON.mockImplementation((url: any) => {
+		asMock(fetchJSON).mockImplementation((url: any) => {
 			const path = getQueryPath(url);
 			if (path === "recursive-root") {
 				return Promise.resolve([
@@ -518,7 +534,7 @@ describe("getRecursiveList", () => {
 	});
 
 	it("avoids revisiting the same directory when duplicate entries are listed", async () => {
-		fetchJSON.mockImplementation((url: any) => {
+		asMock(fetchJSON).mockImplementation((url: any) => {
 			const path = getQueryPath(url);
 			if (path === "dedup-root") {
 				return Promise.resolve([
@@ -531,7 +547,7 @@ describe("getRecursiveList", () => {
 
 		await storage.getRecursiveList("dedup-root");
 
-		const listCalls = fetchJSON.mock.calls.filter(
+		const listCalls = asMock(fetchJSON).mock.calls.filter(
 			([url]: any) => getQueryPath(url) === "dedup-root/sub",
 		);
 		expect(listCalls).toHaveLength(1);
@@ -539,7 +555,7 @@ describe("getRecursiveList", () => {
 
 	it("stops recursion once the max depth is exceeded", async () => {
 		const { logger } = require("@util/api/logger");
-		fetchJSON.mockImplementation((url: any) => {
+		asMock(fetchJSON).mockImplementation((url: any) => {
 			const match = url.match(/path=([^&]*)/);
 			const path = match ? decodeURIComponent(match[1]) : "";
 			const depth = path.split("/").filter(Boolean).length;
@@ -558,7 +574,7 @@ describe("getRecursiveList", () => {
 
 	it("logs and continues when listing a directory fails", async () => {
 		const { logger } = require("@util/api/logger");
-		fetchJSON.mockRejectedValue(new Error("network down"));
+		asMock(fetchJSON).mockRejectedValue(new Error("network down"));
 
 		const result = await storage.getRecursiveList("failing-root");
 
@@ -567,7 +583,7 @@ describe("getRecursiveList", () => {
 	});
 
 	it("propagates listing errors in strict mode", async () => {
-		fetchJSON.mockRejectedValue(new Error("network down"));
+		asMock(fetchJSON).mockRejectedValue(new Error("network down"));
 
 		await expect(
 			storage.getRecursiveList("failing-root-strict", { strict: true }),
@@ -582,19 +598,19 @@ describe("exists", () => {
 	});
 
 	it("returns true for an existing file", async () => {
-		fetchJSON.mockResolvedValue({ name: "file.txt", type: "file" });
+		asMock(fetchJSON).mockResolvedValue({ name: "file.txt", type: "file" });
 
 		await expect(storage.exists("exists-file-test")).resolves.toBeTruthy();
 	});
 
 	it("returns false for a directory", async () => {
-		fetchJSON.mockResolvedValue({ name: "sub", type: "dir" });
+		asMock(fetchJSON).mockResolvedValue({ name: "sub", type: "dir" });
 
 		await expect(storage.exists("exists-dir-test")).resolves.toBe(false);
 	});
 
 	it("returns false for an x-directory mime type", async () => {
-		fetchJSON.mockResolvedValue({
+		asMock(fetchJSON).mockResolvedValue({
 			name: "sub",
 			type: "application/x-directory",
 		});
@@ -603,20 +619,20 @@ describe("exists", () => {
 	});
 
 	it("returns false when the server responds with a directory listing", async () => {
-		fetchJSON.mockResolvedValue([{ name: "a" }]);
+		asMock(fetchJSON).mockResolvedValue([{ name: "a" }]);
 
 		await expect(storage.exists("exists-array-test")).resolves.toBe(false);
 	});
 
 	it("returns false when the item is missing", async () => {
-		fetchJSON.mockResolvedValue(null);
+		asMock(fetchJSON).mockResolvedValue(null);
 
 		await expect(storage.exists("exists-missing-test")).resolves.toBeFalsy();
 	});
 
 	it("returns false and logs when fetchJSON throws", async () => {
 		const { logger } = require("@util/api/logger");
-		fetchJSON.mockRejectedValue(new Error("network error"));
+		asMock(fetchJSON).mockRejectedValue(new Error("network error"));
 
 		await expect(storage.exists("exists-error-test")).resolves.toBe(false);
 		expect(logger.error).toHaveBeenCalled();

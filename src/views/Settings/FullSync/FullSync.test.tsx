@@ -22,7 +22,7 @@ describe("FullSync Component", () => {
 
 	beforeEach(() => {
 		jest.clearAllMocks();
-		useTranslations.mockReturnValue({
+		asMock(useTranslations).mockReturnValue({
 			FULL_SYNC: "Full Sync",
 			CANCEL: "Cancel",
 			FULL_SYNC_MESSAGE: "Do full sync?",
@@ -39,7 +39,7 @@ describe("FullSync Component", () => {
 	});
 
 	it("starts on a fresh database and then syncs when full sync is clicked", async () => {
-		resetLocalCacheForFullSync.mockResolvedValue(undefined);
+		asMock(resetLocalCacheForFullSync).mockResolvedValue(undefined);
 		const { getByRole } = render(
 			<SyncContext.Provider value={{ updateSync: mockUpdateSync }}>
 				<FullSync />

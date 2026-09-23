@@ -30,14 +30,14 @@ const LOCAL_PATH = "local/personal";
 describe("migrateFromMongoDB", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
-		storage.exists.mockResolvedValue(false);
-		storage.writeFile.mockResolvedValue(undefined);
-		storage.deleteFile.mockResolvedValue(undefined);
-		storage.createFolderPath.mockResolvedValue(undefined);
-		calculateHash.mockImplementation(
+		asMock(storage.exists).mockResolvedValue(false);
+		asMock(storage.writeFile).mockResolvedValue(undefined);
+		asMock(storage.deleteFile).mockResolvedValue(undefined);
+		asMock(storage.createFolderPath).mockResolvedValue(undefined);
+		asMock(calculateHash).mockImplementation(
 			async (str: any) => `hash-${String(str).length}`,
 		);
-		readGroups.mockResolvedValue({
+		asMock(readGroups).mockResolvedValue({
 			groups: [
 				{ name: "Split" },
 				{ name: "Bundled", bundled: true },
@@ -67,7 +67,7 @@ describe("migrateFromMongoDB", () => {
 	});
 
 	it("marks migration complete without scanning when MongoDB has no personal folder", async () => {
-		storage.exists.mockResolvedValue(false);
+		asMock(storage.exists).mockResolvedValue(false);
 
 		const result = await migrateFromMongoDB("user-1", [], LOCAL_PATH, true);
 
@@ -79,10 +79,10 @@ describe("migrateFromMongoDB", () => {
 	});
 
 	it("marks migration complete when MongoDB folder exists but has no files", async () => {
-		storage.exists.mockImplementation(
+		asMock(storage.exists).mockImplementation(
 			async (path: any) => path === "personal/metadata/sessions",
 		);
-		storage.getRecursiveList.mockResolvedValue([]);
+		asMock(storage.getRecursiveList).mockResolvedValue([]);
 
 		const result = await migrateFromMongoDB("user-1", [], LOCAL_PATH, true);
 
@@ -90,12 +90,12 @@ describe("migrateFromMongoDB", () => {
 	});
 
 	it("treats a corrupted migration.json as fresh state and deletes the bad file", async () => {
-		storage.exists.mockImplementation(async (path: any) => {
+		asMock(storage.exists).mockImplementation(async (path: any) => {
 			if (path === "/local/personal/migration.json") return true;
 			if (path === "personal/metadata/sessions") return false;
 			return false;
 		});
-		storage.readFile.mockImplementation(async (path: any) => {
+		asMock(storage.readFile).mockImplementation(async (path: any) => {
 			if (path === "/local/personal/migration.json") return "{not json";
 			return null;
 		});
@@ -109,12 +109,12 @@ describe("migrateFromMongoDB", () => {
 	});
 
 	it("re-migrates when marked complete locally but both local and remote are empty", async () => {
-		storage.exists.mockImplementation(async (path: any) => {
+		asMock(storage.exists).mockImplementation(async (path: any) => {
 			if (path === "/local/personal/migration.json") return true;
 			if (path === "personal/metadata/sessions") return true;
 			return false;
 		});
-		storage.readFile.mockImplementation(async (path: any) => {
+		asMock(storage.readFile).mockImplementation(async (path: any) => {
 			if (path === "/local/personal/migration.json") {
 				return JSON.stringify({
 					complete: true,
@@ -124,7 +124,7 @@ describe("migrateFromMongoDB", () => {
 			}
 			return null;
 		});
-		storage.getRecursiveList.mockResolvedValue([]);
+		asMock(storage.getRecursiveList).mockResolvedValue([]);
 
 		const result = await migrateFromMongoDB("user-1", [], LOCAL_PATH, true);
 
@@ -135,18 +135,18 @@ describe("migrateFromMongoDB", () => {
 	});
 
 	it("keeps waiting for upload when marked complete locally with local files still pending", async () => {
-		storage.exists.mockImplementation(async (path: any) => {
+		asMock(storage.exists).mockImplementation(async (path: any) => {
 			if (path === "/local/personal/migration.json") return true;
 			return false;
 		});
-		storage.readFile.mockResolvedValue(
+		asMock(storage.readFile).mockResolvedValue(
 			JSON.stringify({
 				complete: true,
 				migrated: {},
 				files: [],
 			}),
 		);
-		storage.getRecursiveList.mockResolvedValue([
+		asMock(storage.getRecursiveList).mockResolvedValue([
 			{ name: "a.json", path: "/local/personal/a.json" },
 		]);
 
@@ -161,11 +161,11 @@ describe("migrateFromMongoDB", () => {
 	});
 
 	it("skips remote verification and reports complete when read-only and locally complete", async () => {
-		storage.exists.mockImplementation(async (path: any) => {
+		asMock(storage.exists).mockImplementation(async (path: any) => {
 			if (path === "/local/personal/migration.json") return true;
 			return false;
 		});
-		storage.readFile.mockResolvedValue(
+		asMock(storage.readFile).mockResolvedValue(
 			JSON.stringify({ complete: true, migrated: {}, files: [] }),
 		);
 
@@ -181,11 +181,11 @@ describe("migrateFromMongoDB", () => {
 	});
 
 	it("reports complete immediately when remote confirms completion", async () => {
-		storage.exists.mockImplementation(async (path: any) => {
+		asMock(storage.exists).mockImplementation(async (path: any) => {
 			if (path === "/local/personal/migration.json") return true;
 			return false;
 		});
-		storage.readFile.mockResolvedValue(
+		asMock(storage.readFile).mockResolvedValue(
 			JSON.stringify({ complete: true, migrated: {}, files: [] }),
 		);
 
@@ -206,14 +206,14 @@ describe("migrateFromMongoDB", () => {
 
 	it("migrates split-group files into year bundles and writes the local manifest", async () => {
 		const filePath = "/personal/metadata/sessions/Split/2024/a.json";
-		storage.exists.mockImplementation(async (path: any) => {
+		asMock(storage.exists).mockImplementation(async (path: any) => {
 			if (path === "personal/metadata/sessions") return true;
 			return false;
 		});
-		storage.getRecursiveList.mockResolvedValue([
+		asMock(storage.getRecursiveList).mockResolvedValue([
 			{ type: "file", name: "a.json", path: filePath },
 		]);
-		storage.readFiles.mockResolvedValue({
+		asMock(storage.readFiles).mockResolvedValue({
 			"/metadata/sessions/Split/2024/a.json": JSON.stringify({ title: "A" }),
 		});
 
@@ -232,14 +232,14 @@ describe("migrateFromMongoDB", () => {
 
 	it("migrates bundled-group files into the shared bundle.json", async () => {
 		const filePath = "/personal/metadata/sessions/Bundled/session1.json";
-		storage.exists.mockImplementation(async (path: any) => {
+		asMock(storage.exists).mockImplementation(async (path: any) => {
 			if (path === "personal/metadata/sessions") return true;
 			return false;
 		});
-		storage.getRecursiveList.mockResolvedValue([
+		asMock(storage.getRecursiveList).mockResolvedValue([
 			{ type: "file", name: "session1.json", path: filePath },
 		]);
-		storage.readFiles.mockResolvedValue({
+		asMock(storage.readFiles).mockResolvedValue({
 			"/metadata/sessions/Bundled/session1.json": JSON.stringify({
 				title: "B",
 			}),
@@ -256,14 +256,14 @@ describe("migrateFromMongoDB", () => {
 
 	it("migrates merged-group files into a per-group manifest, stripping the group prefix", async () => {
 		const filePath = "/personal/metadata/sessions/Merged/session1.json";
-		storage.exists.mockImplementation(async (path: any) => {
+		asMock(storage.exists).mockImplementation(async (path: any) => {
 			if (path === "personal/metadata/sessions") return true;
 			return false;
 		});
-		storage.getRecursiveList.mockResolvedValue([
+		asMock(storage.getRecursiveList).mockResolvedValue([
 			{ type: "file", name: "session1.json", path: filePath },
 		]);
-		storage.readFiles.mockResolvedValue({
+		asMock(storage.readFiles).mockResolvedValue({
 			"/metadata/sessions/Merged/session1.json": JSON.stringify({
 				title: "M",
 			}),
@@ -280,14 +280,14 @@ describe("migrateFromMongoDB", () => {
 
 	it("skips files whose group no longer exists, without failing the migration", async () => {
 		const filePath = "/personal/metadata/sessions/Unknown/a.json";
-		storage.exists.mockImplementation(async (path: any) => {
+		asMock(storage.exists).mockImplementation(async (path: any) => {
 			if (path === "personal/metadata/sessions") return true;
 			return false;
 		});
-		storage.getRecursiveList.mockResolvedValue([
+		asMock(storage.getRecursiveList).mockResolvedValue([
 			{ type: "file", name: "a.json", path: filePath },
 		]);
-		storage.readFiles.mockResolvedValue({});
+		asMock(storage.readFiles).mockResolvedValue({});
 
 		const result = await migrateFromMongoDB("user-1", [], LOCAL_PATH, true);
 
@@ -297,14 +297,14 @@ describe("migrateFromMongoDB", () => {
 
 	it("skips empty file contents returned from the batch read", async () => {
 		const filePath = "/personal/metadata/sessions/Split/2024/empty.json";
-		storage.exists.mockImplementation(async (path: any) => {
+		asMock(storage.exists).mockImplementation(async (path: any) => {
 			if (path === "personal/metadata/sessions") return true;
 			return false;
 		});
-		storage.getRecursiveList.mockResolvedValue([
+		asMock(storage.getRecursiveList).mockResolvedValue([
 			{ type: "file", name: "empty.json", path: filePath },
 		]);
-		storage.readFiles.mockResolvedValue({
+		asMock(storage.readFiles).mockResolvedValue({
 			"/metadata/sessions/Split/2024/empty.json": "   ",
 		});
 
@@ -315,14 +315,14 @@ describe("migrateFromMongoDB", () => {
 
 	it("continues without marking migrated when a batch read fails entirely", async () => {
 		const filePath = "/personal/metadata/sessions/Split/2024/a.json";
-		storage.exists.mockImplementation(async (path: any) => {
+		asMock(storage.exists).mockImplementation(async (path: any) => {
 			if (path === "personal/metadata/sessions") return true;
 			return false;
 		});
-		storage.getRecursiveList.mockResolvedValue([
+		asMock(storage.getRecursiveList).mockResolvedValue([
 			{ type: "file", name: "a.json", path: filePath },
 		]);
-		storage.readFiles.mockRejectedValue(new Error("batch read failed"));
+		asMock(storage.readFiles).mockRejectedValue(new Error("batch read failed"));
 
 		const result = await migrateFromMongoDB("user-1", [], LOCAL_PATH, true);
 
@@ -335,11 +335,11 @@ describe("migrateFromMongoDB", () => {
 
 	it("links merged-group files to an existing remote bundle instead of re-migrating them", async () => {
 		const filePath = "/personal/metadata/sessions/Merged/session1.json";
-		storage.exists.mockImplementation(async (path: any) => {
+		asMock(storage.exists).mockImplementation(async (path: any) => {
 			if (path === "personal/metadata/sessions") return true;
 			return false;
 		});
-		storage.getRecursiveList.mockResolvedValue([
+		asMock(storage.getRecursiveList).mockResolvedValue([
 			{ type: "file", name: "session1.json", path: filePath },
 		]);
 
@@ -363,11 +363,13 @@ describe("migrateFromMongoDB", () => {
 	});
 
 	it("returns a graceful error result when writing migration state fails unexpectedly", async () => {
-		storage.exists.mockImplementation(async (path: any) => {
+		asMock(storage.exists).mockImplementation(async (path: any) => {
 			if (path === "personal/metadata/sessions") return true;
 			return false;
 		});
-		storage.getRecursiveList.mockRejectedValue(new Error("listing failed"));
+		asMock(storage.getRecursiveList).mockRejectedValue(
+			new Error("listing failed"),
+		);
 
 		const result = await migrateFromMongoDB("user-1", [], LOCAL_PATH, true);
 
@@ -380,12 +382,12 @@ describe("migrateFromMongoDB", () => {
 	});
 
 	it("treats an empty migration file as corrupt and starts fresh", async () => {
-		storage.exists.mockImplementation(async (path: any) => {
+		asMock(storage.exists).mockImplementation(async (path: any) => {
 			if (path === "/local/personal/migration.json") return true;
 			if (path === "personal/metadata/sessions") return false;
 			return false;
 		});
-		storage.readFile.mockResolvedValue("   ");
+		asMock(storage.readFile).mockResolvedValue("   ");
 
 		const result = await migrateFromMongoDB("user-1", [], LOCAL_PATH, true);
 		expect(storage.deleteFile).toHaveBeenCalled();
@@ -393,19 +395,19 @@ describe("migrateFromMongoDB", () => {
 	});
 
 	it("continues when readGroups fails during bundling checks", async () => {
-		readGroups.mockRejectedValue(new Error("groups unavailable"));
-		storage.exists.mockImplementation(async (path: any) => {
+		asMock(readGroups).mockRejectedValue(new Error("groups unavailable"));
+		asMock(storage.exists).mockImplementation(async (path: any) => {
 			if (path === "personal/metadata/sessions") return true;
 			return false;
 		});
-		storage.getRecursiveList.mockResolvedValue([
+		asMock(storage.getRecursiveList).mockResolvedValue([
 			{
 				type: "file",
 				name: "a.json",
 				path: "/personal/metadata/sessions/Split/2024/a.json",
 			},
 		]);
-		storage.readFiles.mockResolvedValue({});
+		asMock(storage.readFiles).mockResolvedValue({});
 
 		const result = await migrateFromMongoDB("user-1", [], LOCAL_PATH, true);
 		expect(result.fileCount).toBe(0);
@@ -423,11 +425,11 @@ describe("migrateFromMongoDB", () => {
 	});
 
 	it("filters out directories and .DS_Store files while scanning", async () => {
-		storage.exists.mockImplementation(async (path: any) => {
+		asMock(storage.exists).mockImplementation(async (path: any) => {
 			if (path === "personal/metadata/sessions") return true;
 			return false;
 		});
-		storage.getRecursiveList.mockResolvedValue([
+		asMock(storage.getRecursiveList).mockResolvedValue([
 			{
 				type: "dir",
 				name: "subdir",
@@ -447,18 +449,18 @@ describe("migrateFromMongoDB", () => {
 
 	it("merges an existing local manifest when present", async () => {
 		const filePath = "/personal/metadata/sessions/Split/2024/a.json";
-		storage.exists.mockImplementation(async (path: any) => {
+		asMock(storage.exists).mockImplementation(async (path: any) => {
 			if (path === "personal/metadata/sessions") return true;
 			if (path === "/local/personal/files.json") return true;
 			return false;
 		});
-		storage.getRecursiveList.mockResolvedValue([
+		asMock(storage.getRecursiveList).mockResolvedValue([
 			{ type: "file", name: "a.json", path: filePath },
 		]);
-		storage.readFiles.mockResolvedValue({
+		asMock(storage.readFiles).mockResolvedValue({
 			"/metadata/sessions/Split/2024/a.json": JSON.stringify({ title: "A" }),
 		});
-		storage.readFile.mockImplementation(async (path: any) => {
+		asMock(storage.readFile).mockImplementation(async (path: any) => {
 			if (path === "/local/personal/files.json") {
 				return JSON.stringify([{ path: "/old.json", version: 1 }]);
 			}
@@ -472,11 +474,11 @@ describe("migrateFromMongoDB", () => {
 
 	it("links bundled-group files to an existing remote bundle.json", async () => {
 		const filePath = "/personal/metadata/sessions/Bundled/session1.json";
-		storage.exists.mockImplementation(async (path: any) => {
+		asMock(storage.exists).mockImplementation(async (path: any) => {
 			if (path === "personal/metadata/sessions") return true;
 			return false;
 		});
-		storage.getRecursiveList.mockResolvedValue([
+		asMock(storage.getRecursiveList).mockResolvedValue([
 			{ type: "file", name: "session1.json", path: filePath },
 		]);
 
@@ -495,20 +497,20 @@ describe("migrateFromMongoDB", () => {
 	});
 
 	it("handles a non-array remoteManifest safely", async () => {
-		storage.exists.mockResolvedValue(false);
+		asMock(storage.exists).mockResolvedValue(false);
 		const result = await migrateFromMongoDB("user-1", null, LOCAL_PATH, true);
 		expect(result.migrated).toBe(false);
 	});
 
 	it("warns when migration state cannot be written", async () => {
 		const { logger } = require("@util/api/logger");
-		storage.getRecursiveList.mockResolvedValue([
+		asMock(storage.getRecursiveList).mockResolvedValue([
 			{ name: "note.txt", path: "mongo/personal/note.txt", type: "file" },
 		]);
-		storage.readFiles.mockResolvedValue([
+		asMock(storage.readFiles).mockResolvedValue([
 			{ path: "mongo/personal/note.txt", content: '{"ok":true}' },
 		]);
-		storage.writeFile.mockImplementation(async (path: any) => {
+		asMock(storage.writeFile).mockImplementation(async (path: any) => {
 			if (String(path).includes("migration.json")) {
 				throw new Error("write failed");
 			}
@@ -521,14 +523,14 @@ describe("migrateFromMongoDB", () => {
 	});
 
 	it("marks unknown-group files as migrated without copying them", async () => {
-		storage.getRecursiveList.mockResolvedValue([
+		asMock(storage.getRecursiveList).mockResolvedValue([
 			{
 				name: "2024-01-01 Unknown.txt",
 				path: "personal/metadata/sessions/Unknown/2024/2024-01-01 Unknown.txt",
 				type: "file",
 			},
 		]);
-		storage.readFiles.mockResolvedValue([
+		asMock(storage.readFiles).mockResolvedValue([
 			{
 				path: "personal/metadata/sessions/Unknown/2024/2024-01-01 Unknown.txt",
 				content: "session body",
@@ -542,12 +544,12 @@ describe("migrateFromMongoDB", () => {
 
 	it("resumes migration when complete state is a zombie with empty local and remote data", async () => {
 		const migrationPath = "/local/personal/migration.json";
-		storage.exists.mockImplementation(async (path: any) => {
+		asMock(storage.exists).mockImplementation(async (path: any) => {
 			if (path === migrationPath) return true;
 			if (path === "personal/metadata/sessions") return true;
 			return false;
 		});
-		storage.readFile.mockImplementation(async (path: any) => {
+		asMock(storage.readFile).mockImplementation(async (path: any) => {
 			if (path === migrationPath) {
 				return JSON.stringify({
 					complete: true,
@@ -557,7 +559,7 @@ describe("migrateFromMongoDB", () => {
 			}
 			return null;
 		});
-		storage.getRecursiveList.mockImplementation(async (path: any) => {
+		asMock(storage.getRecursiveList).mockImplementation(async (path: any) => {
 			if (path === LOCAL_PATH) return [];
 			if (path === "personal/metadata/sessions") {
 				return [
@@ -570,7 +572,7 @@ describe("migrateFromMongoDB", () => {
 			}
 			return [];
 		});
-		storage.readFiles.mockResolvedValue({
+		asMock(storage.readFiles).mockResolvedValue({
 			"/metadata/sessions/Split/2024/a.json": JSON.stringify({ title: "A" }),
 		});
 
@@ -581,10 +583,10 @@ describe("migrateFromMongoDB", () => {
 
 	it("skips remote verification when migration is complete and uploads are disabled", async () => {
 		const migrationPath = "/local/personal/migration.json";
-		storage.exists.mockImplementation(
+		asMock(storage.exists).mockImplementation(
 			async (path: any) => path === migrationPath,
 		);
-		storage.readFile.mockResolvedValue(
+		asMock(storage.readFile).mockResolvedValue(
 			JSON.stringify({ complete: true, migrated: {}, files: [] }),
 		);
 
@@ -599,12 +601,12 @@ describe("migrateFromMongoDB", () => {
 
 	it("restarts from scratch when migration state cannot be parsed", async () => {
 		const migrationPath = "/local/personal/migration.json";
-		storage.exists.mockImplementation(async (path: any) => {
+		asMock(storage.exists).mockImplementation(async (path: any) => {
 			if (path === migrationPath) return true;
 			if (path === "personal/metadata/sessions") return false;
 			return false;
 		});
-		storage.readFile.mockImplementation(async (path: any) => {
+		asMock(storage.readFile).mockImplementation(async (path: any) => {
 			if (path === migrationPath) return "{bad";
 			return null;
 		});
@@ -616,11 +618,11 @@ describe("migrateFromMongoDB", () => {
 
 	it("links split-group files to an existing remote manifest entry", async () => {
 		const filePath = "/personal/metadata/sessions/Split/2024/a.json";
-		storage.exists.mockImplementation(async (path: any) => {
+		asMock(storage.exists).mockImplementation(async (path: any) => {
 			if (path === "personal/metadata/sessions") return true;
 			return false;
 		});
-		storage.getRecursiveList.mockResolvedValue([
+		asMock(storage.getRecursiveList).mockResolvedValue([
 			{ type: "file", name: "a.json", path: filePath },
 		]);
 
@@ -639,18 +641,18 @@ describe("migrateFromMongoDB", () => {
 	});
 
 	it("skips split files without a year segment", async () => {
-		storage.exists.mockImplementation(async (path: any) => {
+		asMock(storage.exists).mockImplementation(async (path: any) => {
 			if (path === "personal/metadata/sessions") return true;
 			return false;
 		});
-		storage.getRecursiveList.mockResolvedValue([
+		asMock(storage.getRecursiveList).mockResolvedValue([
 			{
 				type: "file",
 				name: "Split",
 				path: "/personal/metadata/sessions/Split",
 			},
 		]);
-		storage.readFiles.mockResolvedValue({
+		asMock(storage.readFiles).mockResolvedValue({
 			"/metadata/sessions/Split": JSON.stringify({ ok: true }),
 		});
 
@@ -661,14 +663,14 @@ describe("migrateFromMongoDB", () => {
 
 	it("skips corrupted bundled JSON without failing the batch", async () => {
 		const filePath = "/personal/metadata/sessions/Bundled/session1.json";
-		storage.exists.mockImplementation(async (path: any) => {
+		asMock(storage.exists).mockImplementation(async (path: any) => {
 			if (path === "personal/metadata/sessions") return true;
 			return false;
 		});
-		storage.getRecursiveList.mockResolvedValue([
+		asMock(storage.getRecursiveList).mockResolvedValue([
 			{ type: "file", name: "session1.json", path: filePath },
 		]);
-		storage.readFiles.mockResolvedValue({
+		asMock(storage.readFiles).mockResolvedValue({
 			"/metadata/sessions/Bundled/session1.json": "{bad json",
 		});
 
@@ -680,12 +682,12 @@ describe("migrateFromMongoDB", () => {
 
 	it("repairs double-slash manifest entries and re-queues affected files", async () => {
 		const filePath = "/personal/metadata/sessions/Split/2024/a.json";
-		storage.exists.mockImplementation(async (path: any) => {
+		asMock(storage.exists).mockImplementation(async (path: any) => {
 			if (path === "/local/personal/migration.json") return true;
 			if (path === "personal/metadata/sessions") return true;
 			return false;
 		});
-		storage.readFile.mockImplementation(async (path: any) => {
+		asMock(storage.readFile).mockImplementation(async (path: any) => {
 			if (path === "/local/personal/migration.json") {
 				return JSON.stringify({
 					complete: false,
@@ -695,10 +697,10 @@ describe("migrateFromMongoDB", () => {
 			}
 			return null;
 		});
-		storage.getRecursiveList.mockResolvedValue([
+		asMock(storage.getRecursiveList).mockResolvedValue([
 			{ type: "file", name: "a.json", path: filePath },
 		]);
-		storage.readFiles.mockResolvedValue({
+		asMock(storage.readFiles).mockResolvedValue({
 			"/metadata/sessions/Split/2024/a.json": JSON.stringify({ title: "A" }),
 		});
 

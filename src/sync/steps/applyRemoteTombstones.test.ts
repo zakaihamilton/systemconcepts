@@ -13,7 +13,7 @@ jest.mock("../trash", () => ({ moveFileToTrash: jest.fn() }));
 describe("applyRemoteTombstones", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
-		storage.writeFile.mockResolvedValue(undefined);
+		asMock(storage.writeFile).mockResolvedValue(undefined);
 	});
 
 	it("returns early with no changes when there are no tombstone candidates", async () => {
@@ -36,7 +36,7 @@ describe("applyRemoteTombstones", () => {
 	});
 
 	it("treats a remote deletion for an unknown local file as a candidate", async () => {
-		moveFileToTrash.mockResolvedValue({ moved: false, missing: true });
+		asMock(moveFileToTrash).mockResolvedValue({ moved: false, missing: true });
 
 		const result = await applyRemoteTombstones(
 			[],
@@ -73,7 +73,7 @@ describe("applyRemoteTombstones", () => {
 	});
 
 	it("forces deletion when uploads are disabled, regardless of version", async () => {
-		moveFileToTrash.mockResolvedValue({ moved: true, missing: false });
+		asMock(moveFileToTrash).mockResolvedValue({ moved: true, missing: false });
 		const localManifest = [{ path: "/keep.json", version: "9" }];
 
 		const result = await applyRemoteTombstones(
@@ -104,7 +104,7 @@ describe("applyRemoteTombstones", () => {
 	});
 
 	it("moves the file to trash, updates the manifest, and persists it to disk", async () => {
-		moveFileToTrash.mockResolvedValue({ moved: true, missing: false });
+		asMock(moveFileToTrash).mockResolvedValue({ moved: true, missing: false });
 		const localManifest = [{ path: "/old.json", version: "1" }];
 
 		const result = await applyRemoteTombstones(
@@ -125,7 +125,7 @@ describe("applyRemoteTombstones", () => {
 	});
 
 	it("still marks the manifest entry deleted when the remote file is already missing from local trash", async () => {
-		moveFileToTrash.mockResolvedValue({ moved: false, missing: true });
+		asMock(moveFileToTrash).mockResolvedValue({ moved: false, missing: true });
 
 		const result = await applyRemoteTombstones(
 			[{ path: "/missing.json", version: "1" }],
@@ -140,7 +140,7 @@ describe("applyRemoteTombstones", () => {
 	});
 
 	it("counts a failure and reports incomplete when moving to trash throws", async () => {
-		moveFileToTrash.mockRejectedValue(new Error("fs error"));
+		asMock(moveFileToTrash).mockRejectedValue(new Error("fs error"));
 
 		const result = await applyRemoteTombstones(
 			[{ path: "/broken.json", version: "1" }],
@@ -156,7 +156,7 @@ describe("applyRemoteTombstones", () => {
 	});
 
 	it("still applies a remote tombstone when the local copy is deleted at a lower version", async () => {
-		moveFileToTrash.mockResolvedValue({ moved: true, missing: false });
+		asMock(moveFileToTrash).mockResolvedValue({ moved: true, missing: false });
 		const localManifest = [{ path: "/gone.json", version: "1", deleted: true }];
 
 		const result = await applyRemoteTombstones(

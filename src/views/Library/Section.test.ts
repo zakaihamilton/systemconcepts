@@ -10,7 +10,7 @@ jest.mock("./Store", () => ({
 describe("getLibrarySection", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
-		LibraryStore.getRawState.mockReturnValue({ tags: [] });
+		asMock(LibraryStore.getRawState).mockReturnValue({ tags: [] });
 	});
 
 	it("returns a capitalized root Library section", () => {
@@ -45,7 +45,7 @@ describe("getLibrarySection", () => {
 	});
 
 	it("resolves a tag by _id and appends number", () => {
-		LibraryStore.getRawState.mockReturnValue({
+		asMock(LibraryStore.getRawState).mockReturnValue({
 			tags: [
 				{
 					_id: "tag-1",
@@ -68,7 +68,7 @@ describe("getLibrarySection", () => {
 	});
 
 	it("resolves a field-value path segment preferring earlier fields", () => {
-		LibraryStore.getRawState.mockReturnValue({
+		asMock(LibraryStore.getRawState).mockReturnValue({
 			tags: [
 				{
 					_id: "t1",
@@ -89,7 +89,7 @@ describe("getLibrarySection", () => {
 	});
 
 	it("strips description prefix from the label when present", () => {
-		LibraryStore.getRawState.mockReturnValue({
+		asMock(LibraryStore.getRawState).mockReturnValue({
 			tags: [{ _id: "t1", book: "Book Confessions" }],
 		});
 		const section = getLibrarySection({
@@ -102,7 +102,7 @@ describe("getLibrarySection", () => {
 	});
 
 	it("keeps original label when stripping description leaves nothing", () => {
-		LibraryStore.getRawState.mockReturnValue({
+		asMock(LibraryStore.getRawState).mockReturnValue({
 			tags: [{ _id: "t1", book: "Book" }],
 		});
 		const section = getLibrarySection({
@@ -114,7 +114,7 @@ describe("getLibrarySection", () => {
 	});
 
 	it("strips numeric colon suffixes from labels", () => {
-		LibraryStore.getRawState.mockReturnValue({ tags: [] });
+		asMock(LibraryStore.getRawState).mockReturnValue({ tags: [] });
 		const section = getLibrarySection({
 			id: "Chapter One:12",
 			path: "library/Chapter%20One:12",
@@ -124,7 +124,7 @@ describe("getLibrarySection", () => {
 	});
 
 	it("decodes path segments when id is empty", () => {
-		LibraryStore.getRawState.mockReturnValue({ tags: [] });
+		asMock(LibraryStore.getRawState).mockReturnValue({ tags: [] });
 		const section = getLibrarySection({
 			id: "",
 			path: "library/Some%20Name",
@@ -134,7 +134,7 @@ describe("getLibrarySection", () => {
 	});
 
 	it("returns null Icon when no matching tag field is found", () => {
-		LibraryStore.getRawState.mockReturnValue({ tags: [] });
+		asMock(LibraryStore.getRawState).mockReturnValue({ tags: [] });
 		const section = getLibrarySection({
 			id: "Unknown",
 			path: "library/Unknown",
@@ -146,7 +146,7 @@ describe("getLibrarySection", () => {
 	});
 
 	it("returns null when a tag id has no displayable fields", () => {
-		LibraryStore.getRawState.mockReturnValue({
+		asMock(LibraryStore.getRawState).mockReturnValue({
 			tags: [{ _id: "empty-tag" }],
 		});
 		const section = getLibrarySection({
@@ -160,7 +160,7 @@ describe("getLibrarySection", () => {
 	});
 
 	it("uses the last path segment when id is omitted", () => {
-		LibraryStore.getRawState.mockReturnValue({ tags: [] });
+		asMock(LibraryStore.getRawState).mockReturnValue({ tags: [] });
 		const section = getLibrarySection({
 			id: "",
 			path: "library/alpha/beta",

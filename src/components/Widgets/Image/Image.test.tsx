@@ -29,11 +29,11 @@ jest.mock("@ui/Link", () => ({
 describe("Image Widget", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
-		useFetchJSON.mockReturnValue([null, false, false]);
+		asMock(useFetchJSON).mockReturnValue([null, false, false]);
 	});
 
 	it("renders progress while loading from external source", () => {
-		useFetchJSON.mockReturnValue([null, false, false]);
+		asMock(useFetchJSON).mockReturnValue([null, false, false]);
 		const { getByTestId } = render(
 			<ImageWidget path="wasabi/test.png" showProgress={true} />,
 		);
@@ -41,7 +41,7 @@ describe("Image Widget", () => {
 	});
 
 	it("renders image when path is provided", async () => {
-		useFetchJSON.mockReturnValue([
+		asMock(useFetchJSON).mockReturnValue([
 			{ path: "https://example.com/test.png" },
 			false,
 			false,
@@ -58,7 +58,7 @@ describe("Image Widget", () => {
 	});
 
 	it("requests a signed player URL for AWS images", () => {
-		useFetchJSON.mockReturnValue([null, false, false]);
+		asMock(useFetchJSON).mockReturnValue([null, false, false]);
 
 		render(
 			<ImageWidget
@@ -88,7 +88,7 @@ describe("Image Widget", () => {
 
 	it("handles load and error events and invokes onLoad", async () => {
 		const onLoad = jest.fn();
-		useFetchJSON.mockReturnValue([null, false, false]);
+		asMock(useFetchJSON).mockReturnValue([null, false, false]);
 		render(
 			<ImageWidget
 				path="https://cdn/img.png"
@@ -109,7 +109,7 @@ describe("Image Widget", () => {
 	});
 
 	it("shows a thumbnail until the main image loads", async () => {
-		useFetchJSON.mockReturnValue([null, false, false]);
+		asMock(useFetchJSON).mockReturnValue([null, false, false]);
 		render(
 			<ImageWidget
 				path="https://cdn/full.png"
@@ -123,7 +123,7 @@ describe("Image Widget", () => {
 	});
 
 	it("does not render storage keys as broken thumbnail URLs", () => {
-		useFetchJSON.mockReturnValue([null, false, false]);
+		asMock(useFetchJSON).mockReturnValue([null, false, false]);
 		render(
 			<ImageWidget
 				path="wasabi/group/2026/session.png"
@@ -137,7 +137,7 @@ describe("Image Widget", () => {
 	});
 
 	it("does not render a stale legacy CDN thumbnail beside the signed image", () => {
-		useFetchJSON.mockReturnValue([
+		asMock(useFetchJSON).mockReturnValue([
 			{ path: "https://signed.example/session.png" },
 			false,
 			false,
@@ -158,7 +158,11 @@ describe("Image Widget", () => {
 	});
 
 	it("treats aws/ paths without a leading slash as signed", () => {
-		useFetchJSON.mockReturnValue([{ path: "https://signed" }, false, false]);
+		asMock(useFetchJSON).mockReturnValue([
+			{ path: "https://signed" },
+			false,
+			false,
+		]);
 		render(<ImageWidget path="aws/file.png" alt="aws" />);
 		expect(useFetchJSON).toHaveBeenCalledWith(
 			"/api/player",
@@ -169,13 +173,13 @@ describe("Image Widget", () => {
 	});
 
 	it("hides progress when showProgress is false", () => {
-		useFetchJSON.mockReturnValue([null, false, false]);
+		asMock(useFetchJSON).mockReturnValue([null, false, false]);
 		render(<ImageWidget path="wasabi/x.png" showProgress={false} />);
 		expect(screen.queryByTestId("progress")).not.toBeInTheDocument();
 	});
 
 	it("detects already-complete cached images", async () => {
-		useFetchJSON.mockReturnValue([null, false, false]);
+		asMock(useFetchJSON).mockReturnValue([null, false, false]);
 		const onLoad = jest.fn();
 		render(
 			<ImageWidget
@@ -200,7 +204,7 @@ describe("Image Widget", () => {
 
 	it("clears image state when the effective path becomes empty", async () => {
 		jest.useFakeTimers();
-		useFetchJSON.mockReturnValue([null, false, false]);
+		asMock(useFetchJSON).mockReturnValue([null, false, false]);
 		const { rerender } = render(
 			<ImageWidget path="https://cdn/a.png" alt="swap" />,
 		);
@@ -216,7 +220,7 @@ describe("Image Widget", () => {
 	});
 
 	it("hides thumbnail when it matches the effective path", async () => {
-		useFetchJSON.mockReturnValue([null, false, false]);
+		asMock(useFetchJSON).mockReturnValue([null, false, false]);
 		render(
 			<ImageWidget
 				path="https://cdn/same.png"

@@ -24,9 +24,9 @@ describe("exportData", () => {
 	});
 
 	afterEach(() => {
-		clickSpy.mockRestore();
-		appendSpy.mockRestore();
-		removeSpy.mockRestore();
+		asMock(clickSpy).mockRestore();
+		asMock(appendSpy).mockRestore();
+		asMock(removeSpy).mockRestore();
 	});
 
 	it("creates a download link for typed data via a Blob object URL", async () => {
@@ -34,7 +34,7 @@ describe("exportData", () => {
 
 		expect(URL.createObjectURL).toHaveBeenCalledWith(expect.any(Blob));
 		expect(clickSpy).toHaveBeenCalledTimes(1);
-		const anchor: any = appendSpy.mock.calls[0][0];
+		const anchor: any = asMock(appendSpy).mock.calls[0][0];
 		expect(anchor.download).toBe("greeting.txt");
 		expect(anchor.href).toBe("blob:mock-url");
 
@@ -54,8 +54,8 @@ describe("exportData", () => {
 		const base64 = "H4sIAAA=";
 		exportData(base64, "archive.gz", "application/gzip");
 
-		const [passed] = URL.createObjectURL.mock.calls[0][0].constructor
-			? [URL.createObjectURL.mock.calls[0][0]]
+		const [passed] = asMock(URL.createObjectURL).mock.calls[0][0].constructor
+			? [asMock(URL.createObjectURL).mock.calls[0][0]]
 			: [];
 		expect(passed).toBeInstanceOf(Blob);
 	});
@@ -101,16 +101,16 @@ describe("exportFile", () => {
 	});
 
 	afterEach(() => {
-		clickSpy.mockRestore();
-		appendSpy.mockRestore();
-		removeSpy.mockRestore();
+		asMock(clickSpy).mockRestore();
+		asMock(appendSpy).mockRestore();
+		asMock(removeSpy).mockRestore();
 	});
 
 	it("triggers a direct download of the given URL and cleans up the anchor", async () => {
 		exportFile("https://example.com/file.pdf", "file.pdf");
 
 		expect(clickSpy).toHaveBeenCalledTimes(1);
-		const anchor: any = appendSpy.mock.calls[0][0];
+		const anchor: any = asMock(appendSpy).mock.calls[0][0];
 		expect(anchor.href).toBe("https://example.com/file.pdf");
 		expect(anchor.download).toBe("file.pdf");
 
@@ -131,7 +131,7 @@ describe("importData", () => {
 	});
 
 	afterEach(() => {
-		clickSpy.mockRestore();
+		asMock(clickSpy).mockRestore();
 	});
 
 	it("resolves with the selected file's name and text contents", async () => {
@@ -154,12 +154,14 @@ describe("importData", () => {
 		expect(result).toEqual({ name: "notes.txt", body: "file contents" });
 		expect(capturedInput.type).toBe("file");
 
-		document.createElement.mockRestore();
+		asMock(document.createElement).mockRestore();
 	});
 
 	it("rejects when the file reader errors out", async () => {
 		const readerError = new Error("read failure");
 		class FakeFileReader {
+			error: unknown;
+			onerror?: () => void;
 			readAsText() {
 				setTimeout(() => {
 					this.error = readerError;
@@ -168,7 +170,7 @@ describe("importData", () => {
 			}
 		}
 		const originalFileReader = global.FileReader;
-		global.FileReader = FakeFileReader;
+		global.FileReader = FakeFileReader as unknown as typeof FileReader;
 
 		const originalCreateElement = document.createElement.bind(document);
 		jest.spyOn(document, "createElement").mockImplementation((tag) => {
@@ -183,12 +185,13 @@ describe("importData", () => {
 
 		await expect(importData()).rejects.toBe(readerError);
 
-		document.createElement.mockRestore();
+		asMock(document.createElement).mockRestore();
 		global.FileReader = originalFileReader;
 	});
 
 	it("rejects when the file reader is aborted", async () => {
 		class FakeFileReader {
+			onabort?: () => void;
 			readAsText() {
 				setTimeout(() => {
 					this.onabort?.();
@@ -196,7 +199,7 @@ describe("importData", () => {
 			}
 		}
 		const originalFileReader = global.FileReader;
-		global.FileReader = FakeFileReader;
+		global.FileReader = FakeFileReader as unknown as typeof FileReader;
 
 		const originalCreateElement = document.createElement.bind(document);
 		jest.spyOn(document, "createElement").mockImplementation((tag) => {
@@ -211,7 +214,7 @@ describe("importData", () => {
 
 		await expect(importData()).rejects.toBeUndefined();
 
-		document.createElement.mockRestore();
+		asMock(document.createElement).mockRestore();
 		global.FileReader = originalFileReader;
 	});
 });

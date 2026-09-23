@@ -12,7 +12,7 @@ describe("ButtonSelector Widget", () => {
 
 	beforeEach(() => {
 		jest.clearAllMocks();
-		useTranslations.mockReturnValue({ OPTIONS: "Options" });
+		asMock(useTranslations).mockReturnValue({ OPTIONS: "Options" });
 	});
 
 	it("renders button and dropdown", () => {

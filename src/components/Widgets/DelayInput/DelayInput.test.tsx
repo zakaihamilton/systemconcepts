@@ -12,7 +12,7 @@ describe("DelayInput Widget", () => {
 	it("updates current value immediately but calls onChange after delay", () => {
 		const handleChange = jest.fn();
 		let timeoutCallback: any;
-		useTimeout.mockImplementation((callback: any) => {
+		asMock(useTimeout).mockImplementation((callback: any) => {
 			timeoutCallback = callback;
 		});
 
@@ -22,7 +22,7 @@ describe("DelayInput Widget", () => {
 			</DelayInput>,
 		);
 
-		const input = getByRole("textbox");
+		const input = getByRole("textbox") as HTMLInputElement;
 		fireEvent.change(input, { target: { value: "test" } });
 
 		expect(input.value).toBe("test");

@@ -21,7 +21,7 @@ jest.mock("@util/storage/mongo", () => ({
 }));
 jest.mock("next/server", () => ({
 	NextResponse: {
-		json: (body: any, init = {}) => ({
+		json: (body: any, init: ResponseInit = {}) => ({
 			status: init.status || 200,
 			headers: init.headers || {},
 			json: async () => body,
@@ -80,20 +80,20 @@ describe("enforceRateLimit", () => {
 	});
 
 	it("returns null when the rate limit check passes", async () => {
-		checkRateLimit.mockResolvedValue(undefined);
+		asMock(checkRateLimit).mockResolvedValue(undefined);
 		const request = { headers: new Headers() };
 		await expect(enforceRateLimit(request, { limit: 5 })).resolves.toBeNull();
 	});
 
 	it("returns a 429 response when the rate limit is exceeded", async () => {
-		checkRateLimit.mockRejectedValue("RATE_LIMIT_EXCEEDED");
+		asMock(checkRateLimit).mockRejectedValue("RATE_LIMIT_EXCEEDED");
 		const request = { headers: new Headers() };
 		const response = await enforceRateLimit(request, { limit: 5 });
 		expect(response.status).toBe(429);
 	});
 
 	it("rethrows unexpected errors", async () => {
-		checkRateLimit.mockRejectedValue(new Error("db down"));
+		asMock(checkRateLimit).mockRejectedValue(new Error("db down"));
 		const request = { headers: new Headers() };
 		await expect(enforceRateLimit(request, {})).rejects.toThrow("db down");
 	});
@@ -157,7 +157,7 @@ describe("authenticateTokenRequest", () => {
 	it("returns the user when the token matches and the role is not visitor", async () => {
 		const user = { id: "user", hash: "h1", role: "student" };
 		const token = getApiToken(user);
-		findRecord.mockResolvedValue(user);
+		asMock(findRecord).mockResolvedValue(user);
 
 		await expect(
 			authenticateTokenRequest(paramsOf({ id: "USER", token })),
@@ -172,7 +172,7 @@ describe("authenticateTokenRequest", () => {
 	it("returns null when the user role is visitor", async () => {
 		const user = { id: "user", hash: "h1", role: "visitor" };
 		const token = getApiToken(user);
-		findRecord.mockResolvedValue(user);
+		asMock(findRecord).mockResolvedValue(user);
 
 		await expect(
 			authenticateTokenRequest(paramsOf({ id: "user", token })),
@@ -180,14 +180,18 @@ describe("authenticateTokenRequest", () => {
 	});
 
 	it("returns null when the token does not match", async () => {
-		findRecord.mockResolvedValue({ id: "user", hash: "h1", role: "student" });
+		asMock(findRecord).mockResolvedValue({
+			id: "user",
+			hash: "h1",
+			role: "student",
+		});
 		await expect(
 			authenticateTokenRequest(paramsOf({ id: "user", token: "wrong" })),
 		).resolves.toBeNull();
 	});
 
 	it("returns null when the user does not exist", async () => {
-		findRecord.mockResolvedValue(null);
+		asMock(findRecord).mockResolvedValue(null);
 		await expect(
 			authenticateTokenRequest(paramsOf({ id: "missing", token: "abc" })),
 		).resolves.toBeNull();
@@ -196,7 +200,7 @@ describe("authenticateTokenRequest", () => {
 	it("caches the authentication result for repeated calls", async () => {
 		const user = { id: "user", hash: "h1", role: "student" };
 		const token = getApiToken(user);
-		findRecord.mockResolvedValue(user);
+		asMock(findRecord).mockResolvedValue(user);
 
 		await authenticateTokenRequest(paramsOf({ id: "user", token }));
 		await authenticateTokenRequest(paramsOf({ id: "user", token }));

@@ -18,7 +18,7 @@ jest.mock("@util/domain/views", () => ({
 describe("Languages View", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
-		useTranslations.mockReturnValue({
+		asMock(useTranslations).mockReturnValue({
 			NAME: "Name",
 			DIRECTION: "Direction",
 			LEFT_TO_RIGHT: "Left to Right",

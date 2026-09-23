@@ -76,11 +76,11 @@ describe("useSessionTextColor", () => {
 					if (prop === "--text-color") return "#123456";
 					return "";
 				},
-			});
+			} as unknown as CSSStyleDeclaration);
 	});
 
 	afterEach(() => {
-		getComputedStyleSpy.mockRestore();
+		asMock(getComputedStyleSpy).mockRestore();
 	});
 
 	it("returns the computed text color when there is no session color", () => {
@@ -92,7 +92,7 @@ describe("useSessionTextColor", () => {
 	});
 
 	it("returns white when the mixed background is dark", () => {
-		getComputedStyleSpy.mockReturnValue({
+		asMock(getComputedStyleSpy).mockReturnValue({
 			getPropertyValue: (prop: any) => {
 				if (prop === "--main-background") return "#000000";
 				return "";
@@ -121,9 +121,9 @@ describe("getSessionTextColor", () => {
 					if (prop === "--text-color") return "#654321";
 					return "";
 				},
-			});
+			} as unknown as CSSStyleDeclaration);
 		expect(getSessionTextColor(null, undefined)).toBe("#654321");
-		getComputedStyleSpy.mockRestore();
+		asMock(getComputedStyleSpy).mockRestore();
 	});
 
 	it("computes a contrasting color using the theme's background", () => {
@@ -139,8 +139,8 @@ describe("getSessionTextColor", () => {
 					if (prop === "--main-background") return "#ffffff";
 					return "";
 				},
-			});
+			} as unknown as CSSStyleDeclaration);
 		expect(getSessionTextColor("#000000", {})).toBe("#000000");
-		getComputedStyleSpy.mockRestore();
+		asMock(getComputedStyleSpy).mockRestore();
 	});
 });

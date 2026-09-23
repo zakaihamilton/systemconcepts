@@ -35,7 +35,7 @@ describe("TrackCard", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
 		jest.useFakeTimers();
-		useDateFormatter.mockReturnValue({
+		asMock(useDateFormatter).mockReturnValue({
 			format: (date: any) =>
 				`${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`,
 		});
@@ -72,8 +72,8 @@ describe("TrackCard", () => {
 		expect(screen.getByText("2024-6-15")).toBeInTheDocument();
 		expect(screen.getByText("00:01:30")).toBeInTheDocument();
 		expect(screen.getByTestId("type-audio")).toBeInTheDocument();
-		expect(container.firstChild.className).toMatch(/active/);
-		expect(container.firstChild.className).toMatch(/playing/);
+		expect((container.firstChild as HTMLElement).className).toMatch(/active/);
+		expect((container.firstChild as HTMLElement).className).toMatch(/playing/);
 	});
 
 	it("invokes onSessionClick when the card is clicked", () => {
@@ -99,7 +99,7 @@ describe("TrackCard", () => {
 		rerender(<TrackCard session={{ ...baseSession, duration: 0 }} />);
 		expect(formatDuration).not.toHaveBeenCalled();
 
-		formatDuration.mockReturnValue("00:00:00");
+		asMock(formatDuration).mockReturnValue("00:00:00");
 		rerender(<TrackCard session={{ ...baseSession, duration: 5 }} />);
 		expect(screen.queryByText("00:00:00")).not.toBeInTheDocument();
 	});
@@ -120,7 +120,9 @@ describe("TrackCard", () => {
 		const { container } = render(
 			<TrackCard session={{ ...baseSession, position: 45, duration: 90 }} />,
 		);
-		const progress = container.querySelector("[class*='progressBar']");
+		const progress = container.querySelector<HTMLElement>(
+			"[class*='progressBar']",
+		);
 		expect(progress).toBeTruthy();
 		expect(progress.style.width).toBe("50%");
 	});
@@ -154,7 +156,7 @@ describe("TrackCard", () => {
 
 	it("clears gradient after image load", () => {
 		const { container } = render(<TrackCard session={baseSession} />);
-		const inner = container.querySelector("[class*='cardInner']");
+		const inner = container.querySelector<HTMLElement>("[class*='cardInner']");
 		expect(inner.style.background).toContain("linear-gradient");
 
 		fireEvent.click(screen.getByTestId("image"));

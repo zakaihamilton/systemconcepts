@@ -25,7 +25,7 @@ jest.mock("../Library", () => () => <div data-testid="library-view" />);
 describe("Tags View", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
-		useTranslations.mockReturnValue({
+		asMock(useTranslations).mockReturnValue({
 			SESSIONS: "Sessions",
 			LIBRARY: "Library",
 		});

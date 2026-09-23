@@ -23,7 +23,7 @@ jest.mock("@widgets/Dialog", () => ({ title, children, actions }: any) => (
 describe("Reset Component", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
-		useTranslations.mockReturnValue({
+		asMock(useTranslations).mockReturnValue({
 			RESET: "Reset",
 			CANCEL: "Cancel",
 			RESET_SETTINGS: "Reset Settings",

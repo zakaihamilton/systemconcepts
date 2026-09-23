@@ -7,7 +7,7 @@ jest.mock("@util/domain/translations");
 describe("Dialog Widget", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
-		useTranslations.mockReturnValue({ CLOSE: "Close" });
+		asMock(useTranslations).mockReturnValue({ CLOSE: "Close" });
 	});
 
 	it("renders title and children", () => {

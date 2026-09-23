@@ -1,6 +1,6 @@
 import { createSessionItem } from "./mapper";
 
-function file(name: any, path: any) {
+function file(name: any, path?: string) {
 	return { name, path: path || `/aws/sessions/test/2024/${name}` };
 }
 

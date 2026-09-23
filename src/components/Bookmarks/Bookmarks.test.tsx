@@ -37,11 +37,11 @@ describe("Bookmarks Component", () => {
 			s.bookmarks = [];
 			s._loaded = false;
 		});
-		useTranslations.mockReturnValue(mockTranslations);
-		useActivePages.mockReturnValue(mockActivePages);
-		usePages.mockReturnValue(mockActivePages);
-		MainStore.useState.mockReturnValue({ hash: "#test" });
-		storage.exists.mockResolvedValue(false);
+		asMock(useTranslations).mockReturnValue(mockTranslations);
+		asMock(useActivePages).mockReturnValue(mockActivePages);
+		asMock(usePages).mockReturnValue(mockActivePages);
+		asMock(MainStore.useState).mockReturnValue({ hash: "#test" });
+		asMock(storage.exists).mockResolvedValue(false);
 	});
 
 	it("renders nothing but registers toolbar items", async () => {
@@ -50,14 +50,14 @@ describe("Bookmarks Component", () => {
 			expect(BookmarksStore.getRawState()._loaded).toBe(true),
 		);
 		expect(useToolbar).toHaveBeenCalled();
-		const toolbarArgs = useToolbar.mock.calls[0][0];
+		const toolbarArgs = asMock(useToolbar).mock.calls[0][0];
 		expect(toolbarArgs.id).toBe("Bookmarks");
 		expect(toolbarArgs.items[0].name).toBe("Add Bookmark");
 	});
 
 	it("toggles bookmark when clicked", async () => {
 		let toolbarItems: any = [];
-		useToolbar.mockImplementation(({ items }: any) => {
+		asMock(useToolbar).mockImplementation(({ items }: any) => {
 			toolbarItems = items;
 		});
 
@@ -79,8 +79,8 @@ describe("Bookmarks Component", () => {
 	});
 
 	it("loads bookmarks from storage when the file exists", async () => {
-		storage.exists.mockResolvedValue(true);
-		storage.readFile.mockResolvedValue(
+		asMock(storage.exists).mockResolvedValue(true);
+		asMock(storage.readFile).mockResolvedValue(
 			JSON.stringify({
 				bookmarks: [{ id: "#saved", name: "Saved", pageId: "p1" }],
 			}),
@@ -115,10 +115,10 @@ describe("Bookmarks Component", () => {
 			s._loaded = true;
 		});
 		let toolbarItems: any = [];
-		useToolbar.mockImplementation(({ items }: any) => {
+		asMock(useToolbar).mockImplementation(({ items }: any) => {
 			toolbarItems = items;
 		});
-		useActivePages.mockReturnValue([
+		asMock(useActivePages).mockReturnValue([
 			{
 				id: "test-page",
 				name: "Test Page",
@@ -140,11 +140,11 @@ describe("Bookmarks Component", () => {
 	});
 
 	it("hides the bookmark action on sidebar pages", async () => {
-		useActivePages.mockReturnValue([
+		asMock(useActivePages).mockReturnValue([
 			{ id: "sidebar-page", sidebar: true, root: false },
 		]);
 		let toolbarItems: any = [];
-		useToolbar.mockImplementation(({ items }: any) => {
+		asMock(useToolbar).mockImplementation(({ items }: any) => {
 			toolbarItems = items;
 		});
 
@@ -162,11 +162,11 @@ describe("useBookmarks hook", () => {
 			s.bookmarks = [{ id: "#test", name: "Test", pageId: "test-page" }];
 			s._loaded = true;
 		});
-		usePages.mockReturnValue([
+		asMock(usePages).mockReturnValue([
 			{ id: "test-page", name: "Test Page", label: "Test Label" },
 		]);
 		const { getPagesFromHash } = require("@util/domain/views");
-		getPagesFromHash.mockReturnValue([
+		asMock(getPagesFromHash).mockReturnValue([
 			{ id: "test-page", name: "Test Page", label: "Test Label" },
 		]);
 

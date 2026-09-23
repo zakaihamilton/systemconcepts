@@ -45,7 +45,7 @@ jest.mock(
 );
 
 describe("User View", () => {
-	const mockTranslations = {
+	const mockTranslations: Record<string, string> = {
 		USER: "User",
 		EDIT_ACCOUNT: "Edit Account",
 		BACK: "Back",
@@ -76,10 +76,10 @@ describe("User View", () => {
 
 	beforeEach(() => {
 		jest.clearAllMocks();
-		useTranslations.mockReturnValue(mockTranslations);
-		MainStore.useState.mockReturnValue({ direction: "ltr" });
-		useParentPath.mockReturnValue("#users");
-		useFetchJSON.mockReturnValue([mockUser, jest.fn(), false]);
+		asMock(useTranslations).mockReturnValue(mockTranslations);
+		asMock(MainStore.useState).mockReturnValue({ direction: "ltr" });
+		asMock(useParentPath).mockReturnValue("#users");
+		asMock(useFetchJSON).mockReturnValue([mockUser, jest.fn(), false]);
 	});
 
 	it("renders user details form", () => {
@@ -90,13 +90,13 @@ describe("User View", () => {
 	});
 
 	it("renders edit account title when parent path is #account", () => {
-		useParentPath.mockReturnValue("#account");
+		asMock(useParentPath).mockReturnValue("#account");
 		const { getByText } = render(<User path="testuser" />);
 		expect(getByText("Edit Account")).toBeInTheDocument();
 	});
 
 	it("calls fetchJSON on save", async () => {
-		fetchJSON.mockResolvedValue({});
+		asMock(fetchJSON).mockResolvedValue({});
 		const { getByText } = render(<User path="testuser" />);
 
 		fireEvent.click(getByText("Save"));
@@ -119,7 +119,7 @@ describe("User View", () => {
 	});
 
 	it("disables save when required fields are invalid after validation", () => {
-		useFetchJSON.mockReturnValue([
+		asMock(useFetchJSON).mockReturnValue([
 			{ id: "", email: "", firstName: "", lastName: "" },
 			jest.fn(),
 			false,
@@ -131,7 +131,7 @@ describe("User View", () => {
 
 	it("shows a translated error when save fails", async () => {
 		mockTranslations.SERVER_ERROR = "Server failed";
-		fetchJSON.mockRejectedValue("SERVER_ERROR");
+		asMock(fetchJSON).mockRejectedValue("SERVER_ERROR");
 		const { getByText } = render(<User path="testuser" />);
 
 		fireEvent.click(getByText("Save"));
@@ -142,7 +142,7 @@ describe("User View", () => {
 	});
 
 	it("shows a raw error string when no translation exists", async () => {
-		fetchJSON.mockRejectedValue("UNKNOWN_CODE");
+		asMock(fetchJSON).mockRejectedValue("UNKNOWN_CODE");
 		const { getByText } = render(<User path="testuser" />);
 
 		fireEvent.click(getByText("Save"));
@@ -156,7 +156,7 @@ describe("User View", () => {
 		const consoleError = jest
 			.spyOn(console, "error")
 			.mockImplementation(() => {});
-		fetchJSON.mockResolvedValue({ err: "SAVE_FAILED" });
+		asMock(fetchJSON).mockResolvedValue({ err: "SAVE_FAILED" });
 		mockTranslations.SAVE_FAILED = "Could not save";
 		const { getByText } = render(<User path="testuser" />);
 
@@ -165,30 +165,30 @@ describe("User View", () => {
 		await waitFor(() => {
 			expect(getByText("Could not save")).toBeInTheDocument();
 		});
-		consoleError.mockRestore();
+		asMock(consoleError).mockRestore();
 	});
 
 	it("hides id and password fields in edit-account mode", () => {
-		useParentPath.mockReturnValue("#account");
+		asMock(useParentPath).mockReturnValue("#account");
 		const { queryByTestId } = render(<User path="testuser" />);
 		expect(queryByTestId("input-id")).not.toBeInTheDocument();
 		expect(queryByTestId("input-password")).not.toBeInTheDocument();
 	});
 
 	it("applies rtl styling to the back button", () => {
-		MainStore.useState.mockReturnValue({ direction: "rtl" });
+		asMock(MainStore.useState).mockReturnValue({ direction: "rtl" });
 		const { container } = render(<User path="testuser" />);
 		expect(container.querySelector(".rtl")).toBeTruthy();
 	});
 
 	it("shows loading progress while fetching user data", () => {
-		useFetchJSON.mockReturnValue([null, jest.fn(), true]);
+		asMock(useFetchJSON).mockReturnValue([null, jest.fn(), true]);
 		const { container } = render(<User path="testuser" />);
 		expect(container.querySelector("[role='progressbar']")).toBeTruthy();
 	});
 
 	it("blocks save for invalid email and id values", () => {
-		useFetchJSON.mockReturnValue([
+		asMock(useFetchJSON).mockReturnValue([
 			{
 				id: "bad id!",
 				email: "not-an-email",
@@ -205,7 +205,7 @@ describe("User View", () => {
 	});
 
 	it("surfaces password validation errors after submit", () => {
-		useFetchJSON.mockReturnValue([
+		asMock(useFetchJSON).mockReturnValue([
 			{
 				id: "valid-id",
 				email: "test@example.com",
@@ -225,7 +225,7 @@ describe("User View", () => {
 	});
 
 	it("surfaces password-too-long validation after submit", () => {
-		useFetchJSON.mockReturnValue([
+		asMock(useFetchJSON).mockReturnValue([
 			{
 				id: "valid-id",
 				email: "test@example.com",

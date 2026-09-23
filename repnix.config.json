@@ -2,7 +2,7 @@
 	"schemaVersion": 1,
 	"severityThreshold": "warning",
 	"execution": {
-		"jobs": 2,
+		"jobs": 1,
 		"timeoutSeconds": 300
 	},
 	"baseline": {

@@ -27,9 +27,9 @@ jest.mock("@widgets/Tooltip", () => ({ children, title }: any) => (
 describe("WeekView Session", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
-		useDeviceType.mockReturnValue("desktop");
-		useSessionTextColor.mockReturnValue("#111");
-		toPath.mockImplementation((p: any) => p);
+		asMock(useDeviceType).mockReturnValue("desktop");
+		asMock(useSessionTextColor).mockReturnValue("#111");
+		asMock(toPath).mockImplementation((p: any) => p);
 	});
 
 	it("renders group and navigates on click", () => {
@@ -51,7 +51,7 @@ describe("WeekView Session", () => {
 	});
 
 	it("hides group when showGroup is false and applies mobile styles", () => {
-		useDeviceType.mockReturnValue("phone");
+		asMock(useDeviceType).mockReturnValue("phone");
 		render(
 			<Session
 				group="will"

@@ -8,7 +8,7 @@ import { useTranslations } from "@util/domain/translations";
 import { addPath } from "@util/domain/views";
 import MonthView from "./MonthView";
 
-let swipeHandlers = {};
+let swipeHandlers: Record<string, any> = {};
 let sessionsProps: any = null;
 
 jest.mock("@components/Toolbar", () => ({
@@ -95,8 +95,8 @@ jest.mock("./Sessions", () => (props: any) => {
 	);
 });
 
-function createStore(initial = {}) {
-	const state = { lastViewMode: null, ...initial };
+function createStore(initial: Record<string, any> = {}) {
+	const state: Record<string, any> = { lastViewMode: null, ...initial };
 	return {
 		useState: jest.fn(() => ({ ...state })),
 		update: jest.fn((fn) => fn(state)),
@@ -105,8 +105,8 @@ function createStore(initial = {}) {
 }
 
 function getToolbarItem(id: any) {
-	return useToolbar.mock.calls
-		.at(-1)[0]
+	return asMock(useToolbar)
+		.mock.calls.at(-1)[0]
 		.items.find((item: any) => item.id === id);
 }
 
@@ -128,10 +128,10 @@ describe("MonthView", () => {
 		jest.clearAllMocks();
 		swipeHandlers = {};
 		sessionsProps = null;
-		useDeviceType.mockReturnValue("desktop");
-		useDirection.mockReturnValue("ltr");
-		useTranslations.mockReturnValue(translations);
-		useDateFormatter.mockImplementation((opts = {}) => ({
+		asMock(useDeviceType).mockReturnValue("desktop");
+		asMock(useDirection).mockReturnValue("ltr");
+		asMock(useTranslations).mockReturnValue(translations);
+		asMock(useDateFormatter).mockImplementation((opts = {}) => ({
 			format: (date: any) => {
 				if (opts.weekday) return opts.weekday === "narrow" ? "M" : "Mon";
 				if (opts.month === "short") return "Jun";
@@ -143,7 +143,7 @@ describe("MonthView", () => {
 		}));
 	});
 
-	const renderMonth = (props = {}) => {
+	const renderMonth = (props: Record<string, any> = {}) => {
 		const store = props.store || createStore();
 		const date = props.date || new Date(2024, 5, 15);
 		return {
@@ -270,8 +270,8 @@ describe("MonthView", () => {
 	});
 
 	it("applies rtl swipe mapping and phone formatters", () => {
-		useDirection.mockReturnValue("rtl");
-		useDeviceType.mockReturnValue("phone");
+		asMock(useDirection).mockReturnValue("rtl");
+		asMock(useDeviceType).mockReturnValue("phone");
 		renderMonth();
 		expect(useDateFormatter).toHaveBeenCalledWith({ weekday: "narrow" });
 		expect(useDateFormatter).toHaveBeenCalledWith({ month: "short" });

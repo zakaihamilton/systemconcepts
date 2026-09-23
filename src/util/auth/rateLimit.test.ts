@@ -16,7 +16,7 @@ describe("checkRateLimit", () => {
 
 	it("uses the trusted client ip as the identifier by default", async () => {
 		const findOneAndUpdate = jest.fn().mockResolvedValue({ count: 1 });
-		getCollection.mockResolvedValue({ findOneAndUpdate });
+		asMock(getCollection).mockResolvedValue({ findOneAndUpdate });
 
 		await checkRateLimit({});
 
@@ -30,7 +30,7 @@ describe("checkRateLimit", () => {
 
 	it("uses the explicit key instead of the ip when provided", async () => {
 		const findOneAndUpdate = jest.fn().mockResolvedValue({ count: 1 });
-		getCollection.mockResolvedValue({ findOneAndUpdate });
+		asMock(getCollection).mockResolvedValue({ findOneAndUpdate });
 
 		await checkRateLimit({}, { key: "user-a" });
 
@@ -44,14 +44,14 @@ describe("checkRateLimit", () => {
 
 	it("resolves without throwing when the count is within the limit", async () => {
 		const findOneAndUpdate = jest.fn().mockResolvedValue({ count: 5 });
-		getCollection.mockResolvedValue({ findOneAndUpdate });
+		asMock(getCollection).mockResolvedValue({ findOneAndUpdate });
 
 		await expect(checkRateLimit({}, { limit: 5 })).resolves.toBeUndefined();
 	});
 
 	it("throws RATE_LIMIT_EXCEEDED when the count exceeds the limit", async () => {
 		const findOneAndUpdate = jest.fn().mockResolvedValue({ count: 6 });
-		getCollection.mockResolvedValue({ findOneAndUpdate });
+		asMock(getCollection).mockResolvedValue({ findOneAndUpdate });
 
 		await expect(checkRateLimit({}, { limit: 5 })).rejects.toBe(
 			"RATE_LIMIT_EXCEEDED",
@@ -61,7 +61,7 @@ describe("checkRateLimit", () => {
 	it("inserts a fresh record when none exists yet", async () => {
 		const findOneAndUpdate = jest.fn().mockResolvedValue(null);
 		const insertOne = jest.fn().mockResolvedValue({});
-		getCollection.mockResolvedValue({ findOneAndUpdate, insertOne });
+		asMock(getCollection).mockResolvedValue({ findOneAndUpdate, insertOne });
 
 		await checkRateLimit({}, { limit: 5, windowMs: 1000 });
 
@@ -77,7 +77,7 @@ describe("checkRateLimit", () => {
 			.mockResolvedValueOnce({ count: 1 });
 		const duplicateKeyError = Object.assign(new Error("dup"), { code: 11000 });
 		const insertOne = jest.fn().mockRejectedValue(duplicateKeyError);
-		getCollection.mockResolvedValue({ findOneAndUpdate, insertOne });
+		asMock(getCollection).mockResolvedValue({ findOneAndUpdate, insertOne });
 
 		await expect(checkRateLimit({}, { limit: 5 })).resolves.toBeUndefined();
 		expect(findOneAndUpdate).toHaveBeenCalledTimes(2);
@@ -86,7 +86,7 @@ describe("checkRateLimit", () => {
 	it("rethrows unexpected errors from insertOne", async () => {
 		const findOneAndUpdate = jest.fn().mockResolvedValue(null);
 		const insertOne = jest.fn().mockRejectedValue(new Error("db down"));
-		getCollection.mockResolvedValue({ findOneAndUpdate, insertOne });
+		asMock(getCollection).mockResolvedValue({ findOneAndUpdate, insertOne });
 
 		await expect(checkRateLimit({}, {})).rejects.toThrow("db down");
 	});

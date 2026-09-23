@@ -13,8 +13,8 @@ jest.mock("@widgets/Tooltip", () => ({ children, title }: any) => (
 	<div data-title={title}>{children}</div>
 ));
 
-function createStore(initial = {}) {
-	const state = { ...initial };
+function createStore(initial: Record<string, any> = {}) {
+	const state: Record<string, any> = { ...initial };
 	return {
 		update: jest.fn((fn) => fn(state)),
 		_state: state,
@@ -24,11 +24,11 @@ function createStore(initial = {}) {
 describe("YearView Month", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
-		useTranslations.mockReturnValue({
+		asMock(useTranslations).mockReturnValue({
 			WEEK_VIEW: "Week view",
 			MONTH_VIEW: "Month view",
 		});
-		useDateFormatter.mockImplementation((opts = {}) => ({
+		asMock(useDateFormatter).mockImplementation((opts = {}) => ({
 			format: (date: any) => {
 				if (opts.month) return "June";
 				if (opts.day) return String(date.getDate());

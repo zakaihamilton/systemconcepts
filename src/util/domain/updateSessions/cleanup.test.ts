@@ -31,19 +31,19 @@ describe("cleanupBundledGroup", () => {
 	});
 
 	it("deletes local year files, the empty folder, and the legacy merged file", async () => {
-		storage.exists.mockImplementation(async (path: any) => {
+		asMock(storage.exists).mockImplementation(async (path: any) => {
 			return (
 				path === "/local/sync/test" ||
 				path === "/local/sync/files.json" ||
 				path === "/local/sync/test.json"
 			);
 		});
-		storage.getListing.mockResolvedValue([
+		asMock(storage.getListing).mockResolvedValue([
 			{ name: "2023.json" },
 			{ name: "2024.json" },
 			{ name: "notes.txt" },
 		]);
-		storage.readFile.mockResolvedValue(
+		asMock(storage.readFile).mockResolvedValue(
 			JSON.stringify([
 				{ path: "/test/2023.json" },
 				{ path: "/test/2024.json" },
@@ -71,7 +71,7 @@ describe("cleanupBundledGroup", () => {
 	});
 
 	it("does nothing when there are no local year files or manifest entries", async () => {
-		storage.exists.mockResolvedValue(false);
+		asMock(storage.exists).mockResolvedValue(false);
 
 		await cleanupBundledGroup("empty-group");
 
@@ -82,10 +82,10 @@ describe("cleanupBundledGroup", () => {
 	});
 
 	it("does not rewrite the manifest when no entries match the group", async () => {
-		storage.exists.mockImplementation(
+		asMock(storage.exists).mockImplementation(
 			async (path: any) => path === "/local/sync/files.json",
 		);
-		storage.readFile.mockResolvedValue(
+		asMock(storage.readFile).mockResolvedValue(
 			JSON.stringify([{ path: "/other/2024.json" }]),
 		);
 
@@ -95,10 +95,10 @@ describe("cleanupBundledGroup", () => {
 	});
 
 	it("logs an error and continues when deleting split files fails", async () => {
-		storage.exists.mockImplementation(
+		asMock(storage.exists).mockImplementation(
 			async (path: any) => path === "/local/sync/test",
 		);
-		storage.getListing.mockRejectedValue(new Error("listing failed"));
+		asMock(storage.getListing).mockRejectedValue(new Error("listing failed"));
 
 		await cleanupBundledGroup("test");
 
@@ -113,10 +113,12 @@ describe("cleanupBundledGroup", () => {
 	});
 
 	it("logs an error when updating the manifest fails", async () => {
-		storage.exists.mockImplementation(
+		asMock(storage.exists).mockImplementation(
 			async (path: any) => path === "/local/sync/files.json",
 		);
-		storage.readFile.mockRejectedValue(new Error("manifest read failed"));
+		asMock(storage.readFile).mockRejectedValue(
+			new Error("manifest read failed"),
+		);
 
 		await cleanupBundledGroup("test");
 
@@ -133,10 +135,10 @@ describe("cleanupMergedGroup", () => {
 	});
 
 	it("deletes local year files and the empty folder", async () => {
-		storage.exists.mockImplementation(
+		asMock(storage.exists).mockImplementation(
 			async (path: any) => path === "/local/sync/test",
 		);
-		storage.getListing.mockResolvedValue([
+		asMock(storage.getListing).mockResolvedValue([
 			{ name: "2023.json" },
 			{ name: "ignore.me" },
 		]);
@@ -150,7 +152,7 @@ describe("cleanupMergedGroup", () => {
 	});
 
 	it("does nothing when the years folder does not exist", async () => {
-		storage.exists.mockResolvedValue(false);
+		asMock(storage.exists).mockResolvedValue(false);
 
 		await cleanupMergedGroup("test");
 
@@ -159,10 +161,10 @@ describe("cleanupMergedGroup", () => {
 	});
 
 	it("logs an error and adds a sync log warning when deletion fails", async () => {
-		storage.exists.mockImplementation(
+		asMock(storage.exists).mockImplementation(
 			async (path: any) => path === "/local/sync/test",
 		);
-		storage.getListing.mockRejectedValue(new Error("listing failed"));
+		asMock(storage.getListing).mockRejectedValue(new Error("listing failed"));
 
 		await cleanupMergedGroup("test");
 
@@ -177,10 +179,10 @@ describe("cleanupMergedGroup", () => {
 	});
 
 	it("does not delete files with a non-json extension in the years folder", async () => {
-		storage.exists.mockImplementation(
+		asMock(storage.exists).mockImplementation(
 			async (path: any) => path === "/local/sync/test",
 		);
-		storage.getListing.mockResolvedValue([{ name: "readme.md" }]);
+		asMock(storage.getListing).mockResolvedValue([{ name: "readme.md" }]);
 
 		await cleanupMergedGroup("test");
 

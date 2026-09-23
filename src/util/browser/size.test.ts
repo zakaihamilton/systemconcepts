@@ -125,11 +125,13 @@ describe("useSize", () => {
 	let instances: any;
 
 	class ResizeObserverMock {
-		constructor(callback: any) {
+		callback: ResizeObserverCallback;
+		observe = jest.fn();
+		unobserve = jest.fn();
+		disconnect = jest.fn();
+
+		constructor(callback: ResizeObserverCallback) {
 			this.callback = callback;
-			this.observe = jest.fn();
-			this.unobserve = jest.fn();
-			this.disconnect = jest.fn();
 			instances.push(this);
 		}
 	}
@@ -137,7 +139,8 @@ describe("useSize", () => {
 	beforeEach(() => {
 		jest.useFakeTimers();
 		instances = [];
-		global.ResizeObserver = ResizeObserverMock;
+		global.ResizeObserver =
+			ResizeObserverMock as unknown as typeof ResizeObserver;
 	});
 
 	afterEach(() => {
@@ -155,12 +158,12 @@ describe("useSize", () => {
 		const { result } = renderHook(() => useSize(ref));
 		expect(result.current.width).toBe(0);
 		expect(result.current.height).toBe(0);
-		expect(result.current.ref).toBe(ref);
+		expect((result.current as { ref: typeof ref }).ref).toBe(ref);
 	});
 
 	it("measures the element immediately on mount", () => {
 		const element = document.createElement("div");
-		element.getBoundingClientRect = () => ({ width: 100, height: 50 });
+		element.getBoundingClientRect = () => makeRect(100, 50);
 		const ref = { current: element };
 
 		const { result } = renderHook(() => useSize(ref));
@@ -172,7 +175,7 @@ describe("useSize", () => {
 
 	it("re-measures when the resize observer reports a change", () => {
 		const element = document.createElement("div");
-		let rect = { width: 100, height: 50 };
+		let rect = makeRect(100, 50);
 		element.getBoundingClientRect = () => rect;
 		const ref = { current: element };
 
@@ -184,7 +187,7 @@ describe("useSize", () => {
 			jest.advanceTimersByTime(0);
 		});
 
-		rect = { width: 200, height: 80 };
+		rect = makeRect(200, 80);
 		act(() => {
 			instances[0].callback();
 			jest.advanceTimersByTime(100);
@@ -196,7 +199,7 @@ describe("useSize", () => {
 
 	it("ignores resize observer changes below the meaningful threshold", () => {
 		const element = document.createElement("div");
-		let rect = { width: 100, height: 50 };
+		let rect = makeRect(100, 50);
 		element.getBoundingClientRect = () => rect;
 		const ref = { current: element };
 
@@ -208,7 +211,7 @@ describe("useSize", () => {
 			jest.advanceTimersByTime(0);
 		});
 
-		rect = { width: 100.5, height: 50.5 };
+		rect = makeRect(100.5, 50.5);
 		act(() => {
 			instances[0].callback();
 			jest.advanceTimersByTime(100);
@@ -220,7 +223,7 @@ describe("useSize", () => {
 
 	it("unobserves the element on unmount", () => {
 		const element = document.createElement("div");
-		element.getBoundingClientRect = () => ({ width: 10, height: 10 });
+		element.getBoundingClientRect = () => makeRect(10, 10);
 		const ref = { current: element };
 
 		const { unmount } = renderHook(() => useSize(ref));
@@ -231,7 +234,7 @@ describe("useSize", () => {
 
 	it("cancels pending resize timers when unmounting during a debounced resize", () => {
 		const element = document.createElement("div");
-		element.getBoundingClientRect = () => ({ width: 100, height: 50 });
+		element.getBoundingClientRect = () => makeRect(100, 50);
 		const ref = { current: element };
 
 		const { unmount } = renderHook(() => useSize(ref));
@@ -243,13 +246,14 @@ describe("useSize", () => {
 
 	it("returns a ref handle when a ref is provided", () => {
 		const element = document.createElement("div");
-		element.getBoundingClientRect = () => ({ width: 10, height: 10 });
+		element.getBoundingClientRect = () => makeRect(10, 10);
 		const ref = { current: element };
 
 		const { result } = renderHook(() => useSize(ref));
 
-		expect(result.current.ref).toBe(ref);
-		expect(result.current.counter).toBeDefined();
+		const size = result.current as { ref: typeof ref; counter: number };
+		expect(size.ref).toBe(ref);
+		expect(size.counter).toBeDefined();
 	});
 
 	it("cancels an in-flight animation frame during rapid resize events", () => {
@@ -266,6 +270,20 @@ describe("useSize", () => {
 		});
 
 		expect(cancelSpy).toHaveBeenCalled();
-		cancelSpy.mockRestore();
+		asMock(cancelSpy).mockRestore();
 	});
 });
+
+function makeRect(width: number, height: number): DOMRect {
+	return {
+		x: 0,
+		y: 0,
+		left: 0,
+		top: 0,
+		right: width,
+		bottom: height,
+		width,
+		height,
+		toJSON: () => ({}),
+	};
+}

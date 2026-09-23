@@ -25,7 +25,7 @@ describe("assertSameOrigin", () => {
 	const originalNodeEnv = process.env.NODE_ENV;
 
 	afterEach(() => {
-		process.env.NODE_ENV = originalNodeEnv;
+		Reflect.set(process.env, "NODE_ENV", originalNodeEnv);
 	});
 
 	it("skips origin validation in tests", () => {
@@ -38,7 +38,7 @@ describe("assertSameOrigin", () => {
 	});
 
 	it("accepts a matching origin outside test mode", () => {
-		process.env.NODE_ENV = "production";
+		Reflect.set(process.env, "NODE_ENV", "production");
 
 		expect(() =>
 			assertSameOrigin({
@@ -49,7 +49,7 @@ describe("assertSameOrigin", () => {
 	});
 
 	it("rejects missing and mismatched origins outside test mode", () => {
-		process.env.NODE_ENV = "production";
+		Reflect.set(process.env, "NODE_ENV", "production");
 
 		const request = (origin: any) => ({
 			url: "http://localhost/api",

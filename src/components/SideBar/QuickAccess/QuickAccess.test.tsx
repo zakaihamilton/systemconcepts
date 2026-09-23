@@ -84,15 +84,15 @@ describe("QuickAccess", () => {
 
 	beforeEach(() => {
 		jest.clearAllMocks();
-		useLanguage.mockReturnValue("eng");
-		useTranslations.mockReturnValue({
+		asMock(useLanguage).mockReturnValue("eng");
+		asMock(useTranslations).mockReturnValue({
 			RELOAD: "Reload",
 			LIGHT_MODE: "Light",
 			DARK_MODE: "Dark",
 			LANGUAGE: "Language",
 			TOOLS: "Tools",
 		});
-		usePages.mockReturnValue([
+		asMock(usePages).mockReturnValue([
 			{
 				id: "sync",
 				name: "Sync",
@@ -108,7 +108,7 @@ describe("QuickAccess", () => {
 			},
 			{ id: "hidden", name: "Hidden", sidebar: false, category: "tools" },
 		]);
-		useDarkMode.mockReturnValue(darkMode);
+		asMock(useDarkMode).mockReturnValue(darkMode);
 	});
 
 	it("renders reload, dark mode, language, tools, and quickaccess items", () => {
@@ -153,7 +153,7 @@ describe("QuickAccess", () => {
 	});
 
 	it("shows light mode label when dark mode is on", () => {
-		useDarkMode.mockReturnValue({ value: true, toggle: jest.fn() });
+		asMock(useDarkMode).mockReturnValue({ value: true, toggle: jest.fn() });
 		render(<QuickAccess closeDrawer={jest.fn()} />);
 		expect(screen.getByText("Light")).toBeInTheDocument();
 	});

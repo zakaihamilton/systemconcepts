@@ -46,8 +46,8 @@ describe("Toolbar Component", () => {
 		ToolbarStore.update((s) => {
 			s.sections = [];
 		});
-		useTranslations.mockReturnValue({ MENU: "Menu" });
-		useDeviceType.mockReturnValue("desktop");
+		asMock(useTranslations).mockReturnValue({ MENU: "Menu" });
+		asMock(useDeviceType).mockReturnValue("desktop");
 	});
 
 	it("renders nothing if no items are present", () => {
@@ -112,7 +112,7 @@ describe("Toolbar Component", () => {
 	});
 
 	it("collapses undefined-menu items on mobile when collapsable", () => {
-		useDeviceType.mockReturnValue("phone");
+		asMock(useDeviceType).mockReturnValue("phone");
 		registerToolbar("sec", 1);
 		function TestComponent() {
 			useToolbar({

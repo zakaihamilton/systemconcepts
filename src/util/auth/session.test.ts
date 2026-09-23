@@ -74,14 +74,14 @@ describe("getSessionUser", () => {
 	});
 
 	it("throws when the session cannot be found", async () => {
-		findRecord.mockResolvedValueOnce(null);
+		asMock(findRecord).mockResolvedValueOnce(null);
 		await expect(
 			getSessionUser(requestWithCookie(SESSION_COOKIE, "token")),
 		).rejects.toBe(AUTHENTICATION_REQUIRED);
 	});
 
 	it("throws when the session has expired", async () => {
-		findRecord.mockResolvedValueOnce({
+		asMock(findRecord).mockResolvedValueOnce({
 			userId: "user",
 			expiresAt: new Date(Date.now() - 1000),
 		});
@@ -91,7 +91,7 @@ describe("getSessionUser", () => {
 	});
 
 	it("throws when the session is valid but the user no longer exists", async () => {
-		findRecord
+		asMock(findRecord)
 			.mockResolvedValueOnce({
 				userId: "user",
 				expiresAt: new Date(Date.now() + 100000),
@@ -104,7 +104,7 @@ describe("getSessionUser", () => {
 
 	it("returns the user for a valid session", async () => {
 		const user = { id: "user", role: "student" };
-		findRecord
+		asMock(findRecord)
 			.mockResolvedValueOnce({
 				userId: "user",
 				expiresAt: new Date(Date.now() + 100000),
@@ -149,7 +149,7 @@ describe("revokeSession", () => {
 describe("revokeAllSessions", () => {
 	it("deletes every session for the normalized user id", async () => {
 		const deleteMany = jest.fn();
-		getCollection.mockResolvedValue({ deleteMany });
+		asMock(getCollection).mockResolvedValue({ deleteMany });
 
 		await revokeAllSessions("User@Example.com");
 
@@ -201,7 +201,7 @@ describe("setSessionCookies / clearSessionCookies", () => {
 			{ id: "user" },
 		);
 
-		for (const call of response.cookies.set.mock.calls) {
+		for (const call of asMock(response.cookies.set).mock.calls) {
 			expect(call[2]).not.toHaveProperty("expires");
 		}
 	});
@@ -211,7 +211,7 @@ describe("setSessionCookies / clearSessionCookies", () => {
 		clearSessionCookies(response);
 
 		expect(response.cookies.set).toHaveBeenCalledTimes(4);
-		for (const call of response.cookies.set.mock.calls) {
+		for (const call of asMock(response.cookies.set).mock.calls) {
 			expect(call[2].maxAge).toBe(0);
 		}
 		expect(response.cookies.set).toHaveBeenCalledWith(

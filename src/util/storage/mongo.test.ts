@@ -56,9 +56,9 @@ beforeEach(async () => {
 		})),
 	};
 	cluster = cluster || { db: jest.fn() };
-	cluster.db.mockReset();
-	cluster.db.mockReturnValue(db);
-	MongoClient.connect.mockResolvedValue(cluster);
+	asMock(cluster.db).mockReset();
+	asMock(cluster.db).mockReturnValue(db);
+	asMock(MongoClient.connect).mockResolvedValue(cluster);
 	// Ensure the shared cluster is connected/cached for the main test URL.
 	await getCluster({ url: MAIN_URL });
 });
@@ -76,7 +76,7 @@ describe("getCluster", () => {
 	it("connects once and caches the cluster for a given url", async () => {
 		const url = "mongodb://cache-test-cluster";
 		const freshCluster = { db: jest.fn() };
-		MongoClient.connect.mockResolvedValue(freshCluster);
+		asMock(MongoClient.connect).mockResolvedValue(freshCluster);
 
 		const first = await getCluster({ url });
 		const second = await getCluster({ url });
@@ -88,7 +88,7 @@ describe("getCluster", () => {
 
 	it("throws when the driver returns a falsy cluster", async () => {
 		const url = "mongodb://falsy-cluster";
-		MongoClient.connect.mockResolvedValue(null);
+		asMock(MongoClient.connect).mockResolvedValue(null);
 
 		await expect(getCluster({ url })).rejects.toBe(
 			"Cannot connect to database",
@@ -114,7 +114,7 @@ describe("getDatabase / getCollection", () => {
 describe("listCollection", () => {
 	it("applies projection, skip, and limit when provided", async () => {
 		const cursor = makeCursor([{ id: "a" }]);
-		collection.find.mockReturnValue(cursor);
+		asMock(collection.find).mockReturnValue(cursor);
 
 		const results = await listCollection({
 			collectionName: "sessions",
@@ -133,7 +133,7 @@ describe("listCollection", () => {
 
 	it("skips optional cursor stages when not provided", async () => {
 		const cursor = makeCursor([]);
-		collection.find.mockReturnValue(cursor);
+		asMock(collection.find).mockReturnValue(cursor);
 
 		await listCollection({ collectionName: "sessions" });
 
@@ -145,7 +145,7 @@ describe("listCollection", () => {
 
 describe("listCollections", () => {
 	it("returns collection names", async () => {
-		db.listCollections.mockReturnValue({
+		asMock(db.listCollections).mockReturnValue({
 			toArray: jest
 				.fn()
 				.mockResolvedValue([{ name: "sessions" }, { name: "users" }]),
@@ -163,7 +163,7 @@ describe("record helpers", () => {
 	});
 
 	it("findRecord queries with fields", async () => {
-		collection.findOne.mockResolvedValue({ id: "a" });
+		asMock(collection.findOne).mockResolvedValue({ id: "a" });
 
 		const result = await findRecord({
 			query: { id: "a" },
@@ -209,7 +209,7 @@ describe("record helpers", () => {
 describe("handleRequest GET/POST", () => {
 	it("resolves a batch of ids via $in and truncates oversized responses", async () => {
 		const cursor = makeCursor([{ id: "a" }, { id: "b" }]);
-		collection.find.mockReturnValue(cursor);
+		asMock(collection.find).mockReturnValue(cursor);
 
 		const result = await handleRequest({
 			collectionName: "sessions",
@@ -225,7 +225,7 @@ describe("handleRequest GET/POST", () => {
 
 	it("defaults to an empty array when the id batch query yields no results", async () => {
 		const cursor = makeCursor(null);
-		collection.find.mockReturnValue(cursor);
+		asMock(collection.find).mockReturnValue(cursor);
 
 		const result = await handleRequest({
 			collectionName: "sessions",
@@ -238,7 +238,7 @@ describe("handleRequest GET/POST", () => {
 	it("truncates the id batch response once it exceeds the byte limit", async () => {
 		const bigRecord = { id: "a", blob: "x".repeat(4000 * 1000) };
 		const cursor = makeCursor([bigRecord, { id: "b" }]);
-		collection.find.mockReturnValue(cursor);
+		asMock(collection.find).mockReturnValue(cursor);
 
 		const result = await handleRequest({
 			collectionName: "sessions",
@@ -249,7 +249,7 @@ describe("handleRequest GET/POST", () => {
 	});
 
 	it("looks up a single record by id header", async () => {
-		collection.findOne.mockResolvedValue({ id: "abc" });
+		asMock(collection.findOne).mockResolvedValue({ id: "abc" });
 
 		const result = await handleRequest({
 			collectionName: "sessions",
@@ -262,7 +262,7 @@ describe("handleRequest GET/POST", () => {
 
 	it("queries by escaped regex prefix", async () => {
 		const cursor = makeCursor([{ id: "sessions.1" }]);
-		collection.find.mockReturnValue(cursor);
+		asMock(collection.find).mockReturnValue(cursor);
 
 		const result = await handleRequest({
 			collectionName: "sessions",
@@ -281,7 +281,7 @@ describe("handleRequest GET/POST", () => {
 
 	it("runs a sanitized query from the query header", async () => {
 		const cursor = makeCursor([{ id: "a" }]);
-		collection.find.mockReturnValue(cursor);
+		asMock(collection.find).mockReturnValue(cursor);
 		const query = encodeURIComponent(JSON.stringify({ id: "a" }));
 
 		const result = await handleRequest({
@@ -294,7 +294,7 @@ describe("handleRequest GET/POST", () => {
 
 	it("returns an empty array when the query yields no results", async () => {
 		const cursor = makeCursor(null);
-		collection.find.mockReturnValue(cursor);
+		asMock(collection.find).mockReturnValue(cursor);
 
 		const result = await handleRequest({
 			collectionName: "sessions",
@@ -316,7 +316,7 @@ describe("handleRequest GET/POST", () => {
 	});
 
 	it("returns a safe error payload for unexpected failures", async () => {
-		collection.find.mockImplementation(() => {
+		asMock(collection.find).mockImplementation(() => {
 			throw new Error("boom");
 		});
 

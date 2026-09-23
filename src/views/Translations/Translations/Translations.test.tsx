@@ -4,6 +4,7 @@ import Translations from "./index";
 
 jest.mock("@util/domain/translations");
 jest.mock("@util/browser/store", () => ({
+	...jest.requireActual("@util/browser/store"),
 	useLocalStorage: jest.fn(),
 }));
 jest.mock("@widgets/Table", () => () => <div data-testid="table" />);
@@ -14,7 +15,7 @@ jest.mock("@data/languages", () => [
 describe("Translations View", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
-		useTranslations.mockReturnValue({ ID: "ID" });
+		asMock(useTranslations).mockReturnValue({ ID: "ID" });
 	});
 
 	it("renders translations table", () => {

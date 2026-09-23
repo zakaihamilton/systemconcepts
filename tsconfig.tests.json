@@ -1,0 +1,24 @@
+{
+	"extends": "./tsconfig.json",
+	"compilerOptions": {
+		"incremental": false,
+		"strict": false,
+		"types": ["jest", "node"]
+	},
+	"include": [
+		"next-env.d.ts",
+		"svgr.d.ts",
+		"jest.setup.ts",
+		"**/*.d.ts",
+		"**/*.test.ts",
+		"**/*.test.tsx",
+		"**/*.spec.ts",
+		"**/*.spec.tsx"
+	],
+	"exclude": [
+		"node_modules",
+		"public/sw.js",
+		"public/workbox-*.js",
+		"public/fallback-*.js"
+	]
+}

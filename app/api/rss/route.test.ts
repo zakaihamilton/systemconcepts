@@ -9,6 +9,8 @@ import { GET } from "./route";
 
 jest.mock("next/server", () => {
 	class TestHeaders {
+		values: Map<string, string>;
+
 		constructor(values = {}) {
 			this.values = new Map(
 				Object.entries(values).map(([key, value]) => [
@@ -24,14 +26,18 @@ jest.mock("next/server", () => {
 	}
 
 	class TestResponse {
-		constructor(body: any, init = {}) {
+		body: any;
+		status: number;
+		headers: TestHeaders;
+
+		constructor(body: any, init: ResponseInit = {}) {
 			this.body = body;
 			this.status = init.status || 200;
 			this.headers = new TestHeaders(init.headers);
 		}
 	}
 
-	global.Response = TestResponse;
+	global.Response = TestResponse as unknown as typeof Response;
 
 	return {
 		NextResponse: TestResponse,
@@ -99,10 +105,10 @@ describe("/api/rss", () => {
 			SITE_URL: "https://systemconcepts.app",
 			AWS_SECRET: "internal-secret",
 		};
-		authenticateEdge.mockResolvedValue(true);
-		loadManifest.mockResolvedValue([]);
-		getSessions.mockResolvedValue([]);
-		readApiCacheEdge.mockResolvedValue(null);
+		asMock(authenticateEdge).mockResolvedValue(true);
+		asMock(loadManifest).mockResolvedValue([]);
+		asMock(getSessions).mockResolvedValue([]);
+		asMock(readApiCacheEdge).mockResolvedValue(null);
 	});
 
 	afterAll(() => {
@@ -126,7 +132,7 @@ describe("/api/rss", () => {
 	});
 
 	it("publishes 50 sessions by default", async () => {
-		getSessions.mockResolvedValue(
+		asMock(getSessions).mockResolvedValue(
 			Array.from({ length: 60 }, (_, index) => ({ id: index })),
 		);
 
@@ -137,7 +143,7 @@ describe("/api/rss", () => {
 		expect(buildRssFeed).toHaveBeenCalledWith(
 			expect.objectContaining({ sessions: expect.any(Array) }),
 		);
-		expect(buildRssFeed.mock.calls[0][0].sessions).toHaveLength(50);
+		expect(asMock(buildRssFeed).mock.calls[0][0].sessions).toHaveLength(50);
 	});
 
 	it("rotates the stored feed before media capabilities expire", async () => {
@@ -171,7 +177,7 @@ describe("/api/rss", () => {
 	});
 
 	it("uses shared cache without rebuilding sessions", async () => {
-		readApiCacheEdge.mockResolvedValue(
+		asMock(readApiCacheEdge).mockResolvedValue(
 			'<?xml version="1.0"?><rss><channel><item><pubDate>Mon, 01 Jan 2024 00:00:00 +0000</pubDate></item></channel></rss>',
 		);
 
@@ -186,7 +192,7 @@ describe("/api/rss", () => {
 	});
 
 	it("does not cache unauthorized responses", async () => {
-		authenticateEdge.mockResolvedValue(false);
+		asMock(authenticateEdge).mockResolvedValue(false);
 
 		const response = await GET(
 			makeRequest(
@@ -216,7 +222,7 @@ describe("/api/rss", () => {
 	});
 
 	it("does not cache generation failures", async () => {
-		getSessions.mockRejectedValueOnce(new Error("storage unavailable"));
+		asMock(getSessions).mockRejectedValueOnce(new Error("storage unavailable"));
 
 		const response = await GET(
 			makeRequest("https://systemconcepts.app/api/rss?id=user-f&token=token-f"),

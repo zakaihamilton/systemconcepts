@@ -1,4 +1,14 @@
-export default function pLimit(concurrency: any) {
+export interface LimitFunction {
+	<Result = unknown>(
+		fn: (...args: any[]) => Result | PromiseLike<Result>,
+		...args: any[]
+	): Promise<Awaited<Result>>;
+	readonly activeCount: number;
+	readonly pendingCount: number;
+	clearQueue(): void;
+}
+
+export default function pLimit(concurrency: number): LimitFunction {
 	const queue: any = [];
 	let activeCount = 0;
 
@@ -43,5 +53,5 @@ export default function pLimit(concurrency: any) {
 		},
 	});
 
-	return generator;
+	return generator as unknown as LimitFunction;
 }

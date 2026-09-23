@@ -46,7 +46,7 @@ describe("Transcript Component", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
 		timeupdateCb = null;
-		useTranslations.mockReturnValue({
+		asMock(useTranslations).mockReturnValue({
 			MATCHES: "{current} of {total}",
 			CLOSE: "Close",
 			DOWNLOAD_TRANSCRIPT: "Download",
@@ -61,17 +61,17 @@ describe("Transcript Component", () => {
 			currentTime: 0,
 			play: jest.fn(),
 		};
-		PlayerStore.useState.mockReturnValue({
+		asMock(PlayerStore.useState).mockReturnValue({
 			subtitles: "test.vtt",
 			transcriptionUrl: "",
 			player: mockPlayer,
 		});
-		useFetch.mockReturnValue([
+		asMock(useFetch).mockReturnValue([
 			"WEBVTT\n\n00:00:01.000 --> 00:00:05.000\nHello World",
 			false,
 			false,
 		]);
-		useSearch.mockReturnValue("");
+		asMock(useSearch).mockReturnValue("");
 
 		const portal = document.createElement("div");
 		portal.id = "search-status-portal";
@@ -104,12 +104,16 @@ describe("Transcript Component", () => {
 	});
 
 	it("renders plain text transcripts without timestamps", async () => {
-		PlayerStore.useState.mockReturnValue({
+		asMock(PlayerStore.useState).mockReturnValue({
 			subtitles: "",
 			transcriptionUrl: "test.txt",
 			player: mockPlayer,
 		});
-		useFetch.mockReturnValue(["A transcript without timecodes", false, false]);
+		asMock(useFetch).mockReturnValue([
+			"A transcript without timecodes",
+			false,
+			false,
+		]);
 
 		const { getByText } = render(<Transcript show={true} />);
 		await waitFor(() => {
@@ -119,13 +123,13 @@ describe("Transcript Component", () => {
 	});
 
 	it("shows loading progress", () => {
-		useFetch.mockReturnValue([null, false, true]);
+		asMock(useFetch).mockReturnValue([null, false, true]);
 		render(<Transcript show />);
 		expect(screen.getByTestId("progress")).toBeInTheDocument();
 	});
 
 	it("clears transcript when data is empty", async () => {
-		useFetch.mockReturnValue([null, false, false]);
+		asMock(useFetch).mockReturnValue([null, false, false]);
 		render(<Transcript show />);
 		await waitFor(() => {
 			expect(screen.queryByText("Hello World")).not.toBeInTheDocument();
@@ -133,7 +137,7 @@ describe("Transcript Component", () => {
 	});
 
 	it("parses VTT cues with numeric index lines", async () => {
-		useFetch.mockReturnValue([
+		asMock(useFetch).mockReturnValue([
 			"WEBVTT\n\n1\n00:01:05.000 --> 00:01:10.000\nHour line\n\n2\n00:00:02.000 --> 00:00:03.000\nSecond",
 			false,
 			false,
@@ -146,12 +150,12 @@ describe("Transcript Component", () => {
 	});
 
 	it("parses TXT transcripts with bracket timestamps", async () => {
-		PlayerStore.useState.mockReturnValue({
+		asMock(PlayerStore.useState).mockReturnValue({
 			subtitles: "",
 			transcriptionUrl: "notes.txt",
 			player: mockPlayer,
 		});
-		useFetch.mockReturnValue([
+		asMock(useFetch).mockReturnValue([
 			"[00:00:01] First line\n[00:00:05] Second line",
 			false,
 			false,
@@ -164,12 +168,12 @@ describe("Transcript Component", () => {
 	});
 
 	it("highlights search matches and navigates between them", async () => {
-		useFetch.mockReturnValue([
+		asMock(useFetch).mockReturnValue([
 			"WEBVTT\n\n00:00:01.000 --> 00:00:05.000\nHello World\n\n00:00:06.000 --> 00:00:09.000\nHello again",
 			false,
 			false,
 		]);
-		useSearch.mockImplementation(
+		asMock(useSearch).mockImplementation(
 			(name: any, _cb: any, _show: any, opts: any) => {
 				if (opts?.onEnter) {
 					// expose for later if needed
@@ -202,7 +206,7 @@ describe("Transcript Component", () => {
 	});
 
 	it("hides match header when search has no hits", async () => {
-		useSearch.mockReturnValue("zzzz");
+		asMock(useSearch).mockReturnValue("zzzz");
 		render(<Transcript show />);
 		await waitFor(() => {
 			expect(screen.getByText("Hello World")).toBeInTheDocument();
@@ -211,7 +215,7 @@ describe("Transcript Component", () => {
 	});
 
 	it("updates current line on player timeupdate and scrolls", async () => {
-		useFetch.mockReturnValue([
+		asMock(useFetch).mockReturnValue([
 			"WEBVTT\n\n00:00:01.000 --> 00:00:05.000\nHello World\n\n00:00:06.000 --> 00:00:09.000\nNext",
 			false,
 			false,
@@ -228,12 +232,12 @@ describe("Transcript Component", () => {
 	});
 
 	it("downloads transcript and appends extension when missing", async () => {
-		PlayerStore.useState.mockReturnValue({
+		asMock(PlayerStore.useState).mockReturnValue({
 			subtitles: "",
 			transcriptionUrl: "https://cdn.example/path/file?token=1",
 			player: mockPlayer,
 		});
-		useFetch.mockReturnValue(["plain body", false, false]);
+		asMock(useFetch).mockReturnValue(["plain body", false, false]);
 		const clickSpy = jest
 			.spyOn(HTMLAnchorElement.prototype, "click")
 			.mockImplementation(() => {});
@@ -244,16 +248,16 @@ describe("Transcript Component", () => {
 		fireEvent.click(screen.getByTestId("download"));
 		expect(window.URL.createObjectURL).toHaveBeenCalled();
 		expect(clickSpy).toHaveBeenCalled();
-		clickSpy.mockRestore();
+		asMock(clickSpy).mockRestore();
 	});
 
 	it("downloads vtt without rewriting existing extension", async () => {
-		PlayerStore.useState.mockReturnValue({
+		asMock(PlayerStore.useState).mockReturnValue({
 			subtitles: "https://cdn.example/cap.vtt",
 			transcriptionUrl: "",
 			player: mockPlayer,
 		});
-		useFetch.mockReturnValue([
+		asMock(useFetch).mockReturnValue([
 			"WEBVTT\n\n00:00:01.000 --> 00:00:05.000\nHello",
 			false,
 			false,
@@ -267,11 +271,11 @@ describe("Transcript Component", () => {
 		});
 		fireEvent.click(screen.getByTestId("download"));
 		expect(clickSpy).toHaveBeenCalled();
-		clickSpy.mockRestore();
+		asMock(clickSpy).mockRestore();
 	});
 
 	it("skips player listeners when player is missing", async () => {
-		PlayerStore.useState.mockReturnValue({
+		asMock(PlayerStore.useState).mockReturnValue({
 			subtitles: "test.vtt",
 			transcriptionUrl: "",
 			player: null,
@@ -284,7 +288,7 @@ describe("Transcript Component", () => {
 	});
 
 	it("ignores invalid VTT blocks", async () => {
-		useFetch.mockReturnValue([
+		asMock(useFetch).mockReturnValue([
 			"WEBVTT\n\nbadblock\n\n00:00:01.000 --> 00:00:02.000\nOk",
 			false,
 			false,
@@ -298,13 +302,13 @@ describe("Transcript Component", () => {
 
 	it("opens search header via onEnter callback", async () => {
 		let onEnter: any;
-		useSearch.mockImplementation(
+		asMock(useSearch).mockImplementation(
 			(_name: any, _cb: any, _show: any, opts: any) => {
 				onEnter = opts?.onEnter;
 				return "Hello";
 			},
 		);
-		useFetch.mockReturnValue([
+		asMock(useFetch).mockReturnValue([
 			"WEBVTT\n\n00:00:01.000 --> 00:00:05.000\nHello World",
 			false,
 			false,
@@ -320,7 +324,7 @@ describe("Transcript Component", () => {
 	});
 
 	it("formats multi-hour timestamps", async () => {
-		useFetch.mockReturnValue([
+		asMock(useFetch).mockReturnValue([
 			"WEBVTT\n\n01:02:03.000 --> 01:02:10.000\nLong cue",
 			false,
 			false,
@@ -332,12 +336,12 @@ describe("Transcript Component", () => {
 	});
 
 	it("highlights non-current matches in the same line", async () => {
-		useFetch.mockReturnValue([
+		asMock(useFetch).mockReturnValue([
 			"WEBVTT\n\n00:00:01.000 --> 00:00:05.000\nhello hello",
 			false,
 			false,
 		]);
-		useSearch.mockReturnValue("hello");
+		asMock(useSearch).mockReturnValue("hello");
 		render(<Transcript show />);
 		await waitFor(() => {
 			expect(screen.getByText("1 of 2")).toBeInTheDocument();
@@ -346,7 +350,7 @@ describe("Transcript Component", () => {
 	});
 
 	it("parses VTT cues with missing start timestamps as zero", async () => {
-		useFetch.mockReturnValue([
+		asMock(useFetch).mockReturnValue([
 			"WEBVTT\n\n --> 00:00:02.000\nMissing start",
 			false,
 			false,

@@ -139,7 +139,7 @@ describe("Research View", () => {
 		mockLibraryUpdateCounter = 0;
 		latestListProps = null;
 		const { runResearchSearch } = require("./runResearchSearch");
-		runResearchSearch.mockImplementation(
+		asMock(runResearchSearch).mockImplementation(
 			jest.requireActual("./runResearchSearch").runResearchSearch,
 		);
 		global.ResizeObserver = jest.fn().mockImplementation(() => ({
@@ -161,7 +161,7 @@ describe("Research View", () => {
 			indexTimestamp: 0,
 		};
 		mockLibraryState = { tags: [] };
-		useTranslations.mockReturnValue({
+		asMock(useTranslations).mockReturnValue({
 			RESEARCH: "Research",
 			SESSIONS: "Sessions",
 			ARTICLES: "Articles",
@@ -191,13 +191,13 @@ describe("Research View", () => {
 			RESULTS_LIST: "Results list",
 			MATCH: "matches",
 		});
-		useSessions.mockReturnValue([
+		asMock(useSessions).mockReturnValue([
 			[{ name: "Grace in practice", group: "ai", year: "2024" }],
 			false,
 			[],
 		]);
-		useDeviceType.mockReturnValue("desktop");
-		Cookies.get.mockReturnValue("admin");
+		asMock(useDeviceType).mockReturnValue("desktop");
+		asMock(Cookies.get).mockReturnValue("admin");
 	});
 
 	const renderResearch = () =>
@@ -269,10 +269,10 @@ describe("Research View", () => {
 
 	it("filters the filter list in the drawer", async () => {
 		const storage = require("@util/storage/storage");
-		storage.exists.mockImplementation((path: any) =>
+		asMock(storage.exists).mockImplementation((path: any) =>
 			Promise.resolve(path.endsWith("tags.json")),
 		);
-		storage.readFile.mockResolvedValue(
+		asMock(storage.readFile).mockResolvedValue(
 			JSON.stringify([
 				{ author: "Augustine", book: "Confessions" },
 				{ author: "Aquinas", book: "Summa" },
@@ -309,10 +309,10 @@ describe("Research View", () => {
 
 	it("sorts numbered filter labels numerically", async () => {
 		const storage = require("@util/storage/storage");
-		storage.exists.mockImplementation((path: any) =>
+		asMock(storage.exists).mockImplementation((path: any) =>
 			Promise.resolve(path.endsWith("tags.json")),
 		);
-		storage.readFile.mockResolvedValue(
+		asMock(storage.readFile).mockResolvedValue(
 			JSON.stringify([
 				{ article: "10. Later" },
 				{ article: "2. Middle" },
@@ -444,14 +444,18 @@ describe("Research View", () => {
 		mockLibraryState.tags = [
 			{ _id: "article-1", title: "Grace", topic: "Grace" },
 		];
-		storage.exists.mockResolvedValue(true);
-		storage.readFile.mockImplementation((path: any) =>
+		asMock(storage.exists).mockResolvedValue(true);
+		asMock(storage.readFile).mockImplementation((path: any) =>
 			path.endsWith("tags.json")
 				? JSON.stringify(mockLibraryState.tags)
 				: "binary-index",
 		);
-		decodeBinaryIndex.mockReturnValue({ v: 5, f: ["article-1"], t: {} });
-		loadParagraphsForFile.mockResolvedValue(["Grace"]);
+		asMock(decodeBinaryIndex).mockReturnValue({
+			v: 5,
+			f: ["article-1"],
+			t: {},
+		});
+		asMock(loadParagraphsForFile).mockResolvedValue(["Grace"]);
 
 		renderResearch();
 
@@ -480,7 +484,7 @@ describe("Research View", () => {
 			hasSearched: false,
 			results: [],
 		};
-		useSessions.mockReturnValue([
+		asMock(useSessions).mockReturnValue([
 			[
 				{
 					name: "Grace study",
@@ -491,15 +495,15 @@ describe("Research View", () => {
 				},
 			],
 		]);
-		storage.exists.mockResolvedValue(true);
-		storage.readFile.mockResolvedValue("binary-index");
-		decodeBinaryIndex.mockReturnValue({
+		asMock(storage.exists).mockResolvedValue(true);
+		asMock(storage.readFile).mockResolvedValue("binary-index");
+		asMock(decodeBinaryIndex).mockReturnValue({
 			v: 5,
 			f: [sessionId],
 			// compressed v5 refs: -(fileIndex+1), paraIndex
 			t: { grace: [-1, 1] },
 		});
-		loadParagraphsForFile.mockResolvedValue([
+		asMock(loadParagraphsForFile).mockResolvedValue([
 			"Grace study",
 			"Grace abounds in practice",
 		]);
@@ -527,9 +531,9 @@ describe("Research View", () => {
 		const storage = require("@util/storage/storage");
 		mockResearchState.hasSearched = false;
 		mockResearchState.results = [];
-		storage.exists.mockResolvedValue(true);
-		storage.readFile.mockResolvedValue("binary-index");
-		decodeBinaryIndex.mockReturnValue({ v: 5, f: [], t: {} });
+		asMock(storage.exists).mockResolvedValue(true);
+		asMock(storage.readFile).mockResolvedValue("binary-index");
+		asMock(decodeBinaryIndex).mockReturnValue({ v: 5, f: [], t: {} });
 
 		renderResearch();
 		await waitFor(() => {
@@ -550,7 +554,7 @@ describe("Research View", () => {
 		mockResearchState.results = [];
 		mockResearchState.filterTags = [{ type: "topic", label: "Grace" }];
 		mockResearchState.hasSearched = true;
-		useTranslations.mockReturnValue({
+		asMock(useTranslations).mockReturnValue({
 			RESEARCH: "Research",
 			SESSIONS: "Sessions",
 			ARTICLES: "Articles",
@@ -602,10 +606,10 @@ describe("Research View", () => {
 
 	it("adds a filter from the drawer and clears all", async () => {
 		const storage = require("@util/storage/storage");
-		storage.exists.mockImplementation((path: any) =>
+		asMock(storage.exists).mockImplementation((path: any) =>
 			Promise.resolve(path.endsWith("tags.json")),
 		);
-		storage.readFile.mockResolvedValue(
+		asMock(storage.readFile).mockResolvedValue(
 			JSON.stringify([{ author: "Augustine", book: "Confessions" }]),
 		);
 
@@ -731,10 +735,10 @@ describe("Research View", () => {
 		const storage = require("@util/storage/storage");
 		mockResearchState.hasSearched = false;
 		mockResearchState.results = [];
-		storage.exists.mockImplementation((path: any) =>
+		asMock(storage.exists).mockImplementation((path: any) =>
 			Promise.resolve(path.endsWith("search_index.json")),
 		);
-		storage.readFile.mockResolvedValue(
+		asMock(storage.readFile).mockResolvedValue(
 			JSON.stringify({ v: 4, f: [], d: [], t: {} }),
 		);
 
@@ -758,7 +762,7 @@ describe("Research View", () => {
 
 	it("shows active filter chips and removes one on delete", () => {
 		mockResearchState.filterTags = [{ type: "topic", label: "Grace" }];
-		useTranslations.mockReturnValue({
+		asMock(useTranslations).mockReturnValue({
 			RESEARCH: "Research",
 			SESSIONS: "Sessions",
 			ARTICLES: "Articles",
@@ -806,9 +810,9 @@ describe("Research View", () => {
 		mockResearchState.query = "";
 		mockResearchState.filterTags = [];
 		mockResearchState.hasSearched = false;
-		storage.exists.mockResolvedValue(true);
-		storage.readFile.mockResolvedValue("binary-index");
-		decodeBinaryIndex.mockReturnValue({ v: 5, f: ["a"], t: {} });
+		asMock(storage.exists).mockResolvedValue(true);
+		asMock(storage.readFile).mockResolvedValue("binary-index");
+		asMock(decodeBinaryIndex).mockReturnValue({ v: 5, f: ["a"], t: {} });
 
 		renderResearch();
 		await waitFor(() => {
@@ -822,7 +826,7 @@ describe("Research View", () => {
 	});
 
 	it("uses mobile device type without crashing", () => {
-		useDeviceType.mockReturnValue("phone");
+		asMock(useDeviceType).mockReturnValue("phone");
 		renderResearch();
 		expect(screen.getByTestId("virtual-list")).toBeInTheDocument();
 	});
@@ -830,7 +834,7 @@ describe("Research View", () => {
 	describe("index lifecycle and sync", () => {
 		it("auto-builds the index when no index files exist", async () => {
 			const storage = require("@util/storage/storage");
-			storage.exists.mockResolvedValue(false);
+			asMock(storage.exists).mockResolvedValue(false);
 			mockResearchState.hasSearched = false;
 			renderResearch();
 			await waitFor(() => {
@@ -841,9 +845,9 @@ describe("Research View", () => {
 		it("deletes a corrupted index and rebuilds", async () => {
 			const { decodeBinaryIndex } = require("@util/data/searchIndexBinary");
 			const storage = require("@util/storage/storage");
-			storage.exists.mockResolvedValue(true);
-			storage.readFile.mockResolvedValue("bad-index");
-			decodeBinaryIndex.mockImplementation(() => {
+			asMock(storage.exists).mockResolvedValue(true);
+			asMock(storage.readFile).mockResolvedValue("bad-index");
+			asMock(decodeBinaryIndex).mockImplementation(() => {
 				throw new Error("corrupt");
 			});
 			mockResearchState.hasSearched = false;
@@ -857,14 +861,14 @@ describe("Research View", () => {
 		it("reloads index and tags when the library update counter changes", async () => {
 			const { decodeBinaryIndex } = require("@util/data/searchIndexBinary");
 			const storage = require("@util/storage/storage");
-			storage.exists.mockResolvedValue(true);
-			storage.readFile.mockResolvedValue("binary-index");
-			decodeBinaryIndex.mockReturnValue({ v: 5, f: [], t: {} });
+			asMock(storage.exists).mockResolvedValue(true);
+			asMock(storage.readFile).mockResolvedValue("binary-index");
+			asMock(decodeBinaryIndex).mockReturnValue({ v: 5, f: [], t: {} });
 			const view = renderResearch();
 			await waitFor(() => {
 				expect(storage.readFile).toHaveBeenCalled();
 			});
-			const initialReads = storage.readFile.mock.calls.length;
+			const initialReads = asMock(storage.readFile).mock.calls.length;
 			mockLibraryUpdateCounter = 1;
 			view.rerender(
 				<ContentSize.Provider value={mockSize}>
@@ -872,7 +876,7 @@ describe("Research View", () => {
 				</ContentSize.Provider>,
 			);
 			await waitFor(() => {
-				expect(storage.readFile.mock.calls.length).toBeGreaterThan(
+				expect(asMock(storage.readFile).mock.calls.length).toBeGreaterThan(
 					initialReads,
 				);
 			});
@@ -885,9 +889,9 @@ describe("Research View", () => {
 			mockResearchState._loaded = false;
 			mockResearchState.query = "grace";
 			mockResearchState.hasSearched = false;
-			storage.exists.mockResolvedValue(true);
-			storage.readFile.mockResolvedValue("binary-index");
-			decodeBinaryIndex.mockReturnValue({
+			asMock(storage.exists).mockResolvedValue(true);
+			asMock(storage.readFile).mockResolvedValue("binary-index");
+			asMock(decodeBinaryIndex).mockReturnValue({
 				v: 5,
 				f: ["a"],
 				t: { grace: [-1, 0] },
@@ -903,7 +907,7 @@ describe("Research View", () => {
 	describe("session-derived filters", () => {
 		it("loads session group, year, and type filters", async () => {
 			const storage = require("@util/storage/storage");
-			useSessions.mockReturnValue([
+			asMock(useSessions).mockReturnValue([
 				[
 					{
 						name: "Grace study",
@@ -913,10 +917,10 @@ describe("Research View", () => {
 					},
 				],
 			]);
-			storage.exists.mockImplementation((path: any) =>
+			asMock(storage.exists).mockImplementation((path: any) =>
 				Promise.resolve(path.endsWith("tags.json")),
 			);
-			storage.readFile.mockResolvedValue(JSON.stringify([]));
+			asMock(storage.readFile).mockResolvedValue(JSON.stringify([]));
 			renderResearch();
 			fireEvent.click(screen.getByRole("button", { name: "Filters" }));
 			await waitFor(() => {
@@ -939,9 +943,9 @@ describe("Research View", () => {
 		const loadIndex = () => {
 			const { decodeBinaryIndex } = require("@util/data/searchIndexBinary");
 			const storage = require("@util/storage/storage");
-			storage.exists.mockResolvedValue(true);
-			storage.readFile.mockResolvedValue("binary-index");
-			decodeBinaryIndex.mockReturnValue({
+			asMock(storage.exists).mockResolvedValue(true);
+			asMock(storage.readFile).mockResolvedValue("binary-index");
+			asMock(decodeBinaryIndex).mockReturnValue({
 				v: 5,
 				f: ["article-1"],
 				t: { grace: [-1, 0] },
@@ -953,7 +957,7 @@ describe("Research View", () => {
 			loadIndex();
 			mockResearchState.query = "grace";
 			mockResearchState.hasSearched = false;
-			runResearchSearch.mockImplementation(
+			asMock(runResearchSearch).mockImplementation(
 				() =>
 					new Promise((resolve) => {
 						setTimeout(
@@ -967,7 +971,7 @@ describe("Research View", () => {
 						);
 					}),
 			);
-			useTranslations.mockReturnValue({
+			asMock(useTranslations).mockReturnValue({
 				RESEARCH: "Research",
 				SESSIONS: "Sessions",
 				ARTICLES: "Articles",
@@ -1002,7 +1006,7 @@ describe("Research View", () => {
 			mockResearchState.query = "grace";
 			mockResearchState.results = [{ docId: "keep", matches: [{ index: 0 }] }];
 			mockResearchState.hasSearched = true;
-			runResearchSearch.mockResolvedValue({
+			asMock(runResearchSearch).mockResolvedValue({
 				results: [{ docId: "new", matches: [{ index: 0 }] }],
 				highlight: [],
 				cancelled: true,
@@ -1029,7 +1033,7 @@ describe("Research View", () => {
 			loadIndex();
 			mockResearchState.query = "grace";
 			mockResearchState.hasSearched = false;
-			runResearchSearch.mockRejectedValue(new Error("search failed"));
+			asMock(runResearchSearch).mockRejectedValue(new Error("search failed"));
 			renderResearch();
 			await act(async () => {
 				await Promise.resolve();
@@ -1052,8 +1056,8 @@ describe("Research View", () => {
 			await act(async () => {
 				await Promise.resolve();
 			});
-			const initialCalls = runResearchSearch.mock.calls.length;
-			useSessions.mockReturnValue([
+			const initialCalls = asMock(runResearchSearch).mock.calls.length;
+			asMock(useSessions).mockReturnValue([
 				[
 					{
 						name: "Grace study",
@@ -1073,7 +1077,9 @@ describe("Research View", () => {
 				jest.runOnlyPendingTimers();
 				await Promise.resolve();
 			});
-			expect(runResearchSearch.mock.calls.length).toBeGreaterThan(initialCalls);
+			expect(asMock(runResearchSearch).mock.calls.length).toBeGreaterThan(
+				initialCalls,
+			);
 		});
 	});
 
@@ -1083,17 +1089,21 @@ describe("Research View", () => {
 			const { decodeBinaryIndex } = require("@util/data/searchIndexBinary");
 			mockResearchState.hasSearched = false;
 			mockResearchState.filterTags = [{ type: "author", label: "Augustine" }];
-			storage.exists.mockImplementation((path: any) =>
+			asMock(storage.exists).mockImplementation((path: any) =>
 				Promise.resolve(
 					path.endsWith("tags.json") || path.endsWith("search_index.bin"),
 				),
 			);
-			storage.readFile.mockImplementation((path: any) =>
+			asMock(storage.readFile).mockImplementation((path: any) =>
 				path.endsWith("tags.json")
 					? JSON.stringify([{ author: "Augustine", book: "Confessions" }])
 					: "binary-index",
 			);
-			decodeBinaryIndex.mockReturnValue({ v: 5, f: [], t: { aug: ["aug"] } });
+			asMock(decodeBinaryIndex).mockReturnValue({
+				v: 5,
+				f: [],
+				t: { aug: ["aug"] },
+			});
 			const view = renderResearch();
 			const searchInput = screen.getByPlaceholderText("Search...");
 			fireEvent.focus(searchInput);
@@ -1119,7 +1129,7 @@ describe("Research View", () => {
 				{ type: "topic", label: "Grace" },
 				{ type: "topic", label: "Hope" },
 			];
-			useTranslations.mockReturnValue({
+			asMock(useTranslations).mockReturnValue({
 				RESEARCH: "Research",
 				SESSIONS: "Sessions",
 				ARTICLES: "Articles",
@@ -1142,10 +1152,10 @@ describe("Research View", () => {
 
 		it("clears the filter list query in the drawer", async () => {
 			const storage = require("@util/storage/storage");
-			storage.exists.mockImplementation((path: any) =>
+			asMock(storage.exists).mockImplementation((path: any) =>
 				Promise.resolve(path.endsWith("tags.json")),
 			);
-			storage.readFile.mockResolvedValue(
+			asMock(storage.readFile).mockResolvedValue(
 				JSON.stringify([{ author: "Augustine" }]),
 			);
 			renderResearch();
@@ -1169,13 +1179,13 @@ describe("Research View", () => {
 
 		const getToolbarItems = () => {
 			const { useToolbar } = require("@components/Toolbar");
-			return useToolbar.mock.calls.at(-1)[0].items.filter(Boolean);
+			return asMock(useToolbar).mock.calls.at(-1)[0].items.filter(Boolean);
 		};
 
 		it("exposes admin rebuild and jump actions in the toolbar", () => {
-			Cookies.get.mockReturnValue("admin");
+			asMock(Cookies.get).mockReturnValue("admin");
 			mockResearchState.indexing = false;
-			useTranslations.mockReturnValue({
+			asMock(useTranslations).mockReturnValue({
 				RESEARCH: "Research",
 				REBUILD_INDEX: "Rebuild index",
 				JUMP_TO_ARTICLE: "Jump to article",
@@ -1245,7 +1255,7 @@ describe("Research View", () => {
 			});
 			expect(printSpy).toHaveBeenCalled();
 			expect(document.getElementById("print-root")).toBeTruthy();
-			printSpy.mockRestore();
+			asMock(printSpy).mockRestore();
 		});
 
 		it("toggles search collapse from the toolbar", () => {
@@ -1296,7 +1306,7 @@ describe("Research View", () => {
 
 		it("scrolls to a deep-linked article number", async () => {
 			mockResearchState.results = results;
-			usePathItems.mockReturnValue(["research:2"]);
+			asMock(usePathItems).mockReturnValue(["research:2"]);
 			renderResearch();
 			await waitFor(() => {
 				expect(mockListScrollToItem).toHaveBeenCalledWith(1, "start");
@@ -1340,7 +1350,7 @@ describe("Research View", () => {
 		});
 
 		it("collapses search on mobile when scrolling past the first result", async () => {
-			useDeviceType.mockReturnValue("phone");
+			asMock(useDeviceType).mockReturnValue("phone");
 			mockResearchState.results = results;
 			renderResearch();
 			act(() => {
@@ -1412,11 +1422,13 @@ describe("Research View", () => {
 
 		it("loads filters when sessions is null", async () => {
 			const storage = require("@util/storage/storage");
-			useSessions.mockReturnValue([null]);
-			storage.exists.mockImplementation((path: any) =>
+			asMock(useSessions).mockReturnValue([null]);
+			asMock(storage.exists).mockImplementation((path: any) =>
 				Promise.resolve(path.endsWith("tags.json")),
 			);
-			storage.readFile.mockResolvedValue(JSON.stringify([{ author: "Paul" }]));
+			asMock(storage.readFile).mockResolvedValue(
+				JSON.stringify([{ author: "Paul" }]),
+			);
 			renderResearch();
 			fireEvent.click(screen.getByRole("button", { name: "Filters" }));
 			await waitFor(() => {
@@ -1428,13 +1440,13 @@ describe("Research View", () => {
 
 		it("skips session filters when group year and type are empty", async () => {
 			const storage = require("@util/storage/storage");
-			useSessions.mockReturnValue([
+			asMock(useSessions).mockReturnValue([
 				[{ name: "Bare session", group: "", year: "", type: "" }],
 			]);
-			storage.exists.mockImplementation((path: any) =>
+			asMock(storage.exists).mockImplementation((path: any) =>
 				Promise.resolve(path.endsWith("tags.json")),
 			);
-			storage.readFile.mockResolvedValue(JSON.stringify([]));
+			asMock(storage.readFile).mockResolvedValue(JSON.stringify([]));
 			renderResearch();
 			fireEvent.click(screen.getByRole("button", { name: "Filters" }));
 			await waitFor(() => {
@@ -1446,8 +1458,8 @@ describe("Research View", () => {
 		it("logs when loading tags fails", async () => {
 			const storage = require("@util/storage/storage");
 			const { logger } = require("@util/api/logger");
-			storage.exists.mockResolvedValue(true);
-			storage.readFile.mockRejectedValue(new Error("tags read failed"));
+			asMock(storage.exists).mockResolvedValue(true);
+			asMock(storage.readFile).mockRejectedValue(new Error("tags read failed"));
 			renderResearch();
 			await waitFor(() => {
 				expect(logger.error).toHaveBeenCalledWith(
@@ -1459,10 +1471,10 @@ describe("Research View", () => {
 
 		it("does not update filters after unmount", async () => {
 			const storage = require("@util/storage/storage");
-			storage.exists.mockImplementation((path: any) =>
+			asMock(storage.exists).mockImplementation((path: any) =>
 				Promise.resolve(path.endsWith("tags.json")),
 			);
-			storage.readFile.mockImplementation(
+			asMock(storage.readFile).mockImplementation(
 				() =>
 					new Promise((resolve) => {
 						setTimeout(() => resolve(JSON.stringify([{ author: "Late" }])), 50);
@@ -1482,18 +1494,20 @@ describe("Research View", () => {
 			const { runResearchSearch } = require("./runResearchSearch");
 			mockResearchState.query = "grace";
 			mockResearchState.hasSearched = false;
-			storage.exists.mockResolvedValue(true);
-			storage.readFile.mockResolvedValue("binary-index");
-			decodeBinaryIndex.mockReturnValue({ v: 5, f: ["a"], t: {} });
-			runResearchSearch.mockImplementation(async ({ onProgress }: any) => {
-				onProgress(42);
-				return {
-					results: [{ docId: "1", matches: [{ index: 0 }] }],
-					highlight: ["grace"],
-					cancelled: false,
-				};
-			});
-			useTranslations.mockReturnValue({
+			asMock(storage.exists).mockResolvedValue(true);
+			asMock(storage.readFile).mockResolvedValue("binary-index");
+			asMock(decodeBinaryIndex).mockReturnValue({ v: 5, f: ["a"], t: {} });
+			asMock(runResearchSearch).mockImplementation(
+				async ({ onProgress }: any) => {
+					onProgress(42);
+					return {
+						results: [{ docId: "1", matches: [{ index: 0 }] }],
+						highlight: ["grace"],
+						cancelled: false,
+					};
+				},
+			);
+			asMock(useTranslations).mockReturnValue({
 				RESEARCH: "Research",
 				SESSIONS: "Sessions",
 				ARTICLES: "Articles",
@@ -1529,15 +1543,15 @@ describe("Research View", () => {
 			const { runResearchSearch } = require("./runResearchSearch");
 			mockResearchState.query = "grace";
 			mockResearchState.hasSearched = false;
-			storage.exists.mockResolvedValue(true);
-			storage.readFile.mockResolvedValue("binary-index");
-			decodeBinaryIndex.mockReturnValue({ v: 5, f: ["a"], t: {} });
-			runResearchSearch.mockResolvedValue({
+			asMock(storage.exists).mockResolvedValue(true);
+			asMock(storage.readFile).mockResolvedValue("binary-index");
+			asMock(decodeBinaryIndex).mockReturnValue({ v: 5, f: ["a"], t: {} });
+			asMock(runResearchSearch).mockResolvedValue({
 				results: [],
 				highlight: [],
 				cancelled: false,
 			});
-			useTranslations.mockReturnValue({
+			asMock(useTranslations).mockReturnValue({
 				RESEARCH: "Research",
 				SESSIONS: "Sessions",
 				ARTICLES: "Articles",
@@ -1574,8 +1588,8 @@ describe("Research View", () => {
 		});
 
 		it("omits admin rebuild action for non-admin users", () => {
-			Cookies.get.mockReturnValue("student");
-			useTranslations.mockReturnValue({
+			asMock(Cookies.get).mockReturnValue("student");
+			asMock(useTranslations).mockReturnValue({
 				RESEARCH: "Research",
 				SHOW_SEARCH: "Show Search",
 				HIDE_SEARCH: "Hide Search",
@@ -1584,14 +1598,16 @@ describe("Research View", () => {
 			});
 			renderResearch();
 			const { useToolbar } = require("@components/Toolbar");
-			const items = useToolbar.mock.calls.at(-1)[0].items.filter(Boolean);
+			const items = asMock(useToolbar)
+				.mock.calls.at(-1)[0]
+				.items.filter(Boolean);
 			expect(
 				items.find((item: any) => item.id === "rebuildIndex"),
 			).toBeUndefined();
 		});
 
 		it("uses fallback labels when translations omit panel toggle strings", () => {
-			useTranslations.mockReturnValue({
+			asMock(useTranslations).mockReturnValue({
 				RESEARCH: "Research",
 				SEARCH: "Search",
 				SEARCH_ARTICLES: "Search...",
@@ -1621,7 +1637,7 @@ describe("Research View", () => {
 					isSession: false,
 				},
 			];
-			useTranslations.mockReturnValue({
+			asMock(useTranslations).mockReturnValue({
 				RESEARCH: "Research",
 				SESSIONS: "Sessions",
 				ARTICLES: "Articles",
@@ -1673,16 +1689,16 @@ describe("Research View", () => {
 				{ docId: "1", tag: { title: "Only" }, matches: [{ index: 0 }] },
 			];
 			const view = renderResearch();
-			const items = require("@components/Toolbar").useToolbar.mock.calls.at(
-				-1,
-			)[0].items;
+			const items = asMock(
+				require("@components/Toolbar").useToolbar,
+			).mock.calls.at(-1)[0].items;
 			items.find((item: any) => item.id === "jump").onClick();
 			view.rerender(
 				<ContentSize.Provider value={mockSize}>
 					<Research />
 				</ContentSize.Provider>,
 			);
-			mockListScrollToItem.mockClear();
+			asMock(mockListScrollToItem).mockClear();
 			fireEvent.click(screen.getByRole("button", { name: "jump-page" }));
 			expect(mockListScrollToItem).not.toHaveBeenCalled();
 		});
@@ -1692,14 +1708,14 @@ describe("Research View", () => {
 				{ docId: "1", tag: { title: "A" }, matches: [{ index: 0 }] },
 				{ docId: "2", tag: { title: "B" }, matches: [{ index: 0 }] },
 			];
-			usePathItems.mockReturnValue(["research:1"]);
+			asMock(usePathItems).mockReturnValue(["research:1"]);
 			renderResearch();
 			await act(async () => {
 				latestListProps.onItemsRendered({ visibleStartIndex: 0 });
 				await Promise.resolve();
 			});
-			mockListScrollToItem.mockClear();
-			usePathItems.mockReturnValue(["research:1"]);
+			asMock(mockListScrollToItem).mockClear();
+			asMock(usePathItems).mockReturnValue(["research:1"]);
 			await act(async () => {
 				jest.advanceTimersByTime(50);
 				await Promise.resolve();
@@ -1748,15 +1764,15 @@ describe("Research View", () => {
 				},
 			];
 			renderResearch();
-			const items = require("@components/Toolbar").useToolbar.mock.calls.at(
-				-1,
-			)[0].items;
+			const items = asMock(
+				require("@components/Toolbar").useToolbar,
+			).mock.calls.at(-1)[0].items;
 			items.find((item: any) => item.id === "print").onClick();
 			act(() => {
 				jest.advanceTimersByTime(500);
 			});
 			expect(printSpy).toHaveBeenCalled();
-			printSpy.mockRestore();
+			asMock(printSpy).mockRestore();
 		});
 
 		it("removes print-root on unmount when it created the element", () => {
@@ -1771,10 +1787,10 @@ describe("Research View", () => {
 
 		it("keeps suggestions open when blur moves focus inside the query wrap", async () => {
 			const storage = require("@util/storage/storage");
-			storage.exists.mockImplementation((path: any) =>
+			asMock(storage.exists).mockImplementation((path: any) =>
 				Promise.resolve(path.endsWith("tags.json")),
 			);
-			storage.readFile.mockResolvedValue(
+			asMock(storage.readFile).mockResolvedValue(
 				JSON.stringify([{ title: "Grace and peace" }]),
 			);
 			renderResearch();
@@ -1799,15 +1815,15 @@ describe("Research View", () => {
 				},
 			];
 			renderResearch();
-			const items = require("@components/Toolbar").useToolbar.mock.calls.at(
-				-1,
-			)[0].items;
+			const items = asMock(
+				require("@components/Toolbar").useToolbar,
+			).mock.calls.at(-1)[0].items;
 			items.find((item: any) => item.id === "print").onClick();
 			act(() => {
 				jest.advanceTimersByTime(500);
 			});
 			expect(printSpy).toHaveBeenCalled();
-			printSpy.mockRestore();
+			asMock(printSpy).mockRestore();
 		});
 
 		it("searches on Enter when suggestions are closed", async () => {
@@ -1815,9 +1831,9 @@ describe("Research View", () => {
 			const storage = require("@util/storage/storage");
 			mockResearchState.query = "grace";
 			mockResearchState.hasSearched = false;
-			storage.exists.mockResolvedValue(true);
-			storage.readFile.mockResolvedValue("binary-index");
-			decodeBinaryIndex.mockReturnValue({ v: 5, f: ["a"], t: {} });
+			asMock(storage.exists).mockResolvedValue(true);
+			asMock(storage.readFile).mockResolvedValue("binary-index");
+			asMock(decodeBinaryIndex).mockReturnValue({ v: 5, f: ["a"], t: {} });
 			renderResearch();
 			await act(async () => {
 				await Promise.resolve();
@@ -1834,10 +1850,12 @@ describe("Research View", () => {
 		it("deselects an active filter from the drawer", async () => {
 			const storage = require("@util/storage/storage");
 			mockResearchState.filterTags = [{ type: "author", label: "Paul" }];
-			storage.exists.mockImplementation((path: any) =>
+			asMock(storage.exists).mockImplementation((path: any) =>
 				Promise.resolve(path.endsWith("tags.json")),
 			);
-			storage.readFile.mockResolvedValue(JSON.stringify([{ author: "Paul" }]));
+			asMock(storage.readFile).mockResolvedValue(
+				JSON.stringify([{ author: "Paul" }]),
+			);
 			renderResearch();
 			fireEvent.click(screen.getByRole("button", { name: "Filters (1)" }));
 			await waitFor(() => {
@@ -1864,9 +1882,9 @@ describe("Research View", () => {
 		it("logs when deleting a corrupted index also fails", async () => {
 			const storage = require("@util/storage/storage");
 			const { logger } = require("@util/api/logger");
-			storage.exists.mockResolvedValue(true);
-			storage.readFile.mockRejectedValue(new Error("corrupt"));
-			storage.deleteFile.mockRejectedValue(new Error("delete failed"));
+			asMock(storage.exists).mockResolvedValue(true);
+			asMock(storage.readFile).mockRejectedValue(new Error("corrupt"));
+			asMock(storage.deleteFile).mockRejectedValue(new Error("delete failed"));
 			renderResearch();
 			await act(async () => {
 				await Promise.resolve();

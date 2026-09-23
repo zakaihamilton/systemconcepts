@@ -10,7 +10,7 @@ jest.mock("js-cookie", () => ({
 function freshSyncState(userId: any) {
 	jest.resetModules();
 	const Cookies = require("js-cookie").default;
-	Cookies.get.mockReturnValue(userId);
+	asMock(Cookies.get).mockReturnValue(userId);
 	return require("./syncState");
 }
 

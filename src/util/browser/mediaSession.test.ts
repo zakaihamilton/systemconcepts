@@ -6,22 +6,34 @@ jest.mock("@util/api/logger", () => ({
 	logger: { debug: jest.fn(), warn: jest.fn(), error: jest.fn() },
 }));
 
-function createFakePlayer(overrides = {}) {
-	const player = document.createElement("div");
+function createFakePlayer(overrides: Partial<HTMLMediaElement> = {}) {
+	const player = document.createElement("audio");
 	player.play = jest.fn().mockResolvedValue(undefined);
 	player.pause = jest.fn();
 	player.load = jest.fn();
-	player.networkState = overrides.networkState ?? 0;
+	setMediaProperty(player, "networkState", overrides.networkState ?? 0);
 	player.currentTime = overrides.currentTime ?? 0;
-	player.duration = overrides.duration ?? 100;
-	player.paused = overrides.paused ?? true;
-	player.ended = overrides.ended ?? false;
+	setMediaProperty(player, "duration", overrides.duration ?? 100);
+	setMediaProperty(player, "paused", overrides.paused ?? true);
+	setMediaProperty(player, "ended", overrides.ended ?? false);
 	player.playbackRate = overrides.playbackRate ?? 1;
 	return player;
 }
 
+function setMediaProperty<K extends keyof HTMLMediaElement>(
+	player: HTMLMediaElement,
+	property: K,
+	value: HTMLMediaElement[K],
+) {
+	Object.defineProperty(player, property, {
+		configurable: true,
+		writable: true,
+		value,
+	});
+}
+
 function getHandler(mediaSessionMock: any, action: any) {
-	const call = mediaSessionMock.setActionHandler.mock.calls.find(
+	const call = asMock(mediaSessionMock.setActionHandler).mock.calls.find(
 		([name]: any) => name === action,
 	);
 	return call?.[1];
@@ -40,13 +52,19 @@ describe("useMediaSession", () => {
 
 	beforeAll(() => {
 		originalMediaMetadata = global.MediaMetadata;
-		global.MediaMetadata = function MediaMetadata(data: any) {
-			Object.assign(this, data);
-		};
+		Object.defineProperty(globalThis, "MediaMetadata", {
+			configurable: true,
+			value: function MediaMetadata(data: any) {
+				Object.assign(this, data);
+			},
+		});
 	});
 
 	afterAll(() => {
-		global.MediaMetadata = originalMediaMetadata;
+		Object.defineProperty(globalThis, "MediaMetadata", {
+			configurable: true,
+			value: originalMediaMetadata,
+		});
 	});
 
 	beforeEach(() => {
@@ -59,14 +77,20 @@ describe("useMediaSession", () => {
 			playbackState: "none",
 		};
 		originalMediaSession = navigator.mediaSession;
-		navigator.mediaSession = mediaSessionMock;
+		Object.defineProperty(navigator, "mediaSession", {
+			configurable: true,
+			value: mediaSessionMock,
+		});
 	});
 
 	afterEach(() => {
 		if (originalMediaSession === undefined) {
-			delete navigator.mediaSession;
+			Reflect.deleteProperty(navigator, "mediaSession");
 		} else {
-			navigator.mediaSession = originalMediaSession;
+			Object.defineProperty(navigator, "mediaSession", {
+				configurable: true,
+				value: originalMediaSession,
+			});
 		}
 	});
 
@@ -83,7 +107,7 @@ describe("useMediaSession", () => {
 		});
 
 		it("does not throw when mediaSession is unsupported", () => {
-			delete navigator.mediaSession;
+			Reflect.deleteProperty(navigator, "mediaSession");
 			const player = createFakePlayer();
 			expect(() =>
 				renderHook(() => useMediaSession({ playerRef: player, enabled: true })),
@@ -122,9 +146,11 @@ describe("useMediaSession", () => {
 		});
 
 		it("warns and continues when a handler fails to register", () => {
-			mediaSessionMock.setActionHandler.mockImplementation((action: any) => {
-				if (action === "play") throw new Error("not supported");
-			});
+			asMock(mediaSessionMock.setActionHandler).mockImplementation(
+				(action: any) => {
+					if (action === "play") throw new Error("not supported");
+				},
+			);
 			const player = createFakePlayer();
 			renderHook(() => useMediaSession({ playerRef: player, enabled: true }));
 
@@ -139,7 +165,7 @@ describe("useMediaSession", () => {
 		});
 
 		it("swallows errors thrown while unregistering handlers", () => {
-			mediaSessionMock.setActionHandler.mockImplementation(
+			asMock(mediaSessionMock.setActionHandler).mockImplementation(
 				(action: any, fn: any) => {
 					if (fn === null) throw new Error("cleanup failure");
 				},
@@ -182,7 +208,7 @@ describe("useMediaSession", () => {
 			const notSupported = Object.assign(new Error("nope"), {
 				name: "NotSupportedError",
 			});
-			player.play
+			asMock(player.play)
 				.mockRejectedValueOnce(notSupported)
 				.mockResolvedValueOnce(undefined);
 			renderHook(() => useMediaSession({ playerRef: player, enabled: true }));
@@ -204,7 +230,7 @@ describe("useMediaSession", () => {
 				name: "AbortError",
 			});
 			const retryError = new Error("retry failed");
-			player.play
+			asMock(player.play)
 				.mockRejectedValueOnce(aborted)
 				.mockRejectedValueOnce(retryError);
 			renderHook(() => useMediaSession({ playerRef: player, enabled: true }));
@@ -220,7 +246,7 @@ describe("useMediaSession", () => {
 
 		it("does not retry for unrelated play errors", async () => {
 			const player = createFakePlayer();
-			player.play.mockRejectedValueOnce(new Error("network down"));
+			asMock(player.play).mockRejectedValueOnce(new Error("network down"));
 			renderHook(() => useMediaSession({ playerRef: player, enabled: true }));
 			const play: any = getHandler(mediaSessionMock, "play");
 			await act(async () => {
@@ -364,9 +390,12 @@ describe("useMediaSession", () => {
 
 		it("warns when metadata construction throws", () => {
 			const originalMediaMetadata = global.MediaMetadata;
-			global.MediaMetadata = function () {
-				throw new Error("bad metadata");
-			};
+			Object.defineProperty(globalThis, "MediaMetadata", {
+				configurable: true,
+				value: function () {
+					throw new Error("bad metadata");
+				},
+			});
 			const player = createFakePlayer();
 			renderHook(() =>
 				useMediaSession({ playerRef: player, enabled: true, title: "T" }),
@@ -375,7 +404,10 @@ describe("useMediaSession", () => {
 				"[MediaSession] Failed to set metadata:",
 				expect.any(Error),
 			);
-			global.MediaMetadata = originalMediaMetadata;
+			Object.defineProperty(globalThis, "MediaMetadata", {
+				configurable: true,
+				value: originalMediaMetadata,
+			});
 		});
 	});
 
@@ -383,7 +415,7 @@ describe("useMediaSession", () => {
 		it("clears the position state when duration is unavailable", () => {
 			const player = createFakePlayer({ duration: NaN });
 			renderHook(() => useMediaSession({ playerRef: player, enabled: true }));
-			expect(mediaSessionMock.setPositionState).toHaveBeenCalledWith(null);
+			expect(mediaSessionMock.setPositionState).toHaveBeenCalledWith();
 		});
 
 		it("sets the position state from the player's current state", () => {
@@ -403,15 +435,15 @@ describe("useMediaSession", () => {
 		it("updates the position state on playback progress events", () => {
 			const player = createFakePlayer({ duration: 120 });
 			renderHook(() => useMediaSession({ playerRef: player, enabled: true }));
-			const callsBefore: any =
-				mediaSessionMock.setPositionState.mock.calls.length;
+			const callsBefore: any = asMock(mediaSessionMock.setPositionState).mock
+				.calls.length;
 			player.currentTime = 60;
 			act(() => {
 				player.dispatchEvent(new Event("timeupdate", { bubbles: false }));
 				player.dispatchEvent(new Event("seeked"));
 			});
 			expect(
-				mediaSessionMock.setPositionState.mock.calls.length,
+				asMock(mediaSessionMock.setPositionState).mock.calls.length,
 			).toBeGreaterThan(callsBefore);
 		});
 
@@ -421,18 +453,18 @@ describe("useMediaSession", () => {
 				useMediaSession({ playerRef: player, enabled: true }),
 			);
 			unmount();
-			const callsAfterUnmount: any =
-				mediaSessionMock.setPositionState.mock.calls.length;
+			const callsAfterUnmount: any = asMock(mediaSessionMock.setPositionState)
+				.mock.calls.length;
 			act(() => {
 				player.dispatchEvent(new Event("seeked"));
 			});
-			expect(mediaSessionMock.setPositionState.mock.calls.length).toBe(
+			expect(asMock(mediaSessionMock.setPositionState).mock.calls.length).toBe(
 				callsAfterUnmount,
 			);
 		});
 
 		it("warns when setPositionState throws", () => {
-			mediaSessionMock.setPositionState.mockImplementation(() => {
+			asMock(mediaSessionMock.setPositionState).mockImplementation(() => {
 				throw new Error("bad state");
 			});
 			const player = createFakePlayer({ duration: 120 });
@@ -472,7 +504,7 @@ describe("useMediaSession", () => {
 		});
 
 		it("still tracks lastPlayState when mediaSession is unsupported", () => {
-			delete navigator.mediaSession;
+			Reflect.deleteProperty(navigator, "mediaSession");
 			const player = createFakePlayer();
 			expect(() =>
 				renderHook(() => useMediaSession({ playerRef: player, enabled: true })),
@@ -496,7 +528,7 @@ describe("useMediaSession", () => {
 				document.dispatchEvent(new Event("visibilitychange"));
 			});
 
-			player.paused = true;
+			setMediaProperty(player, "paused", true);
 			visibilityState = "visible";
 			act(() => {
 				document.dispatchEvent(new Event("visibilitychange"));
@@ -519,7 +551,7 @@ describe("useMediaSession", () => {
 			act(() => {
 				document.dispatchEvent(new Event("visibilitychange"));
 			});
-			player.paused = true;
+			setMediaProperty(player, "paused", true);
 			visibilityState = "visible";
 			act(() => {
 				document.dispatchEvent(new Event("visibilitychange"));
@@ -620,7 +652,7 @@ describe("useMediaSession", () => {
 			act(() => {
 				document.dispatchEvent(new Event("visibilitychange"));
 			});
-			player.paused = true;
+			setMediaProperty(player, "paused", true);
 			visibilityState = "visible";
 			act(() => {
 				document.dispatchEvent(new Event("visibilitychange"));
@@ -674,16 +706,18 @@ describe("useMediaSession", () => {
 			act(() => {
 				player.dispatchEvent(new Event("timeupdate"));
 			});
-			expect(mediaSessionMock.setPositionState).toHaveBeenCalledWith(null);
+			expect(mediaSessionMock.setPositionState).toHaveBeenCalledWith();
 		});
 
 		it("ignores unsupported handler registration errors", () => {
 			const player = createFakePlayer();
-			mediaSessionMock.setActionHandler.mockImplementation((action: any) => {
-				if (action === "seekto") {
-					throw new Error("unsupported");
-				}
-			});
+			asMock(mediaSessionMock.setActionHandler).mockImplementation(
+				(action: any) => {
+					if (action === "seekto") {
+						throw new Error("unsupported");
+					}
+				},
+			);
 			expect(() =>
 				renderHook(() => useMediaSession({ playerRef: player, enabled: true })),
 			).not.toThrow();

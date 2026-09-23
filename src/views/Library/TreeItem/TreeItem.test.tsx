@@ -2,6 +2,10 @@ import { act, fireEvent, render, screen } from "@testing-library/react";
 import { LibraryStore } from "../Store";
 import TreeItem from "./TreeItem";
 
+const mockedLibraryStore = LibraryStore as typeof LibraryStore & {
+	__state: any;
+};
+
 jest.mock("../Store", () => {
 	const state = {
 		selectedId: null,
@@ -34,7 +38,7 @@ describe("TreeItem", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
 		jest.useFakeTimers();
-		const state = LibraryStore.__state;
+		const state = mockedLibraryStore.__state;
 		state.selectedId = null;
 		state.selectPath = null;
 		state.expandedNodes = [];
@@ -75,12 +79,12 @@ describe("TreeItem", () => {
 		render(<TreeItem node={parent} onSelect={onSelect} />);
 		fireEvent.click(screen.getByRole("button"));
 		expect(LibraryStore.update).toHaveBeenCalled();
-		expect(LibraryStore.__state.expandedNodes).toContain("parent");
+		expect(mockedLibraryStore.__state.expandedNodes).toContain("parent");
 	});
 
 	it("expands along selectPath and scrolls when not manually clicked", () => {
-		LibraryStore.__state.selectPath = "parent|child";
-		LibraryStore.__state.expandedNodes = [];
+		mockedLibraryStore.__state.selectPath = "parent|child";
+		mockedLibraryStore.__state.expandedNodes = [];
 		const scrollIntoView = jest.fn();
 		Element.prototype.scrollIntoView = scrollIntoView;
 
@@ -95,12 +99,12 @@ describe("TreeItem", () => {
 			/>,
 		);
 
-		expect(LibraryStore.__state.expandedNodes).toContain("parent");
+		expect(mockedLibraryStore.__state.expandedNodes).toContain("parent");
 	});
 
 	it("does not scroll when the node was clicked", () => {
-		LibraryStore.__state.selectPath = "leaf-1";
-		LibraryStore.__state.clickedId = "leaf-1";
+		mockedLibraryStore.__state.selectPath = "leaf-1";
+		mockedLibraryStore.__state.clickedId = "leaf-1";
 		const scrollIntoView = jest.fn();
 		Element.prototype.scrollIntoView = scrollIntoView;
 
@@ -117,8 +121,8 @@ describe("TreeItem", () => {
 	});
 
 	it("scrolls into view for programmatic selection", () => {
-		LibraryStore.__state.selectPath = "leaf-1";
-		LibraryStore.__state.clickedId = null;
+		mockedLibraryStore.__state.selectPath = "leaf-1";
+		mockedLibraryStore.__state.clickedId = null;
 		const scrollIntoView = jest.fn();
 		Element.prototype.scrollIntoView = scrollIntoView;
 
@@ -135,12 +139,12 @@ describe("TreeItem", () => {
 			behavior: "smooth",
 			block: "nearest",
 		});
-		expect(LibraryStore.__state.selectPath).toBeNull();
+		expect(mockedLibraryStore.__state.selectPath).toBeNull();
 	});
 
 	it("scrolls the overflow parent instead of using scrollIntoView", () => {
-		LibraryStore.__state.selectPath = "leaf-1";
-		LibraryStore.__state.clickedId = null;
+		mockedLibraryStore.__state.selectPath = "leaf-1";
+		mockedLibraryStore.__state.clickedId = null;
 		const scrollIntoView = jest.fn();
 		Element.prototype.scrollIntoView = scrollIntoView;
 		const scrollTo = jest.fn();
@@ -162,9 +166,9 @@ describe("TreeItem", () => {
 		Object.defineProperty(scrollParent, "scrollTo", { value: scrollTo });
 		jest.spyOn(window, "getComputedStyle").mockImplementation((el) => {
 			if (el === scrollParent) {
-				return { overflowY: "auto" };
+				return { overflowY: "auto" } as CSSStyleDeclaration;
 			}
-			return { overflowY: "visible" };
+			return { overflowY: "visible" } as CSSStyleDeclaration;
 		});
 
 		act(() => {
@@ -172,8 +176,8 @@ describe("TreeItem", () => {
 		});
 		expect(scrollTo).toHaveBeenCalled();
 		expect(scrollIntoView).not.toHaveBeenCalled();
-		expect(LibraryStore.__state.selectPath).toBeNull();
-		window.getComputedStyle.mockRestore();
+		expect(mockedLibraryStore.__state.selectPath).toBeNull();
+		asMock(window.getComputedStyle).mockRestore();
 	});
 
 	it("uses abbreviation expansion for the display name", () => {
@@ -198,7 +202,7 @@ describe("TreeItem", () => {
 
 	it("calls onToggle when provided instead of updating store expand", () => {
 		const onToggle = jest.fn();
-		LibraryStore.__state.expandedNodes = ["parent"];
+		mockedLibraryStore.__state.expandedNodes = ["parent"];
 		render(
 			<TreeItem
 				node={{
@@ -215,7 +219,7 @@ describe("TreeItem", () => {
 	});
 
 	it("collapses siblings when a child expands via handleChildToggle", () => {
-		LibraryStore.__state.expandedNodes = ["parent", "a"];
+		mockedLibraryStore.__state.expandedNodes = ["parent", "a"];
 		const { rerender } = render(
 			<TreeItem
 				node={{
@@ -232,7 +236,7 @@ describe("TreeItem", () => {
 		expect(screen.getByText("A")).toBeInTheDocument();
 
 		// Re-render with expanded parent so children are visible, then toggle child B
-		LibraryStore.__state.expandedNodes = ["parent", "a"];
+		mockedLibraryStore.__state.expandedNodes = ["parent", "a"];
 		rerender(
 			<TreeItem
 				node={{
@@ -252,8 +256,8 @@ describe("TreeItem", () => {
 		);
 
 		fireEvent.click(screen.getByText("B"));
-		expect(LibraryStore.__state.expandedNodes).toContain("b");
-		expect(LibraryStore.__state.expandedNodes).not.toContain("a");
+		expect(mockedLibraryStore.__state.expandedNodes).toContain("b");
+		expect(mockedLibraryStore.__state.expandedNodes).not.toContain("a");
 	});
 
 	it("clears clickedId after the selection delay", () => {
@@ -264,11 +268,11 @@ describe("TreeItem", () => {
 			/>,
 		);
 		fireEvent.click(screen.getByRole("link"));
-		expect(LibraryStore.__state.clickedId).toBe("leaf-1");
+		expect(mockedLibraryStore.__state.clickedId).toBe("leaf-1");
 		act(() => {
 			jest.advanceTimersByTime(2000);
 		});
-		expect(LibraryStore.__state.clickedId).toBeNull();
+		expect(mockedLibraryStore.__state.clickedId).toBeNull();
 	});
 
 	it("checks truncation on resize and mouse enter", () => {
@@ -289,7 +293,7 @@ describe("TreeItem", () => {
 			name: "Parent",
 			children: [{ id: "child", _id: "child", name: "Child" }],
 		};
-		LibraryStore.__state.expandedNodes = ["parent"];
+		mockedLibraryStore.__state.expandedNodes = ["parent"];
 		render(<TreeItem node={parent} onSelect={onSelect} />);
 		const stopPropagation = jest.fn();
 		const preventDefault = jest.fn();
@@ -301,7 +305,7 @@ describe("TreeItem", () => {
 	});
 
 	it("collapses an expanded node without onToggle", () => {
-		LibraryStore.__state.expandedNodes = ["parent"];
+		mockedLibraryStore.__state.expandedNodes = ["parent"];
 		const parent = {
 			id: "parent",
 			name: "Parent",
@@ -309,11 +313,11 @@ describe("TreeItem", () => {
 		};
 		render(<TreeItem node={parent} onSelect={onSelect} />);
 		fireEvent.click(screen.getByRole("button"));
-		expect(LibraryStore.__state.expandedNodes).not.toContain("parent");
+		expect(mockedLibraryStore.__state.expandedNodes).not.toContain("parent");
 	});
 
 	it("collapses a child via handleChildToggle", () => {
-		LibraryStore.__state.expandedNodes = ["parent", "child"];
+		mockedLibraryStore.__state.expandedNodes = ["parent", "child"];
 		render(
 			<TreeItem
 				node={{
@@ -330,18 +334,20 @@ describe("TreeItem", () => {
 				onSelect={onSelect}
 				onToggle={jest.fn((id, expanding) => {
 					if (!expanding) {
-						LibraryStore.__state.expandedNodes =
-							LibraryStore.__state.expandedNodes.filter((x: any) => x !== id);
+						mockedLibraryStore.__state.expandedNodes =
+							mockedLibraryStore.__state.expandedNodes.filter(
+								(x: any) => x !== id,
+							);
 					}
 				})}
 			/>,
 		);
 		fireEvent.click(screen.getByText("Child"));
-		expect(LibraryStore.__state.expandedNodes).not.toContain("child");
+		expect(mockedLibraryStore.__state.expandedNodes).not.toContain("child");
 	});
 
 	it("marks the node selected when store selectedId matches", () => {
-		LibraryStore.__state.selectedId = "leaf-1";
+		mockedLibraryStore.__state.selectedId = "leaf-1";
 		const { container } = render(
 			<TreeItem
 				node={{ id: "leaf-1", _id: "leaf-1", name: "Leaf" }}
@@ -363,7 +369,7 @@ describe("TreeItem", () => {
 			.closest("button")
 			.querySelector('[class*="toggleIcon"]');
 		fireEvent.click(toggle);
-		expect(LibraryStore.__state.expandedNodes).toContain("parent");
+		expect(mockedLibraryStore.__state.expandedNodes).toContain("parent");
 		expect(onSelect).not.toHaveBeenCalled();
 	});
 });

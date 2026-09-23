@@ -13,7 +13,7 @@ describe("readGroups", () => {
 	});
 
 	it("returns groups, settings, and version straight from storage", async () => {
-		readFile.mockResolvedValue({
+		asMock(readFile).mockResolvedValue({
 			groups: [{ name: "Alpha" }],
 			settings: { theme: "dark" },
 			version: 2,
@@ -30,7 +30,7 @@ describe("readGroups", () => {
 	});
 
 	it("falls back to sensible defaults when fields are missing", async () => {
-		readFile.mockResolvedValue({});
+		asMock(readFile).mockResolvedValue({});
 
 		const result = await readGroups();
 
@@ -38,7 +38,7 @@ describe("readGroups", () => {
 	});
 
 	it("returns defaults and logs an error instead of throwing when the read fails", async () => {
-		readFile.mockRejectedValue(new Error("read failed"));
+		asMock(readFile).mockRejectedValue(new Error("read failed"));
 		const errorSpy = jest
 			.spyOn(structuredLogger, "error")
 			.mockImplementation(() => {});
@@ -47,7 +47,7 @@ describe("readGroups", () => {
 
 		expect(result).toEqual({ groups: [], settings: {}, version: 1 });
 		expect(errorSpy).toHaveBeenCalled();
-		errorSpy.mockRestore();
+		asMock(errorSpy).mockRestore();
 	});
 });
 
@@ -57,7 +57,7 @@ describe("writeGroups", () => {
 	});
 
 	it("normalizes groups/settings and writes them under version 1", async () => {
-		writeFile.mockResolvedValue(undefined);
+		asMock(writeFile).mockResolvedValue(undefined);
 
 		await writeGroups({ groups: [{ name: "Alpha" }], settings: { a: 1 } });
 
@@ -69,7 +69,7 @@ describe("writeGroups", () => {
 	});
 
 	it("defaults groups/settings to empty when omitted", async () => {
-		writeFile.mockResolvedValue(undefined);
+		asMock(writeFile).mockResolvedValue(undefined);
 
 		await writeGroups({});
 
@@ -81,7 +81,7 @@ describe("writeGroups", () => {
 	});
 
 	it("propagates errors from the underlying write", async () => {
-		writeFile.mockRejectedValue(new Error("disk full"));
+		asMock(writeFile).mockRejectedValue(new Error("disk full"));
 
 		await expect(writeGroups({})).rejects.toThrow("disk full");
 	});

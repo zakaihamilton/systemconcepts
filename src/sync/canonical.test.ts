@@ -40,7 +40,7 @@ describe("calculateCanonicalHash", () => {
 	});
 
 	it("hashes the canonical (key-sorted) string form of the object", async () => {
-		calculateHash.mockResolvedValue("hash-value");
+		asMock(calculateHash).mockResolvedValue("hash-value");
 
 		const result = await calculateCanonicalHash({ b: 1, a: 2 });
 

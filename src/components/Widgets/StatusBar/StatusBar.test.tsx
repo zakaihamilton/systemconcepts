@@ -44,7 +44,7 @@ describe("StatusBar Widget", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
 		jest.useFakeTimers();
-		useTranslations.mockReturnValue({
+		asMock(useTranslations).mockReturnValue({
 			CLOSE: "Close",
 			SELECT_ALL: "Select All",
 			SELECT_NONE: "Select None",
@@ -62,7 +62,7 @@ describe("StatusBar Widget", () => {
 	});
 
 	const renderBar = (storeState: any, syncValue = {}) => {
-		mockStore.useState.mockReturnValue(storeState);
+		asMock(mockStore.useState).mockReturnValue(storeState);
 		return render(
 			<SyncContext.Provider value={syncValue}>
 				<StatusBar
@@ -75,7 +75,7 @@ describe("StatusBar Widget", () => {
 	};
 
 	it("renders nothing when not active", () => {
-		mockStore.useState.mockReturnValue({ select: null, message: null });
+		asMock(mockStore.useState).mockReturnValue({ select: null, message: null });
 		const { container } = render(
 			<SyncContext.Provider value={{}}>
 				<StatusBar store={mockStore} />
@@ -96,7 +96,7 @@ describe("StatusBar Widget", () => {
 	});
 
 	it("copies player load errors", async () => {
-		const writeText = jest.fn().mockResolvedValue();
+		const writeText = jest.fn().mockResolvedValue(undefined);
 		Object.assign(navigator, { clipboard: { writeText } });
 		renderBar({
 			select: null,
@@ -214,8 +214,11 @@ describe("StatusBar Widget", () => {
 	it("ignores close when clickaway is reported", () => {
 		renderBar({ select: [], message: "Status Message" });
 		const close = screen.getByLabelText("Close");
-		mockStore.update.mockClear();
-		close.onclick?.({}, "clickaway");
+		asMock(mockStore.update).mockClear();
+		(close.onclick as unknown as (event: MouseEvent, reason: string) => void)?.(
+			new MouseEvent("click"),
+			"clickaway",
+		);
 		expect(mockStore.update).not.toHaveBeenCalled();
 	});
 
@@ -244,7 +247,7 @@ describe("StatusBar Widget", () => {
 			onDone,
 		});
 		fireEvent.click(screen.getByLabelText("Delete"));
-		mockStore.update.mockClear();
+		asMock(mockStore.update).mockClear();
 		const close = screen.queryByLabelText("Close");
 		if (close) {
 			fireEvent.click(close);
@@ -260,11 +263,11 @@ describe("StatusBar Widget", () => {
 			mode: "delete",
 			onDone,
 		});
-		const callsBefore = mockStore.update.mock.calls.length;
+		const callsBefore = asMock(mockStore.update).mock.calls.length;
 		fireEvent.click(screen.getByLabelText("Delete"));
 		await waitFor(() => {
 			expect(onDone).toHaveBeenCalled();
 		});
-		expect(mockStore.update.mock.calls.length).toBe(callsBefore);
+		expect(asMock(mockStore.update).mock.calls.length).toBe(callsBefore);
 	});
 });

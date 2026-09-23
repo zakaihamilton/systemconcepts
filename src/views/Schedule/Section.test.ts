@@ -52,11 +52,11 @@ describe("getScheduleSection", () => {
 		const modes = ["year", "month", "week", "day", "tracks", "history"];
 
 		section.menuItems.forEach((item, index) => {
-			update.mockClear();
+			asMock(update).mockClear();
 			const state = { viewMode: "old" };
 			item.onClick();
 			expect(update).toHaveBeenCalled();
-			update.mock.calls[0][0](state);
+			asMock(update).mock.calls[0][0](state);
 			expect(state.viewMode).toBe(modes[index]);
 		});
 	});

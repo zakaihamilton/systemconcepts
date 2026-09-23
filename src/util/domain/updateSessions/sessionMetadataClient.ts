@@ -151,7 +151,7 @@ async function loadSessionMetadata(group: any, year: any) {
 export async function fetchSessionMetadata(
 	group: any,
 	year: any,
-	metadataFingerprint: any,
+	metadataFingerprint: any = "unknown",
 	forceUpdate = false,
 ) {
 	const cacheKey = getCacheKey(group, year, metadataFingerprint);

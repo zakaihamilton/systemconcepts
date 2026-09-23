@@ -59,8 +59,8 @@ describe("sessionFeed transcript URLs", () => {
 	});
 
 	it("does not emit stale DigitalOcean subtitle paths when a Wasabi transcript exists", async () => {
-		awsMetadataInfo.mockResolvedValue(null);
-		wasabiMetadataInfo.mockResolvedValue({ type: "text/plain" });
+		asMock(awsMetadataInfo).mockResolvedValue(null);
+		asMock(wasabiMetadataInfo).mockResolvedValue({ type: "text/plain" });
 
 		const url: any = await getTranscriptProxyUrl(
 			{
@@ -91,8 +91,8 @@ describe("sessionFeed transcript URLs", () => {
 	});
 
 	it("does not return a yearly zip transcript URL from the sessions API", async () => {
-		awsMetadataInfo.mockResolvedValue(null);
-		wasabiMetadataInfo.mockResolvedValue(null);
+		asMock(awsMetadataInfo).mockResolvedValue(null);
+		asMock(wasabiMetadataInfo).mockResolvedValue(null);
 
 		const url: any = await getTranscriptProxyUrl(
 			{
@@ -111,13 +111,13 @@ describe("sessionFeed transcript URLs", () => {
 	});
 
 	it("returns a signed-redirect URL for an AWS transcript when a summary exists without transcription metadata", async () => {
-		awsMetadataInfo.mockImplementation(({ path }: any) =>
+		asMock(awsMetadataInfo).mockImplementation(({ path }: any) =>
 			path ===
 			"sessions/american/2026/2026-04-28 Overview - Effort vs Finding Favor.txt"
 				? Promise.resolve({ type: "text/plain" })
 				: Promise.resolve(null),
 		);
-		wasabiMetadataInfo.mockResolvedValue(null);
+		asMock(wasabiMetadataInfo).mockResolvedValue(null);
 
 		const url: any = await getTranscriptProxyUrl(
 			{
@@ -142,8 +142,8 @@ describe("sessionFeed transcript URLs", () => {
 	});
 
 	it("reuses transcript metadata lookups for repeated AWS transcript checks", async () => {
-		awsMetadataInfo.mockResolvedValue({ type: "text/plain" });
-		wasabiMetadataInfo.mockResolvedValue(null);
+		asMock(awsMetadataInfo).mockResolvedValue({ type: "text/plain" });
+		asMock(wasabiMetadataInfo).mockResolvedValue(null);
 		const session = {
 			id: "2026-06-24 Cached Transcript",
 			group: "compute",
@@ -169,8 +169,8 @@ describe("sessionFeed transcript URLs", () => {
 	});
 
 	it("does not fall back to a yearly zip transcript URL when no standalone transcript exists", async () => {
-		awsMetadataInfo.mockResolvedValue(null);
-		wasabiMetadataInfo.mockResolvedValue(null);
+		asMock(awsMetadataInfo).mockResolvedValue(null);
+		asMock(wasabiMetadataInfo).mockResolvedValue(null);
 
 		const url: any = await getTranscriptProxyUrl(
 			{
@@ -195,7 +195,7 @@ function jsonBuffer(obj: any) {
 
 describe("getSessions", () => {
 	it("loads manifest and session files, filtering to the requested group", async () => {
-		downloadData.mockImplementation(async ({ path }: any) => {
+		asMock(downloadData).mockImplementation(async ({ path }: any) => {
 			if (path === "sync/files.json.gz") {
 				return jsonBuffer([
 					{ path: "/american.json" },
@@ -215,7 +215,7 @@ describe("getSessions", () => {
 	});
 
 	it("returns sessions from all groups when no group filter is provided", async () => {
-		downloadData.mockImplementation(async ({ path }: any) => {
+		asMock(downloadData).mockImplementation(async ({ path }: any) => {
 			if (path === "sync/files.json.gz") {
 				return jsonBuffer([
 					{ path: "/american.json" },
@@ -236,7 +236,7 @@ describe("getSessions", () => {
 	});
 
 	it("includes bundle.json in the file scan and still filters its sessions by group", async () => {
-		downloadData.mockImplementation(async ({ path }: any) => {
+		asMock(downloadData).mockImplementation(async ({ path }: any) => {
 			if (path === "sync/files.json.gz") {
 				return jsonBuffer([{ path: "/bundle.json" }]);
 			}
@@ -256,7 +256,7 @@ describe("getSessions", () => {
 	});
 
 	it("dedupes sessions with the same group and id across multiple files", async () => {
-		downloadData.mockImplementation(async ({ path }: any) => {
+		asMock(downloadData).mockImplementation(async ({ path }: any) => {
 			if (path === "sync/files.json.gz") {
 				return jsonBuffer([
 					{ path: "/american.json" },
@@ -277,7 +277,7 @@ describe("getSessions", () => {
 	});
 
 	it("logs and continues when a single session file fails to load", async () => {
-		downloadData.mockImplementation(async ({ path }: any) => {
+		asMock(downloadData).mockImplementation(async ({ path }: any) => {
 			if (path === "sync/files.json.gz") {
 				return jsonBuffer([
 					{ path: "/american.json" },
@@ -302,7 +302,7 @@ describe("getSessions", () => {
 	});
 
 	it("caches the manifest and session file lookups within the TTL", async () => {
-		downloadData.mockImplementation(async ({ path }: any) => {
+		asMock(downloadData).mockImplementation(async ({ path }: any) => {
 			if (path === "sync/files.json.gz") {
 				return jsonBuffer([{ path: "/american.json" }]);
 			}
@@ -433,8 +433,8 @@ describe("getTranscriptProxyUrlFast", () => {
 
 describe("getTranscriptProxyUrl inferred and resolution paths", () => {
 	it("uses resolution media paths when audio/video are absent", async () => {
-		awsMetadataInfo.mockResolvedValue(null);
-		wasabiMetadataInfo.mockResolvedValue({ type: "text/plain" });
+		asMock(awsMetadataInfo).mockResolvedValue(null);
+		asMock(wasabiMetadataInfo).mockResolvedValue({ type: "text/plain" });
 
 		const url: any = await getTranscriptProxyUrl(
 			{
@@ -458,8 +458,8 @@ describe("getTranscriptProxyUrl inferred and resolution paths", () => {
 	});
 
 	it("falls back to wasabi group/year transcript when media has no folder", async () => {
-		awsMetadataInfo.mockResolvedValue(null);
-		wasabiMetadataInfo.mockResolvedValue({ type: "text/plain" });
+		asMock(awsMetadataInfo).mockResolvedValue(null);
+		asMock(wasabiMetadataInfo).mockResolvedValue({ type: "text/plain" });
 
 		const url: any = await getTranscriptProxyUrl(
 			{
@@ -481,8 +481,8 @@ describe("getTranscriptProxyUrl inferred and resolution paths", () => {
 	});
 
 	it("skips inferred lookup when there is no transcript evidence", async () => {
-		awsMetadataInfo.mockResolvedValue(null);
-		wasabiMetadataInfo.mockResolvedValue(null);
+		asMock(awsMetadataInfo).mockResolvedValue(null);
+		asMock(wasabiMetadataInfo).mockResolvedValue(null);
 
 		const url: any = await getTranscriptProxyUrl(
 			{
@@ -502,8 +502,8 @@ describe("getTranscriptProxyUrl inferred and resolution paths", () => {
 	});
 
 	it("skips inferred lookup when evidence exists but media path is missing", async () => {
-		awsMetadataInfo.mockResolvedValue(null);
-		wasabiMetadataInfo.mockResolvedValue(null);
+		asMock(awsMetadataInfo).mockResolvedValue(null);
+		asMock(wasabiMetadataInfo).mockResolvedValue(null);
 
 		const url: any = await getTranscriptProxyUrl(
 			{
@@ -523,8 +523,8 @@ describe("getTranscriptProxyUrl inferred and resolution paths", () => {
 	});
 
 	it("clears transcript metadata cache entries when head requests fail", async () => {
-		awsMetadataInfo.mockRejectedValue(new Error("head failed"));
-		wasabiMetadataInfo.mockResolvedValue(null);
+		asMock(awsMetadataInfo).mockRejectedValue(new Error("head failed"));
+		asMock(wasabiMetadataInfo).mockResolvedValue(null);
 
 		await expect(
 			getTranscriptProxyUrl(
@@ -538,7 +538,7 @@ describe("getTranscriptProxyUrl inferred and resolution paths", () => {
 			),
 		).rejects.toThrow("head failed");
 
-		awsMetadataInfo.mockResolvedValue({ type: "text/plain" });
+		asMock(awsMetadataInfo).mockResolvedValue({ type: "text/plain" });
 		const url: any = await getTranscriptProxyUrl(
 			{
 				id: "2024-01-01 Fail",
@@ -559,10 +559,10 @@ describe("getTranscriptProxyUrl inferred and resolution paths", () => {
 
 describe("getSessions cache and path handling", () => {
 	it("clears manifest cache entries when download fails", async () => {
-		downloadData.mockRejectedValueOnce(new Error("manifest fail"));
+		asMock(downloadData).mockRejectedValueOnce(new Error("manifest fail"));
 		await expect(getSessions()).rejects.toThrow("manifest fail");
 
-		downloadData.mockImplementation(async ({ path }: any) => {
+		asMock(downloadData).mockImplementation(async ({ path }: any) => {
 			if (path === "sync/files.json.gz") {
 				return jsonBuffer([{ path: "/american.json" }]);
 			}
@@ -578,7 +578,7 @@ describe("getSessions cache and path handling", () => {
 	});
 
 	it("loads session files whose manifest paths omit a leading slash", async () => {
-		downloadData.mockImplementation(async ({ path }: any) => {
+		asMock(downloadData).mockImplementation(async ({ path }: any) => {
 			if (path === "sync/files.json.gz") {
 				return jsonBuffer([{ path: "american.json" }]);
 			}

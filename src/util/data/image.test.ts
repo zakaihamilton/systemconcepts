@@ -27,17 +27,21 @@ describe("thumbnailify", () => {
 
 	afterEach(() => {
 		global.Image = originalImage;
-		createElementSpy.mockRestore();
+		asMock(createElementSpy).mockRestore();
 	});
 
 	it("scales the image down to fit within maxSize", async () => {
 		global.Image = class {
+			width = 0;
+			height = 0;
+			onload: (() => void) | null = null;
+			onerror: ((error?: unknown) => void) | null = null;
 			set src(_value: any) {
 				this.width = 1200;
 				this.height = 600;
-				this.onload();
+				this.onload?.();
 			}
-		};
+		} as unknown as typeof Image;
 
 		const result = await thumbnailify("data:image/png;base64,AAAA", 600);
 
@@ -53,12 +57,16 @@ describe("thumbnailify", () => {
 
 	it("does not upscale an image smaller than maxSize", async () => {
 		global.Image = class {
+			width = 0;
+			height = 0;
+			onload: (() => void) | null = null;
+			onerror: ((error?: unknown) => void) | null = null;
 			set src(_value: any) {
 				this.width = 100;
 				this.height = 50;
-				this.onload();
+				this.onload?.();
 			}
-		};
+		} as unknown as typeof Image;
 
 		await thumbnailify("data:image/png;base64,AAAA", 600);
 
@@ -68,10 +76,12 @@ describe("thumbnailify", () => {
 
 	it("rejects when the image fails to load", async () => {
 		global.Image = class {
+			onload: (() => void) | null = null;
+			onerror: ((error?: unknown) => void) | null = null;
 			set src(_value: any) {
-				this.onerror();
+				this.onerror?.();
 			}
-		};
+		} as unknown as typeof Image;
 
 		await expect(thumbnailify("bad-data")).rejects.toThrow(
 			"Failed to load image for thumbnail generation",
@@ -101,30 +111,38 @@ describe("shrinkImage", () => {
 				return originalCreateElement(tag);
 			});
 		global.Image = class {
+			width = 0;
+			height = 0;
+			onload: (() => void) | null = null;
+			onerror: ((error?: unknown) => void) | null = null;
 			set src(_value: any) {
 				this.width = 100;
 				this.height = 100;
-				this.onload();
+				this.onload?.();
 			}
-		};
+		} as unknown as typeof Image;
 	});
 
 	afterEach(() => {
 		global.Image = originalImage;
 		global.FileReader = originalFileReader;
-		createElementSpy.mockRestore();
+		asMock(createElementSpy).mockRestore();
 	});
 
 	it("resolves with a thumbnail blob once the buffer is read", async () => {
 		global.FileReader = class {
+			result: string | ArrayBuffer | null = null;
+			onload: (() => void) | null = null;
+			onloadend: (() => void) | null = null;
+			onerror: ((error?: unknown) => void) | null = null;
 			addEventListener(event: any, handler: any) {
 				this[`on${event}`] = handler;
 			}
 			readAsDataURL(_buffer: any) {
 				this.result = "data:image/png;base64,AAAA";
-				this.onload();
+				this.onload?.();
 			}
-		};
+		} as unknown as typeof FileReader;
 
 		const result = await shrinkImage(new Blob(["source"]));
 		expect(result).toBeInstanceOf(Blob);
@@ -132,13 +150,17 @@ describe("shrinkImage", () => {
 
 	it("rejects when reading the buffer fails", async () => {
 		global.FileReader = class {
+			result: string | ArrayBuffer | null = null;
+			onload: (() => void) | null = null;
+			onloadend: (() => void) | null = null;
+			onerror: ((error?: unknown) => void) | null = null;
 			addEventListener(event: any, handler: any) {
 				this[`on${event}`] = handler;
 			}
 			readAsDataURL(_buffer: any) {
-				this.onerror(new Error("read failed"));
+				this.onerror?.(new Error("read failed"));
 			}
-		};
+		} as unknown as typeof FileReader;
 
 		await expect(shrinkImage(new Blob(["source"]))).rejects.toBeInstanceOf(
 			Error,
@@ -155,11 +177,15 @@ describe("blobToBase64", () => {
 
 	it("resolves with the base64 data URL", async () => {
 		global.FileReader = class {
+			result: string | ArrayBuffer | null = null;
+			onload: (() => void) | null = null;
+			onloadend: (() => void) | null = null;
+			onerror: ((error?: unknown) => void) | null = null;
 			readAsDataURL(_blob: any) {
 				this.result = "data:image/png;base64,AAAA";
-				this.onloadend();
+				this.onloadend?.();
 			}
-		};
+		} as unknown as typeof FileReader;
 
 		const result = await blobToBase64(new Blob(["source"]));
 		expect(result).toBe("data:image/png;base64,AAAA");
@@ -167,10 +193,14 @@ describe("blobToBase64", () => {
 
 	it("rejects when the blob cannot be read", async () => {
 		global.FileReader = class {
+			result: string | ArrayBuffer | null = null;
+			onload: (() => void) | null = null;
+			onloadend: (() => void) | null = null;
+			onerror: ((error?: unknown) => void) | null = null;
 			readAsDataURL(_blob: any) {
-				this.onerror();
+				this.onerror?.();
 			}
-		};
+		} as unknown as typeof FileReader;
 
 		await expect(blobToBase64(new Blob(["source"]))).rejects.toThrow(
 			"Failed to convert blob to base64",

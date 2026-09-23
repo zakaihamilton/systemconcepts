@@ -20,8 +20,10 @@ jest.mock("./userStorage", () => ({
 describe("clearBundleCache", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
-		storage.deleteFolder.mockResolvedValue(undefined);
-		storage.resetLocalFileSystem.mockResolvedValue("systemconcepts-fs-fresh");
+		asMock(storage.deleteFolder).mockResolvedValue(undefined);
+		asMock(storage.resetLocalFileSystem).mockResolvedValue(
+			"systemconcepts-fs-fresh",
+		);
 		SyncActiveStore.update((state) => {
 			state.lastSynced = 123;
 			state.lastSyncTime = 123;
@@ -62,7 +64,7 @@ describe("clearBundleCache", () => {
 	});
 
 	it("logs and swallows errors instead of throwing", async () => {
-		storage.deleteFolder.mockRejectedValue(new Error("disk error"));
+		asMock(storage.deleteFolder).mockRejectedValue(new Error("disk error"));
 
 		await expect(clearBundleCache()).resolves.toBeUndefined();
 	});
@@ -71,7 +73,9 @@ describe("clearBundleCache", () => {
 describe("resetLocalCacheForFullSync", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
-		storage.resetLocalFileSystem.mockResolvedValue("systemconcepts-fs-fresh");
+		asMock(storage.resetLocalFileSystem).mockResolvedValue(
+			"systemconcepts-fs-fresh",
+		);
 		SyncActiveStore.update((state) => {
 			state.lastSynced = 123;
 			state.lastSyncTime = 123;
@@ -103,7 +107,7 @@ describe("resetLocalCacheForFullSync", () => {
 
 	it("does not continue to the sync pipeline when a fresh database cannot start", async () => {
 		const error = new Error("fresh database failed");
-		storage.resetLocalFileSystem.mockRejectedValue(error);
+		asMock(storage.resetLocalFileSystem).mockRejectedValue(error);
 
 		await expect(resetLocalCacheForFullSync()).rejects.toBe(error);
 		expect(clearUserSyncStorage).not.toHaveBeenCalled();

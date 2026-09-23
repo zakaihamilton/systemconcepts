@@ -41,19 +41,26 @@ jest.mock(
 jest.mock("@widgets/Message", () => () => <div data-testid="message" />);
 
 describe("Image View", () => {
+	let originalFileReader: typeof FileReader;
 	const mockSize = { width: 800, height: 600 };
 
 	beforeEach(() => {
 		jest.clearAllMocks();
-		useTranslations.mockReturnValue({ CANNOT_LOAD_IMAGE: "Cannot load image" });
-		useParentPath.mockReturnValue("local/test");
-		useParentParams.mockReturnValue({});
-		useFetchJSON.mockReturnValue([null, false, false]);
-		useSync.mockReturnValue([0]);
-		readBinary.mockResolvedValue(new Blob(["test"], { type: "image/png" }));
+		asMock(useTranslations).mockReturnValue({
+			CANNOT_LOAD_IMAGE: "Cannot load image",
+		});
+		asMock(useParentPath).mockReturnValue("local/test");
+		asMock(useParentParams).mockReturnValue({});
+		asMock(useFetchJSON).mockReturnValue([null, false, false]);
+		asMock(useSync).mockReturnValue([0]);
+		asMock(readBinary).mockResolvedValue(
+			new Blob(["test"], { type: "image/png" }),
+		);
 
-		const OriginalFileReader = global.FileReader;
+		originalFileReader = global.FileReader;
 		global.FileReader = class {
+			_cb?: () => void;
+			result: string | ArrayBuffer | null = null;
 			addEventListener(type: any, cb: any) {
 				this._cb = cb;
 			}
@@ -61,14 +68,11 @@ describe("Image View", () => {
 				this.result = "data:image/png;base64,abc";
 				this._cb?.();
 			}
-		};
-		global.FileReader.__Original = OriginalFileReader;
+		} as unknown as typeof FileReader;
 	});
 
 	afterEach(() => {
-		if (global.FileReader.__Original) {
-			global.FileReader = global.FileReader.__Original;
-		}
+		global.FileReader = originalFileReader;
 	});
 
 	const wrap = (ui: any) => (
@@ -88,14 +92,14 @@ describe("Image View", () => {
 	});
 
 	it("uses https path directly", async () => {
-		useParentParams.mockReturnValue({
+		asMock(useParentParams).mockReturnValue({
 			prefix: "sessions",
 			group: "will",
 			year: "2024",
 			date: "2024-01-01",
 			name: "Talk",
 		});
-		useFetchJSON.mockReturnValue([
+		asMock(useFetchJSON).mockReturnValue([
 			{ path: "https://cdn.example/img.png", downloadUrl: "https://dl" },
 			false,
 			false,
@@ -125,7 +129,7 @@ describe("Image View", () => {
 	});
 
 	it("shows error message on read failure", async () => {
-		readBinary.mockRejectedValue(new Error("boom"));
+		asMock(readBinary).mockRejectedValue(new Error("boom"));
 		render(wrap(<ImagePage name="bad" />));
 		await waitFor(() =>
 			expect(screen.getByTestId("message")).toBeInTheDocument(),
@@ -133,14 +137,14 @@ describe("Image View", () => {
 	});
 
 	it("ignores FILE_NOT_FOUND while signing", async () => {
-		useParentParams.mockReturnValue({
+		asMock(useParentParams).mockReturnValue({
 			group: "g",
 			year: "2024",
 			date: "2024-01-01",
 			name: "N",
 		});
-		useFetchJSON.mockReturnValue([null, false, true]);
-		readBinary.mockRejectedValue(new Error("FILE_NOT_FOUND"));
+		asMock(useFetchJSON).mockReturnValue([null, false, true]);
+		asMock(readBinary).mockRejectedValue(new Error("FILE_NOT_FOUND"));
 		render(wrap(<ImagePage name="N" />));
 		await waitFor(() =>
 			expect(screen.getByTestId("progress")).toBeInTheDocument(),
@@ -148,8 +152,8 @@ describe("Image View", () => {
 	});
 
 	it("handles image onError and path with extension already present", async () => {
-		useParentPath.mockReturnValue("local/folder");
-		useParentParams.mockReturnValue({});
+		asMock(useParentPath).mockReturnValue("local/folder");
+		asMock(useParentParams).mockReturnValue({});
 		render(wrap(<ImagePage name="photo.png" ext="png" />));
 		const img = await waitFor(() => screen.getByRole("img", { hidden: true }));
 		fireEvent.error(img);
@@ -160,27 +164,27 @@ describe("Image View", () => {
 
 	it("re-reads on sync counter change and exports path fallback", async () => {
 		let sync = 0;
-		useSync.mockImplementation(() => [sync]);
-		readBinary.mockResolvedValue(null);
+		asMock(useSync).mockImplementation(() => [sync]);
+		asMock(readBinary).mockResolvedValue(null);
 		const { rerender } = render(wrap(<ImagePage name="test" />));
 		await waitFor(() => expect(readBinary).toHaveBeenCalled());
 		sync = 1;
 		rerender(wrap(<ImagePage name="test" />));
 		await waitFor(() =>
-			expect(readBinary.mock.calls.length).toBeGreaterThan(1),
+			expect(asMock(readBinary).mock.calls.length).toBeGreaterThan(1),
 		);
 	});
 
 	it("exports file path when no content or downloadUrl", async () => {
-		readBinary.mockResolvedValue(null);
+		asMock(readBinary).mockResolvedValue(null);
 		// Force src without content by https path via parent group
-		useParentParams.mockReturnValue({
+		asMock(useParentParams).mockReturnValue({
 			group: "g",
 			year: "y",
 			date: "d",
 			name: "n",
 		});
-		useFetchJSON.mockReturnValue([
+		asMock(useFetchJSON).mockReturnValue([
 			{ path: "https://x.png", downloadUrl: "" },
 			false,
 			false,

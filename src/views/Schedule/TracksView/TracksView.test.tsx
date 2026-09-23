@@ -100,8 +100,8 @@ describe("TracksView", () => {
 		jest.clearAllMocks();
 		capturedInputs = [];
 		globalThis.__scrollToItemMock = jest.fn();
-		useDeviceType.mockReturnValue("desktop");
-		useDateFormatter.mockReturnValue({
+		asMock(useDeviceType).mockReturnValue("desktop");
+		asMock(useDateFormatter).mockReturnValue({
 			format: (date: any) => `Month-${date.getMonth() + 1}`,
 		});
 		sessionStorage.clear();
@@ -166,7 +166,7 @@ describe("TracksView", () => {
 	it("registers a today toolbar action that scrolls to the top", () => {
 		renderTracks({ sessions: [{ id: "1", date: "2024-01-05" }] });
 
-		const lastCall = useToolbar.mock.calls.at(-1)[0];
+		const lastCall = asMock(useToolbar).mock.calls.at(-1)[0];
 		const todayItem = lastCall.items.find((item: any) => item.id === "today");
 		expect(todayItem.disabled).toBe(true);
 
@@ -249,7 +249,7 @@ describe("TracksView", () => {
 		Object.defineProperty(list, "scrollTop", { value: 50, writable: true });
 		fireEvent.scroll(list);
 
-		const lastCall = useToolbar.mock.calls.at(-1)[0];
+		const lastCall = asMock(useToolbar).mock.calls.at(-1)[0];
 		const todayItem = lastCall.items.find((item: any) => item.id === "today");
 		expect(todayItem.disabled).toBe(false);
 	});
@@ -261,7 +261,7 @@ describe("TracksView", () => {
 		];
 		renderTracks({ sessions });
 
-		const toolbar = useToolbar.mock.calls.at(-1)[0];
+		const toolbar = asMock(useToolbar).mock.calls.at(-1)[0];
 		const yearWidget = toolbar.items.find(
 			(item: any) => item.id === "yearWidget",
 		);
@@ -275,7 +275,7 @@ describe("TracksView", () => {
 		});
 		expect(globalThis.__scrollToItemMock).toHaveBeenCalled();
 
-		const updatedToolbar = useToolbar.mock.calls.at(-1)[0];
+		const updatedToolbar = asMock(useToolbar).mock.calls.at(-1)[0];
 		const updatedMonth = updatedToolbar.items.find(
 			(item: any) => item.id === "monthWidget",
 		);
@@ -294,7 +294,7 @@ describe("TracksView", () => {
 	});
 
 	it("supports mobile device type without crashing", () => {
-		useDeviceType.mockReturnValue("phone");
+		asMock(useDeviceType).mockReturnValue("phone");
 		renderTracks({
 			sessions: [{ id: "1", date: "2024-01-05" }],
 			playingSession: { id: "1" },

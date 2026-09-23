@@ -20,8 +20,8 @@ jest.mock("@widgets/SessionIcon", () => () => <span data-testid="icon" />);
 describe("MonthView Sessions Session", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
-		useSessionTextColor.mockReturnValue("#222");
-		toPath.mockImplementation((p: any) => p);
+		asMock(useSessionTextColor).mockReturnValue("#222");
+		asMock(toPath).mockImplementation((p: any) => p);
 	});
 
 	it("renders name, group, and navigates", () => {

@@ -10,7 +10,11 @@ import Settings from "./Settings";
 
 jest.mock("use-dark-mode");
 jest.mock("@util/domain/translations");
-jest.mock("@util/browser/store");
+jest.mock("@util/browser/store", () => ({
+	...jest.requireActual("@util/browser/store"),
+	useLocalStorage: jest.fn(),
+	useStoreState: jest.fn(),
+}));
 jest.mock("@util/browser/styles");
 jest.mock("js-cookie");
 jest.mock("@util/domain/language", () => ({
@@ -76,8 +80,8 @@ describe("Settings View", () => {
 
 	beforeEach(() => {
 		jest.clearAllMocks();
-		useDarkMode.mockReturnValue(darkMode);
-		useTranslations.mockReturnValue({
+		asMock(useDarkMode).mockReturnValue(darkMode);
+		asMock(useTranslations).mockReturnValue({
 			NAME: "Name",
 			SETTING: "Setting",
 			LANGUAGE: "Language",
@@ -108,14 +112,17 @@ describe("Settings View", () => {
 			VERSION: "Version",
 			VERSION_DESCRIPTION: "Ver desc",
 		});
-		useStoreState.mockReturnValue({
+		asMock(useStoreState).mockReturnValue({
 			language: languageState,
 			fontSize: fontSizeState,
 			speedToolbar: speedToolbarState,
 		});
-		useDeviceType.mockReturnValue("desktop");
-		SyncActiveStore.useState.mockReturnValue({ locked: false, autoSync: true });
-		Cookies.get.mockReturnValue("visitor");
+		asMock(useDeviceType).mockReturnValue("desktop");
+		asMock(SyncActiveStore.useState).mockReturnValue({
+			locked: false,
+			autoSync: true,
+		});
+		asMock(Cookies.get).mockReturnValue("visitor");
 	});
 
 	it("renders settings table", () => {
@@ -133,14 +140,14 @@ describe("Settings View", () => {
 	});
 
 	it("shows upload row for admin and toggles locked", () => {
-		Cookies.get.mockReturnValue("admin");
+		asMock(Cookies.get).mockReturnValue("admin");
 		render(<Settings />);
 		expect(screen.getByTestId("row-upload")).toBeInTheDocument();
 		const uploadRow = screen.getByTestId("row-upload");
 		fireEvent.click(uploadRow.querySelector('[data-testid="dyn-off"]'));
 		expect(SyncActiveStore.update).toHaveBeenCalled();
 		const state = { locked: false };
-		SyncActiveStore.update.mock.calls.at(-1)[0](state);
+		asMock(SyncActiveStore.update).mock.calls.at(-1)[0](state);
 		expect(state.locked).toBe(true);
 	});
 
@@ -149,7 +156,7 @@ describe("Settings View", () => {
 		const autoRow = screen.getByTestId("row-autoSync");
 		fireEvent.click(autoRow.querySelector('[data-testid="dyn-off"]'));
 		const state = { autoSync: true };
-		SyncActiveStore.update.mock.calls.at(-1)[0](state);
+		asMock(SyncActiveStore.update).mock.calls.at(-1)[0](state);
 		expect(state.autoSync).toBe(false);
 	});
 
@@ -179,12 +186,15 @@ describe("Settings View", () => {
 	});
 
 	it("reflects dark mode on state", () => {
-		useDarkMode.mockReturnValue({
+		asMock(useDarkMode).mockReturnValue({
 			value: true,
 			enable: jest.fn(),
 			disable: jest.fn(),
 		});
-		SyncActiveStore.useState.mockReturnValue({ locked: true, autoSync: false });
+		asMock(SyncActiveStore.useState).mockReturnValue({
+			locked: true,
+			autoSync: false,
+		});
 		render(<Settings />);
 		expect(screen.getByTestId("row-darkMode")).toBeInTheDocument();
 	});

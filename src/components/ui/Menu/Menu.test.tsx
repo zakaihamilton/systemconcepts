@@ -4,6 +4,8 @@ import Menu from "./Menu";
 function makeAnchor(rect = {}) {
 	const anchor = document.createElement("button");
 	anchor.getBoundingClientRect = () => ({
+		x: 24,
+		y: 16,
 		bottom: 48,
 		height: 32,
 		left: 24,
@@ -11,6 +13,7 @@ function makeAnchor(rect = {}) {
 		top: 16,
 		width: 32,
 		...rect,
+		toJSON: () => ({}),
 	});
 	document.body.appendChild(anchor);
 	return anchor;

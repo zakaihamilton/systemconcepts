@@ -12,7 +12,7 @@ jest.mock("@util/storage/aws", () => ({
 describe("aggregateSessionMetadata", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
-		list.mockResolvedValue([
+		asMock(list).mockResolvedValue([
 			{
 				name: "2024-05-05 Test Session.png",
 				type: "file",
@@ -29,7 +29,10 @@ describe("aggregateSessionMetadata", () => {
 				stat: { type: "file", size: 50 },
 			},
 		]);
-		metadataInfo.mockResolvedValue({ type: "application/json", name: "file" });
+		asMock(metadataInfo).mockResolvedValue({
+			type: "application/json",
+			name: "file",
+		});
 	});
 
 	it("parses consolidated metadata and returns fallback file listing", async () => {
@@ -37,7 +40,7 @@ describe("aggregateSessionMetadata", () => {
 		zip.file("Transcriptions/2024-05-05 Test Session.txt", "Transcript");
 		const zipBuffer = await zip.generateAsync({ type: "uint8array" });
 
-		downloadData.mockImplementation(async ({ path, binary }: any) => {
+		asMock(downloadData).mockImplementation(async ({ path, binary }: any) => {
 			if (path.endsWith(".tags")) {
 				return JSON.stringify({
 					sessions: [{ sessionName: "2024-05-05 Test Session", tags: ["ai."] }],
@@ -74,7 +77,7 @@ describe("aggregateSessionMetadata", () => {
 	});
 
 	it("treats missing consolidated files as empty metadata maps", async () => {
-		metadataInfo.mockResolvedValue(null);
+		asMock(metadataInfo).mockResolvedValue(null);
 
 		const result = await aggregateSessionMetadata({
 			group: "test",

@@ -60,25 +60,25 @@ describe("useStyles", () => {
 
 describe("useDeviceType", () => {
 	it("returns ssr when the width is not yet known", () => {
-		useWindowSize.mockReturnValue({ width: 0, height: 0 });
+		asMock(useWindowSize).mockReturnValue({ width: 0, height: 0 });
 		const { result } = renderHook(() => useDeviceType());
 		expect(result.current).toBe("ssr");
 	});
 
 	it("returns phone for narrow widths", () => {
-		useWindowSize.mockReturnValue({ width: 400, height: 800 });
+		asMock(useWindowSize).mockReturnValue({ width: 400, height: 800 });
 		const { result } = renderHook(() => useDeviceType());
 		expect(result.current).toBe("phone");
 	});
 
 	it("returns tablet for mid-range widths", () => {
-		useWindowSize.mockReturnValue({ width: 800, height: 1000 });
+		asMock(useWindowSize).mockReturnValue({ width: 800, height: 1000 });
 		const { result } = renderHook(() => useDeviceType());
 		expect(result.current).toBe("tablet");
 	});
 
 	it("returns desktop for wide widths", () => {
-		useWindowSize.mockReturnValue({ width: 1440, height: 900 });
+		asMock(useWindowSize).mockReturnValue({ width: 1440, height: 900 });
 		const { result } = renderHook(() => useDeviceType());
 		expect(result.current).toBe("desktop");
 	});

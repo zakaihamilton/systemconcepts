@@ -44,8 +44,8 @@ const translations = {
 describe("Storage ItemMenu", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
-		useTranslations.mockReturnValue(translations);
-		StorageStore.update.mockImplementation((fn: any) => {
+		asMock(useTranslations).mockReturnValue(translations);
+		asMock(StorageStore.update).mockImplementation((fn: any) => {
 			const state = {};
 			fn(state);
 			return state;
@@ -90,8 +90,8 @@ describe("Storage ItemMenu", () => {
 		render(<ItemMenuWidget item={item} />);
 		fireEvent.click(screen.getByTestId("menu-rename"));
 
-		const renameState = {};
-		StorageStore.update.mock.calls[0][0](renameState);
+		const renameState: Record<string, any> = {};
+		asMock(StorageStore.update).mock.calls[0][0](renameState);
 		expect(renameState.mode).toBe("rename");
 		expect(renameState.type).toBe("file");
 		expect(renameState.placeholder).toBe("File name");
@@ -110,20 +110,20 @@ describe("Storage ItemMenu", () => {
 		};
 		render(<ItemMenuWidget item={item} />);
 		fireEvent.click(screen.getByTestId("menu-rename"));
-		const renameState = {};
-		StorageStore.update.mock.calls[0][0](renameState);
+		const renameState: Record<string, any> = {};
+		asMock(StorageStore.update).mock.calls[0][0](renameState);
 
-		storage.exists.mockResolvedValueOnce(true);
+		asMock(storage.exists).mockResolvedValueOnce(true);
 		await renameState.onDone("taken.txt");
 		expect(StorageStore.update).toHaveBeenCalled();
-		const errorUpdate = StorageStore.update.mock.calls.at(-1)[0];
-		const errState = {};
+		const errorUpdate = asMock(StorageStore.update).mock.calls.at(-1)[0];
+		const errState: Record<string, any> = {};
 		errorUpdate(errState);
 		expect(errState.severity).toBe("error");
 		expect(errState.message).toContain("taken.txt");
 
-		storage.exists.mockResolvedValueOnce(false);
-		storage.moveFile.mockResolvedValueOnce(undefined);
+		asMock(storage.exists).mockResolvedValueOnce(false);
+		asMock(storage.moveFile).mockResolvedValueOnce(undefined);
 		await renameState.onDone("ok/name.txt");
 		expect(storage.moveFile).toHaveBeenCalled();
 	});
@@ -136,12 +136,12 @@ describe("Storage ItemMenu", () => {
 		};
 		render(<ItemMenuWidget item={item} />);
 		fireEvent.click(screen.getByTestId("menu-rename"));
-		const renameState = {};
-		StorageStore.update.mock.calls[0][0](renameState);
+		const renameState: Record<string, any> = {};
+		asMock(StorageStore.update).mock.calls[0][0](renameState);
 		expect(renameState.placeholder).toBe("Folder name");
 
-		storage.exists.mockResolvedValueOnce(false);
-		storage.moveFolder.mockResolvedValueOnce(undefined);
+		asMock(storage.exists).mockResolvedValueOnce(false);
+		asMock(storage.moveFolder).mockResolvedValueOnce(undefined);
 		await renameState.onDone("renamed");
 		expect(storage.moveFolder).toHaveBeenCalled();
 	});
@@ -150,13 +150,13 @@ describe("Storage ItemMenu", () => {
 		const item = { type: "file", name: "a.txt", path: "/root/a.txt" };
 		render(<ItemMenuWidget item={item} />);
 		fireEvent.click(screen.getByTestId("menu-rename"));
-		const renameState = {};
-		StorageStore.update.mock.calls[0][0](renameState);
-		storage.exists.mockResolvedValueOnce(false);
-		storage.moveFile.mockRejectedValueOnce("boom");
+		const renameState: Record<string, any> = {};
+		asMock(StorageStore.update).mock.calls[0][0](renameState);
+		asMock(storage.exists).mockResolvedValueOnce(false);
+		asMock(storage.moveFile).mockRejectedValueOnce("boom");
 		await renameState.onDone("b.txt");
-		const errState = {};
-		StorageStore.update.mock.calls.at(-1)[0](errState);
+		const errState: Record<string, any> = {};
+		asMock(StorageStore.update).mock.calls.at(-1)[0](errState);
 		expect(errState.message).toBe("boom");
 		expect(errState.severity).toBe("error");
 	});
@@ -165,13 +165,13 @@ describe("Storage ItemMenu", () => {
 		const item = { type: "file", name: "a.txt", path: "/root/a.txt" };
 		render(<ItemMenuWidget item={item} />);
 		fireEvent.click(screen.getByTestId("menu-move"));
-		const moveState = {};
-		StorageStore.update.mock.calls[0][0](moveState);
+		const moveState: Record<string, any> = {};
+		asMock(StorageStore.update).mock.calls[0][0](moveState);
 		expect(moveState.mode).toBe("move");
 		expect(moveState.select).toEqual([item]);
 		expect(moveState.onDone()).toBe(true);
-		const destState = {};
-		StorageStore.update.mock.calls.at(-1)[0](destState);
+		const destState: Record<string, any> = {};
+		asMock(StorageStore.update).mock.calls.at(-1)[0](destState);
 		expect(destState.destination).toBeDefined();
 	});
 
@@ -179,8 +179,8 @@ describe("Storage ItemMenu", () => {
 		const item = { type: "file", name: "a.txt", path: "/root/a.txt" };
 		render(<ItemMenuWidget item={item} />);
 		fireEvent.click(screen.getByTestId("menu-copy"));
-		const copyState = {};
-		StorageStore.update.mock.calls[0][0](copyState);
+		const copyState: Record<string, any> = {};
+		asMock(StorageStore.update).mock.calls[0][0](copyState);
 		expect(copyState.mode).toBe("copy");
 		expect(copyState.onDone()).toBe(true);
 	});
@@ -189,13 +189,13 @@ describe("Storage ItemMenu", () => {
 		const item = { type: "file", name: "a.txt", path: "/root/a.txt" };
 		render(<ItemMenuWidget item={item} />);
 		fireEvent.click(screen.getByTestId("menu-delete"));
-		const deleteState = {};
-		StorageStore.update.mock.calls[0][0](deleteState);
+		const deleteState: Record<string, any> = {};
+		asMock(StorageStore.update).mock.calls[0][0](deleteState);
 		expect(deleteState.mode).toBe("delete");
 		expect(deleteState.severity).toBe("error");
 
-		storage.deleteFile.mockResolvedValueOnce(undefined);
-		storage.deleteFolder.mockResolvedValueOnce(undefined);
+		asMock(storage.deleteFile).mockResolvedValueOnce(undefined);
+		asMock(storage.deleteFolder).mockResolvedValueOnce(undefined);
 		await deleteState.onDone([
 			null,
 			{ type: "file", path: "/root/a.txt" },
@@ -209,17 +209,17 @@ describe("Storage ItemMenu", () => {
 		const item = { type: "dir", name: "d", path: "/root/d" };
 		render(<ItemMenuWidget item={item} />);
 		fireEvent.click(screen.getByTestId("menu-delete"));
-		const deleteState = {};
-		StorageStore.update.mock.calls[0][0](deleteState);
-		storage.deleteFolder.mockRejectedValueOnce("fail");
+		const deleteState: Record<string, any> = {};
+		asMock(StorageStore.update).mock.calls[0][0](deleteState);
+		asMock(storage.deleteFolder).mockRejectedValueOnce("fail");
 		await deleteState.onDone([item]);
-		const errState = {};
-		StorageStore.update.mock.calls.at(-1)[0](errState);
+		const errState: Record<string, any> = {};
+		asMock(StorageStore.update).mock.calls.at(-1)[0](errState);
 		expect(errState.message).toBe("fail");
 	});
 
 	it("exports a directory as zip", async () => {
-		storage.exportFolderAsZip.mockResolvedValueOnce("zip-data");
+		asMock(storage.exportFolderAsZip).mockResolvedValueOnce("zip-data");
 		const item = { type: "dir", name: "folder", path: "/root/folder" };
 		render(<ItemMenuWidget item={item} />);
 		fireEvent.click(screen.getByTestId("menu-export"));
@@ -233,7 +233,7 @@ describe("Storage ItemMenu", () => {
 	});
 
 	it("exports a text file as json and a binary file as octet-stream", async () => {
-		storage.readFile.mockResolvedValueOnce("file-body");
+		asMock(storage.readFile).mockResolvedValueOnce("file-body");
 		const { unmount } = render(
 			<ItemMenuWidget
 				item={{ type: "file", name: "notes.txt", path: "/root/notes.txt" }}
@@ -250,8 +250,8 @@ describe("Storage ItemMenu", () => {
 		unmount();
 
 		jest.clearAllMocks();
-		useTranslations.mockReturnValue(translations);
-		storage.readFile.mockResolvedValueOnce(new Uint8Array([1, 2]));
+		asMock(useTranslations).mockReturnValue(translations);
+		asMock(storage.readFile).mockResolvedValueOnce(new Uint8Array([1, 2]));
 		render(
 			<ItemMenuWidget
 				item={{ type: "file", name: "a.bin", path: "/root/a.bin" }}

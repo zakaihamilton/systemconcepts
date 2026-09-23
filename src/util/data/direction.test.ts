@@ -17,19 +17,19 @@ describe("useDirection", () => {
 	});
 
 	it("returns rtl for a right-to-left language", () => {
-		useLanguage.mockReturnValue("heb");
+		asMock(useLanguage).mockReturnValue("heb");
 		const { result } = renderHook(() => useDirection());
 		expect(result.current).toBe("rtl");
 	});
 
 	it("returns ltr for a left-to-right language", () => {
-		useLanguage.mockReturnValue("eng");
+		asMock(useLanguage).mockReturnValue("eng");
 		const { result } = renderHook(() => useDirection());
 		expect(result.current).toBe("ltr");
 	});
 
 	it("returns undefined when the language is not found", () => {
-		useLanguage.mockReturnValue("unknown");
+		asMock(useLanguage).mockReturnValue("unknown");
 		const { result } = renderHook(() => useDirection());
 		expect(result.current).toBeUndefined();
 	});

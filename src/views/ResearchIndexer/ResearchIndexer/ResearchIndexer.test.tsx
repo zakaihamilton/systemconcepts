@@ -16,6 +16,7 @@ jest.mock("../../ResearchStore/ResearchStore", () => ({
 	},
 }));
 jest.mock("@util/browser/store", () => ({
+	...jest.requireActual("@util/browser/store"),
 	useLocalStorage: jest.fn(),
 }));
 jest.mock("@util/storage/storage", () => ({}));
@@ -30,13 +31,13 @@ describe("ResearchIndexer Component", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
 		jest.useFakeTimers();
-		useTranslations.mockReturnValue({
+		asMock(useTranslations).mockReturnValue({
 			LOADING_TAGS: "Loading tags",
 			DONE: "Done",
 			NO_TAGS_FOUND: "No tags",
 			INDEXING_FAILED: "Failed",
 		});
-		ResearchStore.useState.mockReturnValue({ indexing: false });
+		asMock(ResearchStore.useState).mockReturnValue({ indexing: false });
 	});
 
 	afterEach(() => {
@@ -49,8 +50,8 @@ describe("ResearchIndexer Component", () => {
 	});
 
 	it("builds index successfully and clears status", async () => {
-		ResearchStore.useState.mockReturnValue({ indexing: true });
-		buildSearchIndex.mockImplementation(
+		asMock(ResearchStore.useState).mockReturnValue({ indexing: true });
+		asMock(buildSearchIndex).mockImplementation(
 			async ({ onStatus, onProgress }: any) => {
 				onStatus("working");
 				onProgress(50);
@@ -68,8 +69,8 @@ describe("ResearchIndexer Component", () => {
 	});
 
 	it("handles NO_TAGS_FOUND", async () => {
-		ResearchStore.useState.mockReturnValue({ indexing: true });
-		buildSearchIndex.mockResolvedValue({
+		asMock(ResearchStore.useState).mockReturnValue({ indexing: true });
+		asMock(buildSearchIndex).mockResolvedValue({
 			ok: false,
 			reason: "NO_TAGS_FOUND",
 		});
@@ -78,16 +79,16 @@ describe("ResearchIndexer Component", () => {
 	});
 
 	it("handles indexing errors", async () => {
-		ResearchStore.useState.mockReturnValue({ indexing: true });
-		buildSearchIndex.mockRejectedValue(new Error("boom"));
+		asMock(ResearchStore.useState).mockReturnValue({ indexing: true });
+		asMock(buildSearchIndex).mockRejectedValue(new Error("boom"));
 		render(<ResearchIndexer />);
 		await waitFor(() => expect(buildSearchIndex).toHaveBeenCalled());
 	});
 
 	it("skips callbacks when unmounted mid-index", async () => {
-		ResearchStore.useState.mockReturnValue({ indexing: true });
+		asMock(ResearchStore.useState).mockReturnValue({ indexing: true });
 		let resolve: any;
-		buildSearchIndex.mockImplementation(
+		asMock(buildSearchIndex).mockImplementation(
 			() =>
 				new Promise((r) => {
 					resolve = r;
@@ -102,7 +103,7 @@ describe("ResearchIndexer Component", () => {
 	});
 
 	it("does not start when indexing is false", () => {
-		ResearchStore.useState.mockReturnValue({ indexing: false });
+		asMock(ResearchStore.useState).mockReturnValue({ indexing: false });
 		render(<ResearchIndexer />);
 		expect(buildSearchIndex).not.toHaveBeenCalled();
 	});

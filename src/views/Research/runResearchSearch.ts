@@ -6,98 +6,115 @@ import {
 	parseResearchQuery,
 	rankResearchResults,
 } from "./searchQuery";
+import type {
+	ResearchFilter,
+	ResearchLibraryTag,
+	ResearchMatch,
+	ResearchResult,
+	ResearchSearchIndex,
+	ResearchSearchOutcome,
+	ResearchSession,
+	ResearchTranslations,
+} from "./types";
 
-const capitalize = (s: any) => {
-	if (!s) return "";
-	const str = String(s);
+interface IndexVersionFlags {
+	isV2: boolean;
+	isV3: boolean;
+	isV4: boolean;
+	isV5: boolean;
+}
+
+const capitalize = (value: string | number | undefined) => {
+	if (!value) return "";
+	const str = String(value);
 	if (str.toLowerCase() === "ai") return "AI";
 	return str.charAt(0).toUpperCase() + str.slice(1);
 };
 
-const normalize = (s: any) =>
-	String(s)
+const normalize = (value: string | number | null | undefined) =>
+	String(value)
 		.toLowerCase()
 		.replace(/[^a-z0-9]/g, "");
 
-function expandTokenRefs(refs: any, { isV3, isV4, isV5 }: any) {
-	const tokenRefs = new Set<any>();
+function expandTokenRefs(
+	refs: string[] | number[] | null | undefined,
+	{ isV3, isV4, isV5 }: IndexVersionFlags,
+) {
+	const tokenRefs = new Set<string>();
 	if (!refs) return tokenRefs;
 	if (isV4 || isV5) {
 		let currentFileIndex = -1;
-		for (let i = 0; i < refs.length; i++) {
-			const val = refs[i];
-			if (val < 0) {
-				currentFileIndex = -val - 1;
+		for (const value of refs as number[]) {
+			if (value < 0) {
+				currentFileIndex = -value - 1;
 			} else if (currentFileIndex !== -1) {
-				tokenRefs.add(`${currentFileIndex}:${val}`);
+				tokenRefs.add(`${currentFileIndex}:${value}`);
 			}
 		}
 	} else if (isV3) {
-		for (let i = 0; i < refs.length; i += 2) {
-			tokenRefs.add(`${refs[i]}:${refs[i + 1]}`);
+		const numericRefs = refs as number[];
+		for (let i = 0; i < numericRefs.length; i += 2) {
+			tokenRefs.add(`${numericRefs[i]}:${numericRefs[i + 1]}`);
 		}
 	} else {
-		refs.forEach((ref: any) => tokenRefs.add(ref));
+		for (const ref of refs) tokenRefs.add(String(ref));
 	}
 	return tokenRefs;
 }
 
 function buildDocFromRef(
-	docId: any,
-	indexData: any,
-	versions: any,
-	libraryTags: any,
-	sessionsById: any,
-	paragraphsMap: any,
-) {
+	docId: string,
+	indexData: ResearchSearchIndex,
+	versions: IndexVersionFlags,
+	libraryTags: ResearchLibraryTag[],
+	sessionsById: Map<string, ResearchSession>,
+	paragraphsMap: Map<number, string[]>,
+): ResearchResult | null {
 	const { isV2, isV3, isV4, isV5 } = versions;
 	if (isV3 || isV2 || isV4 || isV5) {
-		const fileIndex = parseInt(docId, 10);
-		const tagId = indexData.f[fileIndex];
+		const fileIndex = Number.parseInt(docId, 10);
+		const tagId = indexData.f?.[fileIndex];
+		if (!tagId) return null;
 		const paragraphs = isV5
 			? paragraphsMap.get(fileIndex)
-			: indexData.d[fileIndex];
+			: indexData.d?.[fileIndex];
 
 		if (tagId.startsWith("session|")) {
 			const parts = tagId.split("|");
-			if (parts.length >= 5) {
-				const session = sessionsById.get(tagId) || {
-					group: parts[1],
-					year: parts[2],
-					date: parts[3],
-					name: parts.slice(4).join("|"),
-				};
-				return {
-					...session,
-					docId: tagId,
-					isSession: true,
-					customTags: [
-						{ label: "Group", value: capitalize(session.group) },
-						{ label: "Year", value: session.year },
-						{ label: "Date", value: session.date },
-						{ label: "Type", value: capitalize(session.type) },
-					],
-					tag: { title: session.name, _id: tagId },
-					paragraphs,
-					matches: [],
-				};
-			}
-			return null;
-		}
-
-		const tag = libraryTags.find((t: any) => t._id === tagId);
-		if (tag) {
+			if (parts.length < 5) return null;
+			const session = sessionsById.get(tagId) || {
+				group: parts[1],
+				year: parts[2],
+				date: parts[3],
+				name: parts.slice(4).join("|"),
+			};
 			return {
+				...session,
 				docId: tagId,
-				tag,
+				isSession: true,
+				customTags: [
+					{ label: "Group", value: capitalize(session.group) },
+					{ label: "Year", value: session.year },
+					{ label: "Date", value: session.date },
+					{ label: "Type", value: capitalize(session.type) },
+				],
+				tag: { title: session.name, _id: tagId },
 				paragraphs,
 				matches: [],
 			};
 		}
-		return null;
+
+		const tag = libraryTags.find((item) => item._id === tagId);
+		if (!tag) return null;
+		return {
+			docId: tagId,
+			tag,
+			paragraphs,
+			matches: [],
+		};
 	}
 
-	const v1Doc = indexData.files[docId];
+	const v1Doc = indexData.files?.[docId];
 	if (v1Doc) {
 		return {
 			...v1Doc,
@@ -108,10 +125,14 @@ function buildDocFromRef(
 	return null;
 }
 
-function addFilterOnlySessionMatch(doc: any) {
+function addFilterOnlySessionMatch(doc: ResearchResult) {
 	if (doc.matches.length > 0) return;
 
-	let summaryText = doc.summary || doc.description;
+	let summaryText =
+		doc.summaryText ||
+		(typeof doc.summary === "string" ? doc.summary : "") ||
+		doc.description ||
+		"";
 	let useParagraphs = !summaryText;
 
 	if (summaryText && doc.tag) {
@@ -122,7 +143,7 @@ function addFilterOnlySessionMatch(doc: any) {
 		}
 	}
 
-	if (useParagraphs && doc.paragraphs?.length > 0) {
+	if (useParagraphs && doc.paragraphs && doc.paragraphs.length > 0) {
 		let found = false;
 		if (doc.tag) {
 			const tText = normalize(doc.tag.title);
@@ -150,38 +171,57 @@ function addFilterOnlySessionMatch(doc: any) {
 			}
 		}
 		if (!found && !summaryText && doc.paragraphs.length > 0) {
-			const p0 = doc.paragraphs[0];
-			const tText = doc.tag ? normalize(doc.tag.title) : "";
-			const p0Norm = normalize(p0);
-			if (p0Norm !== tText && !p0Norm.includes(tText)) {
-				summaryText = p0;
+			const firstParagraph = doc.paragraphs[0];
+			const titleText = doc.tag ? normalize(doc.tag.title) : "";
+			const firstParagraphText = normalize(firstParagraph);
+			if (
+				firstParagraphText !== titleText &&
+				!firstParagraphText.includes(titleText)
+			) {
+				summaryText = firstParagraph;
 			}
 		}
 	}
 
-	summaryText = summaryText || "";
 	doc.paragraphs = [summaryText];
-	doc.matches.push({
-		index: 0,
-		text: summaryText,
-	});
+	doc.matches.push({ index: 0, text: summaryText });
 }
 
-function stripSessionTitleMatches(doc: any) {
+function stripSessionTitleMatches(doc: ResearchResult) {
 	if (!doc.isSession || !doc.tag || doc.matches.length === 0) return;
-	const tText = normalize(doc.tag.title);
-	const m0 = doc.matches[0];
-	if (m0.index !== 0) return;
-	const pText = normalize(m0.text);
-	if (pText === tText || pText.includes(tText) || tText.includes(pText)) {
+	const titleText = normalize(doc.tag.title);
+	const firstMatch = doc.matches[0];
+	if (firstMatch.index !== 0) return;
+	const paragraphText = normalize(firstMatch.text);
+	if (
+		paragraphText === titleText ||
+		paragraphText.includes(titleText) ||
+		titleText.includes(paragraphText)
+	) {
 		doc.matches.shift();
-		if (doc.matches.length === 0 && doc.paragraphs?.length > 1) {
-			doc.matches.push({
-				index: 1,
-				text: doc.paragraphs[1],
-			});
+		if (
+			doc.matches.length === 0 &&
+			doc.paragraphs &&
+			doc.paragraphs.length > 1
+		) {
+			doc.matches.push({ index: 1, text: doc.paragraphs[1] });
 		}
 	}
+}
+
+interface RunResearchSearchOptions {
+	indexData?: ResearchSearchIndex | null;
+	searchQuery?: string;
+	sessionsById?: Map<string, ResearchSession>;
+	libraryTags?: ResearchLibraryTag[];
+	filterTags?: ResearchFilter[];
+	translations?: ResearchTranslations;
+	loadParagraphsForFile?: (
+		fileId: string,
+		sessionsById: Map<string, ResearchSession>,
+	) => Promise<string[]>;
+	isCancelled?: () => boolean;
+	onProgress?: (progress: number) => void;
 }
 
 /**
@@ -191,32 +231,22 @@ function stripSessionTitleMatches(doc: any) {
 export async function runResearchSearch({
 	indexData,
 	searchQuery = "",
-	sessionsById = new Map<any, any>(),
+	sessionsById = new Map<string, ResearchSession>(),
 	libraryTags = [],
 	filterTags = [],
 	translations = {},
 	loadParagraphsForFile = defaultLoadParagraphs,
 	isCancelled = () => false,
 	onProgress = () => {},
-}: {
-	indexData: any;
-	searchQuery?: string;
-	sessionsById?: Map<string, any>;
-	libraryTags?: any[];
-	filterTags?: any[];
-	translations?: Record<string, string>;
-	loadParagraphsForFile?: (...args: any[]) => Promise<any>;
-	isCancelled?: () => boolean;
-	onProgress?: (progress: number) => void;
-}) {
+}: RunResearchSearchOptions): Promise<ResearchSearchOutcome> {
 	if (!indexData) {
 		return { results: [], highlight: [] };
 	}
 
 	const orGroups = parseResearchQuery(searchQuery);
 	const searchTerms = getSearchTerms(searchQuery);
-	let finalRefs = new Set<any>();
-	const paragraphCache = new Map<any, any>();
+	const finalRefs = new Set<string>();
+	const paragraphCache = new Map<number, string[]>();
 
 	const isV2 = indexData.v === 2;
 	const isV3 = indexData.v === 3;
@@ -231,7 +261,7 @@ export async function runResearchSearch({
 		translations,
 		{ libraryTags, sessionsById },
 	);
-	const isFileAllowed = (fileIndex: any) =>
+	const isFileAllowed = (fileIndex: number) =>
 		!allowedFileIndices || allowedFileIndices.has(fileIndex);
 
 	if (!searchQuery.trim()) {
@@ -246,7 +276,7 @@ export async function runResearchSearch({
 			if (isCancelled()) return { results: [], highlight: [], cancelled: true };
 
 			const allTokensInGroup = [
-				...new Set(parsedAndClauses.flatMap((c) => c.terms)),
+				...new Set(parsedAndClauses.flatMap((clause) => clause.terms)),
 			];
 			let groupRefs: Set<string> | null = null;
 
@@ -254,15 +284,18 @@ export async function runResearchSearch({
 				if (isCancelled())
 					return { results: [], highlight: [], cancelled: true };
 
-				const matchingTokens = Object.keys(
-					indexData.t || indexData.tokens || {},
-				).filter((k) => k.includes(token));
-				let tokenRefs = new Set<string>();
-				matchingTokens.forEach((k) => {
+				const tokenIndex = indexData.t || indexData.tokens || {};
+				const matchingTokens = Object.keys(tokenIndex).filter((key) =>
+					key.includes(token),
+				);
+				const tokenRefs = new Set<string>();
+				matchingTokens.forEach((key) => {
 					const refs =
-						isV2 || isV3 || isV4 || isV5 ? indexData.t[k] : indexData.tokens[k];
+						isV2 || isV3 || isV4 || isV5
+							? indexData.t?.[key]
+							: indexData.tokens?.[key];
 					expandTokenRefs(refs, versions).forEach((ref) => {
-						const fileIndex = parseInt(ref.split(":")[0], 10);
+						const fileIndex = Number.parseInt(ref.split(":")[0], 10);
 						if (isFileAllowed(fileIndex)) tokenRefs.add(ref);
 					});
 				});
@@ -271,18 +304,18 @@ export async function runResearchSearch({
 					groupRefs = tokenRefs;
 				} else {
 					groupRefs = new Set<string>(
-						[...groupRefs].filter((x: string) => tokenRefs.has(x)),
+						[...groupRefs].filter((ref: string) => tokenRefs.has(ref)),
 					);
 				}
 			}
 
 			if (groupRefs) {
 				if (isV5) {
-					const uniqueFileIndices = new Set<any>();
-					[...groupRefs].forEach((ref) => {
+					const uniqueFileIndices = new Set<number>();
+					for (const ref of groupRefs) {
 						const [docId] = ref.split(":");
-						uniqueFileIndices.add(parseInt(docId, 10));
-					});
+						uniqueFileIndices.add(Number.parseInt(docId, 10));
+					}
 
 					const fileIndicesArray = [...uniqueFileIndices];
 					let loadedCount = 0;
@@ -291,12 +324,14 @@ export async function runResearchSearch({
 					await Promise.all(
 						fileIndicesArray.map(async (fileIndex) => {
 							if (!paragraphCache.has(fileIndex)) {
-								const fileId = indexData.f[fileIndex];
-								const paragraphs = await loadParagraphsForFile(
-									fileId,
-									sessionsById,
-								);
-								paragraphCache.set(fileIndex, paragraphs);
+								const fileId = indexData.f?.[fileIndex];
+								if (fileId !== undefined) {
+									const paragraphs = await loadParagraphsForFile(
+										fileId,
+										sessionsById,
+									);
+									paragraphCache.set(fileIndex, paragraphs);
+								}
 							}
 
 							loadedCount++;
@@ -311,19 +346,22 @@ export async function runResearchSearch({
 					if (!isCancelled()) onProgress(50);
 				}
 
-				[...groupRefs].forEach((ref) => {
-					const [docId, paraIndex] = ref.split(":");
-					let paragraph = null;
+				for (const ref of groupRefs) {
+					const [docId, paragraphId] = ref.split(":");
+					let paragraph: string | undefined;
 					if (isV5) {
-						const fileIndex = parseInt(docId, 10);
-						const paragraphs = paragraphCache.get(fileIndex);
-						paragraph = paragraphs?.[parseInt(paraIndex, 10)];
+						const fileIndex = Number.parseInt(docId, 10);
+						paragraph =
+							paragraphCache.get(fileIndex)?.[Number.parseInt(paragraphId, 10)];
 					} else if (isV3 || isV2 || isV4) {
-						const fileIndex = parseInt(docId, 10);
-						paragraph = indexData.d[fileIndex]?.[parseInt(paraIndex, 10)];
+						const fileIndex = Number.parseInt(docId, 10);
+						paragraph =
+							indexData.d?.[fileIndex]?.[Number.parseInt(paragraphId, 10)];
 					} else {
-						const doc = indexData.files[docId];
-						paragraph = doc?.paragraphs?.[parseInt(paraIndex, 10)];
+						paragraph =
+							indexData.files?.[docId]?.paragraphs?.[
+								Number.parseInt(paragraphId, 10)
+							];
 					}
 
 					if (paragraph) {
@@ -332,7 +370,7 @@ export async function runResearchSearch({
 						);
 						if (isMatch) finalRefs.add(ref);
 					}
-				});
+				}
 			}
 		}
 	}
@@ -343,7 +381,7 @@ export async function runResearchSearch({
 		const missingFileIndices = [
 			...new Set(
 				[...finalRefs]
-					.map((ref) => parseInt(ref.split(":")[0], 10))
+					.map((ref) => Number.parseInt(ref.split(":")[0], 10))
 					.filter(
 						(fileIndex) =>
 							isFileAllowed(fileIndex) && !paragraphCache.has(fileIndex),
@@ -354,10 +392,9 @@ export async function runResearchSearch({
 		const totalMissing = missingFileIndices.length;
 		await Promise.all(
 			missingFileIndices.map(async (fileIndex) => {
-				const paragraphs = await loadParagraphsForFile(
-					indexData.f[fileIndex],
-					sessionsById,
-				);
+				const fileId = indexData.f?.[fileIndex];
+				if (fileId === undefined) return;
+				const paragraphs = await loadParagraphsForFile(fileId, sessionsById);
 				paragraphCache.set(fileIndex, paragraphs);
 				loadedCount++;
 				if (!isCancelled()) {
@@ -375,9 +412,9 @@ export async function runResearchSearch({
 
 	if (isCancelled()) return { results: [], highlight: [], cancelled: true };
 
-	const groupedResults: Record<string, any> = {};
-	[...finalRefs].forEach((ref) => {
-		const [docId, paraIndex] = ref.split(":");
+	const groupedResults: Record<string, ResearchResult> = Object.create(null);
+	for (const ref of finalRefs) {
+		const [docId, paragraphId] = ref.split(":");
 
 		if (!groupedResults[docId]) {
 			const doc = buildDocFromRef(
@@ -391,23 +428,23 @@ export async function runResearchSearch({
 			if (doc) groupedResults[docId] = doc;
 		}
 
-		if (!groupedResults[docId]) return;
+		const doc = groupedResults[docId];
+		if (!doc) continue;
 
-		if (!searchQuery.trim() && groupedResults[docId].isSession) {
-			addFilterOnlySessionMatch(groupedResults[docId]);
+		if (!searchQuery.trim() && doc.isSession) {
+			addFilterOnlySessionMatch(doc);
 		} else {
-			const idx = parseInt(paraIndex, 10);
-			if (groupedResults[docId].paragraphs?.[idx]) {
-				groupedResults[docId].matches.push({
-					index: idx,
-					text: groupedResults[docId].paragraphs[idx],
-				});
-			}
+			const index = Number.parseInt(paragraphId, 10);
+			const text = doc.paragraphs?.[index];
+			if (text) doc.matches.push({ index, text });
 		}
-	});
+	}
 
 	Object.values(groupedResults).forEach((doc) => {
-		doc.matches.sort((a: any, b: any) => a.index - b.index);
+		doc.matches.sort(
+			(first: ResearchMatch, second: ResearchMatch) =>
+				first.index - second.index,
+		);
 		stripSessionTitleMatches(doc);
 	});
 

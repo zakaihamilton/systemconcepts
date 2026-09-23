@@ -21,6 +21,8 @@ jest.mock("@util/storage/wasabi", () => ({
 }));
 jest.mock("next/server", () => {
 	class TestHeaders {
+		values: Map<string, string>;
+
 		constructor(values = {}) {
 			this.values = new Map(
 				Object.entries(values).map(([key, value]) => [
@@ -36,7 +38,11 @@ jest.mock("next/server", () => {
 	}
 
 	class TestResponse {
-		constructor(body: any, init = {}) {
+		body: any;
+		status: number;
+		headers: TestHeaders;
+
+		constructor(body: any, init: ResponseInit = {}) {
 			this.body = body;
 			this.status = init.status || 200;
 			this.headers = new TestHeaders(init.headers);
@@ -46,14 +52,14 @@ jest.mock("next/server", () => {
 			return JSON.parse(this.body);
 		}
 
-		static json(body: any, init = {}) {
+		static json(body: any, init: ResponseInit = {}) {
 			return new TestResponse(JSON.stringify(body), init);
 		}
 
-		static redirect(url: any, init = {}) {
+		static redirect(url: string | URL, init: ResponseInit = {}) {
 			return new TestResponse(null, {
 				...init,
-				headers: { ...init.headers, Location: url },
+				headers: { ...init.headers, Location: url.toString() },
 			});
 		}
 	}
@@ -83,10 +89,10 @@ function request(
 describe("/api/wasabi", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
-		getSessionUser.mockResolvedValue({ id: "user", role: "student" });
-		roleAuth.mockReturnValue(true);
-		handleRequest.mockResolvedValue(Buffer.from("file-data"));
-		getDownloadUrl.mockResolvedValue(
+		asMock(getSessionUser).mockResolvedValue({ id: "user", role: "student" });
+		asMock(roleAuth).mockReturnValue(true);
+		asMock(handleRequest).mockResolvedValue(Buffer.from("file-data"));
+		asMock(getDownloadUrl).mockResolvedValue(
 			"https://s3.wasabisys.com/bucket/sessions/test/file.txt?signature=test",
 		);
 	});
@@ -123,7 +129,9 @@ describe("/api/wasabi", () => {
 	});
 
 	it("keeps directory listings in the API route in production", async () => {
-		handleRequest.mockResolvedValue([{ name: "file.txt", type: "file" }]);
+		asMock(handleRequest).mockResolvedValue([
+			{ name: "file.txt", type: "file" },
+		]);
 
 		const response = await GET(
 			request(
@@ -142,7 +150,7 @@ describe("/api/wasabi", () => {
 	});
 
 	it("keeps existence checks in the API route", async () => {
-		handleRequest.mockResolvedValue({ name: "file.txt", type: "file" });
+		asMock(handleRequest).mockResolvedValue({ name: "file.txt", type: "file" });
 
 		const response = await GET(
 			request("?path=sessions%2Ftest%2Ffile.txt&exists=true"),
@@ -158,7 +166,7 @@ describe("/api/wasabi", () => {
 	});
 
 	it("does not serve a file when credentials are missing", async () => {
-		getSessionUser.mockRejectedValue("AUTHENTICATION_REQUIRED");
+		asMock(getSessionUser).mockRejectedValue("AUTHENTICATION_REQUIRED");
 
 		const response = await GET(request("?path=sessions%2Ftest%2Ffile.txt", ""));
 
@@ -169,7 +177,7 @@ describe("/api/wasabi", () => {
 	});
 
 	it("does not serve a file for unauthorized users", async () => {
-		roleAuth.mockReturnValue(false);
+		asMock(roleAuth).mockReturnValue(false);
 
 		const response = await GET(request("?path=sessions%2Ftest%2Ffile.txt"));
 
@@ -179,7 +187,7 @@ describe("/api/wasabi", () => {
 	});
 
 	it("returns plain text responses for non-object results", async () => {
-		handleRequest.mockResolvedValue("plain-text");
+		asMock(handleRequest).mockResolvedValue("plain-text");
 
 		const response = await GET(request("?path=sessions%2Ftest%2Ffile.txt"));
 
