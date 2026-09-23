@@ -1,0 +1,156 @@
+import ItemMenu from "@components/ItemMenu";
+import DeleteIcon from "@icons/svg/Delete.svg";
+import FileCopyIcon from "@icons/svg/FileCopy.svg";
+import GetAppIcon from "@icons/svg/GetApp.svg";
+import TrendingFlatIcon from "@icons/svg/TrendingFlat.svg";
+import { fileFolder, isBinaryFile, makePath } from "@util/data/path";
+import { useTranslations } from "@util/domain/translations";
+import { exportData } from "@util/storage/importExport";
+import storage from "@util/storage/storage";
+import { StorageStore } from "../Store";
+export default function ItemMenuWidget({ item, readOnly }: any) {
+	const translations = useTranslations();
+
+	const menuItems = [
+		!readOnly && {
+			id: "rename",
+			name: translations.RENAME,
+			onClick: () => {
+				const placeholder =
+					item.type === "dir"
+						? "FOLDER_NAME_PLACEHOLDER"
+						: "FILE_NAME_PLACEHOLDER";
+				StorageStore.update((s) => {
+					s.mode = "rename";
+					s.type = item.type;
+					s.name = item.name;
+					s.item = item;
+					s.icon = item.icon;
+					s.tooltip = item.tooltip;
+					s.placeholder = translations[placeholder];
+					s.editing = true;
+					s.onValidate = async (name: any) => {
+						if (!name) {
+							return false;
+						}
+						name = name.replace(/\//, " ");
+						const target = makePath(fileFolder(item.path), name);
+						if (makePath(item.path) === makePath(target)) {
+							return false;
+						}
+						return true;
+					};
+					s.onDone = async (name: any) => {
+						name = name.replace(/\//, " ");
+						const target = makePath(fileFolder(item.path), name);
+						try {
+							if (await storage.exists(target)) {
+								throw translations.ALREADY_EXISTS.replace("${name}", name);
+							}
+							if (item.type === "dir") {
+								await storage.moveFolder(item.path, target);
+							} else {
+								await storage.moveFile(item.path, target);
+							}
+						} catch (err: any) {
+							StorageStore.update((s) => {
+								s.message = err;
+								s.severity = "error";
+							});
+						}
+					};
+				});
+			},
+		},
+		!readOnly && {
+			id: "move",
+			name: translations.MOVE,
+			icon: <TrendingFlatIcon />,
+			onClick: () => {
+				StorageStore.update((s) => {
+					s.select = [item];
+					s.mode = "move";
+					s.severity = "info";
+					s.onDone = () => {
+						StorageStore.update((s) => {
+							s.destination = fileFolder(item.path);
+						});
+						return true;
+					};
+				});
+			},
+		},
+		!readOnly && {
+			id: "copy",
+			name: translations.COPY,
+			icon: <FileCopyIcon />,
+			onClick: () => {
+				StorageStore.update((s) => {
+					s.select = [item];
+					s.mode = "copy";
+					s.severity = "info";
+					s.onDone = () => {
+						StorageStore.update((s) => {
+							s.destination = fileFolder(item.path);
+						});
+						return true;
+					};
+				});
+			},
+		},
+		!readOnly && {
+			id: "delete",
+			name: translations.DELETE,
+			icon: <DeleteIcon />,
+			onClick: () => {
+				StorageStore.update((s) => {
+					s.select = [item];
+					s.mode = "delete";
+					s.severity = "error";
+					s.onDone = async (select: any) => {
+						for (const item of select) {
+							if (!item) {
+								continue;
+							}
+							try {
+								if (item.type === "dir") {
+									await storage.deleteFolder(item.path);
+								} else {
+									await storage.deleteFile(item.path);
+								}
+							} catch (err: any) {
+								StorageStore.update((s) => {
+									s.message = err;
+									s.severity = "error";
+								});
+							}
+						}
+					};
+				});
+			},
+		},
+		{
+			id: "export",
+			name: translations.EXPORT,
+			icon: <GetAppIcon />,
+			onClick: async () => {
+				let data = null;
+				let type = "application/json";
+				let name = item.name;
+				if (item.type === "dir") {
+					data = await storage.exportFolderAsZip(item.path);
+					type = "application/zip";
+					name = item.name + ".zip";
+				} else {
+					data = await storage.readFile(item.path);
+					if (isBinaryFile(item.name)) {
+						type = "application/octet-stream";
+					}
+				}
+				exportData(data, name, type);
+			},
+		},
+	].filter(Boolean);
+
+	return <ItemMenu item={item} menuItems={menuItems} store={StorageStore} />;
+}

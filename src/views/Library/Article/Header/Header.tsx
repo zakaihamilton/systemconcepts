@@ -1,0 +1,148 @@
+import Box from "@ui/Box";
+import Paper from "@ui/Paper";
+import Typography from "@ui/Typography";
+import Tooltip from "@widgets/Tooltip";
+import clsx from "clsx";
+import { abbreviations } from "../../../../data/abbreviations";
+import { LibraryIcons, LibraryTagKeys } from "../../Icons";
+import styles from "../Article.module.css";
+
+export default function Header({
+	selectedTag,
+	isHeaderHidden,
+	showAbbreviations,
+	title,
+	translations,
+	currentParagraphIndex,
+	onTitleClick,
+	customTags,
+}: any) {
+	const handleTagKeyPress = (e: any, value: any) => {
+		if (e.key === "Enter" || e.key === " ") {
+			e.preventDefault();
+			navigator.clipboard.writeText(value);
+		}
+	};
+
+	const isTitleSelected = currentParagraphIndex === -2;
+	const isTagsSelected = currentParagraphIndex === -3;
+
+	return (
+		<Box
+			component="header"
+			role="banner"
+			className={clsx(
+				styles.stickyHeader,
+				isHeaderHidden && !isTitleSelected && !isTagsSelected && styles.hidden,
+				(isTitleSelected || isTagsSelected) && styles.headerSelected,
+			)}
+			aria-label={selectedTag?.article || "Article Header"}
+		>
+			<Box className={styles.headerContent}>
+				<Box className={styles.headerInfo}>
+					<Box className={styles.headerTitleWrapper}>
+						<Box className={styles.titleRow}>
+							{selectedTag?.number && (
+								<Paper
+									elevation={0}
+									className={styles.tagNumber}
+									component="span"
+									aria-label={`Tag number: ${selectedTag.number}`}
+								>
+									#{selectedTag.number}
+								</Paper>
+							)}{" "}
+							<Typography
+								variant="h4"
+								className={clsx(
+									styles.title,
+									onTitleClick && styles.titleClickable,
+								)}
+								component="h1"
+								onClick={onTitleClick}
+							>
+								{(() => {
+									const expansion = abbreviations[title.name];
+									return !showAbbreviations && expansion
+										? expansion.eng
+										: title.name;
+								})()}
+							</Typography>
+						</Box>
+						<Box
+							className={styles.metadataRow}
+							role="list"
+							aria-label="Metadata tags"
+						>
+							{customTags &&
+								customTags.map((tag: any) => (
+									<Tooltip
+										key={`custom-${tag.label}`}
+										title={`${tag.label}: ${tag.value}`}
+										arrow
+									>
+										<Paper
+											elevation={0}
+											className={styles.metadataTag}
+											role="listitem"
+											tabIndex={0}
+											aria-label={`${tag.label}: ${tag.value}`}
+											onClick={() => navigator.clipboard.writeText(tag.value)}
+											onKeyDown={(e: any) => handleTagKeyPress(e, tag.value)}
+										>
+											<Typography variant="caption">{tag.value}</Typography>
+										</Paper>
+									</Tooltip>
+								))}
+							{LibraryTagKeys.filter(
+								(key) => key !== "book" && key !== "author",
+							)
+								.concat(["book", "author"])
+								.map((key) => {
+									if (!selectedTag?.[key] || key === "number") return null;
+									if (title.key === key) return null;
+									const value = selectedTag[key];
+									if (title.name === value) return null;
+									const Icon = LibraryIcons[key];
+									const expansion = abbreviations[value];
+									const displayValue =
+										!showAbbreviations && expansion ? expansion.eng : value;
+									const label =
+										translations?.[key.toUpperCase()] ||
+										key.charAt(0).toUpperCase() + key.slice(1);
+
+									return (
+										<Tooltip
+											key={key}
+											title={`${label}: ${displayValue}`}
+											arrow
+										>
+											<Paper
+												elevation={0}
+												className={styles.metadataTag}
+												data-key={key}
+												role="listitem"
+												tabIndex={0}
+												aria-label={`${label}: ${displayValue}`}
+												onClick={() =>
+													navigator.clipboard.writeText(displayValue)
+												}
+												onKeyDown={(e: any) =>
+													handleTagKeyPress(e, displayValue)
+												}
+											>
+												{Icon && <Icon aria-hidden="true" />}
+												<Typography variant="caption">
+													{displayValue}
+												</Typography>
+											</Paper>
+										</Tooltip>
+									);
+								})}
+						</Box>
+					</Box>
+				</Box>
+			</Box>
+		</Box>
+	);
+}

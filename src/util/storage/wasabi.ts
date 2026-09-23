@@ -1,0 +1,220 @@
+import {
+	GetObjectCommand,
+	HeadObjectCommand,
+	ListObjectsV2Command,
+	S3Client,
+} from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { lockMutex } from "@sync/mutex";
+import { validatePathAccess } from "@util/storage/aws";
+
+let wasabiClient: any = null;
+let wasabiBucket: any = null;
+
+export async function getWasabi() {
+	if (wasabiClient) return { client: wasabiClient, bucket: wasabiBucket };
+	const unlock = await lockMutex({ id: "wasabi" });
+	try {
+		if (!wasabiClient) {
+			if (!process.env.WASABI_URL) {
+				throw new Error("WASABI_URL not defined");
+			}
+			const wasabiUri = new URL(process.env.WASABI_URL);
+			wasabiBucket = wasabiUri.pathname.replace("/", "");
+			wasabiClient = new S3Client({
+				endpoint: `https://${wasabiUri.host}`,
+				region: wasabiUri.searchParams.get("region") || "us-east-1",
+				credentials: {
+					accessKeyId: decodeURIComponent(wasabiUri.username),
+					secretAccessKey: decodeURIComponent(wasabiUri.password),
+				},
+				forcePathStyle: true,
+				requestChecksumCalculation: "WHEN_REQUIRED",
+				responseChecksumValidation: "WHEN_REQUIRED",
+			});
+		}
+		return { client: wasabiClient, bucket: wasabiBucket };
+	} finally {
+		unlock();
+	}
+}
+
+function normalizePath(path: any) {
+	if (!path) return path;
+	return path.startsWith("/") ? path.substring(1) : path;
+}
+
+export async function getDownloadUrl({ path }: any) {
+	validatePathAccess(path);
+	const { client, bucket } = await getWasabi();
+	const key = normalizePath(path);
+	const command = new GetObjectCommand({
+		Bucket: bucket,
+		Key: key,
+	});
+
+	return await getSignedUrl(client, command, {
+		expiresIn: 3600,
+	});
+}
+
+export async function downloadData({ path, binary }: any) {
+	const { client, bucket } = await getWasabi();
+	const key = normalizePath(path);
+
+	const downloadParams = {
+		Bucket: bucket,
+		Key: key,
+	};
+
+	const response = await client.send(new GetObjectCommand(downloadParams));
+
+	if (binary) {
+		const uint8Array = await response.Body.transformToByteArray();
+		return Buffer.from(uint8Array);
+	}
+	return await response.Body.transformToString();
+}
+
+export async function metadataInfo({ path }: any) {
+	const key = normalizePath(path);
+	const { client, bucket } = await getWasabi();
+
+	try {
+		const headParams = { Bucket: bucket, Key: key };
+		const headResponse = await client.send(new HeadObjectCommand(headParams));
+		const name = path.split("/").pop();
+		return {
+			type: headResponse.ContentType,
+			name,
+			size: headResponse.ContentLength,
+			date: headResponse.LastModified?.valueOf(),
+		};
+	} catch {
+		// If file not found, check if it is a folder (CommonPrefixes)
+		const listParams = {
+			Bucket: bucket,
+			Delimiter: "/",
+			Prefix: key ? key + "/" : "",
+			MaxKeys: 1,
+		};
+
+		try {
+			const listResponse = await client.send(
+				new ListObjectsV2Command(listParams),
+			);
+			if (
+				(listResponse.Contents && listResponse.Contents.length > 0) ||
+				(listResponse.CommonPrefixes && listResponse.CommonPrefixes.length > 0)
+			) {
+				const name = path.split("/").pop();
+				return {
+					type: "application/x-directory",
+					name,
+				};
+			}
+		} catch {
+			// Ignore list errors, return null
+		}
+	}
+	return null;
+}
+
+export async function list({ path }: any) {
+	const key = normalizePath(path);
+	const { client, bucket } = await getWasabi();
+
+	const items: any = [];
+	let continuationToken: string | undefined;
+	const seenTokens = new Set<string>();
+	let pages = 0;
+	const MAX_LIST_PAGES = 1000;
+
+	do {
+		if (continuationToken) {
+			if (seenTokens.has(continuationToken)) {
+				break;
+			}
+			seenTokens.add(continuationToken);
+		}
+		if (++pages > MAX_LIST_PAGES) {
+			break;
+		}
+		const listParams: import("@aws-sdk/client-s3").ListObjectsV2CommandInput = {
+			Bucket: bucket,
+			Delimiter: "/",
+			Prefix: key ? key + "/" : "",
+			ContinuationToken: continuationToken,
+		};
+		const listResponse = await client.send(
+			new ListObjectsV2Command(listParams),
+		);
+
+		listResponse.CommonPrefixes?.forEach((prefix: any) => {
+			const name = prefix.Prefix.substring(0, prefix.Prefix.length - 1)
+				.split("/")
+				.pop();
+			items.push({ type: "dir", name });
+		});
+
+		listResponse.Contents?.forEach((content: any) => {
+			const name = content.Key.split("/").pop();
+			if (!name) return;
+
+			const type =
+				content.ContentType === "application/x-directory" ? "dir" : "file";
+			items.push({
+				name,
+				stat: {
+					type,
+					size: content.Size,
+					mtimeMs: content.LastModified && content.LastModified.valueOf(),
+				},
+			});
+		});
+
+		continuationToken = listResponse.NextContinuationToken;
+	} while (continuationToken);
+
+	return items;
+}
+
+export async function handleRequest({ req, path }: any) {
+	const headers = req.headers || {};
+
+	const resolvePath = () => {
+		if (path !== undefined) return path;
+		const headerPath = headers.path;
+		return headerPath ? decodeURIComponent(headerPath) : headerPath;
+	};
+
+	const currentPath = resolvePath();
+	if (currentPath) {
+		validatePathAccess(currentPath);
+	}
+
+	if (req.method === "GET") {
+		const query = req.query || {};
+		let binary = query.binary || headers.binary;
+		let type = query.type || headers.type;
+		let exists = query.exists || headers.exists;
+
+		if (exists) {
+			const metadata = await metadataInfo({ path: currentPath });
+			if (metadata) {
+				const type =
+					metadata.type === "application/x-directory" ? "dir" : "file";
+				return { ...metadata, type };
+			}
+			return {};
+		}
+
+		if (type === "dir") {
+			return await list({ path: currentPath });
+		} else {
+			return await downloadData({ path: currentPath, binary });
+		}
+	} else {
+		throw { message: "READ_ONLY_ACCESS", status: 403 };
+	}
+}

@@ -16,6 +16,10 @@
 /.next/
 /out/
 
+# Generated browser runtime from src/browser-runtime/*.ts
+/public/noflash.js
+/public/sw.js
+
 # production
 /build
 

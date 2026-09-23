@@ -1,0 +1,112 @@
+import { useSync } from "@sync/sync";
+import { logger as structuredLogger } from "@util/api/logger";
+import { createStore, useStoreState } from "@util/browser/store";
+import { isCompressedJSONFile } from "@util/data/path";
+import { useParentPath } from "@util/domain/views";
+import { exportData } from "@util/storage/importExport";
+import storage from "@util/storage/storage";
+import Download from "@widgets/Download";
+import EditorWidget from "@widgets/Editor";
+import Progress from "@widgets/Progress";
+import Save from "@widgets/Save";
+import pako from "pako";
+import { useCallback, useEffect, useState } from "react";
+
+const EditorStoreDefaults = {
+	content: "",
+};
+
+export const EditorStore = createStore(EditorStoreDefaults);
+
+export default function Editor({ name, path }: any) {
+	const [syncCounter] = useSync();
+	const parentPath = useParentPath();
+	path = path || (parentPath + "/" + name).split("/").slice(1).join("/");
+	const { content } = useStoreState(EditorStore, (s) => ({
+		content: s.content,
+	}));
+	const [loading, setLoading] = useState(false);
+	const [saving, setSaving] = useState(false);
+	const readFile = useCallback(() => {
+		storage.readFile(path).then((content: any) => {
+			// Handle .json.gz files - decompress them
+			if (isCompressedJSONFile(path) && content) {
+				try {
+					// If content is base64-encoded (string starting with H4sI)
+					if (typeof content === "string" && content.startsWith("H4sI")) {
+						// Decode base64 to binary
+						const binaryString = atob(content);
+						const bytes = new Uint8Array(binaryString.length);
+						for (let i = 0; i < binaryString.length; i++) {
+							bytes[i] = binaryString.charCodeAt(i);
+						}
+						content = bytes;
+					}
+					// Decompress using pako
+					const decompressed = pako.ungzip(content, { to: "string" });
+					content = decompressed;
+				} catch (err: any) {
+					structuredLogger.error("Failed to decompress .json.gz file:", err);
+					content = content || "";
+				}
+			}
+
+			EditorStore.update((s) => {
+				s.content = content || "";
+			});
+			setLoading(false);
+		});
+	}, [path]);
+
+	useEffect(() => {
+		setLoading(true);
+		readFile();
+	}, [path, readFile]);
+
+	useEffect(() => {
+		readFile();
+	}, [syncCounter, readFile]);
+
+	const saveFile = async () => {
+		setSaving(true);
+		await storage.createFolderPath(path);
+
+		let contentToSave = content[0];
+
+		// Handle .json.gz files - compress them before saving
+		if (isCompressedJSONFile(path)) {
+			try {
+				// Compress using pako
+				const compressed = pako.gzip(contentToSave);
+				// Convert to base64 for storage
+				let binary = "";
+				const bytes = new Uint8Array(compressed);
+				for (let i = 0; i < bytes.byteLength; i++) {
+					binary += String.fromCharCode(bytes[i]);
+				}
+				contentToSave = btoa(binary);
+			} catch (err: any) {
+				structuredLogger.error("Failed to compress .json.gz file:", err);
+				// Fall back to saving uncompressed
+			}
+		}
+
+		await storage.writeFile(path, contentToSave);
+		setSaving(false);
+	};
+
+	const downloadFile = () => {
+		if (content[0]) {
+			exportData(content[0], name, "text/plain");
+		}
+	};
+
+	return (
+		<>
+			<Download visible={!loading} onClick={downloadFile} />
+			<Save visible={!loading} onClick={saveFile} saving={saving} />
+			{!loading && <EditorWidget state={content} />}
+			{loading && <Progress />}
+		</>
+	);
+}

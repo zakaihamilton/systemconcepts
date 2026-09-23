@@ -1,0 +1,40 @@
+import clsx from "clsx";
+import styles from "./Group.module.css";
+
+export default function Group({ fill, name, color, fit, className }: any) {
+	const groupName = name && name[0].toUpperCase() + name.slice(1);
+	const style = { backgroundColor: color };
+	return (
+		<div
+			className={clsx(
+				styles.groupContainer,
+				fill && styles.fill,
+				fit && styles.fit,
+				className,
+			)}
+		>
+			<div
+				className={clsx(
+					styles.background,
+					fill && styles.fill,
+					fit && styles.fit,
+				)}
+				style={style}
+			/>
+			<div
+				className={clsx(styles.group, fill && styles.fill, fit && styles.fit)}
+				dir="auto"
+			>
+				{groupName}
+			</div>
+			<div
+				className={clsx(
+					styles.backgroundBorder,
+					fill && styles.fill,
+					fit && styles.fit,
+				)}
+				style={style}
+			/>
+		</div>
+	);
+}

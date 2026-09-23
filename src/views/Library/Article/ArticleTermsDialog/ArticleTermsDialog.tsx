@@ -1,0 +1,286 @@
+import CloseIcon from "@icons/svg/Close.svg";
+import SearchIcon from "@icons/svg/Search.svg";
+import Button from "@ui/Button";
+import Dialog from "@ui/Dialog";
+import DialogActions from "@ui/DialogActions";
+import DialogContent from "@ui/DialogContent";
+import DialogTitle from "@ui/DialogTitle";
+import Divider from "@ui/Divider";
+import IconButton from "@ui/IconButton";
+import List from "@ui/List";
+import ListItem from "@ui/ListItem";
+import ListItemText from "@ui/ListItemText";
+import Typography from "@ui/Typography";
+import { useTranslations } from "@util/domain/translations";
+import Tooltip from "@widgets/Tooltip";
+import React, { useMemo, useState } from "react";
+import { getStyleInfo, PHASE_COLORS } from "../GlossaryUtils";
+import styles from "./ArticleTermsDialog.module.css";
+export default function ArticleTermsDialog({
+	open,
+	onClose,
+	terms,
+	onJump,
+}: any) {
+	const translations = useTranslations();
+	const [search, setSearch] = useState("");
+	const [prevOpen, setPrevOpen] = useState(open);
+
+	if (open && !prevOpen) {
+		setPrevOpen(true);
+		setSearch("");
+	} else if (!open && prevOpen) {
+		setPrevOpen(false);
+	}
+
+	const filteredTerms = useMemo(() => {
+		if (!search) return terms;
+		const lowerSearch = search.toLowerCase();
+		return terms.filter((item: any) => {
+			const { term, trans, en, he } = item;
+			return (
+				term.toLowerCase().includes(lowerSearch) ||
+				(trans && trans.toLowerCase().includes(lowerSearch)) ||
+				(en && en.toLowerCase().includes(lowerSearch)) ||
+				(he && he.includes(search))
+			);
+		});
+	}, [terms, search]);
+
+	const uniqueLetters = useMemo(() => {
+		const letters = new Set<any>();
+		filteredTerms.forEach((item: any) => {
+			const label = item.trans || item.term;
+			if (label) {
+				letters.add(label.charAt(0).toUpperCase());
+			}
+		});
+		return Array.from(letters).sort();
+	}, [filteredTerms]);
+
+	const [activeLetter, setActiveLetter] = useState<any>(null);
+
+	if (uniqueLetters.length > 0 && !activeLetter) {
+		setActiveLetter(uniqueLetters[0]);
+	}
+
+	const handleScroll = (e: any) => {
+		const container = e.target;
+		const containerTop = container.getBoundingClientRect().top;
+
+		// Find the first letter section that is visible or above the fold
+		let currentLetter = null;
+
+		for (const letter of uniqueLetters) {
+			const element = document.getElementById(`term-letter-${letter}`);
+			if (element) {
+				const rect = element.getBoundingClientRect();
+				// If the element is near the top of the container (allowing some buffer)
+				if (rect.top <= containerTop + 50) {
+					currentLetter = letter;
+				} else {
+					// Since specific letter sections are ordered, once we find one below the threshold,
+					// the PREVIOUS one was the current one.
+					break;
+				}
+			}
+		}
+
+		if (currentLetter !== activeLetter) {
+			setActiveLetter(currentLetter);
+		}
+	};
+
+	const handleLetterClick = (letter: any) => {
+		const element = document.getElementById(`term-letter-${letter}`);
+		if (element) {
+			element.scrollIntoView({ behavior: "smooth", block: "start" });
+		}
+	};
+
+	return (
+		<Dialog
+			open={open}
+			onClose={onClose}
+			maxWidth="sm"
+			fullWidth
+			className={styles.dialogTall}
+		>
+			<DialogTitle disableTypography className={styles.titleContainer}>
+				<Typography variant="h6">
+					{translations.ARTICLE_TERMS} ({filteredTerms.length})
+				</Typography>
+				<div className={styles.searchContainer}>
+					<div className={styles.searchIcon}>
+						<SearchIcon color="inherit" />
+					</div>
+					<input
+						className={styles.searchInput}
+						type="text"
+						placeholder={translations.SEARCH}
+						value={search}
+						onChange={(e) => setSearch(e.target.value)}
+						autoFocus
+					/>
+					<div
+						className={`${styles.clearButton} ${!search ? styles.hidden : ""}`}
+					>
+						<Tooltip title={translations.CLEAR}>
+							<IconButton size="small" onClick={() => setSearch("")}>
+								<CloseIcon fontSize="small" />
+							</IconButton>
+						</Tooltip>
+					</div>
+				</div>
+			</DialogTitle>
+			<div className={styles.dialogBody}>
+				{uniqueLetters.length > 0 && (
+					<div className={styles.sidebar}>
+						{uniqueLetters.map((letter) => (
+							<div
+								key={letter}
+								className={`${styles.letterLink} ${letter === activeLetter ? styles.active : ""}`}
+								onClick={() => handleLetterClick(letter)}
+							>
+								{letter}
+							</div>
+						))}
+					</div>
+				)}
+				<DialogContent
+					className={styles.content}
+					onScroll={handleScroll}
+					id="terms-dialog-content"
+				>
+					<List className={styles.list}>
+						{filteredTerms.map((item: any, index: any) => {
+							const { term, trans, en, he, style, paragraphs } = item;
+							const label = trans || term;
+							const firstChar = label.charAt(0).toUpperCase();
+							const prevLabel =
+								index > 0
+									? filteredTerms[index - 1].trans ||
+										filteredTerms[index - 1].term
+									: null;
+							const isNewLetter =
+								index === 0 ||
+								(prevLabel && prevLabel.charAt(0).toUpperCase() !== firstChar);
+
+							const styleInfo = getStyleInfo(style);
+							const phaseRaw = styleInfo?.phase;
+							const phaseKey =
+								typeof phaseRaw === "string" ? phaseRaw.toLowerCase() : null;
+							const phaseColor = phaseKey ? PHASE_COLORS[phaseKey] : null;
+							const phaseLabel = phaseKey
+								? phaseKey.charAt(0).toUpperCase() + phaseKey.slice(1)
+								: null;
+
+							const visibleParagraphs = paragraphs
+								? paragraphs.slice(0, 20)
+								: [];
+							const hasMore = paragraphs && paragraphs.length > 20;
+
+							return (
+								<React.Fragment key={index}>
+									<ListItem
+										className={styles.termListItem}
+										id={isNewLetter ? `term-letter-${firstChar}` : undefined}
+									>
+										<ListItemText
+											primary={
+												<div className={styles.termPrimary}>
+													<Typography
+														variant="subtitle1"
+														component="span"
+														className={styles.termLabel}
+													>
+														{index + 1}. {label}
+													</Typography>
+													{styleInfo?.category && (
+														<span className={styles.categoryBadge}>
+															{styleInfo.category}
+														</span>
+													)}
+													{phaseLabel && (
+														<span
+															className={styles.phaseBadge}
+															style={{
+																backgroundColor: phaseColor || undefined,
+															}}
+														>
+															{phaseLabel}
+														</span>
+													)}
+												</div>
+											}
+											secondary={
+												<div className={styles.termSecondary}>
+													<div className={styles.translationBlock}>
+														<Typography
+															variant="body2"
+															component="span"
+															color="textPrimary"
+														>
+															{en}
+														</Typography>
+														{he && (
+															<Typography
+																variant="body2"
+																component="span"
+																className={styles.hebrewTranslation}
+															>
+																— {he}
+															</Typography>
+														)}
+													</div>
+													{paragraphs && paragraphs.length > 0 && (
+														<div className={styles.paragraphContainer}>
+															{visibleParagraphs.map((p: any) => (
+																<span
+																	key={p}
+																	className={styles.paragraphBadge}
+																	onClick={(e) => {
+																		e.stopPropagation();
+																		onClose();
+																		onJump(p);
+																	}}
+																	title={`${translations.JUMP_TO} ${p}`}
+																>
+																	{p}
+																</span>
+															))}
+															{hasMore && (
+																<Typography
+																	variant="caption"
+																	color="textSecondary"
+																	style={{ marginLeft: "4px" }}
+																>
+																	... (+{paragraphs.length - 20})
+																</Typography>
+															)}
+														</div>
+													)}
+												</div>
+											}
+										/>
+									</ListItem>
+									{index < filteredTerms.length - 1 && (
+										<Divider component="li" />
+									)}
+								</React.Fragment>
+							);
+						})}
+						{filteredTerms.length === 0 && (
+							<ListItem>
+								<ListItemText primary={translations.NO_TERMS_FOUND} />
+							</ListItem>
+						)}
+					</List>
+				</DialogContent>
+			</div>
+			<DialogActions>
+				<Button onClick={onClose}>{translations.CLOSE}</Button>
+			</DialogActions>
+		</Dialog>
+	);
+}

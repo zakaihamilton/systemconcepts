@@ -1,0 +1,10 @@
+import styles from "./Field.module.css";
+
+export default function Field({ name, value }: any) {
+	return (
+		<div className={styles.root}>
+			<div className={styles.name}>{name}:</div>
+			<div className={styles.value}>{value}</div>
+		</div>
+	);
+}

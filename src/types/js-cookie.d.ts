@@ -6,7 +6,10 @@ declare module "js-cookie" {
 			value: string,
 			options?: { expires?: number },
 		): string | undefined;
-		remove(name: string): void;
+		remove(
+			name: string,
+			options?: { path?: string; domain?: string; secure?: boolean },
+		): void;
 	};
 	export default Cookies;
 }

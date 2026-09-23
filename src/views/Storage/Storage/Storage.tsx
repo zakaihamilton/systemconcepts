@@ -1,0 +1,281 @@
+import devices from "@data/storage";
+import FolderIcon from "@icons/svg/Folder.svg";
+import InsertDriveFileIcon from "@icons/svg/InsertDriveFile.svg";
+import StorageIcon from "@icons/svg/Storage.svg";
+import { useSync } from "@sync/sync";
+import Typography from "@ui/Typography";
+import { logger as structuredLogger } from "@util/api/logger";
+import { useLocalStorage } from "@util/browser/store";
+import { useDeviceType } from "@util/browser/styles";
+import { useDateFormatter } from "@util/data/locale";
+import { isBinaryFile, isImageFile } from "@util/data/path";
+import { abbreviateSize } from "@util/data/string";
+import { useTranslations } from "@util/domain/translations";
+import { addPath, setPath } from "@util/domain/views";
+import storage, { useListing } from "@util/storage/storage";
+import Row from "@widgets/Row";
+import StatusBar from "@widgets/StatusBar";
+import Table from "@widgets/Table";
+import Tooltip from "@widgets/Tooltip";
+import { useCallback, useEffect, useMemo } from "react";
+import Actions, { useActions } from "../Actions";
+import Destination from "../Destination";
+import Edit from "../Edit";
+import ItemMenu from "../ItemMenu";
+import { StorageStore, StorageStoreDefaults } from "../Store";
+import styles from "./Storage.module.css";
+
+export default function Storage({ path = "" }: any) {
+	const isPhone = useDeviceType() === "phone";
+	const [syncCounter] = useSync();
+	const translations = useTranslations();
+	const {
+		item: editedItem,
+		mode,
+		select,
+		counter,
+		editing,
+	} = StorageStore.useState();
+	useLocalStorage("StorageStore", StorageStore, ["viewMode"]);
+	const [data, loading, error] = useListing(path, [counter, syncCounter], {
+		useSize: path.startsWith("local") || !path,
+	});
+	const device = (devices as Array<{ id: string; readOnly?: boolean }>).find(
+		(item) => item.id === path.split("/")[0],
+	);
+	const { readOnly } = device || {};
+	const dateFormatter = useDateFormatter({
+		weekday: "long",
+		year: "numeric",
+		month: "long",
+		day: "numeric",
+		hour: "2-digit",
+		minute: "2-digit",
+	});
+
+	useEffect(() => {
+		StorageStore.update((s) => {
+			Object.assign(s, StorageStoreDefaults);
+		});
+	}, [path]);
+
+	const columns = useMemo(
+		() =>
+			[
+				{
+					id: "nameWidget",
+					title: translations.NAME,
+					sortable: "name",
+					padding: false,
+				},
+				!isPhone && {
+					id: "sizeWidget",
+					title: translations.SIZE,
+					sortable: "size",
+					columnProps: {
+						style: {
+							width: "10em",
+						},
+					},
+				},
+				!isPhone && {
+					id: "dateWidget",
+					title: translations.DATE,
+					sortable: "mtimeMs",
+					columnProps: {
+						style: {
+							width: "25em",
+						},
+					},
+				},
+			].filter(Boolean),
+		[isPhone, translations],
+	);
+
+	const rowClick = useCallback(
+		(item: any) => {
+			const { id } = item;
+			if (select) {
+				const exists = select.find((item: any) => item.id === id);
+				StorageStore.update((s) => {
+					if (exists) {
+						s.select = select.filter((item: any) => item.id !== id);
+					} else {
+						s.select = [...select, item];
+					}
+				});
+				return;
+			}
+			if (item.type === "file") {
+				if (isImageFile(item.name)) {
+					addPath(`image?name=${item.name}`);
+				} else if (item.name.endsWith(".json.gz")) {
+					addPath(`editor?name=${item.name}`);
+				} else if (isBinaryFile(item.name)) {
+					/* add media player here */
+				} else {
+					addPath(`editor?name=${item.name}`);
+				}
+			} else {
+				StorageStore.update((s) => {
+					Object.assign(s, StorageStoreDefaults);
+				});
+				setPath("storage/" + id.split("/").filter(Boolean).join("/"));
+			}
+		},
+		[select],
+	);
+
+	const mapper = useCallback(
+		(item: any) => {
+			const id = item.id || item.name;
+			let name = item.name;
+			let tooltip = translations.STORAGE;
+			let icon = <StorageIcon />;
+			if (path) {
+				if (item.type === "dir") {
+					icon = <FolderIcon />;
+					tooltip = translations.FOLDER;
+				} else {
+					icon = <InsertDriveFileIcon />;
+					tooltip = translations.FILE;
+				}
+			} else {
+				name = translations[item.name] || name;
+				structuredLogger.debug(
+					`[Storage Mapper] Root item: ${name}, size: ${item.size}, type: ${typeof item.size}`,
+				);
+			}
+
+			const size = item.size;
+			const hasSize = typeof size === "number";
+
+			let result = {
+				...item,
+				name,
+				id,
+				tooltip,
+				icon,
+				sizeWidget: (item.type === "file" ||
+					(item.type === "dir" && hasSize) ||
+					(!path && hasSize)) && (
+					<Tooltip title={size + " " + translations.BYTES} arrow>
+						<Typography style={{ display: "inline-block" }}>
+							{abbreviateSize(size)}
+						</Typography>
+					</Tooltip>
+				),
+				dateWidget: item.mtimeMs && dateFormatter.format(item.mtimeMs),
+			};
+
+			const itemForMenu = { ...result };
+
+			let nameWidget = null;
+			if (mode === "create" && item.create) {
+				nameWidget = <Edit key={id} />;
+			} else if (mode === "rename" && editedItem.id === id) {
+				nameWidget = <Edit key={id} />;
+			} else {
+				nameWidget = (
+					<Row
+						key={id}
+						onClick={!editing && rowClick.bind(null, result)}
+						iconPadding={item.type ? 110 : 60}
+						icons={
+							<>
+								{item.type && (
+									<ItemMenu readOnly={readOnly} item={itemForMenu} />
+								)}
+								<Tooltip title={tooltip} arrow>
+									<span>{icon}</span>
+								</Tooltip>
+							</>
+						}
+					>
+						{name}
+					</Row>
+				);
+			}
+
+			result.nameWidget = nameWidget;
+			return result;
+		},
+		[
+			path,
+			translations,
+			mode,
+			editedItem,
+			editing,
+			rowClick,
+			readOnly,
+			dateFormatter,
+		],
+	);
+
+	let dataEx = useActions(data);
+
+	const statusBar = (
+		<StatusBar data={dataEx} mapper={mapper} store={StorageStore} />
+	);
+
+	const onImport = useCallback(
+		async (data: any) => {
+			try {
+				await storage.importFolder(path, data);
+				StorageStore.update((s) => {
+					s.counter++;
+				});
+			} catch (err: any) {
+				structuredLogger.error(err);
+				StorageStore.update((s) => {
+					s.message = err;
+					s.severity = "error";
+				});
+			}
+		},
+		[path],
+	);
+
+	const name = path.split("/").pop();
+
+	const onExport = useCallback(async () => {
+		const data = await storage.exportFolderAsZip(path);
+		return {
+			data,
+			type: "application/zip",
+			name: name + ".zip",
+		};
+	}, [path, name]);
+
+	return (
+		<>
+			<Table
+				name={name}
+				columns={columns}
+				store={StorageStore}
+				data={dataEx}
+				mapper={mapper}
+				loading={loading}
+				error={error}
+				viewModes={{
+					list: {
+						className: styles.listItem,
+					},
+					table: null,
+				}}
+				refresh={() => {
+					StorageStore.update((s) => {
+						s.counter++;
+					});
+				}}
+				depends={[mode, select, path, editing, dateFormatter]}
+				resetScrollDeps={[path]}
+				onExport={onExport}
+				onImport={!readOnly && onImport}
+				statusBar={statusBar}
+			/>
+			<Actions path={path} data={dataEx} readOnly={readOnly} />
+			<Destination path={path} />
+		</>
+	);
+}

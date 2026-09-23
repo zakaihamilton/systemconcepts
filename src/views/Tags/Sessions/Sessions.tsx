@@ -1,0 +1,116 @@
+import Chip from "@ui/Chip";
+import { createStore } from "@util/browser/store";
+import { useSessions } from "@util/domain/sessions";
+import { useTranslations } from "@util/domain/translations";
+import FilterBar from "@views/Sessions/FilterBar";
+import Table from "@widgets/Table";
+import { useMemo } from "react";
+import styles from "../Tags/Tags.module.css";
+
+export const TagsStore = createStore({
+	order: "asc",
+	offset: 0,
+	orderBy: "name",
+	viewMode: "list",
+});
+
+export default function Sessions() {
+	const translations = useTranslations();
+	const [sessions] = useSessions([], { filterSessions: true });
+	const { order, orderBy } = TagsStore.useState();
+
+	const columns = [
+		{
+			id: "group",
+			title: translations.GROUP,
+			sortable: true,
+			columnProps: {
+				style: {
+					width: "8em",
+				},
+			},
+		},
+		{
+			id: "date",
+			title: translations.DATE,
+			sortable: true,
+			columnProps: {
+				style: {
+					width: "10em",
+				},
+			},
+		},
+		{
+			id: "name",
+			title: translations.SESSION,
+			sortable: true,
+			columnProps: {
+				style: {
+					width: "20em",
+				},
+			},
+		},
+		{
+			id: "tags",
+			title: translations.TAGS,
+			sortable: false,
+		},
+	];
+
+	const data = useMemo(() => {
+		return sessions.map((session: any) => {
+			const tags = session.tags || [];
+			return {
+				...session,
+				group: session.group,
+				date: session.date,
+				name: session.name,
+				tags: tags.length ? (
+					<div className={styles.tags}>
+						{tags.map((tag: any) => (
+							<Chip
+								key={tag}
+								label={tag}
+								size="small"
+								className={styles.tag}
+								style={{ "--group-color": session.color }}
+							/>
+						))}
+					</div>
+				) : null,
+			};
+		});
+	}, [sessions]);
+
+	const sortedData = useMemo(() => {
+		return data.sort((a: any, b: any) => {
+			const aValue = a[orderBy];
+			const bValue = b[orderBy];
+			if (aValue < bValue) {
+				return order === "asc" ? -1 : 1;
+			}
+			if (aValue > bValue) {
+				return order === "asc" ? 1 : -1;
+			}
+			return 0;
+		});
+	}, [data, order, orderBy]);
+
+	return (
+		<div className={styles.root}>
+			<FilterBar />
+			<Table
+				name="tags"
+				store={TagsStore}
+				columns={columns}
+				data={sortedData}
+				viewModes={{
+					list: {
+						className: styles.list,
+					},
+					table: null,
+				}}
+			/>
+		</div>
+	);
+}
