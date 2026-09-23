@@ -1,6 +1,6 @@
 import type { Config } from "@svgr/core";
 
-const svgrConfig: Config = {
+const svgrConfig = {
 	ref: true,
 	svgoConfig: {
 		plugins: [
@@ -12,12 +12,12 @@ const svgrConfig: Config = {
 					},
 				},
 			},
-			{ name: "removeDimensions" },
+			"removeDimensions",
 		],
 	},
 	svgProps: {
 		fill: "currentColor",
 	},
-};
+} satisfies Config;
 
 export default svgrConfig;

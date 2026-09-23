@@ -3,7 +3,7 @@ import { createRequire } from "node:module";
 import path from "node:path";
 import type { NextConfig } from "next";
 import iconSvgrBase from "./src/components/Icons/svgr.config.ts";
-import iconSvgrTemplate from "./src/components/Icons/svgr-template.ts";
+import iconSvgrWebpackOptions from "./src/components/Icons/svgr.webpack.config.ts";
 
 const rootDirectory = process.cwd();
 const require = createRequire(path.join(rootDirectory, "next.config.ts"));
@@ -11,13 +11,8 @@ const version = JSON.parse(
 	readFileSync(path.join(rootDirectory, "package.json"), "utf8"),
 ).version as string;
 const isDev = process.env.NODE_ENV === "development";
-const iconSvgrConfigFile = path.join(
-	rootDirectory,
-	"src/components/Icons/svgr.webpack.config.ts",
-);
 const iconSvgrOptions = {
-	...iconSvgrBase,
-	template: iconSvgrTemplate,
+	...iconSvgrWebpackOptions,
 };
 const iconsSvgDir = path.join(rootDirectory, "src/components/Icons/svg");
 function configuredOrigin(value: string | undefined): string | null {
@@ -63,7 +58,8 @@ const nextConfig: NextConfig = {
 					{
 						loader: "@svgr/webpack",
 						options: {
-							configFile: iconSvgrConfigFile,
+							...iconSvgrBase,
+							runtimeConfig: false,
 						},
 					},
 				],

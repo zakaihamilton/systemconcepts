@@ -3,6 +3,7 @@ import template from "./svgr-template.ts";
 
 const svgrWebpackConfig = {
 	...base,
+	runtimeConfig: false,
 	template,
 };
 

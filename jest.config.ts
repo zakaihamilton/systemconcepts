@@ -34,6 +34,7 @@ const customJestConfig = {
 		"/node_modules/(?!(p-limit|yocto-queue|react-markdown|remark-breaks|vfile|vfile-message|unist-util-.*|unified|bail|is-plain-obj|trough|decode-named-character-reference|character-entities|mdast-util-.*|micromark.*|property-information|hast-util-.*|space-separated-tokens|comma-separated-tokens|style-to-object|inline-style-parser|devlop)/)",
 	],
 	coverageDirectory: "coverage",
+	coveragePathIgnorePatterns: ["/node_modules/", "/src/components/Icons/svg/"],
 	coverageThreshold: {
 		global: {
 			statements: 80,

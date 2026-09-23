@@ -15,6 +15,7 @@ async function compileSvgMain() {
 		sourceText,
 		{
 			...svgrConfig,
+			runtimeConfig: false,
 			template: svgrTemplate,
 			plugins: ["@svgr/plugin-svgo", "@svgr/plugin-jsx"],
 		},
