@@ -1,156 +1,11 @@
 import { logger as structuredLogger } from "@util/api/logger";
 import { verifyRssMediaToken } from "@util/api/rssMediaToken";
+import { createPresignedUrl } from "@util/storage/awsFetch";
 import { NextResponse } from "next/server";
 import { NO_STORE_HEADERS } from "../cache";
 
 export const runtime = "edge";
 export const dynamic = "force-dynamic";
-
-const importedHmacKeys = new Map<any, any>();
-
-async function hmacSha256(key: any, data: any) {
-	let cryptoKey;
-	if (typeof key === "string") {
-		cryptoKey = importedHmacKeys.get(key);
-		if (!cryptoKey) {
-			cryptoKey = crypto.subtle.importKey(
-				"raw",
-				new TextEncoder().encode(key),
-				{ name: "HMAC", hash: "SHA-256" },
-				false,
-				["sign"],
-			);
-			importedHmacKeys.set(key, cryptoKey);
-		}
-		cryptoKey = await cryptoKey;
-	} else {
-		cryptoKey = await crypto.subtle.importKey(
-			"raw",
-			key,
-			{ name: "HMAC", hash: "SHA-256" },
-			false,
-			["sign"],
-		);
-	}
-	const signature = await crypto.subtle.sign(
-		"HMAC",
-		cryptoKey,
-		typeof data === "string" ? new TextEncoder().encode(data) : data,
-	);
-	return new Uint8Array(signature);
-}
-
-async function sha256Hex(data: any) {
-	const hashBuffer = await crypto.subtle.digest(
-		"SHA-256",
-		typeof data === "string" ? new TextEncoder().encode(data) : data,
-	);
-	return Array.from(new Uint8Array(hashBuffer))
-		.map((b) => b.toString(16).padStart(2, "0"))
-		.join("");
-}
-
-// Ultra-lightweight Web Crypto-based AWS Signature V4 presigned URL generator
-async function getPresignedUrl({
-	endpoint,
-	region,
-	bucket,
-	key,
-	accessKeyId,
-	secretAccessKey,
-	expiresIn = 86400,
-	method = "GET",
-}: any) {
-	return createPresignedUrl({
-		endpoint,
-		region,
-		bucket,
-		key,
-		accessKeyId,
-		secretAccessKey,
-		expiresIn,
-		method,
-	});
-}
-
-async function createPresignedUrl({
-	endpoint,
-	region,
-	bucket,
-	key,
-	accessKeyId,
-	secretAccessKey,
-	expiresIn = 86400,
-	method = "GET",
-}: any) {
-	const now = new Date();
-	const amzDate = now
-		.toISOString()
-		.replace(/[:-]/g, "")
-		.replace(/\.\d{3}/, "");
-	const dateStamp = amzDate.substring(0, 8);
-
-	let host = endpoint.replace(/^https?:\/\//, "");
-	const protocol = endpoint.startsWith("http")
-		? endpoint.match(/^https?:\/\//)[0]
-		: "https://";
-
-	// Uri-encode path segments (preserving slashes)
-	const canonicalUri = `/${bucket}/${key
-		.split("/")
-		.map((segment: any) => encodeURIComponent(segment).replace(/%7E/g, "~"))
-		.join("/")}`;
-
-	const credentialScope = `${dateStamp}/${region}/s3/aws4_request`;
-	const queryParams: Record<string, string> = {
-		"X-Amz-Algorithm": "AWS4-HMAC-SHA256",
-		"X-Amz-Credential": `${accessKeyId}/${credentialScope}`,
-		"X-Amz-Date": amzDate,
-		"X-Amz-Expires": expiresIn.toString(),
-		"X-Amz-SignedHeaders": "host",
-	};
-
-	const canonicalQueryString = Object.keys(queryParams)
-		.sort()
-		.map(
-			(k) => `${encodeURIComponent(k)}=${encodeURIComponent(queryParams[k])}`,
-		)
-		.join("&");
-
-	const canonicalHeaders = `host:${host}\n`;
-	const signedHeaders = "host";
-	const payloadHash = "UNSIGNED-PAYLOAD";
-
-	const canonicalRequest = [
-		method,
-		canonicalUri,
-		canonicalQueryString,
-		canonicalHeaders,
-		signedHeaders,
-		payloadHash,
-	].join("\n");
-
-	const canonicalRequestHash = await sha256Hex(canonicalRequest);
-
-	const stringToSign = [
-		"AWS4-HMAC-SHA256",
-		amzDate,
-		credentialScope,
-		canonicalRequestHash,
-	].join("\n");
-
-	const kDate = await hmacSha256("AWS4" + secretAccessKey, dateStamp);
-	const kRegion = await hmacSha256(kDate, region);
-	const kService = await hmacSha256(kRegion, "s3");
-	const kSigning = await hmacSha256(kService, "aws4_request");
-
-	const signatureBuffer = await hmacSha256(kSigning, stringToSign);
-	const signature = Array.from(signatureBuffer)
-		.map((b) => b.toString(16).padStart(2, "0"))
-		.join("");
-
-	return `${protocol}${host}${canonicalUri}?${canonicalQueryString}&X-Amz-Signature=${signature}`;
-}
 
 async function handleRequest(request: any) {
 	try {
@@ -245,7 +100,7 @@ async function handleRequest(request: any) {
 
 		if (request.method === "HEAD") {
 			try {
-				const signedHeadUrl = await getPresignedUrl({
+				const signedHeadUrl = await createPresignedUrl({
 					endpoint,
 					region,
 					bucket,
@@ -298,7 +153,7 @@ async function handleRequest(request: any) {
 			}
 		}
 
-		const signedStr = await getPresignedUrl({
+		const signedStr = await createPresignedUrl({
 			endpoint,
 			region,
 			bucket,

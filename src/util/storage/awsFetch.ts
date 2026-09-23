@@ -4,14 +4,32 @@
  * Compatible with Vercel Edge Runtime, Cloudflare Workers, and Node.js 18+.
  */
 
+const importedHmacKeys = new Map<string, Promise<CryptoKey>>();
+
 async function hmacSha256(key: any, data: any) {
-	const cryptoKey = await crypto.subtle.importKey(
-		"raw",
-		typeof key === "string" ? new TextEncoder().encode(key) : key,
-		{ name: "HMAC", hash: "SHA-256" },
-		false,
-		["sign"],
-	);
+	let cryptoKey;
+	if (typeof key === "string") {
+		let importedKey = importedHmacKeys.get(key);
+		if (!importedKey) {
+			importedKey = crypto.subtle.importKey(
+				"raw",
+				new TextEncoder().encode(key),
+				{ name: "HMAC", hash: "SHA-256" },
+				false,
+				["sign"],
+			);
+			importedHmacKeys.set(key, importedKey);
+		}
+		cryptoKey = await importedKey;
+	} else {
+		cryptoKey = await crypto.subtle.importKey(
+			"raw",
+			key,
+			{ name: "HMAC", hash: "SHA-256" },
+			false,
+			["sign"],
+		);
+	}
 	const signature = await crypto.subtle.sign(
 		"HMAC",
 		cryptoKey,
@@ -30,7 +48,7 @@ async function sha256Hex(data: any) {
 		.join("");
 }
 
-async function getPresignedUrl({
+export async function createPresignedUrl({
 	endpoint,
 	region,
 	bucket,
@@ -48,7 +66,7 @@ async function getPresignedUrl({
 	const dateStamp = amzDate.substring(0, 8);
 
 	const host = endpoint.replace(/^https?:\/\//, "");
-	const protocol = endpoint.startsWith("https") ? "https://" : "http://";
+	const protocol = endpoint.match(/^https?:\/\//)?.[0] || "https://";
 
 	// URI-encode path segments, preserving slashes
 	const canonicalUri = `/${bucket}/${key
@@ -128,7 +146,7 @@ export async function downloadDataEdge({
 	const secretAccessKey = process.env.AWS_SECRET;
 	const key = normalizePath(path);
 
-	const url = await getPresignedUrl({
+	const url = await createPresignedUrl({
 		endpoint,
 		region,
 		bucket,
