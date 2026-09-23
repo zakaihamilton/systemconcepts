@@ -1,0 +1,220 @@
+import { useSearch } from "@components/Search";
+import { useToolbar } from "@components/Toolbar";
+import { SyncActiveStore } from "@sync/syncState";
+import { fireEvent, render, screen } from "@testing-library/react";
+import { useLocalStorage } from "@util/browser/store";
+import { useDeviceType } from "@util/browser/styles";
+import { SessionsStore, useSessions } from "@util/domain/sessions";
+import { useTranslations } from "@util/domain/translations";
+import Cookies from "js-cookie";
+import SchedulePage, { ScheduleStore } from "./Schedule";
+
+jest.mock("@util/browser/styles");
+jest.mock("js-cookie");
+jest.mock("@util/domain/translations");
+jest.mock("@util/domain/sessions", () => ({
+	useSessions: jest.fn(),
+	SessionsStore: {
+		useState: jest.fn().mockReturnValue({ showFilterDialog: false }),
+		update: jest.fn(),
+	},
+}));
+jest.mock("@components/Search");
+jest.mock("@util/browser/store", () => ({
+	...jest.requireActual("@util/browser/store"),
+	useLocalStorage: jest.fn(),
+}));
+jest.mock("@sync/syncState", () => {
+	const idle = false;
+	return {
+		SyncActiveStore: {
+			useState: jest.fn().mockReturnValue(idle),
+			update: jest.fn(),
+		},
+		UpdateSessionsStore: {
+			useState: jest.fn().mockReturnValue(idle),
+			update: jest.fn(),
+		},
+	};
+});
+jest.mock("@views/Player/Player", () => ({
+	PlayerStore: {
+		useState: jest.fn().mockReturnValue({ session: null }),
+	},
+}));
+jest.mock("@components/Toolbar", () => ({
+	registerToolbar: jest.fn(),
+	useToolbar: jest.fn(),
+}));
+jest.mock("@components/ViewTransition", () => ({ children }: any) => (
+	<div data-testid="view-transition">{children}</div>
+));
+jest.mock("../YearView", () => () => <div data-testid="year-view" />);
+jest.mock("../MonthView", () => () => <div data-testid="month-view" />);
+jest.mock("../WeekView", () => () => <div data-testid="week-view" />);
+jest.mock("../DayView", () => () => <div data-testid="day-view" />);
+jest.mock("../TracksView", () => () => <div data-testid="tracks-view" />);
+jest.mock("../HistoryView", () => () => <div data-testid="history-view" />);
+jest.mock("@widgets/StatusBar", () => () => <div data-testid="status-bar" />);
+jest.mock("@views/Sessions/FilterBar", () => ({ hideYears }: any) => (
+	<div data-testid="filter-bar" data-hide-years={String(!!hideYears)} />
+));
+jest.mock("@widgets/Table", () => ({ statusBar }: any) => (
+	<div data-testid="table">{statusBar}</div>
+));
+jest.mock("@widgets/Message", () => () => <div data-testid="message" />);
+jest.mock("@widgets/Tooltip", () => ({ children }: any) => <>{children}</>);
+jest.mock(
+	"@ui/IconButton",
+	() =>
+		({ children, onClick, "aria-label": label }: any) => (
+			<button type="button" aria-label={label} onClick={onClick}>
+				{children}
+			</button>
+		),
+);
+
+describe("Schedule View", () => {
+	beforeEach(() => {
+		jest.clearAllMocks();
+		asMock(useDeviceType).mockReturnValue("desktop");
+		asMock(Cookies.get).mockReturnValue("test");
+		asMock(useTranslations).mockReturnValue({
+			LOADING: "Loading",
+			YEAR_VIEW: "Year",
+			MONTH_VIEW: "Month",
+			WEEK_VIEW: "Week",
+			DAY_VIEW: "Day",
+			TRACKS_VIEW: "Tracks",
+			HISTORY_VIEW: "History",
+			FILTER: "Filter",
+			REQUIRE_SIGNIN: "Sign in required",
+		});
+		asMock(useSessions).mockReturnValue([[], false]);
+		asMock(useSearch).mockReturnValue("");
+		ScheduleStore.update((s) => {
+			s.viewMode = "week";
+			s.date = new Date("2024-06-10");
+			s.lastViewMode = null;
+		});
+		asMock(SyncActiveStore.useState).mockImplementation((selector: any) => {
+			const state = { needsSessionReload: false, busy: false };
+			return typeof selector === "function" ? selector(state) : state;
+		});
+		asMock(SessionsStore.useState).mockReturnValue({ showFilterDialog: false });
+	});
+
+	it("renders status bar and filter bar", () => {
+		render(<SchedulePage />);
+		expect(screen.getByTestId("status-bar")).toBeInTheDocument();
+		expect(screen.getByTestId("filter-bar")).toBeInTheDocument();
+	});
+
+	it("renders week view by default", () => {
+		render(<SchedulePage />);
+		expect(screen.getByTestId("week-view")).toBeInTheDocument();
+	});
+
+	it("persists the selected schedule date", () => {
+		render(<SchedulePage />);
+		expect(useLocalStorage).toHaveBeenCalledWith(
+			"ScheduleStore",
+			ScheduleStore,
+			expect.arrayContaining(["date"]),
+		);
+	});
+
+	it("renders loading message when sessions are loading", () => {
+		asMock(useSessions).mockReturnValue([[], true]);
+		render(<SchedulePage />);
+		expect(screen.getByTestId("message")).toBeInTheDocument();
+	});
+
+	it.each([
+		["year", "year-view"],
+		["month", "month-view"],
+		["day", "day-view"],
+		["tracks", "tracks-view"],
+		["history", "history-view"],
+		["week", "week-view"],
+	])("switches to %s view from toolbar items", (mode, testId) => {
+		render(<SchedulePage />);
+		const viewGroup = asMock(useToolbar)
+			.mock.calls.at(-1)[0]
+			.items.find((i: any) => i.id === "viewGroup");
+		const { getByLabelText } = render(viewGroup.element);
+		const labels = {
+			year: "Year",
+			month: "Month",
+			week: "Week",
+			day: "Day",
+			tracks: "Tracks",
+			history: "History",
+		};
+		fireEvent.click(getByLabelText(labels[mode]));
+		expect(screen.getByTestId(testId)).toBeInTheDocument();
+	});
+
+	it("filters sessions by search name and tags", () => {
+		asMock(useSearch).mockReturnValue("alpha");
+		asMock(useSessions).mockReturnValue([
+			[
+				{ name: "Alpha Talk", tags: [] },
+				{ name: "Other", tags: ["alpha-tag"] },
+				{ name: "Skip", tags: ["beta"] },
+			],
+			false,
+		]);
+		render(<SchedulePage />);
+		expect(screen.getByTestId("week-view")).toBeInTheDocument();
+	});
+
+	it("toggles filter dialog from toolbar", () => {
+		render(<SchedulePage />);
+		const filterItem = asMock(useToolbar)
+			.mock.calls.at(-1)[0]
+			.items.find((i: any) => i.id === "filter");
+		filterItem.onClick();
+		expect(SessionsStore.update).toHaveBeenCalled();
+		const state = { showFilterDialog: false, filterBarManuallyEnabled: false };
+		asMock(SessionsStore.update).mock.calls.at(-1)[0](state);
+		expect(state.showFilterDialog).toBe(true);
+	});
+
+	it("reloads sessions after sync completes", () => {
+		asMock(SyncActiveStore.useState).mockImplementation((selector: any) => {
+			const state = { needsSessionReload: true, busy: false };
+			return typeof selector === "function" ? selector(state) : state;
+		});
+		render(<SchedulePage />);
+		expect(SessionsStore.update).toHaveBeenCalled();
+		expect(SyncActiveStore.update).toHaveBeenCalled();
+	});
+
+	it("sets signin mode when not signed in", () => {
+		asMock(Cookies.get).mockReturnValue(null);
+		render(<SchedulePage />);
+		expect(ScheduleStore.getRawState().mode).toBe("signin");
+	});
+
+	it("places filter bar on mobile and omits view group", () => {
+		asMock(useDeviceType).mockReturnValue("phone");
+		ScheduleStore.update((s) => {
+			s.viewMode = "tracks";
+		});
+		render(<SchedulePage />);
+		expect(screen.getByTestId("filter-bar")).toHaveAttribute(
+			"data-hide-years",
+			"false",
+		);
+		const items = asMock(useToolbar).mock.calls.at(-1)[0].items;
+		expect(items.find((i: any) => i.id === "viewGroup")).toBeUndefined();
+		expect(items.find((i: any) => i.id === "filter").location).toBe("mobile");
+	});
+
+	it("clears signin mode when signed in", () => {
+		asMock(Cookies.get).mockReturnValue("ok");
+		render(<SchedulePage />);
+		expect(ScheduleStore.getRawState().mode).toBe("");
+	});
+});

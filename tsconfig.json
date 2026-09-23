@@ -1,7 +1,7 @@
 {
 	"compilerOptions": {
-		"allowJs": true,
-		"checkJs": false,
+		"allowJs": false,
+		"allowImportingTsExtensions": true,
 		"esModuleInterop": true,
 		"forceConsistentCasingInFileNames": true,
 		"incremental": true,
@@ -25,10 +25,10 @@
 		"paths": {
 			"@components/*": ["src/components/*"],
 			"@ui/*": ["src/components/ui/*"],
-			"@ui": ["src/components/ui/index.js"],
+			"@ui": ["src/components/ui/index.ts"],
 			"@widgets/*": ["src/components/Widgets/*"],
 			"@icons/svg/*": ["src/components/Icons/svg/*"],
-			"@icons/Audio": ["src/components/Icons/Audio.js"],
+			"@icons/Audio": ["src/components/Icons/Audio.tsx"],
 			"@util/*": ["src/util/*"],
 			"@data/*": ["src/data/*"],
 			"@views/*": ["src/views/*"],
@@ -43,9 +43,16 @@
 		".next/types/**/*.ts",
 		"**/*.ts",
 		"**/*.tsx",
-		"**/*.js",
-		"**/*.jsx",
 		".next/dev/types/**/*.ts"
 	],
-	"exclude": ["node_modules", "public/sw.js", "public/workbox-*.js"]
+	"exclude": [
+		"node_modules",
+		"**/*.test.ts",
+		"**/*.test.tsx",
+		"**/*.spec.ts",
+		"**/*.spec.tsx",
+		"public/sw.js",
+		"public/workbox-*.js",
+		"public/fallback-*.js"
+	]
 }

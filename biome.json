@@ -5,6 +5,7 @@
 			"**",
 			"!**/public/fallback-*.js",
 			"!**/public/workbox-*.js",
+			"!**/public/noflash.js",
 			"!**/public/sw.js",
 			"!**/test_gzip.js",
 			"!**/.next/**",

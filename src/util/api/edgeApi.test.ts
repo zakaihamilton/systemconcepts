@@ -1,0 +1,195 @@
+import {
+	authenticateEdge,
+	enforceRateLimitEdge,
+	getClientIp,
+	scheduleApiCacheWrite,
+} from "./edgeApi";
+
+function searchParamsOf(entries: any) {
+	return new URLSearchParams(entries);
+}
+
+function jsonResponse(body: any, ok = true, status = ok ? 200 : 500) {
+	return Promise.resolve({
+		ok,
+		status,
+		json: () => Promise.resolve(body),
+	});
+}
+
+describe("authenticateEdge", () => {
+	beforeEach(() => {
+		global.fetch = jest.fn();
+	});
+
+	afterEach(() => {
+		jest.restoreAllMocks();
+	});
+
+	it("returns false when the id or token is missing", async () => {
+		await expect(
+			authenticateEdge(searchParamsOf({ id: "user" })),
+		).resolves.toBe(false);
+		await expect(
+			authenticateEdge(searchParamsOf({ token: "abc" })),
+		).resolves.toBe(false);
+		expect(global.fetch).not.toHaveBeenCalled();
+	});
+
+	it("returns true when the verify endpoint confirms the token", async () => {
+		asMock(global.fetch).mockResolvedValue(jsonResponse({ ok: true }));
+		await expect(
+			authenticateEdge(searchParamsOf({ id: "user", token: "abc" })),
+		).resolves.toBe(true);
+		expect(global.fetch).toHaveBeenCalledWith(
+			expect.stringContaining("/api/rss/verify"),
+			expect.objectContaining({ method: "POST" }),
+		);
+	});
+
+	it("returns false when the verify endpoint responds with ok: false", async () => {
+		asMock(global.fetch).mockResolvedValue(jsonResponse({ ok: false }));
+		await expect(
+			authenticateEdge(searchParamsOf({ id: "user", token: "abc" })),
+		).resolves.toBe(false);
+	});
+
+	it("returns false when the verify endpoint returns a non-ok status", async () => {
+		asMock(global.fetch).mockResolvedValue(jsonResponse(null, false, 401));
+		await expect(
+			authenticateEdge(searchParamsOf({ id: "user", token: "abc" })),
+		).resolves.toBe(false);
+	});
+
+	it("returns false when the fetch call throws", async () => {
+		asMock(global.fetch).mockRejectedValue(new Error("network down"));
+		await expect(
+			authenticateEdge(searchParamsOf({ id: "user", token: "abc" })),
+		).resolves.toBe(false);
+	});
+});
+
+describe("enforceRateLimitEdge", () => {
+	let originalNodeEnv: any;
+	let originalPlaywright: any;
+
+	beforeEach(() => {
+		originalNodeEnv = process.env.NODE_ENV;
+		originalPlaywright = process.env.PLAYWRIGHT;
+		Reflect.set(process.env, "NODE_ENV", "production");
+		delete process.env.PLAYWRIGHT;
+		global.fetch = jest.fn();
+	});
+
+	afterEach(() => {
+		if (originalNodeEnv === undefined)
+			Reflect.deleteProperty(process.env, "NODE_ENV");
+		else Reflect.set(process.env, "NODE_ENV", originalNodeEnv);
+		if (originalPlaywright === undefined) delete process.env.PLAYWRIGHT;
+		else process.env.PLAYWRIGHT = originalPlaywright;
+		jest.restoreAllMocks();
+	});
+
+	it("bypasses persistence in Playwright and local development", async () => {
+		process.env.PLAYWRIGHT = "1";
+		await expect(enforceRateLimitEdge("203.0.113.1")).resolves.toBe(true);
+		expect(global.fetch).not.toHaveBeenCalled();
+
+		process.env.PLAYWRIGHT = "0";
+		Reflect.set(process.env, "NODE_ENV", "development");
+		await expect(enforceRateLimitEdge("203.0.113.1")).resolves.toBe(true);
+		expect(global.fetch).not.toHaveBeenCalled();
+	});
+
+	it("returns false when no ip is provided", async () => {
+		await expect(enforceRateLimitEdge(null)).resolves.toBe(false);
+		expect(global.fetch).not.toHaveBeenCalled();
+	});
+
+	it("checks each request when the endpoint allows it", async () => {
+		asMock(global.fetch).mockResolvedValue(jsonResponse({ ok: true }));
+		await expect(enforceRateLimitEdge("203.0.113.2")).resolves.toBe(true);
+		expect(global.fetch).toHaveBeenCalledTimes(1);
+
+		await expect(enforceRateLimitEdge("203.0.113.2")).resolves.toBe(true);
+		expect(global.fetch).toHaveBeenCalledTimes(2);
+	});
+
+	it("checks every request after the endpoint denies it", async () => {
+		asMock(global.fetch).mockResolvedValue(jsonResponse({ ok: false }));
+		await expect(enforceRateLimitEdge("203.0.113.3")).resolves.toBe(false);
+		await expect(enforceRateLimitEdge("203.0.113.3")).resolves.toBe(false);
+		expect(global.fetch).toHaveBeenCalledTimes(2);
+	});
+
+	it("returns false when the endpoint responds with a non-ok status", async () => {
+		asMock(global.fetch).mockResolvedValue(jsonResponse(null, false, 500));
+		await expect(enforceRateLimitEdge("203.0.113.4")).resolves.toBe(false);
+	});
+
+	it("fails closed when the fetch call throws", async () => {
+		asMock(global.fetch).mockRejectedValue(new Error("network down"));
+		await expect(enforceRateLimitEdge("203.0.113.5")).resolves.toBe(false);
+	});
+
+	it("passes the configured limit and window to the endpoint", async () => {
+		asMock(global.fetch).mockResolvedValue(jsonResponse({ ok: true }));
+		await enforceRateLimitEdge("203.0.113.6", { limit: 10, windowMs: 5000 });
+		const [, options] = asMock(global.fetch).mock.calls[0];
+		expect(JSON.parse(options.body)).toEqual({
+			ip: "203.0.113.6",
+			limit: 10,
+			windowMs: 5000,
+		});
+	});
+
+	it("does not cache a rate-limit result for the request window", async () => {
+		asMock(global.fetch).mockResolvedValue(jsonResponse({ ok: true }));
+		await enforceRateLimitEdge("203.0.113.7");
+		await enforceRateLimitEdge("203.0.113.7");
+		expect(global.fetch).toHaveBeenCalledTimes(2);
+	});
+});
+
+describe("scheduleApiCacheWrite", () => {
+	beforeEach(() => {
+		global.fetch = jest.fn();
+	});
+
+	afterEach(() => {
+		jest.restoreAllMocks();
+	});
+
+	it("posts the cache write payload to the internal endpoint", () => {
+		asMock(global.fetch).mockResolvedValue({ ok: true });
+		scheduleApiCacheWrite("rss", "abc", "<xml/>");
+		expect(global.fetch).toHaveBeenCalledWith(
+			expect.stringContaining("/api/internal/api-cache"),
+			expect.objectContaining({
+				method: "POST",
+				body: JSON.stringify({ type: "rss", key: "abc", body: "<xml/>" }),
+			}),
+		);
+	});
+
+	it("swallows errors from the fetch call", async () => {
+		asMock(global.fetch).mockRejectedValue(new Error("network down"));
+		expect(() => scheduleApiCacheWrite("rss", "abc", "<xml/>")).not.toThrow();
+		await Promise.resolve();
+		await Promise.resolve();
+	});
+});
+
+describe("getClientIp", () => {
+	it("reads the vercel forwarded-for header", () => {
+		const request = {
+			headers: new Headers({ "x-vercel-forwarded-for": "198.51.100.4" }),
+		};
+		expect(getClientIp(request)).toBe("198.51.100.4");
+	});
+
+	it("returns unknown when the header is missing", () => {
+		const request = { headers: new Headers() };
+		expect(getClientIp(request)).toBe("unknown");
+	});
+});

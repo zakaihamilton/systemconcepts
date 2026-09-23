@@ -1,0 +1,512 @@
+import { logger as structuredLogger } from "@util/api/logger";
+import { stringToBinary } from "@util/data/binary";
+import { isBinaryFile, makePath } from "@util/data/path";
+import storage from "@util/storage/storage";
+import { readCompressedFileRaw } from "../bundle";
+import {
+	FILES_MANIFEST,
+	LOCAL_SYNC_PATH,
+	SYNC_BASE_PATH,
+	SYNC_BATCH_SIZE,
+} from "../constants";
+import { getFileInfo } from "../hash";
+import { addSyncLog } from "../logs";
+import { applyManifestUpdates } from "../manifest";
+import { lockMutex } from "../mutex";
+import type { SyncProgressTracker } from "../progressTracker";
+import { SyncActiveStore } from "../syncState";
+import { createSyncTrashId, moveFolderToTrash } from "../trash";
+
+const LOCAL_WRITE_TIMEOUT_MS = 30_000;
+
+function withTimeout(promise: any, ms: any, message: any) {
+	let timeoutId: any;
+	const timeout = new Promise((_, reject) => {
+		timeoutId = setTimeout(() => reject(new Error(message)), ms);
+	});
+	return Promise.race([promise, timeout]).finally(() =>
+		clearTimeout(timeoutId),
+	);
+}
+
+async function writeLocalFile(
+	localFilePath: any,
+	contentToWrite: any,
+	fileBasename: any,
+) {
+	addSyncLog(`[${fileBasename}] Writing local file…`, "verbose");
+	await withTimeout(
+		storage.writeFile(localFilePath, contentToWrite),
+		LOCAL_WRITE_TIMEOUT_MS,
+		`[${fileBasename}] Local write timed out after ${LOCAL_WRITE_TIMEOUT_MS / 1000}s`,
+	);
+	addSyncLog(`[${fileBasename}] Local file written.`, "verbose");
+}
+
+/**
+ * Helper function to download a single file
+ */
+async function downloadFile(
+	remoteFile: any,
+	localEntry: any,
+	createdFolders: any,
+	localPath: any,
+	remotePath: any,
+) {
+	const fileBasename = remoteFile.path;
+	const localFilePath = makePath(localPath, fileBasename);
+	const isBinary = isBinaryFile(localFilePath);
+
+	// Binary files are stored without .gz extension, non-binary files have .gz
+	let remoteFilePath = isBinary
+		? makePath(remotePath, fileBasename)
+		: makePath(remotePath, `${fileBasename}.gz`);
+
+	try {
+		let content;
+
+		if (isBinary) {
+			// Binary files: read directly without decompression
+			content = await storage.readFile(remoteFilePath);
+			if (content === null) {
+				// Legacy: try with .gz extension for backwards compatibility
+				remoteFilePath = makePath(remotePath, `${fileBasename}.gz`);
+				content = await readCompressedFileRaw(remoteFilePath, { strict: true });
+			}
+		} else {
+			// Non-binary files: read through compressed file handler
+			content = await readCompressedFileRaw(remoteFilePath, { strict: true });
+			if (content === null) {
+				// Try without .gz extension
+				remoteFilePath = makePath(remotePath, fileBasename);
+				content = await readCompressedFileRaw(remoteFilePath, { strict: true });
+			}
+		}
+
+		if (content === null) return null;
+		addSyncLog(
+			`[${fileBasename}] Remote content ready (${Math.round((content.length || 0) / 1024)}KB).`,
+			"verbose",
+		);
+
+		if (createdFolders) {
+			const folder = localFilePath.substring(0, localFilePath.lastIndexOf("/"));
+			if (!createdFolders.has(folder)) {
+				addSyncLog(`[${fileBasename}] Preparing local path…`, "verbose");
+				await storage.createFolderPath(localFilePath);
+				createdFolders.add(folder);
+			}
+		} else {
+			await storage.createFolderPath(localFilePath);
+		}
+
+		// For binary files, skip all JSON processing and write directly
+		if (isBinary) {
+			const unlock = await lockMutex({ id: localFilePath });
+			try {
+				// AWS returns binary files as base64 strings, convert back to binary
+				// Note: content is a base64 string from AWS, need to convert to binary for local storage
+				let binaryContent = content;
+				if (typeof content === "string") {
+					// Convert base64 string to Blob, then to ArrayBuffer for writing
+					const blob = stringToBinary(content);
+					binaryContent = new Uint8Array(await blob.arrayBuffer());
+				}
+				await writeLocalFile(localFilePath, binaryContent, fileBasename);
+			} finally {
+				unlock();
+			}
+
+			addSyncLog(`Downloaded: ${makePath(remotePath, fileBasename)}`, "info");
+			return {
+				...remoteFile,
+			};
+		}
+
+		// --- HASH VERIFICATION & PRETTY PRINTING (for non-binary files only) ---
+		let contentToWrite = content;
+		let finalHash = null;
+		let finalSize = 0;
+
+		// 1. Calculate hash of RAW content
+		const rawInfo = await getFileInfo(content);
+		finalHash = rawInfo.hash;
+		finalSize = rawInfo.size;
+
+		// 2. Try to pretty-print if small json
+		let prettyContent = null;
+		let prettyInfo = null;
+
+		if (content.length < 500 * 1024) {
+			// 500KB
+			try {
+				const obj = JSON.parse(content);
+				prettyContent = JSON.stringify(obj, null, 4);
+				prettyInfo = await getFileInfo(prettyContent);
+			} catch {
+				// Ignore parse errors
+			}
+		}
+
+		// 3. Decide which content to write
+		// If we have a remote hash, we MUST match it to avoid conflicts
+		if (remoteFile.hash) {
+			if (rawInfo.hash === remoteFile.hash) {
+				// Raw matches! Use raw to stay in sync.
+				addSyncLog(
+					`${fileBasename}: Matches RAW remote hash (${remoteFile.hash}). Writing raw.`,
+					"verbose",
+				);
+				contentToWrite = content;
+				finalHash = rawInfo.hash;
+				finalSize = rawInfo.size;
+			} else if (prettyInfo && prettyInfo.hash === remoteFile.hash) {
+				// Pretty matches! Use pretty.
+				addSyncLog(
+					`${fileBasename}: Matches PRETTY remote hash (${remoteFile.hash}). Writing pretty-printed.`,
+					"verbose",
+				);
+				contentToWrite = prettyContent;
+				finalHash = prettyInfo.hash;
+				finalSize = prettyInfo.size;
+			} else {
+				// Neither matches (rare corruption or different hashing?)
+				// Default to pretty if available for readability, otherwise raw
+				structuredLogger.warn(
+					`[Sync] Hash mismatch for ${fileBasename}. Remote: ${remoteFile.hash}, Raw: ${rawInfo.hash}, Pretty: ${prettyInfo?.hash}`,
+				);
+				if (prettyInfo) {
+					contentToWrite = prettyContent;
+					finalHash = prettyInfo.hash;
+					finalSize = prettyInfo.size;
+				}
+			}
+		} else {
+			// No remote hash? Default to pretty for readability
+			if (prettyInfo) {
+				addSyncLog(
+					`${fileBasename}: No remote hash. Defaulting to pretty-printed.`,
+					"verbose",
+				);
+				contentToWrite = prettyContent;
+				finalHash = prettyInfo.hash;
+				finalSize = prettyInfo.size;
+			}
+		}
+
+		const unlock = await lockMutex({ id: localFilePath });
+		try {
+			// Check if file has changed locally since sync started
+			// This prevents overwriting newer local changes with older remote files
+			if (await storage.exists(localFilePath)) {
+				const currentContent = await storage.readFile(localFilePath);
+				if (currentContent) {
+					const info = await getFileInfo(currentContent);
+
+					// Only treat as conflict if file is in manifest AND hash differs
+					// If file is not in manifest, just download it normally
+					if (localEntry && info.hash !== localEntry.hash) {
+						structuredLogger.warn(
+							`[Sync] Conflict detected for ${fileBasename}:`,
+						);
+						structuredLogger.warn(`  - File exists locally and in manifest`);
+						structuredLogger.warn(
+							`  - Hash mismatch: manifest=${localEntry.hash}, current=${info.hash}`,
+						);
+
+						const remoteVer = parseInt(remoteFile.version) || 0;
+						const localVer = parseInt(localEntry.version) || 0;
+						const newVer = Math.max(remoteVer, localVer) + 1;
+
+						addSyncLog(
+							`Conflict resolved: ${fileBasename} (local version bumped to ${newVer})`,
+							"warning",
+						);
+
+						return {
+							path: remoteFile.path,
+							hash: info.hash,
+							size: info.size,
+							version: newVer.toString(),
+						};
+					}
+				}
+			}
+
+			try {
+				await writeLocalFile(localFilePath, contentToWrite, fileBasename);
+			} catch (err: any) {
+				const errorStr = (err.message || String(err)).toLowerCase();
+				if (errorStr.includes("eisdir")) {
+					structuredLogger.warn(
+						`[Sync] Path ${localFilePath} is a directory, moving it to trash before writing the file.`,
+					);
+					await moveFolderToTrash(localPath, createSyncTrashId(), fileBasename);
+					await writeLocalFile(localFilePath, contentToWrite, fileBasename);
+					addSyncLog(`[${fileBasename}] Local path recovered.`, "verbose");
+				} else {
+					throw err;
+				}
+			}
+		} finally {
+			unlock();
+		}
+
+		addSyncLog(`Downloaded: ${makePath(remotePath, fileBasename)}`, "info");
+
+		// Return the actual properties of what we wrote
+		// This ensures the local manifest is accurate to what is on disk
+		return {
+			...remoteFile,
+			hash: finalHash,
+			size: finalSize,
+		};
+	} catch (err: any) {
+		structuredLogger.error(`[Sync] Failed to download ${fileBasename}:`, err);
+		addSyncLog(`Failed to download: ${fileBasename}`, "error");
+		return { failed: true, path: remoteFile.path };
+	}
+}
+
+/**
+ * Step 4: Download files that have higher version on remote
+ * Uses parallel batch processing for performance
+ */
+export async function downloadUpdates(
+	localManifest: any,
+	remoteManifest: any,
+	localPath = LOCAL_SYNC_PATH,
+	remotePath = SYNC_BASE_PATH,
+	canUpload = true,
+	progressTracker: Pick<SyncProgressTracker, "updateProgress"> | null = null,
+	restoreMissingFiles = false,
+) {
+	const start = performance.now();
+	addSyncLog("Step 4: Downloading updates...", "info");
+
+	try {
+		const localMap = new Map<string, any>(
+			(localManifest || []).map((f: any) => [f.path, f]),
+		);
+		const toDownload = [];
+		const createdFolders = new Set<any>();
+		const missingOnRemote: any = [];
+		const failedDownloads = [];
+		const updates = [];
+		let processedDownloads = 0;
+
+		// Collect files that need downloading
+		for (const remoteFile of remoteManifest) {
+			if (remoteFile.deleted) continue;
+			const localFile = localMap.get(remoteFile.path);
+			const remoteVer = parseInt(remoteFile.version) || 0;
+			const localVer = localFile ? parseInt(localFile.version) || 0 : 0;
+
+			structuredLogger.debug(
+				`[Sync] Check ${remoteFile.path}: remoteVer=${remoteVer}, localVer=${localVer}`,
+			);
+
+			if (remoteVer > localVer || !localFile) {
+				if (localFile && localFile.hash === remoteFile.hash) {
+					structuredLogger.debug(
+						`[Sync] Hash matches for ${remoteFile.path} (${localFile.hash}). Updating local manifest version to ${remoteFile.version} without downloading.`,
+					);
+					addSyncLog(
+						`Hash matches for ${remoteFile.path}. Version updated to ${remoteFile.version}.`,
+						"info",
+					);
+					updates.push({
+						...localFile,
+						version: remoteFile.version,
+					});
+				} else {
+					toDownload.push(remoteFile);
+				}
+			} else if (localFile.deleted) {
+				if (canUpload && !restoreMissingFiles) {
+					// Admin: Keep it deleted locally, skip download
+					structuredLogger.debug(
+						`[Sync] Skipping download for locally deleted file: ${remoteFile.path}`,
+					);
+				} else if (restoreMissingFiles) {
+					// Restore Missing Files Safety:
+					// If file is missing/deleted locally, we force restore it to avoid data loss on remote
+					structuredLogger.debug(
+						`[Sync] Restoring missing/deleted file (Safety Policy): ${remoteFile.path}`,
+					);
+					addSyncLog(`Safety Restore: ${remoteFile.path}`, "warning");
+					toDownload.push(remoteFile);
+				} else {
+					// Student/Visitor: Re-download to restore from remote
+					structuredLogger.debug(
+						`[Sync] Restoring locally deleted file from remote: ${remoteFile.path}`,
+					);
+					toDownload.push(remoteFile);
+				}
+			}
+		}
+
+		if (toDownload.length === 0) {
+			structuredLogger.debug(
+				"[Sync] Comparison complete, nothing to download. Remote Manifest:",
+				JSON.stringify(remoteManifest),
+			);
+			const updatedManifest = await applyManifestUpdates(
+				localManifest,
+				updates,
+			);
+			if (updates.length > 0) {
+				const manifestPath = makePath(localPath, FILES_MANIFEST);
+				const unlock = await lockMutex({ id: manifestPath });
+				try {
+					await storage.writeFile(
+						manifestPath,
+						JSON.stringify(updatedManifest, null, 4),
+					);
+				} finally {
+					unlock();
+				}
+			}
+			return {
+				manifest: updatedManifest,
+				hasChanges: false,
+				complete: true,
+				counts: { attempted: 0, succeeded: 0, failed: 0 },
+				cleanedRemoteManifest: remoteManifest,
+			};
+		}
+
+		addSyncLog(`Downloading ${toDownload.length} file(s)...`, "info");
+
+		if (progressTracker) {
+			progressTracker.updateProgress("downloadUpdates", {
+				processed: 0,
+				total: toDownload.length,
+			});
+		}
+
+		// Download in parallel batches
+		for (let i = 0; i < toDownload.length; i += SYNC_BATCH_SIZE) {
+			// Check for cancellation
+			if (SyncActiveStore.getRawState().stopping) {
+				addSyncLog("Download stopped by user", "warning");
+				break;
+			}
+			const batch = toDownload.slice(i, i + SYNC_BATCH_SIZE);
+			const progress = Math.min(i + batch.length, toDownload.length);
+			const percent = Math.round((progress / toDownload.length) * 100);
+
+			addSyncLog(
+				`Downloading ${progress}/${toDownload.length} (${percent}%)...`,
+				"info",
+			);
+
+			if (progressTracker) {
+				progressTracker.updateProgress("downloadUpdates", {
+					processed: progress,
+					total: toDownload.length,
+				});
+			}
+
+			const results = await Promise.all(
+				batch.map(async (remoteFile) => {
+					const localEntry = localMap.get(remoteFile.path);
+					const result = await downloadFile(
+						remoteFile,
+						localEntry,
+						createdFolders,
+						localPath,
+						remotePath,
+					);
+					// If download returned null, the file doesn't exist on remote (or read failed)
+					if (result === null) {
+						missingOnRemote.push(remoteFile);
+					} else if (result.failed) {
+						failedDownloads.push(remoteFile);
+					}
+					return result;
+				}),
+			);
+			processedDownloads += batch.length;
+
+			updates.push(...results.filter((result) => result && !result.failed));
+		}
+
+		// Clean remote manifest if we found missing files
+		let cleanedRemoteManifest = remoteManifest;
+		if (missingOnRemote.length > 0 && !SyncActiveStore.getRawState().stopping) {
+			addSyncLog(
+				`Found ${missingOnRemote.length} missing file(s) on remote, cleaning manifest...`,
+				"info",
+			);
+
+			const missingPaths: any = new Set(
+				missingOnRemote.map((f: any) => f.path),
+			);
+			cleanedRemoteManifest = remoteManifest.filter(
+				(f: any) => !missingPaths.has(f.path),
+			);
+
+			// Log each missing file
+			missingOnRemote.forEach((file: any) => {
+				addSyncLog(
+					`Removed from remote manifest: ${file.path} (file not found)`,
+					"info",
+				);
+			});
+
+			addSyncLog(
+				"Remote manifest cleanup deferred because missing files make the phase incomplete",
+				"warning",
+			);
+		}
+
+		// Apply all updates in a single operation
+		const updatedManifest = await applyManifestUpdates(localManifest, updates);
+		const failedCount = missingOnRemote.length + failedDownloads.length;
+		const unprocessedCount = toDownload.length - processedDownloads;
+
+		// Write updated manifest to disk
+		const manifestPath = makePath(localPath, FILES_MANIFEST);
+		const unlock = await lockMutex({ id: manifestPath });
+		try {
+			await storage.writeFile(
+				manifestPath,
+				JSON.stringify(updatedManifest, null, 4),
+			);
+		} finally {
+			unlock();
+		}
+
+		const duration = ((performance.now() - start) / 1000).toFixed(1);
+		addSyncLog(
+			`✓ Downloaded ${updates.length} file(s) in ${duration}s`,
+			updates.length > 0 ? "success" : "info",
+		);
+		if (failedCount + unprocessedCount > 0) {
+			addSyncLog(
+				`${failedCount + unprocessedCount} file(s) were not downloaded and will be retried`,
+				"warning",
+			);
+		}
+
+		return {
+			manifest: updatedManifest,
+			hasChanges: updates.length > 0,
+			complete:
+				failedCount === 0 &&
+				unprocessedCount === 0 &&
+				!SyncActiveStore.getRawState().stopping,
+			counts: {
+				attempted: processedDownloads,
+				succeeded: processedDownloads - failedCount,
+				failed: failedCount + unprocessedCount,
+			},
+			cleanedRemoteManifest,
+		};
+	} catch (err: any) {
+		structuredLogger.error("[Sync] Download failed:", err);
+		addSyncLog(`Download failed: ${err.message}`, "error");
+		throw err;
+	}
+}

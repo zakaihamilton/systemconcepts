@@ -1,0 +1,85 @@
+import storage from "@util/storage/storage";
+import { addSyncLog } from "../logs";
+import { removeDeletedFiles } from "./removeDeletedFiles";
+
+jest.mock("@util/storage/storage", () => ({
+	__esModule: true,
+	default: {
+		exists: jest.fn(),
+		deleteFile: jest.fn(),
+		writeFile: jest.fn(),
+	},
+}));
+
+jest.mock("../logs", () => ({ addSyncLog: jest.fn() }));
+
+describe("removeDeletedFiles", () => {
+	beforeEach(() => {
+		jest.clearAllMocks();
+	});
+
+	it("preserves previously synced files absent from the manifest for admins", async () => {
+		const remoteManifest = Object.assign([], { loadedFromManifest: true });
+		const localManifest = [
+			{ path: "/bundle.json", version: "4" },
+			{ path: "/american/2026.json", version: "3" },
+		];
+
+		const result: any = await removeDeletedFiles(
+			localManifest,
+			remoteManifest,
+			"local/sync",
+			false,
+		);
+
+		expect(storage.deleteFile).not.toHaveBeenCalled();
+		expect(storage.writeFile).not.toHaveBeenCalled();
+		expect(result).toEqual({ manifest: localManifest, hasChanges: false });
+		expect(addSyncLog).toHaveBeenCalledWith(
+			"Keeping 2 local file(s) absent from the remote manifest for reconciliation",
+			"warning",
+		);
+	});
+
+	it("skips deletion when the remote manifest is missing", async () => {
+		const localManifest = [{ path: "/bundle.json" }];
+		const remoteManifest: any = [];
+
+		const result: any = await removeDeletedFiles(localManifest, remoteManifest);
+
+		expect(result).toEqual({ manifest: localManifest, hasChanges: false });
+		expect(addSyncLog).toHaveBeenCalledWith(
+			"Remote manifest missing/empty - skipping deletion for safety",
+			"warning",
+		);
+	});
+
+	it("skips deletion when the remote manifest came from a listing", async () => {
+		const localManifest = [{ path: "/bundle.json" }];
+		const remoteManifest = Object.assign([{ path: "/bundle.json" }], {
+			loadedFromManifest: false,
+		});
+
+		await removeDeletedFiles(localManifest, remoteManifest);
+
+		expect(addSyncLog).toHaveBeenCalledWith(
+			"Remote manifest generated from listing - skipping deletion for safety",
+			"warning",
+		);
+	});
+
+	it("reports when every local file remains in the remote manifest", async () => {
+		const localManifest = [{ path: "/bundle.json" }];
+		const remoteManifest = Object.assign([{ path: "/bundle.json" }], {
+			loadedFromManifest: true,
+		});
+
+		const result = await removeDeletedFiles(localManifest, remoteManifest);
+
+		expect(result).toEqual({ manifest: localManifest, hasChanges: false });
+		expect(addSyncLog).toHaveBeenCalledWith(
+			"✓ No deleted files to remove",
+			"info",
+		);
+	});
+});

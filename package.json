@@ -3,25 +3,26 @@
 	"version": "2.4.8",
 	"private": true,
 	"scripts": {
-		"dev": "next dev",
-		"build": "next build --webpack",
-		"analyze": "ANALYZE=true next build --webpack",
+		"dev": "yarn build:browser-runtime && next dev",
+		"build:browser-runtime": "node --experimental-strip-types scripts/build-browser-runtime.ts",
+		"build": "yarn build:browser-runtime && next build --webpack",
+		"analyze": "yarn build:browser-runtime && ANALYZE=true next build --webpack",
 		"start": "next start",
 		"lint": "biome check .",
-		"typecheck": "tsc --noEmit",
-		"test": "jest",
-		"test:watch": "jest --watch",
+		"typecheck": "tsc --noEmit && tsc --noEmit --project tsconfig.tests.json",
+		"test": "yarn build:browser-runtime && jest --runInBand",
+		"test:watch": "yarn build:browser-runtime && jest --watch",
 		"test:e2e": "playwright test",
-		"test:coverage": "jest --coverage --coverageReporters=text-summary",
+		"test:coverage": "yarn build:browser-runtime && jest --runInBand --coverage --coverageReporters=text-summary",
 		"audit:dependencies": "npm audit --omit=dev --audit-level=high --package-lock=false",
-		"db:indexes": "node scripts/db-indexes.mjs",
+		"db:indexes": "node --experimental-strip-types scripts/db-indexes.ts",
 		"verify": "yarn lint && yarn typecheck && yarn test --runInBand && yarn test:coverage && yarn build && yarn test:e2e",
-		"full-start": "next build --webpack && next start",
+		"full-start": "yarn build && next start",
 		"health": "repnix check",
 		"health:dead-code": "knip",
 		"health:duplication": "jscpd app src",
 		"health:coverage": "c8 --all --reporter=text yarn test",
-		"health:architecture": "depcruise --output-type json --config -- app src",
+		"health:architecture": "depcruise --output-type json --config .dependency-cruiser.json app src",
 		"health:documentation": "markdownlint-cli2 \"**/*.md\" \"#node_modules\""
 	},
 	"dependencies": {
@@ -29,7 +30,7 @@
 		"@aws-sdk/s3-request-presigner": "^3.1050.0",
 		"@fontsource/dseg7": "^4.5.4",
 		"@simplewebauthn/browser": "^13.3.0",
-		"@simplewebauthn/server": "^13.3.0",
+		"@simplewebauthn/server": "^13.3.3",
 		"@vercel/analytics": "^2.0.1",
 		"@vercel/speed-insights": "^2.0.0",
 		"base64-arraybuffer-es6": "^3.1.0",
@@ -39,8 +40,8 @@
 		"js-cookie": "^3.0.7",
 		"jszip": "^3.10.1",
 		"mongodb": "^7.2.0",
-		"next": "16.2.11",
-		"nodemailer": "^9.0.1",
+		"next": "16.3.6",
+		"nodemailer": "^10.0.10",
 		"p-limit": "^7.3.0",
 		"pako": "^2.1.0",
 		"pullstate": "^1.25.0",
@@ -56,8 +57,9 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.4.15",
-		"@next/bundle-analyzer": "16.2.11",
+		"@next/bundle-analyzer": "16.3.6",
 		"@playwright/test": "^1.60.0",
+		"@svgr/core": "8.1.0",
 		"@svgr/webpack": "^8.1.0",
 		"@testing-library/dom": "^10.4.1",
 		"@testing-library/jest-dom": "^6.9.1",
@@ -79,20 +81,24 @@
 		"yarn-upgrade-all": "^0.8.1"
 	},
 	"optionalDependencies": {
-		"@next/swc-linux-x64-gnu": "16.2.11"
+		"@next/swc-linux-x64-gnu": "16.3.6"
 	},
 	"resolutions": {
-		"fast-uri": "3.1.5",
+		"baseline-browser-mapping": "2.11.25",
+		"browserslist": "4.29.0",
+		"fast-uri": "3.1.8",
 		"nanoid": "3.3.18",
 		"postcss": "8.5.23",
-		"sharp": "0.35.3"
+		"sharp": "0.35.4"
 	},
 	"overrides": {
+		"baseline-browser-mapping": "2.11.25",
+		"browserslist": "4.29.0",
 		"glob": "^13.0.0",
-		"fast-uri": "3.1.5",
+		"fast-uri": "3.1.8",
 		"nanoid": "3.3.18",
 		"postcss": "8.5.23",
-		"sharp": "0.35.3"
+		"sharp": "0.35.4"
 	},
 	"packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }

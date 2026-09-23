@@ -1,0 +1,66 @@
+import { MainStore } from "@components/Main/MainStore";
+import ViewTransition from "@components/ViewTransition";
+import pages from "@data/views";
+import { useSize } from "@util/browser/size";
+import { useActivePages, useParentParams } from "@util/domain/views";
+import { createContext, useEffect, useRef, useState } from "react";
+import styles from "./Content.module.css";
+
+export const ContentSize = createContext<any>(undefined);
+
+export default function Content() {
+	const activePages = useActivePages();
+	const parentParams = useParentParams();
+	const { hash, showSideBar } = MainStore.useState();
+	const activePage = activePages[activePages.length - 1];
+	const ref = useRef<any>(null);
+	const size = useSize(ref, [showSideBar, hash]);
+	const [playerPage, setPlayerPage] = useState<any>(null);
+	const showPlayer = activePage?.id === "player";
+	useEffect(() => {
+		if (!activePage) {
+			return;
+		}
+		const timerHandle = setTimeout(() => {
+			if (showPlayer) {
+				setPlayerPage((prev: any) => {
+					const newPage = { ...activePage, ...parentParams };
+					if (
+						prev &&
+						["id", "url", "group", "name"].every(
+							(key) => prev[key] === newPage[key],
+						)
+					) {
+						return prev;
+					}
+					return newPage;
+				});
+			}
+		}, 0);
+		return () => clearTimeout(timerHandle);
+	}, [showPlayer, activePage, parentParams]);
+	if (!activePage) {
+		return null;
+	}
+	const { Component } = activePage;
+	const showPage = activePage.id !== "player" && Component;
+	const Player = pages.find((page) => page.id === "player")?.Component;
+	return (
+		<ContentSize.Provider value={size}>
+			<div className={styles.root}>
+				<div ref={ref} className={styles.pageContainer}>
+					<main className={styles.page}>
+						{playerPage && Player && (
+							<Player key={playerPage.url} show={showPlayer} {...playerPage} />
+						)}
+						{showPage && (
+							<ViewTransition transitionKey={activePage.url || activePage.id}>
+								<Component {...activePage} />
+							</ViewTransition>
+						)}
+					</main>
+				</div>
+			</div>
+		</ContentSize.Provider>
+	);
+}

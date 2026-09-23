@@ -1,0 +1,34 @@
+import { addDate } from "@util/data/date";
+import Day from "../Day";
+
+export default function Week({
+	sessions,
+	month,
+	date,
+	row,
+	dateFormatter,
+	playingSession,
+	collapsedGroups,
+	onToggleGroup,
+}: any) {
+	const numDays = 7;
+	const days = new Array(numDays).fill(0).map((_, index) => {
+		const day = addDate(date, index);
+		return (
+			<Day
+				sessions={sessions}
+				key={index}
+				month={month}
+				column={index + 1}
+				row={row}
+				count={numDays}
+				date={day}
+				dateFormatter={dateFormatter}
+				playingSession={playingSession}
+				collapsedGroups={collapsedGroups}
+				onToggleGroup={onToggleGroup}
+			/>
+		);
+	});
+	return <>{days}</>;
+}

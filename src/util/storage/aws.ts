@@ -1,0 +1,555 @@
+import {
+	CopyObjectCommand,
+	DeleteObjectCommand,
+	GetObjectCommand,
+	HeadObjectCommand,
+	ListObjectsV2Command,
+	PutObjectCommand,
+	S3Client,
+} from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { lockMutex } from "@sync/mutex";
+import { logger as structuredLogger } from "@util/api/logger";
+import { getSafeError } from "@util/api/safeError";
+import { isBinaryFile } from "@util/data/path";
+import fs from "fs";
+import pLimit from "p-limit";
+
+let s3Client: any = null;
+
+export async function getDownloadUrl({
+	path,
+	bucketName = process.env.AWS_BUCKET,
+	expiresIn = 3600,
+	responseContentDisposition,
+}: any) {
+	validatePathAccess(path);
+	const s3 = await getS3({});
+	const bucket = bucketName;
+	const key = normalizePath(path);
+
+	const command = new GetObjectCommand({
+		Bucket: bucket,
+		Key: key,
+		...(responseContentDisposition && {
+			ResponseContentDisposition: responseContentDisposition,
+		}),
+	});
+
+	return await getSignedUrl(s3, command, {
+		expiresIn,
+	});
+}
+
+export async function getS3(params: any) {
+	const unlock = await lockMutex({ id: "s3" });
+	try {
+		if (s3Client) {
+			return s3Client;
+		}
+		structuredLogger.debug("getS3: initializing s3Client");
+
+		const { endpoint, region } = params || {};
+		let finalEndpoint = endpoint || process.env.AWS_ENDPOINT;
+		const finalRegion = region || "us-east-1";
+
+		if (finalEndpoint) {
+			if (!finalEndpoint.startsWith("http")) {
+				finalEndpoint = `https://${finalEndpoint}`;
+			}
+			try {
+				new URL(finalEndpoint);
+			} catch (_err: any) {
+				structuredLogger.error("getS3: Invalid endpoint URL:", finalEndpoint);
+				// Fallback to undefined to let AWS SDK use defaults if appropriate,
+				// or let new S3Client throw with a clear error
+			}
+		}
+
+		structuredLogger.debug("getS3: initializing s3Client", {
+			finalEndpoint,
+			finalRegion,
+		});
+
+		const accessKeyId = process.env.AWS_ID;
+		const secretAccessKey = process.env.AWS_SECRET;
+
+		structuredLogger.debug("getS3: credentials check", {
+			hasAccessKey: !!accessKeyId,
+			hasSecretKey: !!secretAccessKey,
+			accessKeyLength: accessKeyId ? accessKeyId.length : 0,
+		});
+
+		if (!accessKeyId || !secretAccessKey) {
+			structuredLogger.error(
+				"getS3: Missing AWS credentials! Check AWS_ID and AWS_SECRET in .env",
+			);
+		}
+
+		s3Client = new S3Client({
+			endpoint: finalEndpoint,
+			region: "sfo3",
+			...(accessKeyId && secretAccessKey
+				? { credentials: { accessKeyId, secretAccessKey } }
+				: {}),
+			forcePathStyle: true,
+		});
+		structuredLogger.debug(
+			"getS3: created s3Client",
+			typeof s3Client,
+			typeof s3Client.send,
+		);
+		return s3Client;
+	} finally {
+		unlock();
+	}
+}
+
+/**
+ * Helper to parse S3 location strings.
+ * Supports "bucket/key" or just "key" (uses default bucket).
+ */
+function parseUrl(url: any) {
+	if (!url) return [process.env.AWS_BUCKET, ""];
+	const parts = url.split("/");
+	// If it looks like a full path "bucket/folder/file"
+	if (parts.length > 1 && !url.startsWith("/")) {
+		return [parts[0], parts.slice(1).join("/")];
+	}
+	// Default to environment bucket if just a key is provided
+	return [process.env.AWS_BUCKET, url];
+}
+
+/**
+ * Normalize path by removing leading slash
+ */
+function normalizePath(path: any) {
+	if (!path) return path;
+	return path.startsWith("/") ? path.substring(1) : path;
+}
+
+/**
+ * Validate path access to prevent traversal and restricted folder access
+ */
+export function validatePathAccess(path: any) {
+	if (!path) return; // Allow empty path (root listing) if logical, or throw if strict.
+
+	// Decode first to ensure %2e%2e is caught as ..
+	const decoded = decodeURIComponent(path);
+	const normalized = normalizePath(decoded).replace(/^\/+/, "");
+
+	// 3. Security: Robust traversal check
+	if (normalized.split("/").includes("..")) {
+		throw new Error("ACCESS_DENIED");
+	}
+
+	// Block private folder access
+	if (normalized.startsWith("private/") || normalized === "private") {
+		throw new Error("ACCESS_DENIED");
+	}
+}
+
+/**
+ * Normalize and authorize an object path used by the public session-content
+ * endpoints. Those endpoints must never be able to read the personal sync
+ * namespace merely because the caller has a student session.
+ */
+export function normalizeSessionContentPath(path: any) {
+	if (typeof path !== "string" || !path) {
+		throw new Error("ACCESS_DENIED");
+	}
+
+	let normalized;
+	try {
+		normalized = decodeURIComponent(path).replace(/^\/+/, "");
+	} catch {
+		throw new Error("ACCESS_DENIED");
+	}
+
+	// Session metadata may contain either the storage key or the legacy virtual
+	// device-prefixed form. S3 receives the key without that device prefix.
+	if (normalized.startsWith("aws/")) {
+		normalized = normalized.slice("aws/".length);
+	}
+
+	validatePathAccess(normalized);
+	if (!normalized.startsWith("sessions/")) {
+		throw new Error("ACCESS_DENIED");
+	}
+	return normalized;
+}
+
+export async function uploadFile({
+	from,
+	to,
+	bucketName = process.env.AWS_BUCKET,
+}: any) {
+	const s3 = await getS3({});
+	const bucket = bucketName;
+	const key = normalizePath(to);
+
+	// Note: In Next.js (Serverless), 'from' must be in /tmp/ or accessible via fs.
+	if (!fs.existsSync(from)) {
+		throw new Error(`Source file not found: ${from}`);
+	}
+
+	const fileStream = fs.createReadStream(from);
+	const uploadParams = {
+		Bucket: bucket,
+		Key: key,
+		Body: fileStream,
+	};
+	return await s3.send(new PutObjectCommand(uploadParams));
+}
+
+export async function downloadFile({
+	from,
+	to,
+	bucketName = process.env.AWS_BUCKET,
+}: any) {
+	const s3 = await getS3({});
+	const bucket = bucketName;
+	const key = from;
+
+	const downloadParams = {
+		Bucket: bucket,
+		Key: key,
+	};
+
+	const response = await s3.send(new GetObjectCommand(downloadParams));
+
+	// 4. Stability: Use pipeline or simple write for Next.js context
+	// Direct pipe can be risky if error handling isn't attached to both streams.
+	const fileStream = fs.createWriteStream(to);
+
+	// Readable.fromWeb or simple pipe for Node >= 18
+	if (response.Body.pipe) {
+		response.Body.pipe(fileStream);
+	} else {
+		// Fallback for some SDK versions or mocked streams
+		const buffer = await response.Body.transformToByteArray();
+		fs.writeFileSync(to, buffer);
+		return;
+	}
+
+	await new Promise((resolve, reject) => {
+		fileStream.on("finish", resolve);
+		fileStream.on("error", reject);
+		response.Body.on("error", reject);
+	});
+}
+
+export async function uploadData({
+	path,
+	data,
+	bucketName = process.env.AWS_BUCKET,
+}: any) {
+	const s3 = await getS3({});
+	const bucket = bucketName;
+	const key = normalizePath(path);
+
+	const uploadParams = {
+		Bucket: bucket,
+		Key: key,
+		Body: data,
+	};
+	return await s3.send(new PutObjectCommand(uploadParams));
+}
+
+export async function downloadData({
+	path,
+	binary,
+	bucketName = process.env.AWS_BUCKET,
+}: any) {
+	const s3 = await getS3({});
+	const bucket = bucketName;
+	const key = normalizePath(path);
+
+	const downloadParams = {
+		Bucket: bucket,
+		Key: key,
+	};
+
+	const response = await s3.send(new GetObjectCommand(downloadParams));
+
+	// 5. Memory Optimization: Use SDK built-in transform methods
+	if (binary) {
+		const uint8Array = await response.Body.transformToByteArray();
+		// Convert Uint8Array to Buffer for compatibility with existing code
+		return Buffer.from(uint8Array);
+	}
+	return await response.Body.transformToString();
+}
+
+export async function copyFile(from: any, to: any) {
+	const [fromBucketName, fromPath] = parseUrl(from);
+	const [toBucketName, toPath] = parseUrl(to);
+
+	const s3 = await getS3({});
+
+	// CopySource must be URL encoded, but the slash between bucket and key must remain
+	const copyParams = {
+		Bucket: toBucketName,
+		CopySource: `${fromBucketName}/${encodeURIComponent(fromPath)}`,
+		Key: toPath,
+	};
+	return await s3.send(new CopyObjectCommand(copyParams));
+}
+
+export async function moveFile({
+	from,
+	to,
+	bucketName = process.env.AWS_BUCKET,
+}: any) {
+	const s3 = await getS3({});
+
+	// 6. Bug Fix: Don't encode the slash between Bucket and Key
+	const encodedSource = `${bucketName}/${encodeURIComponent(from)}`;
+
+	const copyParams = {
+		Bucket: bucketName,
+		CopySource: encodedSource,
+		Key: to,
+	};
+
+	const copyResponse = await s3.send(new CopyObjectCommand(copyParams));
+	await deleteFile({ path: from, bucketName });
+	return copyResponse;
+}
+
+export async function deleteFile({
+	path,
+	bucketName = process.env.AWS_BUCKET,
+}: any) {
+	const s3 = await getS3({});
+	const bucket = bucketName;
+	const key = normalizePath(path);
+
+	const deleteParams = {
+		Bucket: bucket,
+		Key: key,
+	};
+	return await s3.send(new DeleteObjectCommand(deleteParams));
+}
+
+export async function metadataInfo({
+	path,
+	bucketName = process.env.AWS_BUCKET,
+}: any) {
+	path = normalizePath(path);
+	const s3 = await getS3({});
+	const bucket = bucketName;
+	const key = path;
+
+	try {
+		const headParams = { Bucket: bucket, Key: key };
+		const headResponse = await s3.send(new HeadObjectCommand(headParams));
+		const name = path.split("/").pop();
+		return {
+			type: headResponse.ContentType,
+			name,
+			size: headResponse.ContentLength,
+			date: headResponse.LastModified?.valueOf(),
+		};
+	} catch {
+		// If file not found, check if it is a folder (CommonPrefixes)
+		const listParams = {
+			Bucket: bucket,
+			Delimiter: "/",
+			Prefix: key ? key + "/" : "",
+			MaxKeys: 1,
+		};
+
+		try {
+			const listResponse = await s3.send(new ListObjectsV2Command(listParams));
+			if (
+				(listResponse.Contents && listResponse.Contents.length > 0) ||
+				(listResponse.CommonPrefixes && listResponse.CommonPrefixes.length > 0)
+			) {
+				const name = path.split("/").pop();
+				return {
+					type: "application/x-directory",
+					name,
+				};
+			}
+		} catch {
+			// Ignore list errors, return null
+		}
+	}
+	return null;
+}
+
+export async function list({
+	path,
+	bucketName = process.env.AWS_BUCKET,
+	includeCounts = false,
+}: any) {
+	path = normalizePath(path);
+
+	const s3 = await getS3({});
+	const bucket = bucketName;
+	const key = path;
+
+	const items: any = [];
+	let continuationToken: string | undefined;
+	const seenTokens = new Set<string>();
+	let pages = 0;
+	const MAX_LIST_PAGES = 1000;
+
+	do {
+		if (continuationToken) {
+			if (seenTokens.has(continuationToken)) {
+				break;
+			}
+			seenTokens.add(continuationToken);
+		}
+		if (++pages > MAX_LIST_PAGES) {
+			break;
+		}
+		const listParams: import("@aws-sdk/client-s3").ListObjectsV2CommandInput = {
+			Bucket: bucket,
+			Delimiter: "/",
+			Prefix: key ? key + "/" : "",
+			ContinuationToken: continuationToken,
+		};
+		const listResponse = await s3.send(new ListObjectsV2Command(listParams));
+
+		listResponse.CommonPrefixes?.forEach((prefix: any) => {
+			const name = prefix.Prefix.substring(0, prefix.Prefix.length - 1)
+				.split("/")
+				.pop();
+			// Block private folder from listing
+			if (name === "private") return;
+
+			items.push({ type: "dir", name });
+		});
+
+		listResponse.Contents?.forEach((content: any) => {
+			const name = content.Key.split("/").pop();
+			if (!name) return;
+
+			const type =
+				content.ContentType === "application/x-directory" ? "dir" : "file";
+			items.push({
+				name,
+				stat: {
+					type,
+					size: content.Size,
+					mtimeMs: content.LastModified && content.LastModified.valueOf(),
+				},
+			});
+		});
+
+		continuationToken = listResponse.NextContinuationToken;
+	} while (continuationToken);
+
+	if (includeCounts) {
+		const limit = pLimit(10);
+		await Promise.all(
+			items
+				.filter((item: any) => item.type === "dir")
+				.map((item: any) =>
+					limit(async () => {
+						const childPrefix = `${key ? `${key}/` : ""}${item.name}/`;
+						const response = await s3.send(
+							new ListObjectsV2Command({
+								Bucket: bucket,
+								Delimiter: "/",
+								Prefix: childPrefix,
+							}),
+						);
+						item.count =
+							(response.CommonPrefixes?.length || 0) +
+							(response.Contents || []).filter(
+								(content: any) => content.Key !== childPrefix,
+							).length;
+					}),
+				),
+		);
+	}
+
+	return items;
+}
+
+export async function handleRequest({ readOnly, req, path }: any) {
+	const headers = req.headers || {};
+
+	const resolvePath = () => {
+		if (path !== undefined) return path;
+		const headerPath = headers.path;
+		return headerPath ? decodeURIComponent(headerPath) : headerPath;
+	};
+
+	const currentPath = resolvePath();
+
+	// 7. Security: Always validate path traversal regardless of method
+	// (Previously only validated in GET readOnly, allowing PUT/DELETE exploits)
+	if (currentPath) {
+		validatePathAccess(currentPath);
+	}
+
+	if (req.method === "GET") {
+		const query = req.query || {};
+		let binary = query.binary || headers.binary;
+		let type = query.type || headers.type;
+		let exists = query.exists || headers.exists;
+
+		if (exists) {
+			const metadata = await metadataInfo({ path: currentPath });
+			if (metadata) {
+				const type =
+					metadata.type === "application/x-directory" ? "dir" : "file";
+				return { ...metadata, type };
+			}
+			return {};
+		}
+
+		try {
+			if (type === "dir") {
+				return await list({
+					path: currentPath,
+					includeCounts: query.counts === "1" || headers.counts === "1",
+				});
+			} else {
+				return await downloadData({ path: currentPath, binary });
+			}
+		} catch (err: any) {
+			if (
+				err?.name === "NoSuchKey" ||
+				err?.Code === "NoSuchKey" ||
+				err?.$metadata?.httpStatusCode === 404
+			) {
+				return "";
+			}
+			structuredLogger.error("get error: ", err);
+			return { err: getSafeError(err) };
+		}
+	} else if (req.method === "PUT") {
+		if (readOnly) {
+			throw { message: "READ_ONLY_ACCESS", status: 403 };
+		}
+
+		// Handle batch uploads
+		const items = Array.isArray(req.body) ? req.body : [req.body]; // Handle single or array
+
+		for (const item of items) {
+			let { body, path: itemPath } = item;
+
+			// Validate specific item path
+			validatePathAccess(itemPath);
+
+			if (typeof body === "string" && isBinaryFile(itemPath)) {
+				body = Buffer.from(body, "base64");
+			}
+			await uploadData({ path: itemPath, data: body });
+		}
+		return { success: true };
+	} else if (req.method === "DELETE") {
+		if (readOnly) {
+			throw { message: "READ_ONLY_ACCESS", status: 403 };
+		}
+		// validatePathAccess was already called on 'currentPath' at start of function
+		await deleteFile({ path: currentPath });
+		return { success: true };
+	}
+}

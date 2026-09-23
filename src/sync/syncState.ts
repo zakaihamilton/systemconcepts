@@ -1,0 +1,108 @@
+import { createStore } from "@util/browser/store";
+import Cookies from "js-cookie";
+import { clearLegacySyncStorage, getUserSyncStorageKey } from "./userStorage";
+
+export const SyncActiveStore = createStore({
+	active: 0,
+	counter: 0,
+	busy: false,
+	lastSynced: 0,
+	lastSyncTime: 0, // Track when we last attempted/completed a sync for auto-sync logic
+	progress: { total: 0, processed: 0 },
+	currentBundle: null, // Track which bundle is currently being synced
+	logs: [], // Store sync milestones
+	lastDuration: 0, // Track duration of last successful sync
+	startTime: 0, // Track when current sync started
+	needsSessionReload: false, // Signal that sessions should be reloaded
+	phase: null, // Track current sync phase (main, library, personal)
+	libraryUpdateCounter: 0, // Signal that library content changed
+	personalUpdateCounter: 0, // Signal that personal files (e.g. history) changed
+	personalSyncBusy: false, // Track personal sync status
+	personalSyncError: null,
+	locked: false, // Track if sync upload is locked
+	autoSync: true, // Track if automatic sync is enabled (default: true)
+	stopping: false, // Track if sync is currently being stopped
+	debugLevel: "info", // Track debug level (info/verbose)
+});
+
+export const UpdateSessionsStore = createStore({
+	busy: false,
+	status: [],
+	start: 0,
+	showUpdateDialog: false,
+});
+
+export function loadUserSyncState(userId = Cookies.get("id")) {
+	if (typeof window === "undefined") return;
+	clearLegacySyncStorage();
+	const storageKey = getUserSyncStorageKey("sync_lastSyncTime", userId);
+	const lastSyncTime = Number.parseInt(
+		(storageKey && localStorage.getItem(storageKey)) || "0",
+		10,
+	);
+	SyncActiveStore.update((s) => {
+		s.lastSyncTime =
+			Number.isFinite(lastSyncTime) && lastSyncTime > 0 ? lastSyncTime : 0;
+		s.lastSynced = 0;
+		s.lastDuration = 0;
+		s.counter = 0;
+		s.busy = false;
+		s.phase = null;
+		s.logs = [];
+	});
+}
+
+if (typeof window !== "undefined") {
+	clearLegacySyncStorage();
+	const locked = localStorage.getItem("sync_locked");
+	if (locked) {
+		SyncActiveStore.update((s) => {
+			s.locked = locked === "true";
+		});
+	}
+
+	const autoSync = localStorage.getItem("sync_autoSync");
+	if (autoSync !== null) {
+		SyncActiveStore.update((s) => {
+			s.autoSync = autoSync === "true";
+		});
+	}
+
+	loadUserSyncState();
+
+	const debugLevel = localStorage.getItem("sync_debugLevel");
+	if (debugLevel !== null) {
+		SyncActiveStore.update((s) => {
+			s.debugLevel = debugLevel;
+		});
+	}
+
+	SyncActiveStore.subscribe(
+		(s) => s.locked,
+		(locked) => {
+			localStorage.setItem("sync_locked", String(locked));
+		},
+	);
+
+	SyncActiveStore.subscribe(
+		(s) => s.autoSync,
+		(autoSync) => {
+			localStorage.setItem("sync_autoSync", String(autoSync));
+		},
+	);
+
+	SyncActiveStore.subscribe(
+		(s) => s.lastSyncTime,
+		(lastSyncTime) => {
+			const storageKey = getUserSyncStorageKey("sync_lastSyncTime");
+			if (storageKey) localStorage.setItem(storageKey, String(lastSyncTime));
+		},
+	);
+
+	SyncActiveStore.subscribe(
+		(s) => s.debugLevel,
+		(debugLevel) => {
+			localStorage.setItem("sync_debugLevel", debugLevel);
+		},
+	);
+}

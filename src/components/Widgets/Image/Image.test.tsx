@@ -1,0 +1,235 @@
+import {
+	act,
+	fireEvent,
+	render,
+	screen,
+	waitFor,
+} from "@testing-library/react";
+import { useFetchJSON } from "@util/api/fetch";
+import ImageWidget from "./index";
+
+jest.mock("@util/api/fetch");
+jest.mock("@widgets/Progress", () => () => <div data-testid="progress" />);
+jest.mock("@ui/Link", () => ({
+	__esModule: true,
+	default: ({ children, onClick, href, className, disabled, style }: any) => (
+		<a
+			href={href}
+			onClick={onClick}
+			className={className}
+			aria-disabled={disabled}
+			style={style}
+			data-testid="link"
+		>
+			{children}
+		</a>
+	),
+}));
+
+describe("Image Widget", () => {
+	beforeEach(() => {
+		jest.clearAllMocks();
+		asMock(useFetchJSON).mockReturnValue([null, false, false]);
+	});
+
+	it("renders progress while loading from external source", () => {
+		asMock(useFetchJSON).mockReturnValue([null, false, false]);
+		const { getByTestId } = render(
+			<ImageWidget path="wasabi/test.png" showProgress={true} />,
+		);
+		expect(getByTestId("progress")).toBeInTheDocument();
+	});
+
+	it("renders image when path is provided", async () => {
+		asMock(useFetchJSON).mockReturnValue([
+			{ path: "https://example.com/test.png" },
+			false,
+			false,
+		]);
+		const { getByRole } = render(
+			<ImageWidget path="https://example.com/test.png" alt="Test Image" />,
+		);
+		await waitFor(() => {
+			expect(getByRole("img")).toHaveAttribute(
+				"src",
+				"https://example.com/test.png",
+			);
+		});
+	});
+
+	it("requests a signed player URL for AWS images", () => {
+		asMock(useFetchJSON).mockReturnValue([null, false, false]);
+
+		render(
+			<ImageWidget
+				path="/aws/sessions/will/2026/2026-06-30 Beastly.png"
+				alt="Beastly"
+			/>,
+		);
+
+		expect(useFetchJSON).toHaveBeenCalledWith(
+			"/api/player",
+			expect.objectContaining({
+				headers: {
+					path: encodeURIComponent(
+						"/aws/sessions/will/2026/2026-06-30 Beastly.png",
+					),
+				},
+			}),
+			["/aws/sessions/will/2026/2026-06-30 Beastly.png"],
+			true,
+		);
+	});
+
+	it("does not render alt text as visible fallback content", () => {
+		const { queryByText } = render(<ImageWidget alt="Post War Depression" />);
+		expect(queryByText("Post War Depression")).not.toBeInTheDocument();
+	});
+
+	it("handles load and error events and invokes onLoad", async () => {
+		const onLoad = jest.fn();
+		asMock(useFetchJSON).mockReturnValue([null, false, false]);
+		render(
+			<ImageWidget
+				path="https://cdn/img.png"
+				alt="pic"
+				onLoad={onLoad}
+				onClick={jest.fn()}
+				href="#go"
+				width={10}
+				height={20}
+				loading="lazy"
+			/>,
+		);
+		const img = await screen.findByRole("img");
+		fireEvent.load(img);
+		expect(onLoad).toHaveBeenCalled();
+		fireEvent.error(img);
+		expect(screen.queryByRole("img")).not.toBeInTheDocument();
+	});
+
+	it("shows a thumbnail until the main image loads", async () => {
+		asMock(useFetchJSON).mockReturnValue([null, false, false]);
+		render(
+			<ImageWidget
+				path="https://cdn/full.png"
+				thumbnail="https://cdn/thumb.png"
+				alt="both"
+			/>,
+		);
+		await waitFor(() => {
+			expect(screen.getAllByRole("img")).toHaveLength(2);
+		});
+	});
+
+	it("does not render storage keys as broken thumbnail URLs", () => {
+		asMock(useFetchJSON).mockReturnValue([null, false, false]);
+		render(
+			<ImageWidget
+				path="wasabi/group/2026/session.png"
+				thumbnail="wasabi/group/2026/session.png"
+				alt="storage image"
+			/>,
+		);
+
+		expect(screen.queryAllByRole("img")).toHaveLength(0);
+		expect(screen.getByTestId("progress")).toBeInTheDocument();
+	});
+
+	it("does not render a stale legacy CDN thumbnail beside the signed image", () => {
+		asMock(useFetchJSON).mockReturnValue([
+			{ path: "https://signed.example/session.png" },
+			false,
+			false,
+		]);
+		render(
+			<ImageWidget
+				path="wasabi/group/2026/session.png"
+				thumbnail="https://screens.sfo2.digitaloceanspaces.com/wasabi/group/2026/session.png"
+				alt="signed image"
+			/>,
+		);
+
+		expect(screen.getAllByRole("img")).toHaveLength(1);
+		expect(screen.getByRole("img")).toHaveAttribute(
+			"src",
+			"https://signed.example/session.png",
+		);
+	});
+
+	it("treats aws/ paths without a leading slash as signed", () => {
+		asMock(useFetchJSON).mockReturnValue([
+			{ path: "https://signed" },
+			false,
+			false,
+		]);
+		render(<ImageWidget path="aws/file.png" alt="aws" />);
+		expect(useFetchJSON).toHaveBeenCalledWith(
+			"/api/player",
+			expect.any(Object),
+			["aws/file.png"],
+			true,
+		);
+	});
+
+	it("hides progress when showProgress is false", () => {
+		asMock(useFetchJSON).mockReturnValue([null, false, false]);
+		render(<ImageWidget path="wasabi/x.png" showProgress={false} />);
+		expect(screen.queryByTestId("progress")).not.toBeInTheDocument();
+	});
+
+	it("detects already-complete cached images", async () => {
+		asMock(useFetchJSON).mockReturnValue([null, false, false]);
+		const onLoad = jest.fn();
+		render(
+			<ImageWidget
+				path="https://cdn/cached.png"
+				alt="cached"
+				onLoad={onLoad}
+			/>,
+		);
+		const img = await screen.findByRole("img");
+		Object.defineProperty(img, "complete", { value: true });
+		Object.defineProperty(img, "naturalHeight", { value: 10 });
+		await act(async () => {
+			fireEvent.load(img);
+		});
+		expect(onLoad).toHaveBeenCalled();
+	});
+
+	it("shows external boolean loading without a path", () => {
+		render(<ImageWidget loading showProgress />);
+		expect(screen.getByTestId("progress")).toBeInTheDocument();
+	});
+
+	it("clears image state when the effective path becomes empty", async () => {
+		jest.useFakeTimers();
+		asMock(useFetchJSON).mockReturnValue([null, false, false]);
+		const { rerender } = render(
+			<ImageWidget path="https://cdn/a.png" alt="swap" />,
+		);
+		await waitFor(() => {
+			expect(screen.getByRole("img")).toBeInTheDocument();
+		});
+		rerender(<ImageWidget path="" alt="swap" />);
+		await act(async () => {
+			jest.runAllTimers();
+		});
+		expect(screen.queryByRole("img")).not.toBeInTheDocument();
+		jest.useRealTimers();
+	});
+
+	it("hides thumbnail when it matches the effective path", async () => {
+		asMock(useFetchJSON).mockReturnValue([null, false, false]);
+		render(
+			<ImageWidget
+				path="https://cdn/same.png"
+				thumbnail="https://cdn/same.png"
+				alt="same"
+			/>,
+		);
+		await waitFor(() => {
+			expect(screen.getAllByRole("img")).toHaveLength(1);
+		});
+	});
+});

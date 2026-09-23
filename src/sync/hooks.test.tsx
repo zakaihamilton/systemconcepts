@@ -1,0 +1,229 @@
+import { render } from "@testing-library/react";
+import { usePageVisibility } from "@util/browser/hooks";
+import { useOnline } from "@util/browser/online";
+import Cookies from "js-cookie";
+import { useSync } from "./hooks";
+import { requestSync } from "./requests";
+import { SyncActiveStore, UpdateSessionsStore } from "./syncState";
+
+jest.mock("js-cookie", () => ({ get: jest.fn() }));
+jest.mock("@util/browser/hooks", () => ({ usePageVisibility: jest.fn() }));
+jest.mock("@util/browser/online", () => ({ useOnline: jest.fn() }));
+jest.mock("./requests", () => ({
+	requestSync: jest.fn(),
+	stopSync: jest.fn(),
+}));
+jest.mock("./autoSync", () => ({
+	AUTO_SYNC_INTERVAL_MS: 12 * 60 * 1000,
+	getAutoSyncJitter: jest.fn(() => 0),
+	shouldRunInitialAutoSync: jest.fn(() => false),
+}));
+jest.mock("./syncState", () => {
+	const state = { busy: false, autoSync: true, counter: 0, lastSyncTime: 0 };
+	return {
+		SyncActiveStore: {
+			getRawState: jest.fn(() => state),
+			useState: jest.fn((selector) => selector(state)),
+			subscribe: jest.fn(() => jest.fn()),
+		},
+		UpdateSessionsStore: { getRawState: jest.fn(() => ({ busy: false })) },
+	};
+});
+
+function Scheduler() {
+	useSync({ schedule: true });
+	return null;
+}
+
+describe("useSync automatic scheduler", () => {
+	beforeEach(() => {
+		jest.clearAllMocks();
+		asMock(Cookies.get).mockImplementation((name: any) =>
+			name === "id" ? "user" : "hash",
+		);
+		asMock(useOnline).mockReturnValue(true);
+		asMock(usePageVisibility).mockReturnValue(true);
+		asMock(SyncActiveStore.getRawState).mockReturnValue({
+			busy: false,
+			autoSync: true,
+			counter: 0,
+			lastSyncTime: 0,
+		});
+		asMock(SyncActiveStore.useState).mockImplementation((selector: any) =>
+			selector({ busy: false, autoSync: true, counter: 0, lastSyncTime: 0 }),
+		);
+		asMock(UpdateSessionsStore.getRawState).mockReturnValue({ busy: false });
+	});
+
+	it("syncs immediately on mount when the previous sync is due", () => {
+		jest.spyOn(Date, "now").mockReturnValue(12 * 60 * 1000);
+		render(<Scheduler />);
+		expect(requestSync).toHaveBeenCalledWith(false);
+	});
+
+	it("does not sync on mount when the previous sync is recent", () => {
+		jest.spyOn(Date, "now").mockReturnValue(1_000);
+		asMock(SyncActiveStore.getRawState).mockReturnValue({ lastSyncTime: 1 });
+		render(<Scheduler />);
+		expect(requestSync).not.toHaveBeenCalled();
+	});
+
+	it("checks immediately when the page returns to visible", () => {
+		jest.spyOn(Date, "now").mockReturnValue(12 * 60 * 1000);
+		asMock(usePageVisibility).mockReturnValue(false);
+		const view = render(<Scheduler />);
+		expect(requestSync).not.toHaveBeenCalled();
+		asMock(usePageVisibility).mockReturnValue(true);
+		view.rerender(<Scheduler />);
+		expect(requestSync).toHaveBeenCalledWith(false);
+	});
+
+	it("does not sync while sessions are refreshing", () => {
+		jest.spyOn(Date, "now").mockReturnValue(12 * 60 * 1000);
+		asMock(UpdateSessionsStore.getRawState).mockReturnValue({ busy: true });
+		render(<Scheduler />);
+		expect(requestSync).not.toHaveBeenCalled();
+	});
+
+	it("does not sync when automatic sync is disabled", () => {
+		jest.spyOn(Date, "now").mockReturnValue(12 * 60 * 1000);
+		asMock(SyncActiveStore.useState).mockImplementation((selector: any) =>
+			selector({ busy: false, autoSync: false, counter: 0, lastSyncTime: 0 }),
+		);
+		render(<Scheduler />);
+		expect(requestSync).not.toHaveBeenCalled();
+	});
+
+	it("does not sync while another sync is active", () => {
+		jest.spyOn(Date, "now").mockReturnValue(12 * 60 * 1000);
+		asMock(SyncActiveStore.getRawState).mockReturnValue({
+			busy: true,
+			autoSync: true,
+			counter: 0,
+			lastSyncTime: 0,
+		});
+		asMock(SyncActiveStore.useState).mockImplementation((selector: any) =>
+			selector({ busy: true, autoSync: true, counter: 0, lastSyncTime: 0 }),
+		);
+		render(<Scheduler />);
+		expect(requestSync).not.toHaveBeenCalled();
+	});
+
+	it("does not restart sync when busy flips after an incomplete attempt", () => {
+		const { shouldRunInitialAutoSync } = require("./autoSync");
+		asMock(shouldRunInitialAutoSync).mockReturnValue(true);
+		jest.spyOn(Date, "now").mockReturnValue(12 * 60 * 1000);
+
+		const view = render(<Scheduler />);
+		expect(requestSync).toHaveBeenCalledTimes(1);
+
+		// Simulate the scheduler re-rendering when SyncActiveStore.busy clears
+		// after an incomplete sync. checkSync must not be recreated from that
+		// busy transition, or Update Sessions / sync would loop forever.
+		asMock(SyncActiveStore.useState).mockImplementation((selector: any) =>
+			selector({ busy: false, autoSync: true, counter: 0, lastSyncTime: 0 }),
+		);
+		view.rerender(<Scheduler />);
+		expect(requestSync).toHaveBeenCalledTimes(1);
+	});
+
+	it("does not sync while offline or signed out", () => {
+		jest.spyOn(Date, "now").mockReturnValue(12 * 60 * 1000);
+		asMock(useOnline).mockReturnValue(false);
+		const view = render(<Scheduler />);
+		expect(requestSync).not.toHaveBeenCalled();
+		asMock(useOnline).mockReturnValue(true);
+		asMock(Cookies.get).mockReturnValue(undefined);
+		view.rerender(<Scheduler />);
+		expect(requestSync).not.toHaveBeenCalled();
+	});
+
+	it("does not schedule when schedule is false", () => {
+		jest.spyOn(Date, "now").mockReturnValue(12 * 60 * 1000);
+		function Idle() {
+			useSync({ schedule: false });
+			return null;
+		}
+		render(<Idle />);
+		expect(requestSync).not.toHaveBeenCalled();
+	});
+
+	it("does not sync when active is false", () => {
+		jest.spyOn(Date, "now").mockReturnValue(12 * 60 * 1000);
+		function Idle() {
+			useSync({ schedule: true, active: false });
+			return null;
+		}
+		render(<Idle />);
+		expect(requestSync).not.toHaveBeenCalled();
+	});
+});
+
+describe("useSyncFeature", () => {
+	const { useSyncFeature } = require("./hooks");
+	const { stopSync } = require("./requests");
+
+	function FeatureProbe({ onReady }: any) {
+		const feature = useSyncFeature();
+		onReady(feature);
+		return null;
+	}
+
+	it("exposes sync controls and caps percentage while syncing", () => {
+		asMock(SyncActiveStore.useState).mockImplementation((selector: any) =>
+			selector({
+				busy: true,
+				lastSynced: 1,
+				logs: ["a"],
+				lastDuration: 2,
+				startTime: 3,
+				progress: { processed: 10, total: 10 },
+				personalSyncBusy: false,
+				personalSyncError: null,
+				phase: "download",
+			}),
+		);
+		let feature;
+		render(
+			<FeatureProbe
+				onReady={(value: any) => {
+					feature = value;
+				}}
+			/>,
+		);
+		expect(feature.percentage).toBe(99);
+		expect(feature.busy).toBe(true);
+		expect(feature.phase).toBe("download");
+		feature.sync();
+		expect(requestSync).toHaveBeenCalledWith(true);
+		feature.stop();
+		expect(stopSync).toHaveBeenCalled();
+	});
+
+	it("reports zero percentage when progress is missing", () => {
+		asMock(SyncActiveStore.useState).mockImplementation((selector: any) =>
+			selector({
+				busy: false,
+				lastSynced: null,
+				logs: [],
+				lastDuration: 0,
+				startTime: null,
+				progress: null,
+				personalSyncBusy: true,
+				personalSyncError: "err",
+				phase: null,
+			}),
+		);
+		let feature;
+		render(
+			<FeatureProbe
+				onReady={(value: any) => {
+					feature = value;
+				}}
+			/>,
+		);
+		expect(feature.percentage).toBe(0);
+		expect(feature.personalSyncBusy).toBe(true);
+		expect(feature.personalSyncError).toBe("err");
+	});
+});

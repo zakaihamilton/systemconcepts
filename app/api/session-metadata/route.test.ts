@@ -1,0 +1,99 @@
+import { roleAuth } from "@util/auth/roles";
+import { getSessionUser } from "@util/auth/session";
+import { aggregateSessionMetadata } from "@util/domain/updateSessions/sessionMetadataServer";
+import { GET } from "./route";
+
+jest.mock("@util/auth/session", () => ({
+	getSessionUser: jest.fn(),
+	getAuthErrorStatus: jest.fn((err, fallback = 403) =>
+		err === "AUTHENTICATION_REQUIRED" ? 401 : fallback,
+	),
+}));
+jest.mock("@util/auth/roles", () => ({
+	roleAuth: jest.fn(),
+}));
+jest.mock("@util/api/safeError", () => ({
+	getSafeError: jest.fn((err) => String(err?.message || err)),
+}));
+jest.mock("@util/domain/updateSessions/sessionMetadataServer", () => ({
+	aggregateSessionMetadata: jest.fn(),
+}));
+jest.mock("next/server", () => ({
+	NextResponse: {
+		json: (body: any, init: { status?: number; headers?: Headers } = {}) => ({
+			status: init.status || 200,
+			json: async () => body,
+			headers: {
+				get: (name: any) => init.headers?.get?.(name) || null,
+			},
+		}),
+	},
+}));
+
+function request(url: any, cookie = "id=user; hash=secret") {
+	return {
+		url,
+		headers: {
+			get: (name: any) => (name.toLowerCase() === "cookie" ? cookie : null),
+		},
+	};
+}
+
+describe("/api/session-metadata", () => {
+	beforeEach(() => {
+		jest.clearAllMocks();
+		asMock(getSessionUser).mockResolvedValue({ id: "user", role: "student" });
+		asMock(roleAuth).mockReturnValue(true);
+		asMock(aggregateSessionMetadata).mockResolvedValue({
+			group: "test",
+			year: "2024",
+			items: [],
+			tags: { "2024-05-05 Test": ["ai"] },
+			durations: {},
+			summaries: {},
+			transcriptions: {},
+		});
+	});
+
+	it("authorizes metadata reads and returns the aggregated payload", async () => {
+		const response = await GET(
+			request("http://localhost/api/session-metadata?group=test&year=2024"),
+		);
+		const body = await response.json();
+
+		expect(response.status).toBe(200);
+		expect(getSessionUser).toHaveBeenCalled();
+		expect(roleAuth).toHaveBeenCalledWith("student", "student");
+		expect(aggregateSessionMetadata).toHaveBeenCalledWith({
+			group: "test",
+			year: "2024",
+		});
+		expect(body.tags["2024-05-05 Test"]).toEqual(["ai"]);
+		expect(response.headers.get("Cache-Control")).toContain("no-store");
+	});
+
+	it("rejects requests without credentials before reading metadata", async () => {
+		asMock(getSessionUser).mockRejectedValue("AUTHENTICATION_REQUIRED");
+
+		const response = await GET(
+			request("http://localhost/api/session-metadata?group=test&year=2024", ""),
+		);
+		const body = await response.json();
+
+		expect(response.status).toBe(401);
+		expect(body.err).toBe("AUTHENTICATION_REQUIRED");
+		expect(getSessionUser).toHaveBeenCalled();
+		expect(aggregateSessionMetadata).not.toHaveBeenCalled();
+	});
+
+	it("rejects users without session metadata read access", async () => {
+		asMock(roleAuth).mockReturnValue(false);
+
+		const response = await GET(
+			request("http://localhost/api/session-metadata?group=test&year=2024"),
+		);
+
+		expect(response.status).toBe(403);
+		expect(aggregateSessionMetadata).not.toHaveBeenCalled();
+	});
+});

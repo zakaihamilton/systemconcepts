@@ -1,0 +1,65 @@
+import { SyncActiveStore } from "@sync/syncState";
+import { useFile } from "@util/storage/storage";
+import { useCallback } from "react";
+
+export function useRecentHistory() {
+	// Re-read after sync writes personal files (e.g. first login), so Home
+	// Continue watching updates without navigating away and back.
+	const personalUpdateCounter = SyncActiveStore.useState(
+		(state) => state.personalUpdateCounter || 0,
+	);
+	const [history, loadingHistory, errorHistory, writeHistory] = useFile(
+		"local/personal/history.json",
+		[personalUpdateCounter],
+		(data: any) => {
+			return data ? JSON.parse(data) : [];
+		},
+	);
+
+	const addToHistory = useCallback(
+		(session: any) => {
+			if (!session || !session.group || !session.name || !session.date) {
+				return;
+			}
+			writeHistory((history: any) => {
+				let items = history || [];
+				const lastItem = items[0];
+				const isSameSession =
+					lastItem &&
+					lastItem.group === session.group &&
+					lastItem.name === session.name &&
+					lastItem.date === session.date;
+				if (isSameSession) {
+					return items;
+				}
+				items = [...items];
+				items.unshift({ ...session, timestamp: Date.now() });
+				items = items.slice(0, 300);
+				return items;
+			});
+		},
+		[writeHistory],
+	);
+
+	const removeFromHistory = useCallback(
+		(item: any) => {
+			writeHistory((history: any) => {
+				return (history || []).filter(
+					(h: any) =>
+						h.group !== item.group ||
+						h.name !== item.name ||
+						h.date !== item.date,
+				);
+			});
+		},
+		[writeHistory],
+	);
+
+	return [
+		history,
+		addToHistory,
+		loadingHistory,
+		errorHistory,
+		removeFromHistory,
+	];
+}

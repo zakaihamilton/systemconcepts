@@ -1,0 +1,210 @@
+import { MainStore } from "@components/Main";
+import AccountCircleIcon from "@icons/svg/AccountCircle.svg";
+import ArrowBackIcon from "@icons/svg/ArrowBack.svg";
+import VpnKeyIcon from "@icons/svg/VpnKey.svg";
+import Button from "@ui/Button";
+import Checkbox from "@ui/Checkbox";
+import FormControlLabel from "@ui/FormControlLabel";
+import Grid from "@ui/Grid";
+import IconButton from "@ui/IconButton";
+import LinearProgress from "@ui/LinearProgress";
+import Typography from "@ui/Typography";
+import { fetchJSON } from "@util/api/fetch";
+import { logger as structuredLogger } from "@util/api/logger";
+import { useTranslations } from "@util/domain/translations";
+import { setHash, setPath } from "@util/domain/views";
+import Input from "@widgets/Input";
+import Tooltip from "@widgets/Tooltip";
+import clsx from "clsx";
+import Cookies from "js-cookie";
+import { useState } from "react";
+import styles from "../../Account/Account/Account.module.css";
+export default function ResetPassword({ path = "" }: any) {
+	const { direction } = MainStore.useState();
+
+	const translations = useTranslations();
+	const idState = useState(Cookies.get("id") || "");
+	const newPasswordState = useState("");
+	const [remember, setRemember] = useState(true);
+	const [validate, setValidate] = useState(false);
+	const [inProgress, setProgress] = useState(false);
+	const [error, setError] = useState("");
+	const [emailSent, setEmailSent] = useState(false);
+	const code = path;
+	const hasCode = !!code;
+
+	const changeRemember = (event: any) => setRemember(event.target.value);
+
+	const onValidatePassword = (text: any) => {
+		let error = "";
+		if (!text) {
+			error = translations.EMPTY_PASSWORD;
+		} else if (text.length < 8) {
+			error = translations.PASSWORD_TOO_SHORT;
+		} else if (text.length > 72) {
+			error = translations.PASSWORD_TOO_LONG;
+		}
+		return error;
+	};
+
+	const onValidateField = (text: any) => {
+		let error = "";
+		if (!text) {
+			error = translations.EMPTY_FIELD;
+		}
+		return error;
+	};
+
+	const invalidFields =
+		(hasCode && onValidatePassword(newPasswordState[0])) ||
+		onValidateField(idState[0]);
+	const isInvalid = validate && invalidFields;
+
+	const onSubmit = () => {
+		setValidate(true);
+		if (!invalidFields && !inProgress) {
+			const [id] = idState;
+			const [newPassword] = newPasswordState;
+			setProgress(true);
+			fetchJSON("/api/login", {
+				method: "POST",
+				body: JSON.stringify(
+					hasCode
+						? { action: "reset-confirm", id, newPassword, code }
+						: { action: "reset-request", id },
+				),
+			})
+				.then(({ err }: any) => {
+					if (err) {
+						structuredLogger.error(err);
+						throw err;
+					}
+					if (hasCode) {
+						setProgress(false);
+						setError("");
+						setEmailSent(false);
+						setPath("");
+					} else {
+						setEmailSent(true);
+						setProgress(false);
+						setError("");
+						setValidate(false);
+					}
+				})
+				.catch((err) => {
+					setError(translations[err] || String(err));
+					setProgress(false);
+				});
+		}
+	};
+
+	const onKeyDown = async (event: any) => {
+		if (event.keyCode == 13) {
+			onSubmit();
+		}
+	};
+
+	return (
+		<div className={styles.root}>
+			<div className={styles.card}>
+				{inProgress && <LinearProgress className={styles.progress} />}
+				<div className={styles.header}>
+					<Tooltip title={translations.BACK} arrow>
+						<IconButton
+							className={clsx(
+								styles.backButton,
+								direction === "rtl" && styles.rtl,
+							)}
+							onClick={() => setHash("account")}
+							aria-label={translations.BACK}
+						>
+							<ArrowBackIcon />
+						</IconButton>
+					</Tooltip>
+					<Typography component="h1" className={styles.title}>
+						{hasCode
+							? translations.CHANGE_PASSWORD
+							: translations.RESET_PASSWORD}
+					</Typography>
+				</div>
+				{error && <Typography className={styles.error}>{error}</Typography>}
+				{emailSent && !hasCode && (
+					<Typography className={styles.notification}>
+						{translations.RESET_EMAIL_SENT}
+					</Typography>
+				)}
+				<div className={styles.form}>
+					<Grid container spacing={2}>
+						<Grid size={12}>
+							<Input
+								state={idState}
+								required
+								id="userid"
+								label={translations.ID}
+								name="userid"
+								autoComplete="userid"
+								validate={validate}
+								onValidate={onValidateField}
+								autoFocus
+								icon={<AccountCircleIcon />}
+								background={true}
+							/>
+						</Grid>
+						{hasCode && (
+							<Grid size={12}>
+								<Input
+									state={newPasswordState}
+									required
+									name="newpassword"
+									label={translations.NEW_PASSWORD}
+									type="password"
+									id="newpassword"
+									autoComplete="new-password"
+									validate={validate}
+									onValidate={onValidatePassword}
+									icon={<VpnKeyIcon />}
+									onKeyDown={onKeyDown}
+									background={true}
+								/>
+							</Grid>
+						)}
+						{hasCode && (
+							<Grid size={12}>
+								<FormControlLabel
+									className={clsx(
+										styles.checkboxLabel,
+										direction === "rtl" && styles.rtlLabel,
+									)}
+									control={
+										<Checkbox
+											color="primary"
+											value={remember}
+											onChange={changeRemember}
+										/>
+									}
+									label={translations.REMEMBER_ME}
+								/>
+							</Grid>
+						)}
+						<Grid size={12}>
+							<Button
+								fullWidth
+								variant="contained"
+								color="primary"
+								className={styles.submit}
+								disabled={
+									!!(isInvalid || inProgress || (emailSent && !hasCode))
+								}
+								onClick={onSubmit}
+							>
+								{hasCode
+									? translations.CHANGE_PASSWORD
+									: translations.RESET_PASSWORD}
+							</Button>
+						</Grid>
+					</Grid>
+				</div>
+			</div>
+		</div>
+	);
+}

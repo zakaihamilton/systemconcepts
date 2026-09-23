@@ -1,0 +1,95 @@
+import { logger as structuredLogger } from "@util/api/logger";
+
+function getSiteUrl() {
+	return (
+		process.env.SITE_URL ||
+		process.env.NEXT_PUBLIC_SITE_URL ||
+		"https://systemconcepts.app"
+	);
+}
+
+export async function authenticateEdge(searchParams: any) {
+	const id = searchParams.get("id");
+	const token = searchParams.get("token");
+	if (!id || !token) return false;
+
+	const siteUrl = getSiteUrl();
+	try {
+		const res = await fetch(`${siteUrl}/api/rss/verify`, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				"x-internal-key": process.env.AWS_SECRET || "",
+			},
+			body: JSON.stringify({ id, token }),
+		});
+		if (!res.ok) {
+			structuredLogger.warn("[Edge API] Verify endpoint returned", res.status);
+			return false;
+		}
+		const { ok } = await res.json();
+		return ok === true;
+	} catch (err: any) {
+		structuredLogger.error("[Edge API] Auth fetch failed:", err);
+		return false;
+	}
+}
+
+export async function enforceRateLimitEdge(
+	ip: any,
+	options: Record<string, any> = {},
+) {
+	if (process.env.PLAYWRIGHT === "1") return true;
+	// Local development can run without MongoDB or an internal secret. Keep the
+	// public local UI usable there; production must enforce the persisted limit.
+	if (process.env.NODE_ENV === "development") return true;
+	const { limit = 60, windowMs = 60 * 1000 } = options;
+	if (!ip) return false;
+
+	const siteUrl = getSiteUrl();
+	try {
+		const res = await fetch(`${siteUrl}/api/internal/rate-limit`, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				"x-internal-key": process.env.AWS_SECRET || "",
+			},
+			body: JSON.stringify({ ip, limit, windowMs }),
+		});
+		if (!res.ok) {
+			structuredLogger.warn(
+				"[Edge API] Rate limit endpoint returned",
+				res.status,
+			);
+			return false;
+		}
+		const { ok } = await res.json();
+		return ok === true;
+	} catch (err: any) {
+		structuredLogger.error("[Edge API] Rate limit fetch failed:", err);
+		// Fail closed so an internal rate-limit outage cannot become an
+		// unrestricted public API window.
+		return false;
+	}
+}
+
+export function scheduleApiCacheWrite(type: any, key: any, body: any) {
+	const siteUrl = getSiteUrl();
+	void fetch(`${siteUrl}/api/internal/api-cache`, {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json",
+			"x-internal-key": process.env.AWS_SECRET || "",
+		},
+		body: JSON.stringify({ type, key, body }),
+	}).catch((err) => {
+		structuredLogger.error(
+			"[Edge API] Failed to schedule api-cache write:",
+			err,
+		);
+	});
+}
+
+export function getClientIp(request: any) {
+	return request.headers.get("x-vercel-forwarded-for") || "unknown";
+}

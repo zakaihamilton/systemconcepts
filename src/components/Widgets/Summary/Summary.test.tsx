@@ -1,0 +1,40 @@
+import { render } from "@testing-library/react";
+import { useFetch } from "@util/api/fetch";
+import { useTranslations } from "@util/domain/translations";
+import Summary from "./index";
+
+jest.mock("@util/api/fetch");
+jest.mock("@util/domain/translations");
+jest.mock("@util/data/string", () => ({
+	preprocessMarkdown: jest.fn((s) => s),
+}));
+jest.mock("react-markdown", () => ({ children }: any) => (
+	<div data-testid="markdown">{children}</div>
+));
+
+describe("Summary Widget", () => {
+	beforeEach(() => {
+		jest.clearAllMocks();
+		asMock(useTranslations).mockReturnValue({
+			NO_SUMMARY: "No summary available",
+		});
+	});
+
+	it("renders loading state", () => {
+		asMock(useFetch).mockReturnValue([null, null, true]);
+		const { container } = render(<Summary path="test" />);
+		expect(container.querySelector('[role="progressbar"]')).toBeInTheDocument();
+	});
+
+	it("renders markdown content", () => {
+		asMock(useFetch).mockReturnValue(["# Test Summary", null, false]);
+		const { getByTestId } = render(<Summary path="test" />);
+		expect(getByTestId("markdown")).toHaveTextContent("# Test Summary");
+	});
+
+	it("renders no summary message when content is missing", () => {
+		asMock(useFetch).mockReturnValue([null, null, false]);
+		const { getByText } = render(<Summary path="test" />);
+		expect(getByText("No summary available")).toBeInTheDocument();
+	});
+});

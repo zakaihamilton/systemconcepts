@@ -1,0 +1,24 @@
+import fs from "node:fs";
+import path from "node:path";
+
+const worker = fs.readFileSync(
+	path.join(process.cwd(), "public/sw.js"),
+	"utf8",
+);
+
+describe("native service worker", () => {
+	it("defines the offline fallback and scoped API caching rules", () => {
+		expect(worker).toContain('cache.add("/~offline")');
+		expect(worker).toContain('url.pathname === "/api/player"');
+		expect(worker).toContain('url.pathname === "/api/sessions"');
+		expect(worker).toContain("staleWhileRevalidate(request, SESSION_CACHE)");
+		expect(worker).toContain("no-store");
+		expect(worker).not.toContain("MEDIA_CACHE");
+		expect(worker).toMatch(/(?:self|worker)\.skipWaiting\(\)/);
+		expect(worker).not.toContain("self.clients.claim()");
+	});
+
+	it("does not depend on generated Workbox runtime code", () => {
+		expect(worker).not.toMatch(/workbox|importScripts|precacheAndRoute/i);
+	});
+});
