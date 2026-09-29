@@ -1,10 +1,14 @@
-const VERSION = "systemconcepts-v2";
+// Replaced with the build ID and asset list by build-browser-runtime after next build.
+const BUILD_ID = "__SYSTEMCONCEPTS_BUILD_ID__";
+const PRECACHE_ASSETS: string[] = ["__SYSTEMCONCEPTS_PRECACHE_ASSETS__"];
+const VERSION = `systemconcepts-v3-${BUILD_ID}`;
 const PAGE_CACHE = `${VERSION}-pages`;
 const SESSION_CACHE = `${VERSION}-sessions`;
 const SESSION_CACHE_MAX_ENTRIES = 128;
 
 interface CacheHandle {
 	add(request: RequestInfo | URL): Promise<void>;
+	addAll(requests: (RequestInfo | URL)[]): Promise<void>;
 	match(request: RequestInfo | URL): Promise<Response | undefined>;
 	put(request: RequestInfo | URL, response: Response): Promise<void>;
 	keys(): Promise<Request[]>;
@@ -46,9 +50,23 @@ const cacheStorage = (globalThis as unknown as { caches: CacheStorageHandle })
 
 worker.addEventListener("install", (event) => {
 	event.waitUntil(
-		cacheStorage.open(PAGE_CACHE).then((cache) => cache.add("/~offline")),
+		cacheStorage
+			.open(PAGE_CACHE)
+			.then((cache) =>
+				cache.addAll(
+					[
+						"/",
+						"/~offline",
+						"/noflash.js",
+						"/icon.png",
+						"/manifest.json",
+						...PRECACHE_ASSETS.filter((asset) => !asset.startsWith("__")),
+					].map((asset) => new Request(asset, { cache: "reload" })),
+				),
+			),
 	);
-	worker.skipWaiting();
+	// Only activate after the whole shell has been cached successfully.
+	// Existing tabs keep their worker until they close, avoiding mixed build assets.
 });
 
 worker.addEventListener("activate", (event) => {
@@ -60,7 +78,8 @@ worker.addEventListener("activate", (event) => {
 					keys
 						.filter(
 							(key) =>
-								key.startsWith("systemconcepts-") && !key.startsWith(VERSION),
+								key.startsWith("systemconcepts-") &&
+								!key.startsWith(`${VERSION}-`),
 						)
 						.map((key) => cacheStorage.delete(key)),
 				),
@@ -110,6 +129,34 @@ function networkFirst(
 	});
 }
 
+async function cacheFirst(request: Request): Promise<Response> {
+	const cache = await cacheStorage.open(PAGE_CACHE);
+	const cached = await cache.match(request);
+	if (cached) return cached;
+	const response = await fetch(request);
+	if (
+		response.ok &&
+		!/\bno-store\b/i.test(response.headers.get("cache-control") || "")
+	) {
+		await cache.put(request, response.clone());
+	}
+	return response;
+}
+
+async function navigate(request: Request): Promise<Response> {
+	try {
+		return await fetch(request);
+	} catch (error) {
+		const cache = await cacheStorage.open(PAGE_CACHE);
+		// Product routes live in the hash, so every product deep link uses this shell.
+		const cached = await cache.match(
+			new URL(request.url).pathname === "/" ? "/" : "/~offline",
+		);
+		if (cached) return cached;
+		throw error;
+	}
+}
+
 worker.addEventListener("fetch", (event) => {
 	const { request } = event;
 	const url = new URL(request.url);
@@ -120,8 +167,13 @@ worker.addEventListener("fetch", (event) => {
 		return;
 	}
 	if (request.mode === "navigate") {
-		event.respondWith(
-			fetch(request).catch(() => cacheStorage.match("/~offline")),
-		);
+		event.respondWith(navigate(request));
+		return;
+	}
+	if (
+		url.pathname.startsWith("/_next/static/") ||
+		["/noflash.js", "/icon.png", "/manifest.json"].includes(url.pathname)
+	) {
+		event.respondWith(cacheFirst(request));
 	}
 });

@@ -1,5 +1,3 @@
-// @ts-check
-
 import { persistAutoSyncVersion } from "./autoSync";
 import { addSyncLog } from "./logs";
 import { performSync } from "./orchestrator";
@@ -12,10 +10,7 @@ export async function stopSync() {
 	});
 }
 
-/**
- * @param {boolean} forceReload
- */
-export async function requestSync(forceReload: any) {
+export async function requestSync(forceReload: boolean) {
 	const state = SyncActiveStore.getRawState();
 	if (state.locked) addSyncLog("Sync is locked (skipping upload)", "warning");
 	if (state.busy || UpdateSessionsStore.getRawState().busy) {

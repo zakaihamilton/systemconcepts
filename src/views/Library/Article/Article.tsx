@@ -1,19 +1,6 @@
 import { useSearch } from "@components/Search";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
-import ArrowBackIcon from "@icons/svg/ArrowBack.svg";
-import ArrowForwardIcon from "@icons/svg/ArrowForward.svg";
-import ArticleIcon from "@icons/svg/Article.svg";
-import CodeIcon from "@icons/svg/Code.svg";
-import CodeOffIcon from "@icons/svg/CodeOff.svg";
-import DataArrayIcon from "@icons/svg/DataArray.svg";
-import DownloadIcon from "@icons/svg/Download.svg";
-import EditIcon from "@icons/svg/Edit.svg";
-import FormatListNumberedIcon from "@icons/svg/FormatListNumbered.svg";
-import KeyboardArrowDownIcon from "@icons/svg/KeyboardArrowDown.svg";
-import KeyboardArrowUpIcon from "@icons/svg/KeyboardArrowUp.svg";
 import LibraryBooksIcon from "@icons/svg/LibraryBooks.svg";
-import MenuBookIcon from "@icons/svg/MenuBook.svg";
-import PrintIcon from "@icons/svg/Print.svg";
 import Box from "@ui/Box";
 import CircularProgress from "@ui/CircularProgress";
 import Typography from "@ui/Typography";
@@ -22,7 +9,6 @@ import { useLocalStorage } from "@util/browser/hooks";
 import { useDeviceType } from "@util/browser/styles";
 import { useSwipe } from "@util/browser/touch";
 import { useTranslations } from "@util/domain/translations";
-import { exportData } from "@util/storage/importExport";
 import clsx from "clsx";
 import Cookies from "js-cookie";
 import React, {
@@ -43,8 +29,10 @@ import JumpDialog from "./JumpDialog";
 import PageIndicator from "./PageIndicator";
 import Player from "./Player";
 import ScrollToTop from "./ScrollToTop";
+import { useArticlePrint } from "./useArticlePrint";
 import { useArticleScroll } from "./useArticleScroll";
 import { useArticleSearch } from "./useArticleSearch";
+import { useArticleToolbarItems } from "./useArticleToolbarItems";
 
 registerToolbar("Article");
 
@@ -297,278 +285,13 @@ function Article({
 		);
 	}, [selectedTag?._id, setScrollInfo]);
 
-	const formatArticleWithTags = useCallback((tag: any, text: any) => {
-		if (!tag) return text;
-		const metadata = LibraryTagKeys.map((key) => {
-			const val = tag[key];
-			if (!val) return null;
-			const label = key.charAt(0).toUpperCase() + key.slice(1);
-			return `${label}: ${val}`;
-		})
-			.filter(Boolean)
-			.join("\n");
+	const { handlePrint, handleExport } = useArticlePrint({
+		contentRef,
+		selectedTag,
+		content,
+	});
 
-		return `${metadata}\n\n${"=".repeat(20)}\n\n${text || ""}`;
-	}, []);
-
-	const handlePrint = useCallback(() => {
-		const rootElement = contentRef.current;
-		if (!rootElement) return;
-
-		const iframe = document.createElement("iframe");
-		iframe.id = "print-root";
-		Object.assign(iframe.style, {
-			position: "absolute",
-			top: "-9999px",
-			left: "-9999px",
-			width: "100%",
-			height: "auto",
-		});
-		document.body.appendChild(iframe);
-
-		const cssStyles = Array.from(
-			document.querySelectorAll("style, link[rel='stylesheet']"),
-		)
-			.map((node) => node.outerHTML)
-			.join("");
-
-		const frameWindow = iframe.contentWindow;
-		if (!frameWindow) {
-			document.body.removeChild(iframe);
-			return;
-		}
-		const doc = frameWindow.document;
-		doc.open();
-		doc.write(`
-            <!DOCTYPE html>
-            <html>
-            <head>
-                ${cssStyles}
-                <style>
-                    :global(body), html, body {
-                        background: white !important;
-                        height: auto !important;
-                        overflow: visible !important;
-                        width: 100% !important;
-                    }
-                    [class*="Article_root"] {
-                        position: static !important;
-                        height: auto !important;
-                        overflow: visible !important;
-                        display: block !important;
-                        visibility: visible !important;
-                        margin: 0 !important;
-                        padding: 20px !important;
-                        width: 100% !important;
-                    }
-                    @media print {
-                        body { -webkit-print-color-adjust: exact; }
-                        .print-hidden { display: none !important; }
-                    }
-                </style>
-            </head>
-            <body>
-                <div id="print-root" class="${styles.root}">
-                    ${rootElement.outerHTML}
-                </div>
-                <script>
-                    window.onload = () => {
-                        setTimeout(() => {
-                            window.print();
-                            setTimeout(() => {
-                                window.top.postMessage("print-complete", "*");
-                            }, 1000);
-                        }, 500);
-                    };
-                </script>
-            </body>
-            </html>
-        `);
-		doc.close();
-
-		let cleanupExecuted = false;
-		const cleanup = (e?: any) => {
-			if (cleanupExecuted) return;
-			if (e && e.data !== "print-complete") return;
-
-			cleanupExecuted = true;
-			setTimeout(() => {
-				if (document.body.contains(iframe)) {
-					document.body.removeChild(iframe);
-				}
-			}, 5000);
-			window.removeEventListener("message", cleanup);
-		};
-
-		window.addEventListener("message", cleanup);
-
-		// Fallback cleanup after 30 seconds to prevent memory leak
-		setTimeout(() => cleanup(), 30000);
-	}, [contentRef]);
-
-	const handleExport = useCallback(() => {
-		if (!selectedTag || !content) return;
-		const formatted = formatArticleWithTags(selectedTag, content);
-		const filename = `${selectedTag.article || "Article"}${selectedTag.number ? `_${selectedTag.number}` : ""}.md`;
-		exportData(formatted, filename, "text/plain");
-	}, [selectedTag, content, formatArticleWithTags]);
-
-	const toolbarItems = useMemo(() => {
-		if (!content || !selectedTag || embedded) {
-			return [];
-		}
-		let items: any[] = [
-			{
-				id: "toggleAbbreviations",
-				name: showAbbreviations
-					? translations.SHOW_FULL_TERMS
-					: translations.SHOW_ABBREVIATIONS,
-				icon: <LibraryBooksIcon />,
-				onClick: () => setShowAbbreviations((prev) => !prev),
-				menu: true,
-			},
-			{
-				id: "toggleSquareBrackets",
-				name: hideSquareBrackets
-					? translations.SHOW_SQUARE_BRACKETS
-					: translations.HIDE_SQUARE_BRACKETS,
-				icon: <DataArrayIcon />,
-				onClick: () => setHideSquareBrackets((prev) => !prev),
-				menu: true,
-			},
-			{
-				id: "toggleMarkdown",
-				name: showMarkdown
-					? translations.VIEW_PLAIN_TEXT
-					: translations.VIEW_MARKDOWN,
-				icon: showMarkdown ? <CodeOffIcon /> : <CodeIcon />,
-				onClick: () => setShowMarkdown((prev) => !prev),
-				menu: true,
-				divider: true,
-			},
-			{
-				id: "jumpToParagraph",
-				name: translations.JUMP_TO,
-				icon: <FormatListNumberedIcon />,
-				onClick: () => setJumpDialogOpen(true),
-				menu: true,
-			},
-			{
-				id: "articleTerms",
-				name: translations.ARTICLE_TERMS,
-				icon: <MenuBookIcon />,
-				onClick: handleShowTerms,
-				menu: true,
-				divider: true,
-			},
-		];
-		if (isAdmin) {
-			if (openEditDialog) {
-				items.push({
-					id: "editTags",
-					name: translations.EDIT_TAGS,
-					icon: <EditIcon />,
-					onClick: openEditDialog,
-					menu: true,
-				});
-			}
-			if (openEditContentDialog) {
-				items.push({
-					id: "editArticle",
-					name: translations.EDIT_ARTICLE,
-					icon: <ArticleIcon />,
-					onClick: openEditContentDialog,
-					menu: true,
-					divider: true,
-				});
-			}
-		}
-
-		// eslint-disable-next-line react-hooks/refs
-		items.push({
-			id: "export",
-			name: showMarkdown ? translations.PRINT : translations.EXPORT_TO_MD,
-			icon: showMarkdown ? <PrintIcon /> : <DownloadIcon />,
-			onClick: () => {
-				if (showMarkdown) handlePrint();
-				else handleExport();
-			},
-			menu: true,
-		});
-
-		if (search && totalMatches > 0) {
-			items = [
-				...items,
-				{
-					id: "prevMatch",
-					name: translations.PREVIOUS_MATCH,
-					icon: <KeyboardArrowUpIcon />,
-					onClick: handlePrevMatch,
-					location: isPhone ? "header" : undefined,
-				},
-				{
-					id: "matchCount",
-					name:
-						totalMatches > 0 ? `${matchIndex + 1} / ${totalMatches}` : "0 / 0",
-					element: (
-						<Typography
-							key="matchCount"
-							variant="caption"
-							className={styles.matchCount}
-						>
-							{totalMatches > 0
-								? `${matchIndex + 1} / ${totalMatches}`
-								: "0 / 0"}
-						</Typography>
-					),
-					location: isPhone ? "header" : undefined,
-				},
-				{
-					id: "nextMatch",
-					name: translations.NEXT_MATCH,
-					icon: <KeyboardArrowDownIcon />,
-					onClick: handleNextMatch,
-					location: isPhone ? "header" : undefined,
-				},
-			];
-		}
-
-		if (onPrev && prevArticle) {
-			const previousTooltip = prevArticle.name ? (
-				<span className={styles.tooltip}>
-					<b>{translations.PREVIOUS}</b> {prevArticle.name}
-				</span>
-			) : (
-				<b>{translations.PREVIOUS}</b>
-			);
-			items.push({
-				id: "prevArticle",
-				name: previousTooltip,
-				icon: <ArrowBackIcon />,
-				onClick: onPrev,
-				location: isMobile ? undefined : "header",
-			});
-		}
-
-		if (onNext && nextArticle) {
-			const nextTooltip = nextArticle.name ? (
-				<span className={styles.tooltip}>
-					<b>{translations.NEXT}</b> {nextArticle.name}
-				</span>
-			) : (
-				<b>{translations.NEXT}</b>
-			);
-			items.push({
-				id: "nextArticle",
-				name: nextTooltip,
-				icon: <ArrowForwardIcon />,
-				onClick: onNext,
-				location: isMobile ? undefined : "header",
-			});
-		}
-
-		return items;
-	}, [
+	const toolbarItems = useArticleToolbarItems({
 		translations,
 		handleExport,
 		handlePrint,
@@ -581,6 +304,7 @@ function Article({
 		handlePrevMatch,
 		handleNextMatch,
 		showMarkdown,
+		setShowMarkdown,
 		content,
 		selectedTag,
 		isPhone,
@@ -589,13 +313,14 @@ function Article({
 		setShowAbbreviations,
 		hideSquareBrackets,
 		setHideSquareBrackets,
+		setJumpDialogOpen,
 		prevArticle,
 		nextArticle,
 		onPrev,
 		onNext,
 		isMobile,
 		embedded,
-	]);
+	});
 
 	const swipeHandlers = useSwipe({
 		onSwipeLeft: onNext,

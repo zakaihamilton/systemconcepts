@@ -1,9 +1,6 @@
-// @ts-check
-
 import { fetchJSON } from "@util/api/fetch";
 import { logger as structuredLogger } from "@util/api/logger";
 import { roleAuth } from "@util/auth/roles";
-import storage from "@util/storage/storage";
 import Cookies from "js-cookie";
 import { SYNC_CONFIG } from "./config";
 import {
@@ -15,16 +12,36 @@ import { getMutex, isMutexLocked, lockMutex } from "./mutex";
 import { executeSyncPipeline } from "./pipeline";
 import { TOTAL_COMBINED_WEIGHT } from "./progressTracker";
 import { SyncActiveStore, UpdateSessionsStore } from "./syncState";
+import type { SyncResult } from "./types";
 import { normalizeSyncUserId } from "./userStorage";
+
+type OrchestratorDependencies = Omit<
+	typeof defaultDependencies,
+	"cookies" | "logger" | "fetchJSON"
+> & {
+	cookies: {
+		get(name: string): string | undefined;
+		set(name: string, value: string, options?: { expires: number }): unknown;
+	};
+	logger: Pick<typeof structuredLogger, "debug" | "warn" | "error">;
+	fetchJSON(url: string): Promise<{ role?: string } | null>;
+};
 
 const defaultDependencies = {
 	cookies: Cookies,
-	fetchJSON,
+	fetchJSON: async (url: string) => {
+		const user: unknown = await fetchJSON(url);
+		return typeof user === "object" &&
+			user !== null &&
+			"role" in user &&
+			typeof user.role === "string"
+			? { role: user.role }
+			: null;
+	},
 	roleAuth,
 	logger: structuredLogger,
 	addSyncLog,
 	configs: SYNC_CONFIG,
-	storage,
 	getReadOnlyManifestFreshness,
 	persistManifestSignature,
 	executeSyncPipeline,
@@ -33,16 +50,15 @@ const defaultDependencies = {
 	getMutex,
 };
 
-/**
- * @param {Partial<typeof defaultDependencies>} [overrides]
- */
-export function createSyncOrchestrator(overrides: Record<string, any> = {}) {
-	const dependencies = { ...defaultDependencies, ...overrides };
+export function createSyncOrchestrator(
+	overrides: Partial<OrchestratorDependencies> = {},
+) {
+	const dependencies: OrchestratorDependencies = {
+		...defaultDependencies,
+		...overrides,
+	};
 
-	/**
-	 * @param {string | undefined} role
-	 */
-	async function refreshRole(role: any) {
+	async function refreshRole(role: string | undefined) {
 		const id = dependencies.cookies.get("id");
 		const hash = dependencies.cookies.get("hash");
 		if (!id || !hash) return role;
@@ -52,7 +68,7 @@ export function createSyncOrchestrator(overrides: Record<string, any> = {}) {
 				dependencies.cookies.set("role", user.role, { expires: 60 });
 				return user.role;
 			}
-		} catch (error: any) {
+		} catch (error) {
 			dependencies.logger.error("[Sync] Failed to refresh role", error);
 			const message = error instanceof Error ? error.message : String(error);
 			dependencies.addSyncLog(`Role refresh failed: ${message}`, "error");
@@ -60,11 +76,7 @@ export function createSyncOrchestrator(overrides: Record<string, any> = {}) {
 		return role;
 	}
 
-	/**
-	 * @param {boolean} forceReload
-	 * @returns {Promise<import("./types").SyncResult>}
-	 */
-	return async function performSync(forceReload: any) {
+	return async function performSync(forceReload: boolean): Promise<SyncResult> {
 		const unlock = await dependencies.lockMutex({ id: "sync_process" });
 		try {
 			dependencies.logger.debug(
@@ -123,11 +135,9 @@ export function createSyncOrchestrator(overrides: Record<string, any> = {}) {
 					);
 					continue;
 				}
-				/** @type {any} */ (SyncActiveStore).update(
-					(/** @type {import("./types").SyncState} */ state) => {
-						state.phase = config.name.toLowerCase();
-					},
-				);
+				SyncActiveStore.update((state) => {
+					state.phase = config.name.toLowerCase();
+				});
 				const result = await dependencies.executeSyncPipeline(
 					config,
 					role,
@@ -184,7 +194,7 @@ export function createSyncOrchestrator(overrides: Record<string, any> = {}) {
 				};
 			}
 			return { completed: true };
-		} catch (error: any) {
+		} catch (error) {
 			dependencies.logger.error("[Sync] Sync failed:", error);
 			let message = error instanceof Error ? error.message : String(error);
 			if (error === 401 || error === 403) message = "Please login to sync";

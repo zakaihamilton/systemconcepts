@@ -1,7 +1,7 @@
 import { createSyncOrchestrator } from "./orchestrator";
 import { SyncActiveStore, UpdateSessionsStore } from "./syncState";
 
-const mainConfig = {
+const mainConfig: import("./types").SyncConfig = {
 	name: "Main",
 	localPath: "local/sync",
 	remotePath: "aws/sync",

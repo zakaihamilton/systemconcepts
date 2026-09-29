@@ -34,7 +34,7 @@ export function getSavedLibraryCounter() {
 	return Number.isFinite(saved) ? saved : null;
 }
 
-export function saveLibraryCounter(counter: any) {
+export function saveLibraryCounter(counter: number) {
 	const storageKey = getUserSyncStorageKey(LIBRARY_COUNTER_STORAGE_KEY);
 	if (typeof window !== "undefined" && storageKey && Number.isFinite(counter)) {
 		localStorage.setItem(storageKey, String(counter));

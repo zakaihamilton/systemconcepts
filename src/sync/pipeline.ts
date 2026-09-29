@@ -1,5 +1,3 @@
-// @ts-check
-
 import { logger as structuredLogger } from "@util/api/logger";
 import { roleAuth } from "@util/auth/roles";
 import { makePath } from "@util/data/path";
@@ -27,9 +25,13 @@ import { uploadUpdates } from "./steps/uploadUpdates";
 import { readFileIfExists } from "./storageReads";
 import { SyncActiveStore } from "./syncState";
 import { createSyncTrashId } from "./trash";
+import type { Manifest, PipelineResult, SyncConfig } from "./types";
 
-const defaultDependencies = {
-	storage,
+const defaultDependencies: PipelineDependencies = {
+	storage: {
+		createFolderPath: (path) => storage.createFolderPath(path),
+		readFile: (path) => storage.readFile(path),
+	},
 	roleAuth,
 	addSyncLog,
 	logger: structuredLogger,
@@ -51,38 +53,109 @@ const defaultDependencies = {
 	createSyncTrashId,
 };
 
-/** @typedef {{
- * storage: any,
- * roleAuth: (...args: any[]) => boolean,
- * addSyncLog: (...args: any[]) => void,
- * logger: any,
- * ProgressTracker: any,
- * getLocalFiles: (...args: any[]) => Promise<any>,
- * readLibraryCounter: (...args: any[]) => Promise<any>,
- * getSavedLibraryCounter: (...args: any[]) => any,
- * saveLibraryCounter: (...args: any[]) => any,
- * syncManifest: (...args: any[]) => Promise<import("./types").Manifest>,
- * migrateFromMongoDB: (...args: any[]) => Promise<any>,
- * updateLocalManifest: (...args: any[]) => Promise<any>,
- * downloadUpdates: (...args: any[]) => Promise<any>,
- * removeDeletedFiles: (...args: any[]) => Promise<any>,
- * uploadUpdates: (...args: any[]) => Promise<any>,
- * uploadNewFiles: (...args: any[]) => Promise<any>,
- * deleteRemoteFiles: (...args: any[]) => any,
- * applyRemoteTombstones: (...args: any[]) => Promise<any>,
- * uploadManifest: (...args: any[]) => Promise<any>,
- * createSyncTrashId: () => string
- * }} PipelineDependencies */
+type LocalFile = { path: string; fullPath: string };
+type ManifestResult = {
+	manifest: Manifest;
+	hasChanges: boolean;
+	complete?: boolean;
+	cleanedRemoteManifest?: Manifest;
+};
+type ProgressTracker = Pick<
+	SyncProgressTracker,
+	| "updateProgress"
+	| "completeStep"
+	| "setComplete"
+	| "usePersonalWeights"
+	| "getCurrentOffset"
+>;
+interface PipelineDependencies {
+	storage: {
+		createFolderPath(path: string): Promise<unknown>;
+		readFile(path: string): Promise<string | null>;
+	};
+	roleAuth(role: string | undefined, requiredRole: string): boolean;
+	addSyncLog(message: string, type: string): void;
+	logger: Pick<typeof structuredLogger, "warn" | "debug" | "error">;
+	ProgressTracker: new (
+		offset: number,
+		total: number | null,
+	) => ProgressTracker;
+	getLocalFiles(path: string, config: SyncConfig): Promise<LocalFile[]>;
+	readLibraryCounter(): Promise<number>;
+	getSavedLibraryCounter(): number | null;
+	saveLibraryCounter(counter: number): void;
+	syncManifest(
+		path: string,
+		locked: boolean,
+		migration: boolean,
+	): Promise<Manifest>;
+	migrateFromMongoDB(
+		userId: string,
+		manifest: Manifest,
+		path: string,
+		canUpload: boolean,
+	): Promise<{
+		migrated: boolean;
+		fileCount: number;
+		deletedKeys?: string[];
+		manifest?: Manifest | null;
+		error?: unknown;
+	}>;
+	updateLocalManifest(
+		files: LocalFile[],
+		path: string,
+		manifest: Manifest,
+		options: { skipHashing: boolean },
+	): Promise<Manifest>;
+	downloadUpdates(
+		local: Manifest,
+		remote: Manifest,
+		localPath: string,
+		remotePath: string,
+		canUpload: boolean,
+		progress: ProgressTracker,
+		restore?: boolean,
+	): Promise<ManifestResult>;
+	removeDeletedFiles(
+		local: Manifest,
+		remote: Manifest,
+		path: string,
+		readOnly: boolean,
+	): Promise<ManifestResult>;
+	uploadUpdates(
+		local: Manifest,
+		remote: Manifest,
+		localPath: string,
+		remotePath: string,
+		progress: ProgressTracker,
+	): Promise<ManifestResult>;
+	uploadNewFiles(
+		local: Manifest,
+		remote: Manifest,
+		localPath: string,
+		remotePath: string,
+		progress: ProgressTracker,
+	): Promise<ManifestResult>;
+	deleteRemoteFiles(
+		local: Manifest,
+		path: string,
+		syncId: string,
+	): Promise<{ complete: boolean }>;
+	applyRemoteTombstones(
+		local: Manifest,
+		remote: Manifest,
+		path: string,
+		canUpload: boolean,
+		syncId: string,
+	): Promise<ManifestResult>;
+	uploadManifest(manifest: Manifest, path: string): Promise<unknown>;
+	createSyncTrashId(): string;
+}
 
-/**
- * @param {string} localPath
- * @param {import("./types").SyncConfig} config
- * @param {PipelineDependencies} dependencies
- */
 async function getLibraryLocalFiles(
-	localPath: any,
-	config: any,
-	dependencies: any,
+	localPath: string,
+	config: SyncConfig,
+	dependencies: PipelineDependencies,
 ) {
 	if (!config.useChangeCounter) {
 		return {
@@ -93,14 +166,24 @@ async function getLibraryLocalFiles(
 	const counter = await dependencies.readLibraryCounter();
 	const savedCounter = dependencies.getSavedLibraryCounter();
 	const manifestPath = makePath(localPath, FILES_MANIFEST);
-	let cachedManifest = null;
+	let cachedManifest: Manifest | null = null;
 	try {
 		const content = await readFileIfExists(dependencies.storage, manifestPath);
 		if (content !== null) {
-			const parsed = content ? JSON.parse(content) : [];
-			cachedManifest = Array.isArray(parsed) ? parsed : null;
+			const parsed: unknown = content ? JSON.parse(content) : [];
+			if (
+				Array.isArray(parsed) &&
+				parsed.every(
+					(entry: unknown) =>
+						typeof entry === "object" &&
+						entry !== null &&
+						"path" in entry &&
+						typeof entry.path === "string",
+				)
+			)
+				cachedManifest = parsed as Manifest;
 		}
-	} catch (error: any) {
+	} catch (error) {
 		dependencies.logger.warn(
 			"[Sync] Failed to read cached local manifest:",
 			error,
@@ -135,28 +218,21 @@ async function getLibraryLocalFiles(
 	};
 }
 
-/**
- * @param {Partial<typeof defaultDependencies>} [overrides]
- */
-export function createSyncPipeline(overrides: Record<string, any> = {}) {
-	/** @type {PipelineDependencies} */
-	const dependencies = { ...defaultDependencies, ...overrides };
+export function createSyncPipeline(
+	overrides: Partial<PipelineDependencies> = {},
+) {
+	const dependencies: PipelineDependencies = {
+		...defaultDependencies,
+		...overrides,
+	};
 
-	/**
-	 * @param {import("./types").SyncConfig} config
-	 * @param {string | undefined} role
-	 * @param {string} userId
-	 * @param {number} [phaseOffset]
-	 * @param {number | null} [combinedTotalWeight]
-	 * @returns {Promise<import("./types").PipelineResult>}
-	 */
 	return async function executeSyncPipeline(
-		config: any,
-		role: any,
-		userId: any,
+		config: SyncConfig,
+		role: string | undefined,
+		userId: string,
 		phaseOffset = 0,
 		combinedTotalWeight: number | null = null,
-	) {
+	): Promise<PipelineResult> {
 		const {
 			name,
 			localPath,
@@ -243,16 +319,12 @@ export function createSyncPipeline(overrides: Record<string, any> = {}) {
 					if (migrationResult.deletedKeys) {
 						const deletedKeys = new Set(migrationResult.deletedKeys);
 						remoteManifest = remoteManifest.filter(
-							(/** @type {import("./types").ManifestEntry} */ entry: any) =>
-								!deletedKeys.has(entry.path),
+							(entry) => !deletedKeys.has(entry.path),
 						);
 					}
 					if (migrationResult.manifest) {
 						const remotePaths = new Set(
-							remoteManifest.map(
-								(/** @type {import("./types").ManifestEntry} */ entry: any) =>
-									entry.path,
-							),
+							remoteManifest.map((entry) => entry.path),
 						);
 						for (const entry of migrationResult.manifest) {
 							if (!remotePaths.has(entry.path)) {
@@ -268,7 +340,7 @@ export function createSyncPipeline(overrides: Record<string, any> = {}) {
 					localFiles = await dependencies.getLocalFiles(localPath, config);
 					skipHashing = false;
 				}
-			} catch (error: any) {
+			} catch (error) {
 				migrationComplete = false;
 				const message = error instanceof Error ? error.message : String(error);
 				dependencies.logger.error(`[${name}] Migration failed:`, error);
@@ -346,10 +418,7 @@ export function createSyncPipeline(overrides: Record<string, any> = {}) {
 				migrationComplete &&
 				remoteManifestAuthoritative &&
 				!SyncActiveStore.getRawState().stopping;
-			const localTombstones = localManifest.filter(
-				(/** @type {import("./types").ManifestEntry} */ entry: any) =>
-					entry.deleted,
-			);
+			const localTombstones = localManifest.filter((entry) => entry.deleted);
 			if (deletionSafe && localTombstones.length > 0) {
 				remoteManifest = await applyManifestUpdates(
 					remoteManifest,
@@ -411,8 +480,7 @@ export function createSyncPipeline(overrides: Record<string, any> = {}) {
 			remoteManifestAuthoritative &&
 			!SyncActiveStore.getRawState().stopping;
 		const remoteTombstoneCount = remoteManifest.filter(
-			(/** @type {import("./types").ManifestEntry} */ entry: any) =>
-				entry.deleted,
+			(entry) => entry.deleted,
 		).length;
 		if (localDeletionSafe && remoteTombstoneCount > 0) {
 			const localTrashResult = await dependencies.applyRemoteTombstones(

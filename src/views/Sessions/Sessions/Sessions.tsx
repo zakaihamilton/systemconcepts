@@ -1,12 +1,6 @@
 import ViewTransition from "@components/ViewTransition";
-import AutoAwesomeIcon from "@icons/svg/AutoAwesome.svg";
-import ExpandLessIcon from "@icons/svg/ExpandLess.svg";
-import ExpandMoreIcon from "@icons/svg/ExpandMore.svg";
-import GraphicEqIcon from "@icons/svg/GraphicEq.svg";
-import MovieIcon from "@icons/svg/Movie.svg";
 import { SyncActiveStore } from "@sync/syncState";
 import { useSessionReloadOnSyncComplete } from "@sync/useSessionReloadOnSyncComplete";
-import Chip from "@ui/Chip";
 import { useLocalStorage } from "@util/browser/store";
 import { useDeviceType } from "@util/browser/styles";
 import { useDateFormatter } from "@util/data/locale";
@@ -17,49 +11,19 @@ import { useRequireSigninMode } from "@util/domain/useRequireSigninMode";
 import { addPath, toPath } from "@util/domain/views";
 import { PlayerStore } from "@views/Player/Player";
 import FilterBar from "@views/Sessions/FilterBar";
-import Group from "@widgets/Group";
-import Image from "@widgets/Image";
-import Label from "@widgets/Label";
-import Row from "@widgets/Row";
-import SessionIcon from "@widgets/SessionIcon";
 import StatusBar from "@widgets/StatusBar";
 import Table from "@widgets/Table";
-import Tooltip from "@widgets/Tooltip";
-import clsx from "clsx";
 import Cookies from "js-cookie";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { buildTreePrefixMap } from "./buildTreePrefixMap";
+import { renderSessionColumn } from "./renderSessionColumn";
 import styles from "./Sessions.module.css";
-
-function getSessionListId(session: any) {
-	return session?.id || session?.key;
-}
-
-function collectSessionIds(sessions: any) {
-	const ids = new Set<any>();
-	for (const session of sessions) {
-		const id = getSessionListId(session);
-		if (id) {
-			ids.add(id);
-		}
-	}
-	return ids;
-}
-
-function hasNewSessionId(previousIds: any, nextIds: any) {
-	for (const id of nextIds) {
-		if (!previousIds.has(id)) {
-			return true;
-		}
-	}
-	return false;
-}
-
-function getSessionDateLocale() {
-	if (typeof navigator === "undefined") {
-		return undefined;
-	}
-	return navigator.languages?.[0] || navigator.language;
-}
+import {
+	collectSessionIds,
+	getSessionDateLocale,
+	hasNewSessionId,
+} from "./sessionHelpers";
+import { useSessionTreeGrouping } from "./useSessionTreeGrouping";
 
 export default function SessionsPage() {
 	const isSignedIn = Cookies.get("id") && Cookies.get("hash");
@@ -358,85 +322,7 @@ export default function SessionsPage() {
 		});
 	}, []);
 
-	const treePrefixMap = useMemo(() => {
-		if (!sessions) return new Map<any, any>();
-
-		const buckets: Record<string, any> = {};
-		for (const s of sessions) {
-			if (!s.name) continue;
-			const bucketKey = `${s.group}||${s.date}`;
-			if (!buckets[bucketKey]) buckets[bucketKey] = [];
-			buckets[bucketKey].push(s.name);
-		}
-
-		const prefixMap = new Map<any, any>();
-		const HYPHENS = /[-\u2010-\u2015\u2212\uFE58\uFE63\uFF0D]/u;
-		const isBoundary = (c: any) => !c || /[^\p{L}\p{N}]/u.test(c);
-
-		for (const bucketKey in buckets) {
-			const names = buckets[bucketKey];
-
-			// 1. Generate all possible prefixes
-			const allPrefixes = new Set<any>();
-			for (const name of names) {
-				allPrefixes.add(name);
-				for (let i = 0; i < name.length; i++) {
-					if (HYPHENS.test(name[i])) {
-						const extracted = name.substring(0, i);
-						const clean = extracted.replace(/[^\p{L}\p{N}]+$/u, "");
-						if (clean.length > 2) {
-							allPrefixes.add(clean);
-						}
-					}
-				}
-			}
-
-			const validPrefixes = Array.from(allPrefixes).sort(
-				(a, b) => b.length - a.length,
-			);
-
-			// 2. Pre-calculate counts for prefixes that appear more than once
-			const prefixCounts = new Map<any, any>();
-			for (const p of validPrefixes) {
-				let count = 0;
-				for (const name of names) {
-					if (name.toLowerCase().startsWith(p.toLowerCase())) {
-						const nextChar = name[p.length];
-						if (
-							isBoundary(nextChar) ||
-							p.toLowerCase() === name.toLowerCase()
-						) {
-							count++;
-						}
-					}
-				}
-				if (count > 1) {
-					prefixCounts.set(p, count);
-				}
-			}
-
-			// 3. Find the final prefix for each name using the pre-calculated counts
-			for (const name of names) {
-				let finalPrefix = name;
-				const nameLower = name.toLowerCase();
-
-				for (const p of validPrefixes) {
-					if (nameLower.startsWith(p.toLowerCase())) {
-						const nextChar = name[p.length];
-						if (
-							(isBoundary(nextChar) || p.toLowerCase() === nameLower) &&
-							prefixCounts.has(p)
-						) {
-							finalPrefix = p;
-							break;
-						}
-					}
-				}
-				prefixMap.set(`${bucketKey}||${name}`, finalPrefix);
-			}
-		}
-		return prefixMap;
-	}, [sessions]);
+	const treePrefixMap = useMemo(() => buildTreePrefixMap(sessions), [sessions]);
 
 	const mapper = useCallback(
 		(item: any) => {
@@ -502,313 +388,18 @@ export default function SessionsPage() {
 	);
 
 	const renderColumn = useCallback(
-		(columnId: any, item: any) => {
-			switch (columnId) {
-				case "name":
-				case "nameWidget": {
-					const style: Record<string, any> = {};
-
-					if (item.isGroupHeader) {
-						const toggleFolder = (e: any) => {
-							e.preventDefault();
-							e.stopPropagation();
-							SessionsStore.update((s) => {
-								const expanded = s.expandedTreeGroups || [];
-								if (expanded.includes(item.prefix)) {
-									s.expandedTreeGroups = expanded.filter(
-										(p) => p !== item.prefix,
-									);
-								} else {
-									s.expandedTreeGroups = [...expanded, item.prefix];
-								}
-							});
-						};
-						const icon = (
-							<div className={styles.icon} onClick={toggleFolder}>
-								{item.isExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-							</div>
-						);
-						const nameContent = (
-							<div className={styles.nameContainer}>
-								<span
-									className={clsx(styles.labelText, styles.singleLine)}
-									style={{ fontWeight: "bold" }}
-								>
-									{item.name}{" "}
-									<span style={{ opacity: 0.7, fontSize: "0.9em" }}>
-										({item.count})
-									</span>
-								</span>
-							</div>
-						);
-						return (
-							<Row onClick={toggleFolder} icons={icon}>
-								{nameContent}
-							</Row>
-						);
-					}
-
-					const icon = (
-						<div
-							style={style}
-							className={styles.icon}
-							onClick={() => handleIconClick(item.type)}
-							id={item.type}
-						>
-							<SessionIcon type={item.type} />
-						</div>
-					);
-
-					const nameContentInner = (
-						<span
-							className={clsx(
-								styles.labelText,
-								viewMode !== "grid" && styles.singleLine,
-								viewMode === "grid" && styles.gridLineClamp,
-							)}
-						>
-							{item.name}
-							{viewMode !== "grid" && (
-								<div
-									className={clsx(
-										styles.percentageContainer,
-										item.percentage && styles.visible,
-									)}
-								>
-									<div
-										className={styles.percentage}
-										style={{ width: item.percentage + "%" }}
-									/>
-								</div>
-							)}
-						</span>
-					);
-
-					const nameContent = (
-						<Tooltip title={item.name}>
-							<div className={styles.nameContainer}>{nameContentInner}</div>
-						</Tooltip>
-					);
-
-					const href = target(item);
-					return viewMode === "grid" ? (
-						<Label
-							className={clsx(styles.labelName, styles[viewMode])}
-							icon={viewMode !== "grid" && icon}
-							name={nameContent}
-						/>
-					) : (
-						<Row href={href} onClick={() => gotoItem(item)} icons={icon}>
-							{nameContent}
-						</Row>
-					);
-				}
-
-				case "thumbnail":
-				case "thumbnailWidget": {
-					if (item.isGroupHeader) {
-						return null;
-					}
-					const shouldShowImage = viewMode === "grid";
-					const altIcon = (
-						<>
-							{item.video ? (
-								<MovieIcon fontSize="large" />
-							) : (
-								<GraphicEqIcon fontSize="large" />
-							)}
-						</>
-					);
-
-					const aiBadge = item.ai && viewMode === "grid" && (
-						<Tooltip title="AI Summary Available">
-							<div className={styles.aiBadge}>
-								<AutoAwesomeIcon />
-								<span className={styles.aiText}>AI</span>
-							</div>
-						</Tooltip>
-					);
-
-					const progressBar = typeof item.percentage === "number" &&
-						!isNaN(item.percentage) &&
-						item.percentage > 0 &&
-						viewMode === "grid" && (
-							<div className={clsx(styles.gridProgressBar, styles.visible)}>
-								<div
-									className={styles.gridProgressFill}
-									style={{ width: item.percentage + "%" }}
-								/>
-							</div>
-						);
-
-					return (
-						<div className={styles.thumbnailContainer}>
-							<Image
-								href={target(item)}
-								onClick={() => gotoItem(item)}
-								path={shouldShowImage ? item.thumbnail : null}
-								width={viewMode === "grid" ? null : "12em"}
-								height={viewMode === "grid" ? null : "9em"}
-								alt={altIcon}
-								loading="lazy"
-							/>
-							{aiBadge}
-							{progressBar}
-						</div>
-					);
-				}
-
-				case "group":
-				case "groupWidget":
-					return (
-						<Group
-							fill={viewMode === "grid"}
-							name={item.group}
-							color={item.color}
-							className={
-								viewMode === "grid"
-									? styles.gridGroupContainer
-									: styles.listGroupContainer
-							}
-						/>
-					);
-
-				case "date": {
-					if (item.isGroupHeader) {
-						return null;
-					}
-					const formatted = formatDate(item.date);
-					if (viewMode === "grid") {
-						return (
-							<div className={styles.gridDateBadge}>
-								<span className={styles.gridDateText}>{formatted}</span>
-							</div>
-						);
-					}
-					return (
-						<div className={styles.dateBadge}>
-							<span className={styles.dateText}>{formatted}</span>
-						</div>
-					);
-				}
-
-				case "duration":
-				case "durationWidget":
-					return item.formattedDuration;
-
-				case "tags":
-				case "tagsWidget":
-					return item.tags.length ? (
-						<div className={styles.tags}>
-							{item.tags.map((tag: any) => (
-								<Chip
-									key={tag}
-									label={tag}
-									size="small"
-									className={styles.tag}
-								/>
-							))}
-						</div>
-					) : null;
-
-				default:
-					return item[columnId];
-			}
-		},
+		(columnId: any, item: any) =>
+			renderSessionColumn(columnId, item, {
+				viewMode,
+				target,
+				gotoItem,
+				handleIconClick,
+				formatDate,
+			}),
 		[viewMode, target, gotoItem, handleIconClick, formatDate],
 	);
 
-	const treeGroupCache = useRef<Record<string, any>>({});
-
-	const treeGroup: any = useCallback(
-		(sortedItems: any, expandedTreeGroupsList: any) => {
-			let collapsedResult: any;
-			let groups: any;
-
-			if (treeGroupCache.current.sortedItems === sortedItems) {
-				collapsedResult = treeGroupCache.current.result;
-				groups = treeGroupCache.current.groups;
-			} else {
-				groups = {};
-				const groupOrder: any = [];
-
-				sortedItems.forEach((itemWrapper: any) => {
-					const { mapped } = itemWrapper;
-					const groupKey = mapped.treeGroupKey;
-					if (!groups[groupKey]) {
-						groups[groupKey] = { prefix: mapped.treePrefix, items: [] };
-						groupOrder.push(groupKey);
-					}
-					groups[groupKey].items.push(itemWrapper);
-				});
-
-				collapsedResult = [];
-				groupOrder.forEach((groupKey: any) => {
-					const { prefix, items }: any = groups[groupKey];
-					if (items.length === 1) {
-						collapsedResult.push(items[0]);
-					} else {
-						const firstItem = items[0];
-						const headerMapped = {
-							...firstItem.mapped,
-							id: "group_" + groupKey,
-							key: "group_" + groupKey,
-							isGroupHeader: true,
-							prefix: groupKey,
-							name: prefix,
-							count: items.length,
-						};
-						collapsedResult.push({
-							raw: { ...firstItem.raw, isGroupHeader: true },
-							mapped: headerMapped,
-							searchableText: prefix.toLowerCase(),
-						});
-					}
-				});
-
-				treeGroupCache.current = {
-					sortedItems,
-					result: collapsedResult,
-					groups,
-				};
-			}
-
-			if (!expandedTreeGroupsList.length) {
-				return collapsedResult;
-			}
-
-			const finalResult = [];
-			const expandedSet = new Set(expandedTreeGroupsList);
-
-			for (const item of collapsedResult) {
-				const isExpanded =
-					item.mapped.isGroupHeader && expandedSet.has(item.mapped.prefix);
-
-				if (isExpanded) {
-					const expandedGroup = groups[item.mapped.prefix];
-					// Push the header with expanded state
-					finalResult.push({
-						...item,
-						mapped: { ...item.mapped, isExpanded: true },
-					});
-					// Push the children if the group exists
-					if (expandedGroup) {
-						const treeChildren = expandedGroup.items.map((child: any) => ({
-							raw: child.raw,
-							mapped: { ...child.mapped, isTreeChild: true },
-						}));
-						finalResult.push(...treeChildren);
-					}
-				} else {
-					// Push the collapsed item or non-header item
-					finalResult.push(item);
-				}
-			}
-
-			return finalResult;
-		},
-		[],
-	);
+	const treeGroup = useSessionTreeGrouping();
 
 	const getSeparator = useCallback((item: any, prevItem: any, orderBy: any) => {
 		if (orderBy === "date") {

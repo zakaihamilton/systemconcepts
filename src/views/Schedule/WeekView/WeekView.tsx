@@ -201,9 +201,7 @@ export default function WeekView({
 	const hasNextWeek =
 		weekOfMonth !== numOfWeeksInMonth - 1 || month.getFullYear() !== yearEnd;
 	const isToday =
-		weekOfMonth === getWeekOfMonth(today) &&
-		month.getMonth() == today.getMonth() &&
-		month.getFullYear() == today.getFullYear();
+		firstDay.toDateString() === getWeekViewStart(today).toDateString();
 
 	const gotoToday = () => {
 		store.update((s: any) => {

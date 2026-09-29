@@ -64,7 +64,7 @@ export class SyncProgressTracker {
 		);
 	}
 
-	updateProgress(stepName: any, stepProgress = { processed: 1, total: 1 }) {
+	updateProgress(stepName: string, stepProgress = { processed: 1, total: 1 }) {
 		const stepWeight = this.weights[stepName] || 0;
 		const stepCompletion =
 			stepProgress.total > 0 ? stepProgress.processed / stepProgress.total : 0;
@@ -80,7 +80,7 @@ export class SyncProgressTracker {
 		});
 	}
 
-	completeStep(stepName: any) {
+	completeStep(stepName: string) {
 		this.completedWeight += this.weights[stepName] || 0;
 		this.updateProgress(stepName, { processed: 1, total: 1 });
 	}

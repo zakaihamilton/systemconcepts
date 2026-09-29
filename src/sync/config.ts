@@ -1,5 +1,6 @@
-/** @type {import("./types").SyncConfig[]} */
-export const SYNC_CONFIG = [
+import type { SyncConfig } from "./types";
+
+export const SYNC_CONFIG: SyncConfig[] = [
 	{
 		name: "Main",
 		localPath: "local/sync",
