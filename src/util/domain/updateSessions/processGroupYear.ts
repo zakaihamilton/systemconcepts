@@ -6,6 +6,7 @@ import { isDurationFile, isSummaryFile, isTagsFile } from "@util/data/path";
 import storage from "@util/storage/storage";
 import { getCombinedYearFingerprint } from "./fingerprints";
 import { createSessionItem } from "./mapper";
+import { recordGroupError, toSessionProgress } from "./sessionProgress";
 import {
 	buildMetadataLookup,
 	getDigitalOceanSessionFiles,
@@ -426,17 +427,7 @@ export async function processGroupYear({
 				UpdateSessionsStore.update((s) => {
 					s.status[itemIndex].addedCount += newCount;
 					s.status[itemIndex].newSessions.push(
-						...newSessions.map((s: any) => ({
-							name: s.id,
-							files: s.files || [],
-							metadata: {
-								hasTags: Array.isArray(s.tags) && s.tags.length > 0,
-								hasDuration: typeof s.duration === "number" && s.duration > 0.5,
-								hasSummary: !!s.summaryText || !!s.summary,
-								hasTranscription: !!s.transcription,
-								hasThumbnail: !!s.thumbnail || !!s.image,
-							},
-						})),
+						...newSessions.map(toSessionProgress),
 					);
 					s.status = [...s.status];
 				});
@@ -470,10 +461,7 @@ export async function processGroupYear({
 		})();
 	} catch (err: any) {
 		structuredLogger.error(err);
-		UpdateSessionsStore.update((s) => {
-			s.status[itemIndex].errors.push(err.message || String(err));
-			s.status = [...s.status];
-		});
+		recordGroupError(itemIndex, err);
 		throw err; // Abort this year's processing and fail the group update
 	} finally {
 		UpdateSessionsStore.update((s) => {

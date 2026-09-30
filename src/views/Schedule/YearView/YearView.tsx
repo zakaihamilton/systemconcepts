@@ -1,15 +1,14 @@
 import { registerToolbar, useToolbar } from "@components/Toolbar";
-import ArrowBackIcon from "@icons/svg/ArrowBack.svg";
-import ArrowForwardIcon from "@icons/svg/ArrowForward.svg";
 import ChevronLeftIcon from "@icons/svg/ChevronLeft.svg";
 import ChevronRightIcon from "@icons/svg/ChevronRight.svg";
-import TodayIcon from "@icons/svg/Today.svg";
 import { useSwipe } from "@util/browser/touch";
 import { getYearNames } from "@util/data/date";
 import { useDirection } from "@util/data/direction";
 import { useDateFormatter } from "@util/data/locale";
 import { useTranslations } from "@util/domain/translations";
 import Input from "@widgets/Input";
+import { getYearState } from "../calendarState";
+import { getScheduleNavigationItems } from "../navigationItems";
 import Month from "./Month";
 import styles from "./YearView.module.css";
 
@@ -41,16 +40,7 @@ export default function YearView({
 		);
 	});
 
-	const yearState = [
-		currentYear,
-		(year: any) => {
-			const newDate = new Date(date);
-			newDate.setFullYear(year);
-			store.update((s: any) => {
-				s.date = newDate;
-			});
-		},
-	];
+	const yearState = getYearState(date, currentYear, store);
 	const yearStart = 2015;
 	const yearEnd = new Date().getFullYear() + 2;
 	const yearItems = getYearNames(
@@ -90,38 +80,15 @@ export default function YearView({
 		});
 	};
 
-	const gotoToday = () => {
-		store.update((s: any) => {
-			s.date = new Date();
-		});
-	};
-
-	const goBack = () => {
-		if (lastViewMode) {
-			store.update((s: any) => {
-				s.viewMode = lastViewMode;
-				s.lastViewMode = null;
-			});
-		}
-	};
-
 	const toolbarItems = [
-		{
-			id: "back",
-			name: translations.BACK,
-			icon: direction === "rtl" ? <ArrowForwardIcon /> : <ArrowBackIcon />,
-			onClick: goBack,
-			location: "header",
-			disabled: !lastViewMode,
-		},
-		{
-			id: "today",
-			name: translations.TODAY,
-			icon: <TodayIcon />,
-			onClick: gotoToday,
-			location: "header",
+		...getScheduleNavigationItems({
+			store,
+			direction,
+			translations,
+			lastViewMode,
+			today: () => new Date(),
 			menu: false,
-		},
+		}),
 		{
 			id: "previousYear",
 			name: translations.PREVIOUS_YEAR,

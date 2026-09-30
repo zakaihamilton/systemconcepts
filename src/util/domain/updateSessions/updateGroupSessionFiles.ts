@@ -7,7 +7,7 @@ import {
 } from "@util/data/path";
 import { getYearFingerprint } from "./fingerprints";
 
-export function isYearMetadataFile(file: any, yearName: any) {
+function isYearMetadataFile(file: any, yearName: any) {
 	return (
 		file.name === yearName + ".tags" ||
 		file.name === yearName + ".duration" ||
@@ -16,7 +16,7 @@ export function isYearMetadataFile(file: any, yearName: any) {
 	);
 }
 
-export function getSessionFileId(file: any) {
+function getSessionFileId(file: any) {
 	let id = fileTitle(file.name);
 	if (isVideoFile(file.name)) {
 		const resolutionMatch = id.match(/(.*)_(\d+x\d+)/);
@@ -45,13 +45,13 @@ export function groupFilesBySessionId(files: any, yearName: any) {
 	return map;
 }
 
-export function isCandidateSessionId(id: any) {
+function isCandidateSessionId(id: any) {
 	// Keep this aligned with createSessionItem's date/name parse so listing
 	// entries that can never become sessions do not force endless reprocessing.
 	return /^\d{4}-\d{2}-\d{2} .+/.test(String(id || "").trim());
 }
 
-export function hasMediaFiles(files: any) {
+function hasMediaFiles(files: any) {
 	return (files || []).some(
 		(file: any) =>
 			isAudioFile(file.name) ||
@@ -106,13 +106,7 @@ export function getSessionIdsNeedingRefresh(
 		yearItems,
 		yearName,
 	);
-	const cachedById = new Map<any, any>();
-	for (const session of cachedYearSessions || []) {
-		const id = session.id || session.name;
-		if (id) {
-			cachedById.set(id, session);
-		}
-	}
+	const cachedById = sessionsById(cachedYearSessions);
 	const previous = previousSessionFingerprints || {};
 	const wasabiFilesMap = groupFilesBySessionId(yearItems, yearName);
 	const ids = [];
@@ -153,20 +147,8 @@ export function mergeListingSessions(
 	cachedYearSessions: any,
 	refreshedSessions: any,
 ) {
-	const cachedById = new Map<any, any>();
-	for (const session of cachedYearSessions || []) {
-		const id = session.id || session.name;
-		if (id) {
-			cachedById.set(id, session);
-		}
-	}
-	const refreshedById = new Map<any, any>();
-	for (const session of refreshedSessions || []) {
-		const id = session.id || session.name;
-		if (id) {
-			refreshedById.set(id, session);
-		}
-	}
+	const cachedById = sessionsById(cachedYearSessions);
+	const refreshedById = sessionsById(refreshedSessions);
 	return listingSessionIds
 		.map((id: any) => refreshedById.get(id) || cachedById.get(id))
 		.filter(Boolean);
@@ -222,4 +204,13 @@ export function getDigitalOceanSessionFiles(files: any, wasabiFiles = []) {
 			!isVideoFile(file.name) &&
 			(!hasWasabiImage || !isImageFile(file.name)),
 	);
+}
+
+function sessionsById(sessions: any[]) {
+	const byId = new Map();
+	for (const session of sessions || []) {
+		const id = session.id || session.name;
+		if (id) byId.set(id, session);
+	}
+	return byId;
 }

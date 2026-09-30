@@ -7,6 +7,7 @@ import { makePath } from "@util/data/path";
 import storage from "@util/storage/storage";
 import { persistGroupSessions } from "./persistGroupSessions";
 import { processGroupYear } from "./processGroupYear";
+import { recordGroupError } from "./sessionProgress";
 import {
 	getGroupMetadataFiles,
 	getSessionYear,
@@ -127,10 +128,7 @@ export async function updateGroupProcess(
 		);
 	} catch (err: any) {
 		structuredLogger.error(err);
-		UpdateSessionsStore.update((s) => {
-			s.status[itemIndex].errors.push(err.message || String(err));
-			s.status = [...s.status];
-		});
+		recordGroupError(itemIndex, err);
 		// Abort the process to prevent data corruption (writing empty files)
 		return;
 	}

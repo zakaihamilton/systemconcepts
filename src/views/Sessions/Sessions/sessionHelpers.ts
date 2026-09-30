@@ -1,4 +1,4 @@
-export function getSessionListId(session: any) {
+function getSessionListId(session: any) {
 	return session?.id || session?.key;
 }
 

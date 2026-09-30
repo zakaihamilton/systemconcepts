@@ -12,6 +12,7 @@ import { logger as structuredLogger } from "@util/api/logger";
 import { makePath } from "@util/data/path";
 import storage from "@util/storage/storage";
 import { cleanupBundledGroup, cleanupMergedGroup } from "./cleanup";
+import { toSessionProgress } from "./sessionProgress";
 import { updateYearSync, yieldToMain } from "./utils";
 
 type GroupSession = import("../../../types/domain").Session & {
@@ -39,78 +40,25 @@ export async function persistGroupSessions({
 	itemIndex: number;
 	years: { name: string }[];
 }) {
-	if (isBundled) {
-		// For bundled groups:
-		// 1. Deduplicate sessions (preferring fresh ones from this sync)
-		const sessionMap = new Map<string, GroupSession>();
-		allSessions.forEach((s) => sessionMap.set(s.id, s));
-		const uniqueSessions = Array.from(sessionMap.values());
-		uniqueSessions.sort((a, b) => a.id.localeCompare(b.id));
-
-		if (existingSessions) {
-			existingSessions.sort((a, b) => a.id.localeCompare(b.id));
-			const uniqueSessionsStr = JSON.stringify(uniqueSessions);
-			const existingSessionsStr = JSON.stringify(existingSessions);
-
-			if (uniqueSessionsStr === existingSessionsStr && !forceUpdate) {
-				addSyncLog(`[${name}] ✓ Verified (no changes).`, "success");
-				return { continue: false, value: uniqueSessions };
-			}
+	if (isBundled || isMerged) {
+		// Fresh sessions overlay cached entries by ID for either compact format.
+		const uniqueSessions = [
+			...new Map(allSessions.map((session) => [session.id, session])).values(),
+		].sort((a, b) => a.id.localeCompare(b.id));
+		existingSessions.sort((a, b) => a.id.localeCompare(b.id));
+		if (
+			!forceUpdate &&
+			JSON.stringify(uniqueSessions) === JSON.stringify(existingSessions)
+		) {
+			addSyncLog(`[${name}] ✓ Verified (no changes).`, "success");
+			return {
+				continue: false,
+				...(isBundled ? { value: uniqueSessions } : {}),
+			};
 		}
-
-		// 2. Cleanup
-		await cleanupBundledGroup(name);
-
-		const existingIds = new Set(existingSessions.map((s) => s.id));
-		const newSessionItems = uniqueSessions.filter(
-			(s) => !existingIds.has(s.id),
-		);
-		const addedCount = newSessionItems.length;
-
-		UpdateSessionsStore.update((s) => {
-			s.status[itemIndex].addedCount = addedCount;
-			s.status[itemIndex].newSessions.push(
-				...newSessionItems.map((s) => ({
-					name: s.id,
-					files: s.files || [],
-					metadata: {
-						hasTags: Array.isArray(s.tags) && s.tags.length > 0,
-						hasDuration: typeof s.duration === "number" && s.duration > 0.5,
-						hasSummary: !!s.summaryText || !!s.summary,
-						hasTranscription: !!s.transcription,
-						hasThumbnail: !!s.thumbnail || !!s.image,
-					},
-				})),
-			);
-			s.status = [...s.status];
-		});
-		uniqueSessions.forEach((session) => allSessionNames.add(session.id));
-
-		return { continue: false, value: uniqueSessions };
-	}
-
-	if (isMerged) {
-		// For merged groups:
-		// 1. Deduplicate sessions (preferring fresh ones from this sync)
-		const sessionMap = new Map<string, GroupSession>();
-		allSessions.forEach((s) => sessionMap.set(s.id, s));
-		const uniqueSessions = Array.from(sessionMap.values());
-		uniqueSessions.sort((a, b) => a.id.localeCompare(b.id));
-
-		let hasChanges = true;
-		if (existingSessions) {
-			existingSessions.sort((a, b) => a.id.localeCompare(b.id));
-			const uniqueSessionsStr = JSON.stringify(uniqueSessions);
-			const existingSessionsStr = JSON.stringify(existingSessions);
-
-			if (uniqueSessionsStr === existingSessionsStr && !forceUpdate) {
-				hasChanges = false;
-				addSyncLog(`[${name}] ✓ Verified (no changes).`, "success");
-				return { continue: false };
-			}
-		}
-
-		if (hasChanges) {
+		if (isBundled) {
+			await cleanupBundledGroup(name);
+		} else {
 			// 2. Write ONE merged file (compact JSON — pretty-print freezes large groups)
 			const localGroupPath = makePath(LOCAL_SYNC_PATH, `${name}.json`);
 			const groupData = {
@@ -158,21 +106,12 @@ export async function persistGroupSessions({
 		UpdateSessionsStore.update((s) => {
 			s.status[itemIndex].addedCount = addedCount;
 			s.status[itemIndex].newSessions.push(
-				...newSessionItems.map((s) => ({
-					name: s.id,
-					files: s.files || [],
-					metadata: {
-						hasTags: Array.isArray(s.tags) && s.tags.length > 0,
-						hasDuration: typeof s.duration === "number" && s.duration > 0.5,
-						hasSummary: !!s.summaryText || !!s.summary,
-						hasTranscription: !!s.transcription,
-						hasThumbnail: !!s.thumbnail || !!s.image,
-					},
-				})),
+				...newSessionItems.map(toSessionProgress),
 			);
 			s.status = [...s.status];
 		});
 		uniqueSessions.forEach((session) => allSessionNames.add(session.id));
+		if (isBundled) return { continue: false, value: uniqueSessions };
 	} else {
 		// For split (enabled) groups:
 		// 1. Check if we need to migrate from a merged file (e.g. settings changed or first sync after migration)

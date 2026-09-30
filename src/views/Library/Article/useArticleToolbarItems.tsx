@@ -65,101 +65,71 @@ interface ArticleToolbarItem {
 }
 
 export function useArticleToolbarItems(options: ArticleToolbarOptions) {
-	const {
-		translations,
-		handleExport,
-		handlePrint,
-		isAdmin,
-		openEditDialog,
-		openEditContentDialog,
-		search,
-		totalMatches,
-		matchIndex,
-		handlePrevMatch,
-		handleNextMatch,
-		showMarkdown,
-		setShowMarkdown,
-		content,
-		selectedTag,
-		isPhone,
-		handleShowTerms,
-		showAbbreviations,
-		setShowAbbreviations,
-		hideSquareBrackets,
-		setHideSquareBrackets,
-		setJumpDialogOpen,
-		prevArticle,
-		nextArticle,
-		onPrev,
-		onNext,
-		isMobile,
-		embedded,
-	} = options;
 	const toolbarItems = useMemo(() => {
-		if (!content || !selectedTag || embedded) {
+		if (!options.content || !options.selectedTag || options.embedded) {
 			return [];
 		}
 		let items: ArticleToolbarItem[] = [
 			{
 				id: "toggleAbbreviations",
-				name: showAbbreviations
-					? translations.SHOW_FULL_TERMS
-					: translations.SHOW_ABBREVIATIONS,
+				name: options.showAbbreviations
+					? options.translations.SHOW_FULL_TERMS
+					: options.translations.SHOW_ABBREVIATIONS,
 				icon: <LibraryBooksIcon />,
-				onClick: () => setShowAbbreviations((prev) => !prev),
+				onClick: () => options.setShowAbbreviations((prev) => !prev),
 				menu: true,
 			},
 			{
 				id: "toggleSquareBrackets",
-				name: hideSquareBrackets
-					? translations.SHOW_SQUARE_BRACKETS
-					: translations.HIDE_SQUARE_BRACKETS,
+				name: options.hideSquareBrackets
+					? options.translations.SHOW_SQUARE_BRACKETS
+					: options.translations.HIDE_SQUARE_BRACKETS,
 				icon: <DataArrayIcon />,
-				onClick: () => setHideSquareBrackets((prev) => !prev),
+				onClick: () => options.setHideSquareBrackets((prev) => !prev),
 				menu: true,
 			},
 			{
 				id: "toggleMarkdown",
-				name: showMarkdown
-					? translations.VIEW_PLAIN_TEXT
-					: translations.VIEW_MARKDOWN,
-				icon: showMarkdown ? <CodeOffIcon /> : <CodeIcon />,
-				onClick: () => setShowMarkdown((prev) => !prev),
+				name: options.showMarkdown
+					? options.translations.VIEW_PLAIN_TEXT
+					: options.translations.VIEW_MARKDOWN,
+				icon: options.showMarkdown ? <CodeOffIcon /> : <CodeIcon />,
+				onClick: () => options.setShowMarkdown((prev) => !prev),
 				menu: true,
 				divider: true,
 			},
 			{
 				id: "jumpToParagraph",
-				name: translations.JUMP_TO,
+				name: options.translations.JUMP_TO,
 				icon: <FormatListNumberedIcon />,
-				onClick: () => setJumpDialogOpen(true),
+				onClick: () => options.setJumpDialogOpen(true),
 				menu: true,
 			},
 			{
 				id: "articleTerms",
-				name: translations.ARTICLE_TERMS,
+				name: options.translations.ARTICLE_TERMS,
 				icon: <MenuBookIcon />,
-				onClick: handleShowTerms,
+				onClick: options.handleShowTerms,
 				menu: true,
 				divider: true,
 			},
 		];
-		if (isAdmin) {
-			if (openEditDialog) {
+		if (options.isAdmin) {
+			if (options.openEditDialog) {
 				items.push({
 					id: "editTags",
-					name: translations.EDIT_TAGS,
+					name: options.translations.EDIT_TAGS,
 					icon: <EditIcon />,
-					onClick: openEditDialog,
+					onClick: options.openEditDialog,
 					menu: true,
 				});
 			}
-			if (openEditContentDialog) {
+			if (options.openEditContentDialog) {
 				items.push({
 					id: "editArticle",
-					name: translations.EDIT_ARTICLE,
+					name: options.translations.EDIT_ARTICLE,
 					icon: <ArticleIcon />,
-					onClick: openEditContentDialog,
+					onClick: options.openEditContentDialog,
 					menu: true,
 					divider: true,
 				});
@@ -169,116 +139,120 @@ export function useArticleToolbarItems(options: ArticleToolbarOptions) {
 		// eslint-disable-next-line react-hooks/refs
 		items.push({
 			id: "export",
-			name: showMarkdown ? translations.PRINT : translations.EXPORT_TO_MD,
-			icon: showMarkdown ? <PrintIcon /> : <DownloadIcon />,
+			name: options.showMarkdown
+				? options.translations.PRINT
+				: options.translations.EXPORT_TO_MD,
+			icon: options.showMarkdown ? <PrintIcon /> : <DownloadIcon />,
 			onClick: () => {
-				if (showMarkdown) handlePrint();
-				else handleExport();
+				if (options.showMarkdown) options.handlePrint();
+				else options.handleExport();
 			},
 			menu: true,
 		});
 
-		if (search && totalMatches > 0) {
+		if (options.search && options.totalMatches > 0) {
 			items = [
 				...items,
 				{
 					id: "prevMatch",
-					name: translations.PREVIOUS_MATCH,
+					name: options.translations.PREVIOUS_MATCH,
 					icon: <KeyboardArrowUpIcon />,
-					onClick: handlePrevMatch,
-					location: isPhone ? "header" : undefined,
+					onClick: options.handlePrevMatch,
+					location: options.isPhone ? "header" : undefined,
 				},
 				{
 					id: "matchCount",
 					name:
-						totalMatches > 0 ? `${matchIndex + 1} / ${totalMatches}` : "0 / 0",
+						options.totalMatches > 0
+							? `${options.matchIndex + 1} / ${options.totalMatches}`
+							: "0 / 0",
 					element: (
 						<Typography
 							key="matchCount"
 							variant="caption"
 							className={styles.matchCount}
 						>
-							{totalMatches > 0
-								? `${matchIndex + 1} / ${totalMatches}`
+							{options.totalMatches > 0
+								? `${options.matchIndex + 1} / ${options.totalMatches}`
 								: "0 / 0"}
 						</Typography>
 					),
-					location: isPhone ? "header" : undefined,
+					location: options.isPhone ? "header" : undefined,
 				},
 				{
 					id: "nextMatch",
-					name: translations.NEXT_MATCH,
+					name: options.translations.NEXT_MATCH,
 					icon: <KeyboardArrowDownIcon />,
-					onClick: handleNextMatch,
-					location: isPhone ? "header" : undefined,
+					onClick: options.handleNextMatch,
+					location: options.isPhone ? "header" : undefined,
 				},
 			];
 		}
 
-		if (onPrev && prevArticle) {
-			const previousTooltip = prevArticle.name ? (
+		if (options.onPrev && options.prevArticle) {
+			const previousTooltip = options.prevArticle.name ? (
 				<span className={styles.tooltip}>
-					<b>{translations.PREVIOUS}</b> {prevArticle.name}
+					<b>{options.translations.PREVIOUS}</b> {options.prevArticle.name}
 				</span>
 			) : (
-				<b>{translations.PREVIOUS}</b>
+				<b>{options.translations.PREVIOUS}</b>
 			);
 			items.push({
 				id: "prevArticle",
 				name: previousTooltip,
 				icon: <ArrowBackIcon />,
-				onClick: onPrev,
-				location: isMobile ? undefined : "header",
+				onClick: options.onPrev,
+				location: options.isMobile ? undefined : "header",
 			});
 		}
 
-		if (onNext && nextArticle) {
-			const nextTooltip = nextArticle.name ? (
+		if (options.onNext && options.nextArticle) {
+			const nextTooltip = options.nextArticle.name ? (
 				<span className={styles.tooltip}>
-					<b>{translations.NEXT}</b> {nextArticle.name}
+					<b>{options.translations.NEXT}</b> {options.nextArticle.name}
 				</span>
 			) : (
-				<b>{translations.NEXT}</b>
+				<b>{options.translations.NEXT}</b>
 			);
 			items.push({
 				id: "nextArticle",
 				name: nextTooltip,
 				icon: <ArrowForwardIcon />,
-				onClick: onNext,
-				location: isMobile ? undefined : "header",
+				onClick: options.onNext,
+				location: options.isMobile ? undefined : "header",
 			});
 		}
 
 		return items;
 	}, [
-		translations,
-		handleExport,
-		handlePrint,
-		isAdmin,
-		openEditDialog,
-		openEditContentDialog,
-		search,
-		totalMatches,
-		matchIndex,
-		handlePrevMatch,
-		handleNextMatch,
-		showMarkdown,
-		setShowMarkdown,
-		content,
-		selectedTag,
-		isPhone,
-		handleShowTerms,
-		showAbbreviations,
-		setShowAbbreviations,
-		hideSquareBrackets,
-		setHideSquareBrackets,
-		setJumpDialogOpen,
-		prevArticle,
-		nextArticle,
-		onPrev,
-		onNext,
-		isMobile,
-		embedded,
+		options.translations,
+		options.handleExport,
+		options.handlePrint,
+		options.isAdmin,
+		options.openEditDialog,
+		options.openEditContentDialog,
+		options.search,
+		options.totalMatches,
+		options.matchIndex,
+		options.handlePrevMatch,
+		options.handleNextMatch,
+		options.showMarkdown,
+		options.setShowMarkdown,
+		options.content,
+		options.selectedTag,
+		options.isPhone,
+		options.handleShowTerms,
+		options.showAbbreviations,
+		options.setShowAbbreviations,
+		options.hideSquareBrackets,
+		options.setHideSquareBrackets,
+		options.setJumpDialogOpen,
+		options.prevArticle,
+		options.nextArticle,
+		options.onPrev,
+		options.onNext,
+		options.isMobile,
+		options.embedded,
 	]);
 
 	return toolbarItems;

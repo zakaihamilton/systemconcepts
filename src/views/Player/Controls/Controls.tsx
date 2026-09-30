@@ -16,6 +16,16 @@ import { TransportControls } from "./TransportControls";
 const skipPoints = 10;
 const PLAY_LOADING_DELAY_MS = 150;
 
+function resumeIntent(
+	currentTime: number,
+	fallback: number,
+	shouldPlay: boolean,
+) {
+	const position =
+		Number.isFinite(currentTime) && currentTime > 0 ? currentTime : fallback;
+	return { position: position > 0 ? position : 0, shouldPlay };
+}
+
 export default function Controls({
 	show,
 	path,
@@ -151,14 +161,11 @@ export default function Controls({
 				// Media errors often emit pause next. Stash resume intent now so that
 				// pause cannot clear wantPlaying before URL renew/path change runs.
 				if (!pendingResumeRef.current) {
-					const position =
-						Number.isFinite(playerRef.currentTime) && playerRef.currentTime > 0
-							? playerRef.currentTime
-							: currentTimeRef.current;
-					pendingResumeRef.current = {
-						position: position > 0 ? position : 0,
-						shouldPlay: wantPlayingRef.current,
-					};
+					pendingResumeRef.current = resumeIntent(
+						playerRef.currentTime,
+						currentTimeRef.current,
+						wantPlayingRef.current,
+					);
 				}
 				if (errorTimeoutRef.current) {
 					clearTimeout(errorTimeoutRef.current);
@@ -559,14 +566,11 @@ export default function Controls({
 	});
 
 	const reloadMedia = useCallback(() => {
-		const position =
-			Number.isFinite(playerRef.currentTime) && playerRef.currentTime > 0
-				? playerRef.currentTime
-				: currentTimeRef.current;
-		pendingResumeRef.current = {
-			position: position > 0 ? position : 0,
-			shouldPlay: wantPlayingRef.current,
-		};
+		pendingResumeRef.current = resumeIntent(
+			playerRef.currentTime,
+			currentTimeRef.current,
+			wantPlayingRef.current,
+		);
 		setError(null);
 		if (renewUrl) {
 			renewUrl();

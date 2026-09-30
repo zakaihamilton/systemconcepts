@@ -44,10 +44,7 @@ export function getMetadataFingerprint(metadataFiles: any, yearName: any) {
 	);
 }
 
-export function getMetadataFromYearCache(
-	yearCache: any,
-	metadataFingerprint: any,
-) {
+function getMetadataFromYearCache(yearCache: any, metadataFingerprint: any) {
 	if (!yearCache?.metadata) {
 		return null;
 	}
@@ -58,7 +55,7 @@ export function getMetadataFromYearCache(
 	return normalizeMetadataPayload(yearCache.metadata);
 }
 
-export function getYearCachePath(groupName: any, yearName: any) {
+function getYearCachePath(groupName: any, yearName: any) {
 	return makePath(GROUP_UPDATE_CACHE_PATH, groupName, `${yearName}.json`);
 }
 
@@ -174,7 +171,7 @@ export async function loadCachedYearSessions(
 	return readSessionsFile(localYearPath);
 }
 
-export async function getLegacyMetadata(
+async function getLegacyMetadata(
 	year: any,
 	name: any,
 	awsPath: any,
@@ -204,7 +201,7 @@ export async function getLegacyMetadata(
 	};
 }
 
-export async function getMetadataYearItems(metadataYearPath: any) {
+async function getMetadataYearItems(metadataYearPath: any) {
 	try {
 		const items = await getListing(metadataYearPath);
 		items.sort((a: any, b: any) => a.name.localeCompare(b.name));
@@ -221,7 +218,7 @@ export async function getMetadataYearItems(metadataYearPath: any) {
 	}
 }
 
-export async function readSessionsFile(path: any) {
+async function readSessionsFile(path: any) {
 	try {
 		if (!(await storage.exists(path))) {
 			return [];
@@ -238,7 +235,7 @@ export async function readSessionsFile(path: any) {
 	}
 }
 
-export async function loadCachedYearMetadata(
+async function loadCachedYearMetadata(
 	name: any,
 	yearName: any,
 	isMerged: any,
