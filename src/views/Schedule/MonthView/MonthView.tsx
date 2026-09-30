@@ -1,9 +1,6 @@
 import { registerToolbar, useToolbar } from "@components/Toolbar";
-import ArrowBackIcon from "@icons/svg/ArrowBack.svg";
-import ArrowForwardIcon from "@icons/svg/ArrowForward.svg";
 import ChevronLeftIcon from "@icons/svg/ChevronLeft.svg";
 import ChevronRightIcon from "@icons/svg/ChevronRight.svg";
-import TodayIcon from "@icons/svg/Today.svg";
 import { useDeviceType } from "@util/browser/styles";
 import { useSwipe } from "@util/browser/touch";
 import { getSessionTextColor } from "@util/data/colors";
@@ -22,6 +19,8 @@ import { addPath, toPath } from "@util/domain/views";
 import Input from "@widgets/Input";
 import SessionIcon from "@widgets/SessionIcon";
 import { useState } from "react";
+import { getWeekDayProps, getYearState } from "../calendarState";
+import { getScheduleNavigationItems } from "../navigationItems";
 import DayHeader from "./DayHeader";
 import styles from "./MonthView.module.css";
 import Sessions from "./Sessions";
@@ -79,15 +78,11 @@ export default function MonthView({
 		);
 	});
 
-	const numDaysInWeek = 7;
-	const dayTitles = new Array(numDaysInWeek).fill(0).map((_, index) => {
-		const day = addDate(firstDay, index);
+	const dayTitles = getWeekDayProps(firstDay).map((dayProps) => {
 		return (
 			<DayHeader
-				key={index}
-				date={day}
-				index={index}
-				count={numDaysInWeek}
+				key={dayProps.index}
+				{...dayProps}
 				dateFormatter={dayHeaderFormatter}
 			/>
 		);
@@ -122,16 +117,7 @@ export default function MonthView({
 		/>
 	);
 
-	const yearState = [
-		month.getFullYear(),
-		(year: any) => {
-			const newDate = new Date(date);
-			newDate.setFullYear(year);
-			store.update((s: any) => {
-				s.date = newDate;
-			});
-		},
-	];
+	const yearState = getYearState(date, month.getFullYear(), store);
 	const yearStart = 2015;
 	const yearEnd = new Date().getFullYear() + 2;
 	const yearItems = getYearNames(month, yearFormatter, yearStart, yearEnd).map(
@@ -194,39 +180,16 @@ export default function MonthView({
 		month.getMonth() == today.getMonth() &&
 		month.getFullYear() == today.getFullYear();
 
-	const gotoToday = () => {
-		store.update((s: any) => {
-			s.date = today;
-		});
-	};
-
-	const goBack = () => {
-		if (lastViewMode) {
-			store.update((s: any) => {
-				s.viewMode = lastViewMode;
-				s.lastViewMode = null;
-			});
-		}
-	};
-
 	const toolbarItems = [
-		{
-			id: "back",
-			name: translations.BACK,
-			icon: direction === "rtl" ? <ArrowForwardIcon /> : <ArrowBackIcon />,
-			onClick: goBack,
-			location: "header",
-			disabled: !lastViewMode,
-		},
-		{
-			id: "today",
-			name: translations.TODAY,
-			icon: <TodayIcon />,
-			onClick: gotoToday,
-			disabled: isToday,
-			location: "header",
+		...getScheduleNavigationItems({
+			store,
+			direction,
+			translations,
+			lastViewMode,
+			today: today,
+			todayDisabled: isToday,
 			menu: false,
-		},
+		}),
 		{
 			id: "previousMonth",
 			name: translations.PREVIOUS_MONTH,

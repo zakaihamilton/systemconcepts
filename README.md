@@ -53,7 +53,7 @@ AWS, Wasabi, MongoDB, and email integrations are optional in local development. 
 
 ## PWA and offline behavior
 
-The TypeScript sources in `src/browser-runtime/` generate the browser theme script and service worker in `public/` during development, builds, and test runs. The service worker provides the offline fallback and runtime caching rules; `/~offline` is the document fallback. Service workers register only in production, so use a production build to test offline behavior.
+The TypeScript sources in `src/browser-runtime/` generate the browser theme script and service worker in `public/` during development, builds, and test runs. Production builds generate a build-specific service worker that precaches the application shell, JavaScript, CSS, bundled fonts, and core public assets. Cached local content can be reopened after an offline reload, including hash deep links. Session API responses use network-first caching; authenticated APIs and media URLs are not cached by the worker. Updates activate after existing app tabs close. The service worker provides the offline fallback and runtime caching rules; `/~offline` is the document fallback. Service workers register only in production, so use a production build to test offline behavior.
 
 ```bash
 yarn build

@@ -1,9 +1,6 @@
 import { registerToolbar, useToolbar } from "@components/Toolbar";
-import ArrowBackIcon from "@icons/svg/ArrowBack.svg";
-import ArrowForwardIcon from "@icons/svg/ArrowForward.svg";
 import ChevronLeftIcon from "@icons/svg/ChevronLeft.svg";
 import ChevronRightIcon from "@icons/svg/ChevronRight.svg";
-import TodayIcon from "@icons/svg/Today.svg";
 import { useDeviceType } from "@util/browser/styles";
 import {
 	addDate,
@@ -21,6 +18,8 @@ import { useTranslations } from "@util/domain/translations";
 import Input from "@widgets/Input";
 import clsx from "clsx";
 import { useState } from "react";
+import { getWeekDayProps, getYearState } from "../calendarState";
+import { getScheduleNavigationItems } from "../navigationItems";
 import DayHeader from "./DayHeader";
 import Week from "./Week";
 import styles from "./WeekView.module.css";
@@ -59,15 +58,11 @@ export default function WeekView({
 		year: "numeric",
 	});
 
-	const numDaysInWeek = 7;
-	const dayTitles = new Array(numDaysInWeek).fill(0).map((_, index) => {
-		const day = addDate(firstDay, index);
+	const dayTitles = getWeekDayProps(firstDay).map((dayProps) => {
 		return (
 			<DayHeader
-				key={index}
-				date={day}
-				index={index}
-				count={numDaysInWeek}
+				key={dayProps.index}
+				{...dayProps}
 				dateFormatter={dateFormatter}
 				dayFormatter={dayHeaderFormatter}
 				store={store}
@@ -141,16 +136,7 @@ export default function WeekView({
 		/>
 	);
 
-	const yearState = [
-		month.getFullYear(),
-		(year: any) => {
-			const newDate = new Date(date);
-			newDate.setFullYear(year);
-			store.update((s: any) => {
-				s.date = newDate;
-			});
-		},
-	];
+	const yearState = getYearState(date, month.getFullYear(), store);
 	const currentYear = month.getFullYear();
 	const yearStart = 2015;
 	let yearEnd = new Date().getFullYear() + 2;
@@ -201,24 +187,7 @@ export default function WeekView({
 	const hasNextWeek =
 		weekOfMonth !== numOfWeeksInMonth - 1 || month.getFullYear() !== yearEnd;
 	const isToday =
-		weekOfMonth === getWeekOfMonth(today) &&
-		month.getMonth() == today.getMonth() &&
-		month.getFullYear() == today.getFullYear();
-
-	const gotoToday = () => {
-		store.update((s: any) => {
-			s.date = today;
-		});
-	};
-
-	const goBack = () => {
-		if (lastViewMode) {
-			store.update((s: any) => {
-				s.viewMode = lastViewMode;
-				s.lastViewMode = null;
-			});
-		}
-	};
+		firstDay.toDateString() === getWeekViewStart(today).toDateString();
 
 	const toggleGroup = (group: any) => {
 		setCollapsedGroups((groups) => {
@@ -230,23 +199,14 @@ export default function WeekView({
 	};
 
 	const toolbarItems = [
-		{
-			id: "back",
-			name: translations.BACK,
-			icon: direction === "rtl" ? <ArrowForwardIcon /> : <ArrowBackIcon />,
-			onClick: goBack,
-			location: "header",
-			disabled: !lastViewMode,
-		},
-		{
-			id: "today",
-			name: translations.TODAY,
-			icon: <TodayIcon />,
-			onClick: gotoToday,
-			location: "header",
-			disabled: isToday,
-			menu: false,
-		},
+		...getScheduleNavigationItems({
+			store,
+			direction,
+			translations,
+			lastViewMode,
+			today: today,
+			todayDisabled: isToday,
+		}),
 		{
 			id: "previousWeek",
 			name: translations.PREVIOUS_WEEK,

@@ -5,8 +5,8 @@
 	"scripts": {
 		"dev": "yarn build:browser-runtime && next dev",
 		"build:browser-runtime": "node --experimental-strip-types scripts/build-browser-runtime.ts",
-		"build": "yarn build:browser-runtime && next build --webpack",
-		"analyze": "yarn build:browser-runtime && ANALYZE=true next build --webpack",
+		"build": "yarn build:browser-runtime && next build --webpack && yarn build:browser-runtime --production",
+		"analyze": "yarn build:browser-runtime && ANALYZE=true next build --webpack && yarn build:browser-runtime --production",
 		"start": "next start",
 		"lint": "biome check .",
 		"typecheck": "tsc --noEmit && tsc --noEmit --project tsconfig.tests.json",

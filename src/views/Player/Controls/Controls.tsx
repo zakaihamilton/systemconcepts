@@ -1,13 +1,6 @@
 import { MainStore } from "@components/Main";
-import Forward10Icon from "@icons/svg/Forward10.svg";
-import PauseIcon from "@icons/svg/Pause.svg";
-import PlayArrowIcon from "@icons/svg/PlayArrow.svg";
-import ReplayIcon from "@icons/svg/Replay.svg";
-import Replay10Icon from "@icons/svg/Replay10.svg";
-import StopIcon from "@icons/svg/Stop.svg";
 import MuiAlert from "@ui/Alert";
 import Button from "@ui/Button";
-import CircularProgress from "@ui/CircularProgress";
 import { logger as structuredLogger } from "@util/api/logger";
 import { usePageVisibility } from "@util/browser/hooks";
 import { useMediaSession } from "@util/browser/mediaSession";
@@ -16,26 +9,21 @@ import { useTranslations } from "@util/domain/translations";
 import { useFile } from "@util/storage/storage";
 import clsx from "clsx";
 import { useCallback, useEffect, useRef, useState } from "react";
-import PlayerButton from "../Button";
 import styles from "./Controls.module.css";
+import { SeekBar } from "./SeekBar";
+import { TransportControls } from "./TransportControls";
 
 const skipPoints = 10;
 const PLAY_LOADING_DELAY_MS = 150;
 
-function PlaybackIcon({ loading, paused, loadingLabel }: any) {
-	return (
-		<span className={clsx(styles.playbackIcon, loading && styles.isLoading)}>
-			<CircularProgress
-				className={styles.loadingIndicator}
-				size={24}
-				aria-label={loadingLabel}
-				aria-hidden={!loading}
-			/>
-			<span className={styles.playbackSymbol} aria-hidden={loading}>
-				{paused ? <PlayArrowIcon /> : <PauseIcon />}
-			</span>
-		</span>
-	);
+function resumeIntent(
+	currentTime: number,
+	fallback: number,
+	shouldPlay: boolean,
+) {
+	const position =
+		Number.isFinite(currentTime) && currentTime > 0 ? currentTime : fallback;
+	return { position: position > 0 ? position : 0, shouldPlay };
 }
 
 export default function Controls({
@@ -173,14 +161,11 @@ export default function Controls({
 				// Media errors often emit pause next. Stash resume intent now so that
 				// pause cannot clear wantPlaying before URL renew/path change runs.
 				if (!pendingResumeRef.current) {
-					const position =
-						Number.isFinite(playerRef.currentTime) && playerRef.currentTime > 0
-							? playerRef.currentTime
-							: currentTimeRef.current;
-					pendingResumeRef.current = {
-						position: position > 0 ? position : 0,
-						shouldPlay: wantPlayingRef.current,
-					};
+					pendingResumeRef.current = resumeIntent(
+						playerRef.currentTime,
+						currentTimeRef.current,
+						wantPlayingRef.current,
+					);
 				}
 				if (errorTimeoutRef.current) {
 					clearTimeout(errorTimeoutRef.current);
@@ -581,14 +566,11 @@ export default function Controls({
 	});
 
 	const reloadMedia = useCallback(() => {
-		const position =
-			Number.isFinite(playerRef.currentTime) && playerRef.currentTime > 0
-				? playerRef.currentTime
-				: currentTimeRef.current;
-		pendingResumeRef.current = {
-			position: position > 0 ? position : 0,
-			shouldPlay: wantPlayingRef.current,
-		};
+		pendingResumeRef.current = resumeIntent(
+			playerRef.currentTime,
+			currentTimeRef.current,
+			wantPlayingRef.current,
+		);
 		setError(null);
 		if (renewUrl) {
 			renewUrl();
@@ -653,103 +635,32 @@ export default function Controls({
 				className={clsx(styles.root, variant === "video" && styles.video)}
 				style={{ zIndex }}
 			>
-				<div className={styles.progress}>
-					<div
-						className={clsx(styles.progressLine, showLoading && styles.loading)}
-					>
-						<div
-							className={styles.progressBack}
-							ref={progressRef}
-							{...events}
-							tabIndex={0}
-							role="slider"
-							aria-label={translations.SEEK}
-							aria-valuemin={0}
-							aria-valuemax={playerRef.duration || 0}
-							aria-valuenow={currentTime}
-							aria-valuetext={progressText}
-						/>
-						<div className={styles.progressText}>{progressText}</div>
-						<div
-							className={styles.progressPlayed}
-							style={{ width: left + "%", backgroundColor: color }}
-						/>
-						<div
-							className={styles.progressPosition}
-							style={{ left: progressPosition, backgroundColor: color }}
-						/>
-					</div>
-				</div>
-				<div className={styles.buttons}>
-					{direction === "ltr" && (
-						<PlayerButton
-							icon={<Replay10Icon />}
-							name={translations.REPLAY}
-							onClick={replay}
-							variant={variant}
-						/>
-					)}
-					{direction === "rtl" && (
-						<PlayerButton
-							icon={<Forward10Icon />}
-							name={translations.FORWARD}
-							onClick={forward}
-							variant={variant}
-						/>
-					)}
-					{!!error && (
-						<PlayerButton
-							icon={<ReplayIcon />}
-							name={translations.RELOAD}
-							onClick={reloadMedia}
-							variant={variant}
-						/>
-					)}
-					{!error && (
-						<PlayerButton
-							icon={
-								<PlaybackIcon
-									loading={showLoading}
-									paused={playerRef.paused}
-									loadingLabel={translations.LOADING}
-								/>
-							}
-							name={
-								showLoading
-									? translations.LOADING
-									: playerRef.paused
-										? translations.PLAY
-										: translations.PAUSE
-							}
-							onClick={playerRef.paused ? play : pause}
-							variant={variant}
-						/>
-					)}
-					{!error && (
-						<PlayerButton
-							icon={<StopIcon />}
-							name={translations.STOP}
-							onClick={stop}
-							variant={variant}
-						/>
-					)}
-					{direction === "ltr" && (
-						<PlayerButton
-							icon={<Forward10Icon />}
-							name={translations.FORWARD}
-							onClick={forward}
-							variant={variant}
-						/>
-					)}
-					{direction === "rtl" && (
-						<PlayerButton
-							icon={<Replay10Icon />}
-							name={translations.REPLAY}
-							onClick={replay}
-							variant={variant}
-						/>
-					)}
-				</div>
+				<SeekBar
+					progressRef={progressRef}
+					showLoading={showLoading}
+					events={events}
+					translations={translations}
+					playerRef={playerRef}
+					currentTime={currentTime}
+					progressText={progressText}
+					left={left}
+					color={color}
+					progressPosition={progressPosition}
+				/>
+				<TransportControls
+					direction={direction}
+					error={error}
+					showLoading={showLoading}
+					paused={playerRef.paused}
+					translations={translations}
+					onReplay={replay}
+					onForward={forward}
+					onReload={reloadMedia}
+					onPlay={play}
+					onPause={pause}
+					onStop={stop}
+					variant={variant}
+				/>
 			</div>
 		</>
 	);

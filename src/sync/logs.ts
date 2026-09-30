@@ -1,7 +1,7 @@
 import { SyncActiveStore } from "@sync/syncState";
 import { logger as structuredLogger } from "@util/api/logger";
 
-export function addSyncLog(message: any, type = "info") {
+export function addSyncLog(message: string, type = "info") {
 	// Check global debug level from store
 	const currentDebugLevel = SyncActiveStore.getRawState().debugLevel || "info";
 

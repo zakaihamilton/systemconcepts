@@ -17,7 +17,7 @@ export interface ManifestEntry {
 	path: string;
 	fullPath?: string;
 	modified?: number;
-	version?: number;
+	version?: string | number;
 	hash?: string;
 	deleted?: boolean;
 	[key: string]: unknown;

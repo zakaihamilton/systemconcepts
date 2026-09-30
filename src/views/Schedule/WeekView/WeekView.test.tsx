@@ -163,6 +163,19 @@ describe("WeekView", () => {
 		getToolbarItem("back").onClick();
 	});
 
+	it.each([
+		new Date(2026, 8, 29),
+		new Date(2026, 11, 31),
+	])("recognizes the current week across a month/year boundary (%s)", (today) => {
+		jest.useFakeTimers().setSystemTime(today);
+		try {
+			renderWeek({ date: today });
+			expect(getToolbarItem("today").disabled).toBe(true);
+		} finally {
+			jest.useRealTimers();
+		}
+	});
+
 	it("updates date from week, month, and year widgets", () => {
 		const store = createStore();
 		renderWeek({ store, date: new Date(2024, 5, 12) });

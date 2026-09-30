@@ -257,6 +257,36 @@ describe("sync pipeline permissions", () => {
 		);
 	});
 
+	it.each([
+		"[null]",
+		'[{"path":42}]',
+		'[{"hash":"x"}]',
+	])("rescans instead of trusting malformed cached manifest %s", async (content) => {
+		const dependencies = makeDependencies(jest.fn().mockReturnValue(false));
+		dependencies.storage.readFile.mockResolvedValue(content);
+		dependencies.readLibraryCounter.mockResolvedValue(7);
+		dependencies.getSavedLibraryCounter.mockReturnValue(7);
+		await createSyncPipeline(dependencies)(
+			{
+				name: "Library",
+				localPath: "local/library",
+				remotePath: "aws/library",
+				direction: "pull",
+				uploadsRole: "admin",
+				useChangeCounter: true,
+			},
+			"student",
+			"user-1",
+		);
+		expect(dependencies.getLocalFiles).toHaveBeenCalled();
+		expect(dependencies.updateLocalManifest).toHaveBeenCalledWith(
+			[],
+			"local/library",
+			expect.any(Array),
+			{ skipHashing: false },
+		);
+	});
+
 	it("rescans library files when the counter changes", async () => {
 		const dependencies = makeDependencies(jest.fn().mockReturnValue(true));
 		asMock(dependencies.readLibraryCounter)
