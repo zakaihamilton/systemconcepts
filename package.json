@@ -76,7 +76,7 @@
 		"jscpd": "^5.0.14",
 		"knip": "^6.32.2",
 		"markdownlint-cli2": "^0.23.2",
-		"repnix": "^0.3.4",
+		"repnix": "^1.0.4",
 		"typescript": "^6.0.3",
 		"yarn-upgrade-all": "^0.8.1"
 	},
