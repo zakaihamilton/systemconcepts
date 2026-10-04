@@ -5,8 +5,6 @@ import crypto from "crypto";
 import { NextResponse } from "next/server";
 import { JSON_HEADERS } from "./httpHeaders";
 
-export { JSON_HEADERS, NO_CACHE_HEADERS } from "./httpHeaders";
-
 export function jsonError(
 	message: any,
 	status = 500,
