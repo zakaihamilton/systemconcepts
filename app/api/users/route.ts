@@ -126,7 +126,7 @@ async function handleUsers(request: any) {
 
 		const result = await handleRequest({ collectionName, req });
 		const sanitizeUser = (user: any) => {
-			if (!user) return user;
+			if (!user || typeof user.id !== "string") return user;
 			const {
 				hash,
 				salt: _salt,

@@ -231,3 +231,28 @@ describe("nested user records", () => {
 		);
 	});
 });
+
+test("returns user-write acknowledgements without requiring storage secrets", async () => {
+	const originalAwsSecret = process.env.AWS_SECRET;
+	const originalRssSecret = process.env.RSS_SECRET;
+	delete process.env.AWS_SECRET;
+	delete process.env.RSS_SECRET;
+	try {
+		asMock(getSessionUser).mockResolvedValue({
+			id: "attacker",
+			role: "student",
+		});
+		asMock(roleAuth).mockReturnValue(false);
+		asMock(handleRequest).mockResolvedValue({});
+		const response = await DELETE(
+			request({ method: "DELETE", body: { id: "attacker" } }),
+		);
+		expect(response.status).toBe(200);
+		await expect(response.json()).resolves.toEqual({});
+	} finally {
+		if (originalAwsSecret === undefined) delete process.env.AWS_SECRET;
+		else process.env.AWS_SECRET = originalAwsSecret;
+		if (originalRssSecret === undefined) delete process.env.RSS_SECRET;
+		else process.env.RSS_SECRET = originalRssSecret;
+	}
+});
