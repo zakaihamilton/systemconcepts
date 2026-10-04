@@ -612,3 +612,44 @@ describe("sync pipeline permissions", () => {
 		expect(result.complete).toBe(false);
 	});
 });
+
+test("manifest publication failure prevents remote and local cleanup", async () => {
+	SyncActiveStore.update((state) => {
+		state.locked = false;
+		state.stopping = false;
+	});
+	const dependencies = makeDependencies(jest.fn().mockReturnValue(true));
+	const tombstones = [{ path: "/deleted.json", version: "2", deleted: true }];
+	dependencies.updateLocalManifest.mockResolvedValue(tombstones);
+	dependencies.downloadUpdates.mockResolvedValue({
+		manifest: tombstones,
+		hasChanges: false,
+		complete: true,
+	});
+	dependencies.removeDeletedFiles.mockResolvedValue({
+		manifest: tombstones,
+		hasChanges: false,
+	});
+	dependencies.uploadManifest.mockRejectedValue(
+		Object.assign(new Error("ACCESS_DENIED"), { status: 403 }),
+	);
+	await expect(
+		createSyncPipeline(dependencies)(
+			{
+				name: "Main",
+				localPath: "local/sync",
+				remotePath: "aws/sync",
+				direction: "bi",
+				uploadsRole: "admin",
+			},
+			"admin",
+			"user-1",
+		),
+	).rejects.toThrow("ACCESS_DENIED");
+	expect(dependencies.deleteRemoteFiles).not.toHaveBeenCalled();
+	expect(dependencies.applyRemoteTombstones).not.toHaveBeenCalled();
+	expect(dependencies.addSyncLog).not.toHaveBeenCalledWith(
+		expect.stringContaining("sync complete"),
+		"success",
+	);
+});

@@ -1,4 +1,5 @@
 import { checkRateLimit } from "@util/auth/rateLimit";
+import { getTrustedClientIp } from "@util/auth/requestSecurity";
 import { findRecord } from "@util/storage/mongo";
 import crypto from "crypto";
 import { NextResponse } from "next/server";
@@ -29,9 +30,7 @@ export function jsonSuccess(
 }
 
 export function getClientIp(request: any) {
-	const forwarded = request.headers.get("x-forwarded-for");
-	if (forwarded) return forwarded.split(",")[0].trim();
-	return request.headers.get("x-real-ip") || "unknown";
+	return getTrustedClientIp(request);
 }
 
 export async function enforceRateLimit(request: any, options: any) {

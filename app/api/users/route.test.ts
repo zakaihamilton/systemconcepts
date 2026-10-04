@@ -151,3 +151,83 @@ describe("/api/users authorization and import handling", () => {
 		expect(body.users[1].rssToken).toBeUndefined();
 	});
 });
+
+describe("nested user records", () => {
+	beforeEach(() => {
+		jest.clearAllMocks();
+		asMock(roleAuth).mockReturnValue(false);
+		asMock(getSessionUser).mockResolvedValue({
+			id: "attacker",
+			role: "student",
+		});
+		asMock(findRecord).mockResolvedValue({
+			id: "attacker",
+			role: "student",
+			hash: "original",
+			credentials: ["passkey"],
+		});
+		asMock(handleRequest).mockResolvedValue({});
+	});
+
+	it("blocks deletion of a victim concealed in an own-account wrapper", async () => {
+		const response = await DELETE(
+			request({
+				method: "DELETE",
+				body: { id: "attacker", users: [{ id: "victim" }] },
+			}),
+		);
+		expect(response.status).toBe(403);
+		expect(handleRequest).not.toHaveBeenCalled();
+	});
+
+	it.each([
+		{ id: "attacker", role: "admin", hash: "chosen" },
+		{ id: "victim", role: "student", hash: "chosen" },
+	])("blocks unauthorized nested writes: %j", async (record) => {
+		const response = await PUT(
+			request({
+				method: "PUT",
+				body: { id: "attacker", role: "student", users: [record] },
+			}),
+		);
+		expect(response.status).toBe(403);
+		expect(handleRequest).not.toHaveBeenCalled();
+	});
+
+	it("preserves authentication fields on authorized nested profile updates", async () => {
+		const record = {
+			id: "attacker",
+			role: "student",
+			firstName: "Updated",
+			hash: "chosen",
+			credentials: [],
+		};
+		const response = await PUT(
+			request({ method: "PUT", body: { users: [record] } }),
+		);
+		expect(response.status).toBe(200);
+		expect(handleRequest).toHaveBeenCalledWith(
+			expect.objectContaining({
+				req: expect.objectContaining({
+					body: [
+						expect.objectContaining({
+							id: "attacker",
+							firstName: "Updated",
+							hash: "original",
+							credentials: ["passkey"],
+						}),
+					],
+				}),
+			}),
+		);
+	});
+
+	it("forwards a single own-account deletion as an authorized array", async () => {
+		await DELETE(request({ method: "DELETE", body: { id: "attacker" } }));
+		expect(handleRequest).toHaveBeenCalledWith(
+			expect.objectContaining({
+				req: expect.objectContaining({ body: [{ id: "attacker" }] }),
+			}),
+		);
+	});
+});

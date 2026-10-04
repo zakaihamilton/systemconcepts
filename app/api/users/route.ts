@@ -31,41 +31,55 @@ async function handleUsers(request: any) {
 			body = null;
 		}
 
+		// Resolve the same records that storage will write before authorizing them.
+		// Always forward writes as an array so storage cannot reinterpret a wrapper.
+		const isWrite = request.method === "PUT" || request.method === "DELETE";
+		const records = Array.isArray(body)
+			? body
+			: body && Object.hasOwn(body, collectionName)
+				? body[collectionName]
+				: [body];
+		if (isWrite && !Array.isArray(records)) throw "INVALID_REQUEST";
+
 		if (!roleAuth(user && user.role, "admin")) {
 			if (!queryId) throw "ACCESS_DENIED";
 			const parsedId = decodeURIComponent(queryId);
 			if (parsedId !== id) throw "ACCESS_DENIED";
-			if (request.method === "PUT") {
-				const record = await findRecord({
-					query: { id: parsedId },
-					collectionName,
-				});
-				if (!record || !body) throw "ACCESS_DENIED";
-				if (record.id !== body.id || record.role !== body.role)
-					throw "ACCESS_DENIED";
-				body.hash = record.hash;
-				body.salt = record.salt;
-				body.role = record.role;
-				body.credentials = record.credentials;
-				body.resetToken = record.resetToken;
-				body.resetTokenExpiry = record.resetTokenExpiry;
-				body.date = record.date;
-				body.utc = record.utc;
-				delete body.password;
-			} else if (request.method === "DELETE") {
-				const records = Array.isArray(body) ? body : [body];
+			if (isWrite) {
 				if (
 					!records.length ||
-					records.some((record) => !record || record.id !== id)
+					records.some((record: any) => !record || record.id !== id)
 				)
 					throw "ACCESS_DENIED";
 			}
+			if (request.method === "PUT") {
+				const existing = await findRecord({
+					query: { id: parsedId },
+					collectionName,
+				});
+				if (
+					!existing ||
+					records.some((record: any) => record.role !== existing.role)
+				)
+					throw "ACCESS_DENIED";
+				for (const record of records) {
+					for (const field of [
+						"hash",
+						"salt",
+						"role",
+						"credentials",
+						"resetToken",
+						"resetTokenExpiry",
+						"date",
+						"utc",
+					]) {
+						record[field] = existing[field];
+					}
+					delete record.password;
+					delete record.rssToken;
+				}
+			}
 		} else if (request.method === "PUT") {
-			const records = Array.isArray(body)
-				? body
-				: body && Array.isArray(body[collectionName])
-					? body[collectionName]
-					: [body];
 			for (const record of records) {
 				if (
 					record?.password &&
@@ -106,7 +120,7 @@ async function handleUsers(request: any) {
 		const req = {
 			method: request.method,
 			headers: Object.fromEntries(request.headers.entries()),
-			body,
+			body: isWrite ? records.filter((record: any) => record != null) : body,
 			query: Object.fromEntries(url.searchParams.entries()),
 		};
 

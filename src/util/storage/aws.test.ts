@@ -85,6 +85,25 @@ afterAll(() => {
 });
 
 describe("getS3", () => {
+	it.each([
+		[{}, undefined, "sfo3"],
+		[{}, "eu-west-1", "eu-west-1"],
+		[{ region: "us-east-2" }, "eu-west-1", "us-east-2"],
+	])("uses the requested or configured region (%j, %s)", async (params, configured, expected) => {
+		if (configured === undefined) delete process.env.AWS_REGION;
+		else process.env.AWS_REGION = configured;
+		let freshGetS3: typeof getS3;
+		let freshS3Client: typeof S3Client;
+		jest.isolateModules(() => {
+			freshGetS3 = require("@util/storage/aws").getS3;
+			freshS3Client = require("@aws-sdk/client-s3").S3Client;
+		});
+		await freshGetS3!(params);
+		expect(freshS3Client!).toHaveBeenCalledWith(
+			expect.objectContaining({ region: expected }),
+		);
+	});
+
 	it("caches the client across calls", async () => {
 		const first = await getS3({});
 		const second = await getS3({});
