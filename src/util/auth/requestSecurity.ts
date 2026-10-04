@@ -1,6 +1,10 @@
 export function getTrustedClientIp(request: any = {}) {
 	if (request?.ip) return String(request.ip);
-	return request?.headers?.get("x-vercel-forwarded-for") || "unknown";
+	// A self-hosted proxy must overwrite this header, not append untrusted input.
+	const header =
+		process.env.TRUSTED_CLIENT_IP_HEADER || "x-vercel-forwarded-for";
+	const forwarded = request?.headers?.get(header);
+	return forwarded?.split(",")[0].trim() || "unknown";
 }
 
 export function assertSameOrigin(request: any) {

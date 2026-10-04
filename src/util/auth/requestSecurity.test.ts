@@ -1,6 +1,40 @@
 import { assertSameOrigin, getTrustedClientIp } from "./requestSecurity";
 
 describe("getTrustedClientIp", () => {
+	const originalHeader = process.env.TRUSTED_CLIENT_IP_HEADER;
+	beforeEach(() => {
+		delete process.env.TRUSTED_CLIENT_IP_HEADER;
+	});
+	afterEach(() => {
+		if (originalHeader === undefined)
+			delete process.env.TRUSTED_CLIENT_IP_HEADER;
+		else process.env.TRUSTED_CLIENT_IP_HEADER = originalHeader;
+	});
+
+	it("separates self-hosted clients using the configured proxy header", () => {
+		process.env.TRUSTED_CLIENT_IP_HEADER = "x-forwarded-for";
+		expect(
+			getTrustedClientIp({
+				headers: new Headers({ "x-forwarded-for": "203.0.113.7, 10.0.0.1" }),
+			}),
+		).toBe("203.0.113.7");
+		expect(
+			getTrustedClientIp({
+				headers: new Headers({ "x-forwarded-for": "198.51.100.4, 10.0.0.1" }),
+			}),
+		).toBe("198.51.100.4");
+	});
+
+	it("ignores unconfigured client-supplied forwarding headers", () => {
+		expect(
+			getTrustedClientIp({
+				headers: new Headers({
+					"x-forwarded-for": "203.0.113.7",
+					"x-real-ip": "203.0.113.8",
+				}),
+			}),
+		).toBe("unknown");
+	});
 	it("prefers an explicitly resolved IP", () => {
 		expect(
 			getTrustedClientIp({

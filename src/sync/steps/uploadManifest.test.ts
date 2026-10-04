@@ -90,26 +90,26 @@ describe("uploadManifest", () => {
 		);
 	});
 
-	it("warns visitors on ACCESS_DENIED without throwing", async () => {
+	it("warns visitors and propagates ACCESS_DENIED", async () => {
 		asMock(Cookies.get).mockReturnValue("visitor");
 		asMock(writeCompressedFile).mockRejectedValue(
 			Object.assign(new Error("ACCESS_DENIED"), { status: 403 }),
 		);
 		await expect(
 			uploadManifest([{ path: "/a.json", version: "1" }]),
-		).resolves.toBeUndefined();
+		).rejects.toMatchObject({ status: 403 });
 		expect(addSyncLog).toHaveBeenCalledWith(
 			expect.stringContaining("Visitor access restricted"),
 			"warning",
 		);
 	});
 
-	it("warns non-visitors on numeric 403 without throwing", async () => {
+	it("warns non-visitors and propagates numeric 403", async () => {
 		asMock(Cookies.get).mockReturnValue("user");
 		asMock(writeCompressedFile).mockRejectedValue(403);
 		await expect(
 			uploadManifest([{ path: "/a.json", version: "1" }]),
-		).resolves.toBeUndefined();
+		).rejects.toBe(403);
 		expect(addSyncLog).toHaveBeenCalledWith(
 			"Skipping manifest upload (read-only access)",
 			"warning",

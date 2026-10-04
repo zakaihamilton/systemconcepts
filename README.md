@@ -37,11 +37,14 @@ Copy `.env.example` to `.env.local` and fill only the services needed for the wo
 | --- | --- | --- |
 | `NEXT_PUBLIC_SITE_URL`, `SITE_URL` | Absolute application URL and internal API verification | Production/RSS |
 | `NEXT_PUBLIC_LOG_LEVEL`, `LOG_LEVEL` | Browser and server log thresholds | No |
+| `TRUSTED_CLIENT_IP_HEADER` | Client-IP header overwritten by a trusted reverse proxy (defaults to Vercel’s header) | Self-hosted authentication |
 | `MONGO_URL`, `MONGO_DB` | Accounts and MongoDB-backed personal data | Authentication/personal data |
-| `AWS_ENDPOINT`, `AWS_BUCKET`, `AWS_ID`, `AWS_SECRET` | S3-compatible storage | AWS storage |
+| `AWS_REGION`, `AWS_ENDPOINT`, `AWS_BUCKET`, `AWS_ID`, `AWS_SECRET` | S3-compatible storage | AWS storage |
 | `WASABI_URL` | Wasabi media/proxy URL | Wasabi storage |
 | `RSS_MEDIA_SECRET` | Authorizes public RSS media and transcript links | Production RSS |
 | `GMAIL_USER`, `GMAIL_PASSWORD`, `GMAIL_FROM` | Password-reset email | Email delivery |
+
+For self-hosted authentication, set `TRUSTED_CLIENT_IP_HEADER` to the header your reverse proxy overwrites with the client address (for example, `x-real-ip` or `x-forwarded-for`). Prevent direct access to the Next.js server so callers cannot forge that header. Without a resolved client address, requests share the `unknown` rate-limit bucket. `AWS_REGION` defaults to `sfo3` for existing DigitalOcean deployments; set it to the actual region for other storage providers.
 
 Never commit real credentials. Logging redacts common credential and token fields, but secrets should still not be passed as diagnostic context.
 

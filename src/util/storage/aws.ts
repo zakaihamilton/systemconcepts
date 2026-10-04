@@ -51,7 +51,7 @@ export async function getS3(params: any) {
 
 		const { endpoint, region } = params || {};
 		let finalEndpoint = endpoint || process.env.AWS_ENDPOINT;
-		const finalRegion = region || "us-east-1";
+		const finalRegion = region || process.env.AWS_REGION || "sfo3";
 
 		if (finalEndpoint) {
 			if (!finalEndpoint.startsWith("http")) {
@@ -88,7 +88,7 @@ export async function getS3(params: any) {
 
 		s3Client = new S3Client({
 			endpoint: finalEndpoint,
-			region: "sfo3",
+			region: finalRegion,
 			...(accessKeyId && secretAccessKey
 				? { credentials: { accessKeyId, secretAccessKey } }
 				: {}),

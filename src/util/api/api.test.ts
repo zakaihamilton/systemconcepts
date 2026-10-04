@@ -52,7 +52,14 @@ describe("jsonError / jsonSuccess", () => {
 });
 
 describe("getClientIp", () => {
-	it("prefers the x-forwarded-for header and takes the first entry", () => {
+	const originalHeader = process.env.TRUSTED_CLIENT_IP_HEADER;
+	afterEach(() => {
+		if (originalHeader === undefined)
+			delete process.env.TRUSTED_CLIENT_IP_HEADER;
+		else process.env.TRUSTED_CLIENT_IP_HEADER = originalHeader;
+	});
+	it("uses a configured x-forwarded-for header and takes the first entry", () => {
+		process.env.TRUSTED_CLIENT_IP_HEADER = "x-forwarded-for";
 		const request = {
 			headers: new Headers({
 				"x-forwarded-for": "203.0.113.9, 10.0.0.1",
@@ -61,7 +68,8 @@ describe("getClientIp", () => {
 		expect(getClientIp(request)).toBe("203.0.113.9");
 	});
 
-	it("falls back to x-real-ip", () => {
+	it("uses a configured x-real-ip header", () => {
+		process.env.TRUSTED_CLIENT_IP_HEADER = "x-real-ip";
 		const request = {
 			headers: new Headers({ "x-real-ip": "198.51.100.2" }),
 		};

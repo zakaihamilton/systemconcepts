@@ -1,4 +1,5 @@
 import { logger as structuredLogger } from "@util/api/logger";
+import { getTrustedClientIp } from "@util/auth/requestSecurity";
 
 function getSiteUrl() {
 	return (
@@ -91,5 +92,5 @@ export function scheduleApiCacheWrite(type: any, key: any, body: any) {
 }
 
 export function getClientIp(request: any) {
-	return request.headers.get("x-vercel-forwarded-for") || "unknown";
+	return getTrustedClientIp(request);
 }

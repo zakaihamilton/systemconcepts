@@ -87,7 +87,7 @@ export async function uploadManifest(
 			} else {
 				addSyncLog("Skipping manifest upload (read-only access)", "warning");
 			}
-			return;
+			throw err;
 		}
 		structuredLogger.error("[Sync] Step 7 error:", err);
 		throw err;
