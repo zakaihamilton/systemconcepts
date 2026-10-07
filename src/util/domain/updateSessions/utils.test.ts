@@ -70,19 +70,25 @@ describe("getListing", () => {
 });
 
 describe("slimSessionForPersist", () => {
-	it("keeps only name/path on media refs and drops summaryText", () => {
+	it("keeps media size while dropping listing noise and summaryText", () => {
 		const slim = slimSessionForPersist({
 			id: "2024-01-01 Talk",
 			summaryText: "huge body",
 			audio: {
 				name: "a.m4a",
 				path: "wasabi/g/a.m4a",
+				type: "audio",
 				mtimeMs: 1,
 				size: 99,
 			},
 		});
 		expect(slim.summaryText).toBeUndefined();
-		expect(slim.audio).toEqual({ name: "a.m4a", path: "wasabi/g/a.m4a" });
+		expect(slim.audio).toEqual({
+			name: "a.m4a",
+			path: "wasabi/g/a.m4a",
+			type: "audio",
+			size: 99,
+		});
 	});
 });
 
