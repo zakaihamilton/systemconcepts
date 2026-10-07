@@ -57,6 +57,9 @@ function slimFileRef(file: any) {
 	if (!file || typeof file !== "object") return file;
 	const slim: Record<string, any> = { name: file.name, path: file.path };
 	if (file.type) slim.type = file.type;
+	if (typeof file.size === "number" && Number.isFinite(file.size)) {
+		slim.size = file.size;
+	}
 	return slim;
 }
 
