@@ -24,7 +24,7 @@
 		"health:coverage": "c8 --all --reporter=text yarn test",
 		"health:architecture": "depcruise --output-type json --config .dependency-cruiser.json app src",
 		"health:documentation": "markdownlint-cli2 \"**/*.md\" \"#node_modules\"",
-		"health:a11y": "yarn build && playwright test tests/e2e/guardrails.spec.ts --project=chromium",
+		"health:a11y": "yarn build && playwright test tests/e2e/guardrails.spec.ts --project=chromium --grep=WCAG",
 		"health:visual": "if [ \"$RUN_VISUAL_REGRESSION\" = \"1\" ] || [ \"$(uname)\" = \"Darwin\" ]; then yarn build && playwright test tests/e2e/guardrails.spec.ts --project=chromium; else echo \"Visual regression runs in the macOS guardrail job.\"; fi",
 		"health:interactions": "jest --runInBand src/views/Account/Account/Account.test.tsx",
 		"health:styles": "stylelint --formatter json \"**/*.{css,pcss,postcss}\""
