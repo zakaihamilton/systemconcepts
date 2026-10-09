@@ -22,7 +22,6 @@
 }
 
 .day {
-	color: var(--text-color);
 	margin-right: 0.25em;
 	margin-bottom: 0.25em;
 	width: 2em !important;

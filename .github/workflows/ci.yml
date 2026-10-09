@@ -28,6 +28,7 @@ jobs:
           cache: yarn
       - run: corepack enable
       - run: yarn install --frozen-lockfile
+      - run: npx playwright install --with-deps chromium
       - name: Repository health
         run: yarn run health --details
       - run: yarn lint
@@ -38,3 +39,19 @@ jobs:
       - run: yarn build
       - run: npx playwright install --with-deps chromium
       - run: yarn test:e2e
+
+  visual-regression:
+    runs-on: macos-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: yarn
+      - run: corepack enable
+      - run: yarn install --frozen-lockfile
+      - run: npx playwright install chromium
+      - run: yarn health:visual
+        env:
+          RUN_VISUAL_REGRESSION: "1"

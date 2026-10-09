@@ -3,7 +3,6 @@ import ExpandLess from "@icons/svg/ExpandLess.svg";
 import ExpandMore from "@icons/svg/ExpandMore.svg";
 import Avatar from "@ui/Avatar";
 import Collapse from "@ui/Collapse";
-import Divider from "@ui/Divider";
 import IconButton from "@ui/IconButton";
 import Link from "@ui/Link";
 import List from "@ui/List";
@@ -116,11 +115,7 @@ export function ListItemWidget({
 	}
 	return (
 		<>
-			<ListItem
-				disablePadding
-				className={itemClassName}
-				divider={!!reverse && !!divider ? true : undefined}
-			>
+			<ListItem disablePadding className={itemClassName} divider={!!divider}>
 				<ListItemButton
 					className={styles.itemButton}
 					style={style}
@@ -175,7 +170,6 @@ export function ListItemWidget({
 					)}
 				</Collapse>
 			)}
-			{!reverse && !!divider && <Divider />}
 		</>
 	);
 }
@@ -212,8 +206,8 @@ export default function ListWidget({
 	});
 
 	return (
-		<List className={className} component="nav">
-			{elements}
-		</List>
+		<nav>
+			<List className={className}>{elements}</List>
+		</nav>
 	);
 }
