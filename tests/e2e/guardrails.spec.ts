@@ -11,7 +11,7 @@ test("home page has no WCAG A/AA violations", async ({ page }) => {
 	await expect(page.locator("main").first()).toBeVisible();
 	await page.evaluate(() => {
 		document
-			.getAnimations({ subtree: true })
+			.getAnimations()
 			.filter((animation) =>
 				Number.isFinite(animation.effect?.getComputedTiming().endTime),
 			)
