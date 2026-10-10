@@ -25,17 +25,18 @@ test("home page has no WCAG A/AA violations", async ({ page }) => {
 	expect(results.violations).toEqual([]);
 });
 
-test("home page matches the reviewed desktop and mobile layouts", async ({
-	page,
-}) => {
-	for (const size of sizes) {
-		await page.setViewportSize({ width: size.width, height: size.height });
-		await page.goto("/");
-		await expect(page.locator("main").first()).toBeVisible();
-		await expect(page).toHaveScreenshot("home-" + size.name + ".png", {
-			fullPage: true,
-			animations: "disabled",
-			caret: "hide",
-		});
-	}
-});
+for (const size of sizes) {
+	test(
+		"home page matches the reviewed " + size.name + " layout",
+		async ({ page }) => {
+			await page.setViewportSize({ width: size.width, height: size.height });
+			await page.goto("/");
+			await expect(page.locator("main").first()).toBeVisible();
+			await expect(page).toHaveScreenshot("home-" + size.name + ".png", {
+				fullPage: true,
+				animations: "disabled",
+				caret: "hide",
+			});
+		},
+	);
+}

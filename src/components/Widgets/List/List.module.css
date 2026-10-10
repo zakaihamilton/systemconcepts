@@ -182,3 +182,7 @@
 .reverse {
 	flex-direction: column-reverse;
 }
+
+.divider {
+	display: contents;
+}

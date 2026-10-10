@@ -164,7 +164,11 @@ export function ListItemWidget({
 					</ListItemSecondaryAction>
 				)}
 			</ListItem>
-			{!reverse && !!divider && <Divider component="li" role="separator" />}
+			{!reverse && !!divider && (
+				<li role="presentation" className={styles.divider}>
+					<Divider />
+				</li>
+			)}
 			{open && (
 				<li>
 					<Collapse in={open} timeout="auto" unmountOnExit>
