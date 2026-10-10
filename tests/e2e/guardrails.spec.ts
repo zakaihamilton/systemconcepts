@@ -29,6 +29,10 @@ for (const size of sizes) {
 	test(
 		"home page matches the reviewed " + size.name + " layout",
 		async ({ page }) => {
+			test.skip(
+				process.platform !== "darwin",
+				"Reviewed screenshots run in the macOS visual-regression job.",
+			);
 			await page.setViewportSize({ width: size.width, height: size.height });
 			await page.goto("/");
 			await expect(page.locator("main").first()).toBeVisible();
