@@ -165,7 +165,7 @@ export function ListItemWidget({
 				)}
 			</ListItem>
 			{!reverse && !!divider && (
-				<li role="presentation" className={styles.divider}>
+				<li aria-hidden="true" className={styles.divider}>
 					<Divider />
 				</li>
 			)}
