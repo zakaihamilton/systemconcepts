@@ -8,5 +8,22 @@
 	"baseline": {
 		"path": ".repnix-baseline.json",
 		"failOn": "new"
+	},
+	"categories": {
+		"accessibility": {
+			"mode": "required"
+		},
+		"runtime-accessibility": {
+			"mode": "required"
+		},
+		"visual-regression": {
+			"mode": "required"
+		},
+		"interactions": {
+			"mode": "required"
+		},
+		"styles": {
+			"mode": "required"
+		}
 	}
 }

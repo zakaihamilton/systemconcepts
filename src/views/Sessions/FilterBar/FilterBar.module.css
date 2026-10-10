@@ -2,7 +2,6 @@
 	width: 100%;
 	background: var(--app-bar-background);
 	border-top: 1px solid rgba(var(--text-color-rgb, 128, 128, 128), 0.1);
-	border-bottom: 1px solid rgba(var(--text-color-rgb, 128, 128, 128), 0.1);
 	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 	display: grid;
 	grid-template-rows: 1fr;
@@ -127,7 +126,6 @@
 	font-size: 1.5em;
 	opacity: 0.7;
 	cursor: pointer;
-	transition: all 0.2s ease;
 	border-radius: 50%;
 	display: flex;
 	align-items: center;
