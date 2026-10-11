@@ -1146,6 +1146,14 @@ export const glossary: Record<string, any> = {
 			phase: "one",
 		},
 	},
+	einayim: {
+		he: "עיניים",
+		en: "Eyes",
+		trans: "Einayim",
+		style: {
+			phase: "one",
+		},
+	},
 	awyzen: {
 		he: "אוזן",
 		en: "Ear",
