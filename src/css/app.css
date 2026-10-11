@@ -5,7 +5,6 @@
 video::cue,
 video::-webkit-media-text-track-display,
 video::-webkit-media-text-track-container {
-	background-color: var(--cue-background) !important;
 	background: var(--cue-background) !important;
 	background-image: none !important;
 	color: var(--cue-color) !important;

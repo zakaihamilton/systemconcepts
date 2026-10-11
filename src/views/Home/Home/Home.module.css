@@ -102,6 +102,7 @@
 .signInPrompt p,
 .syncPrompt p {
 	margin: 0;
+	color: var(--text-color);
 }
 
 .syncProgress {

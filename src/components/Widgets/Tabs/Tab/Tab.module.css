@@ -1,6 +1,6 @@
 .root {
 	min-width: auto !important;
-	max-width: auto !important;
+	max-width: none !important;
 	border-radius: 0 !important;
 }
 

@@ -243,49 +243,49 @@
 			"file": "src/views/Types/ItemMenu/index.ts"
 		},
 		{
-			"fingerprint": "67884821e3a2ebe6495bf59b",
+			"fingerprint": "0a5def007a6bb74696fa96c3",
 			"provider": "Knip",
 			"category": "dead-code",
 			"type": "unused-dependency",
 			"scope": ".",
 			"file": "package.json",
-			"line": 31
+			"line": 35
 		},
 		{
-			"fingerprint": "e2d4aa0514903a13d2ac6751",
+			"fingerprint": "7b0fb3a914fdce97692818be",
 			"provider": "Knip",
 			"category": "dead-code",
 			"type": "unused-dependency",
 			"scope": ".",
 			"file": "package.json",
-			"line": 39
+			"line": 43
 		},
 		{
-			"fingerprint": "4ee9dc6fc7b68b535fb5229c",
+			"fingerprint": "1d81c128ae183af680a88384",
 			"provider": "Knip",
 			"category": "dead-code",
 			"type": "unused-dependency",
 			"scope": ".",
 			"file": "package.json",
-			"line": 55
+			"line": 59
 		},
 		{
-			"fingerprint": "8be7edc7967e098039afd7c4",
+			"fingerprint": "b8121b40dd7ee5eb5e3d6d80",
 			"provider": "Knip",
 			"category": "dead-code",
 			"type": "unused-dependency",
 			"scope": ".",
 			"file": "package.json",
-			"line": 63
+			"line": 69
 		},
 		{
-			"fingerprint": "f8f641e3d46293e62710455c",
+			"fingerprint": "d1905c9b72b32a6009bc421e",
 			"provider": "Knip",
 			"category": "dead-code",
 			"type": "unused-dependency",
 			"scope": ".",
 			"file": "package.json",
-			"line": 81
+			"line": 93
 		},
 		{
 			"fingerprint": "f404aadcfd76cee2da5a957c",
@@ -7146,22 +7146,22 @@
 			"line": 1
 		},
 		{
-			"fingerprint": "8a84413551e522f45d32c1f5",
+			"fingerprint": "15e68552984af937a467beff",
 			"provider": "jscpd",
 			"category": "duplication",
 			"type": "duplication",
 			"scope": ".",
 			"file": "views/Schedule/DayView/Session/Session.module.css",
-			"line": 87
+			"line": 84
 		},
 		{
-			"fingerprint": "8a84413551e522f45d32c1f5",
+			"fingerprint": "15e68552984af937a467beff",
 			"provider": "jscpd",
 			"category": "duplication",
 			"type": "duplication",
 			"scope": ".",
 			"file": "views/Schedule/DayView/Session/Session.module.css",
-			"line": 87
+			"line": 84
 		},
 		{
 			"fingerprint": "76bd16b8a7c3023162d30b72",

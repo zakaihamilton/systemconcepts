@@ -6,7 +6,6 @@
 	font: inherit;
 	align-items: center;
 	justify-content: center;
-	min-height: 7em;
 	color: var(--text-color);
 	position: relative;
 	overflow: hidden;
@@ -34,7 +33,6 @@
 }
 
 .group {
-	font-weight: bold;
 	display: flex;
 	align-self: flex-end;
 	font-weight: normal;
@@ -82,7 +80,6 @@
 	display: flex;
 	justify-content: center;
 	gap: 4px;
-	margin-top: 4px;
 	opacity: 0.8;
 	margin: 0.5em;
 }

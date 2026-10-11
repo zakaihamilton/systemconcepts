@@ -11,9 +11,6 @@
 	overflow: hidden;
 	flex: 1;
 	padding: 4px;
-}
-
-.item {
 	background-color: var(--main-background);
 }
 

@@ -164,18 +164,18 @@ export function ListItemWidget({
 					</ListItemSecondaryAction>
 				)}
 			</ListItem>
-			{expandIcon && (
-				<Collapse in={open} timeout="auto" unmountOnExit>
-					{content ? (
-						content
-					) : (
-						<List component="div" disablePadding>
-							{elements}
-						</List>
-					)}
-				</Collapse>
+			{!reverse && !!divider && (
+				<li aria-hidden="true" className={styles.divider}>
+					<Divider />
+				</li>
 			)}
-			{!reverse && !!divider && <Divider />}
+			{open && (
+				<li>
+					<Collapse in={open} timeout="auto" unmountOnExit>
+						{content ? content : <List disablePadding>{elements}</List>}
+					</Collapse>
+				</li>
+			)}
 		</>
 	);
 }
@@ -212,8 +212,8 @@ export default function ListWidget({
 	});
 
 	return (
-		<List className={className} component="nav">
-			{elements}
-		</List>
+		<nav>
+			<List className={className}>{elements}</List>
+		</nav>
 	);
 }

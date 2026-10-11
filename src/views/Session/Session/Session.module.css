@@ -254,7 +254,7 @@
 		max-width: calc(90vw - 4em) !important;
 		font-size: 0.85em !important;
 		padding: 0.3em 0.6em !important;
-		word-break: break-word !important;
+		overflow-wrap: anywhere !important;
 		white-space: normal !important;
 		height: auto !important;
 		min-height: 2em !important;
