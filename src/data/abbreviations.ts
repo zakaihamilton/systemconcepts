@@ -7,6 +7,10 @@ export const abbreviations: Record<string, any> = {
 		eng: "Hesed, Gevura, Tifferet",
 		heb: "חסד, גבורה, תפארת",
 	},
+	HBD: {
+		eng: "Hochma, Bina, Daat",
+		heb: "חכמה, בינה, דעת",
+	},
 	NHY: {
 		eng: "Netzah, Hod, Yesod",
 		heb: "נצח, הוד, יסוד",
