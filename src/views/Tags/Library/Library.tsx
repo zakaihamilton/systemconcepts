@@ -5,6 +5,7 @@ import DeleteForeverIcon from "@icons/svg/DeleteForever.svg";
 import EditIcon from "@icons/svg/Edit.svg";
 import EditAttributesIcon from "@icons/svg/EditAttributes.svg";
 import MoreVertIcon from "@icons/svg/MoreVert.svg";
+import RefreshIcon from "@icons/svg/Refresh.svg";
 import { LIBRARY_LOCAL_PATH } from "@sync/constants";
 import { bumpLibraryCounter } from "@sync/libraryCounter";
 import Box from "@ui/Box";
@@ -33,6 +34,7 @@ import Cookies from "js-cookie";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import dialog from "../../../css/dialog-patterns.module.css";
 import BatchDialog from "../BatchDialog";
+import RebuildDialog from "../RebuildDialog/RebuildDialog";
 import SyncDialog from "../SyncDialog";
 import styles from "./Library.module.css";
 
@@ -56,6 +58,7 @@ export default function LibraryTags() {
 	const [deleteDialog, setDeleteDialog] = useState<any>(null); // { category, value, count }
 	const [deleteArticlesDialog, setDeleteArticlesDialog] = useState<any>(null); // { category, value, count }
 	const [syncDialog, setSyncDialog] = useState(false);
+	const [rebuildDialog, setRebuildDialog] = useState(false);
 	const [batchDialog, setBatchDialog] = useState(false);
 	const [newValue, setNewValue] = useState("");
 	const [processing, setProcessing] = useState(false);
@@ -68,6 +71,13 @@ export default function LibraryTags() {
 	}, []);
 
 	const toolbarItems = [
+		isAdmin && {
+			id: "rebuild_library_tags",
+			name: translations.REBUILD_LIBRARY_TAGS || "Rebuild Library Tags",
+			icon: <RefreshIcon />,
+			onClick: () => setRebuildDialog(true),
+			location: "header",
+		},
 		isAdmin && {
 			id: "sync_article_tags",
 			name: translations.SYNC_ARTICLE_TAGS,
@@ -102,6 +112,13 @@ export default function LibraryTags() {
 			structuredLogger.error("Failed to load tags:", err);
 		}
 	};
+
+	const handleTagsRebuilt = useCallback((rebuiltTags: any[]) => {
+		setTags(rebuiltTags);
+		LibraryStore.update((s) => {
+			s.tags = rebuiltTags;
+		});
+	}, []);
 
 	const aggregatedData = useMemo(() => {
 		const map = new Map<any, any>();
@@ -617,6 +634,13 @@ export default function LibraryTags() {
 				open={syncDialog}
 				onClose={() => setSyncDialog(false)}
 				tags={tags}
+			/>
+
+			<RebuildDialog
+				open={rebuildDialog}
+				onClose={() => setRebuildDialog(false)}
+				currentTags={tags}
+				onRebuilt={handleTagsRebuilt}
 			/>
 
 			{/* Batch Update Dialog */}
