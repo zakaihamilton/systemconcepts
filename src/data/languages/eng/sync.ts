@@ -36,6 +36,35 @@ export default [
 		value: "Sync Article Tags",
 	},
 	{
+		id: "REBUILD_LIBRARY_TAGS",
+		value: "Rebuild Library Tags",
+	},
+	{
+		id: "REBUILD_LIBRARY_TAGS_HELP",
+		value:
+			"Scan article JSON files in the local library and refresh the tag list, including newly added articles.",
+	},
+	{
+		id: "SOURCE_FILES_SCANNED",
+		value: "Source files scanned",
+	},
+	{
+		id: "TAG_INDEX_UP_TO_DATE",
+		value: "The tag index is already up to date.",
+	},
+	{
+		id: "NO_LIBRARY_ARTICLES_FOUND",
+		value: "No article records were found in the library JSON files.",
+	},
+	{
+		id: "FAILED_TO_REBUILD_TAGS",
+		value: "Failed to rebuild the library tag index.",
+	},
+	{
+		id: "APPLY_REBUILD",
+		value: "Rebuild",
+	},
+	{
 		id: "SYNC_ARTICLE_TAGS_CONFIRM",
 		value:
 			"Are you sure you want to sync tags from the library to all article files? This will overwrite individual file tags.",

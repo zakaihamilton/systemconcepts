@@ -40,6 +40,34 @@ export default [
 		value: "סנכרון תגיות מאמרים",
 	},
 	{
+		id: "REBUILD_LIBRARY_TAGS",
+		value: "בנייה מחדש של תגיות הספרייה",
+	},
+	{
+		id: "REBUILD_LIBRARY_TAGS_HELP",
+		value: "סריקת קובצי המאמרים בספרייה המקומית ורענון רשימת התגיות, כולל מאמרים חדשים.",
+	},
+	{
+		id: "SOURCE_FILES_SCANNED",
+		value: "קובצי מקור שנסרקו",
+	},
+	{
+		id: "TAG_INDEX_UP_TO_DATE",
+		value: "אינדקס התגיות מעודכן.",
+	},
+	{
+		id: "NO_LIBRARY_ARTICLES_FOUND",
+		value: "לא נמצאו רשומות מאמרים בקובצי ה־JSON של הספרייה.",
+	},
+	{
+		id: "FAILED_TO_REBUILD_TAGS",
+		value: "בנייה מחדש של אינדקס תגיות הספרייה נכשלה.",
+	},
+	{
+		id: "APPLY_REBUILD",
+		value: "בנייה מחדש",
+	},
+	{
 		id: "SYNC_ARTICLE_TAGS_CONFIRM",
 		value:
 			"האם אתה בטוח שברצונך לסנכרן תגיות מהספרייה לכל קובצי המאמרים? פעולה זו תדרוס תגיות בודדות של קבצים.",

@@ -14,6 +14,8 @@ const TextField = forwardRef<any, any>(function TextField(
 		fullWidth = false,
 		type = "text",
 		select = false,
+		multiline = false,
+		rows = 3,
 		children,
 		inputClassName,
 		selectClassName,
@@ -60,6 +62,7 @@ const TextField = forwardRef<any, any>(function TextField(
 	const fieldInputClassName = clsx(
 		styles.input,
 		select && styles.select,
+		multiline && styles.multilineInput,
 		inputClassName,
 	);
 	const resolvedStartAdornment = InputProps?.startAdornment || startAdornment;
@@ -79,6 +82,7 @@ const TextField = forwardRef<any, any>(function TextField(
 				className={clsx(
 					variant === "filled" && styles.filled,
 					variant === "outlined" && styles.outlined,
+					multiline && styles.multiline,
 					focused && styles.focused,
 					error && styles.error,
 				)}
@@ -95,7 +99,12 @@ const TextField = forwardRef<any, any>(function TextField(
 						{label}
 					</label>
 				)}
-				<div className={styles.inputWrapper}>
+				<div
+					className={clsx(
+						styles.inputWrapper,
+						multiline && styles.multilineInputWrapper,
+					)}
+				>
 					{resolvedStartAdornment && (
 						<span className={styles.adornmentStart}>
 							{resolvedStartAdornment}
@@ -127,6 +136,23 @@ const TextField = forwardRef<any, any>(function TextField(
 						>
 							{children}
 						</select>
+					) : multiline ? (
+						<textarea
+							ref={setRefs}
+							id={id}
+							name={id}
+							aria-label={label || props["aria-label"]}
+							value={displayValue ?? ""}
+							onChange={onChange}
+							onFocus={handleFocus}
+							onBlur={handleBlur}
+							disabled={disabled}
+							readOnly={inputProps.readOnly}
+							rows={rows}
+							className={fieldInputClassName}
+							{...inputProps}
+							{...props}
+						/>
 					) : (
 						<input
 							ref={setRefs}

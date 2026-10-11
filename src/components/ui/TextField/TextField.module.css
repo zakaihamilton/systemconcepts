@@ -72,6 +72,20 @@
 	color: var(--primary-color);
 }
 
+.outlined .labelFloating {
+	top: -7px;
+	left: 8px;
+	padding: 0 4px;
+	background-color: inherit;
+	transform: scale(0.85);
+}
+
+[dir="rtl"] .outlined .labelFloating {
+	right: 8px;
+	left: auto;
+	transform-origin: top right;
+}
+
 .labelError {
 	color: var(--error-color);
 }
@@ -81,6 +95,19 @@
 	align-items: center;
 	padding: 3px 12px 4px;
 	min-height: 1.5rem;
+}
+
+.multiline {
+	display: flex;
+	flex: 1;
+	min-height: 0;
+}
+
+.multilineInputWrapper {
+	align-items: stretch;
+	flex: 1;
+	min-height: 0;
+	padding: 12px;
 }
 
 .input {
@@ -94,6 +121,15 @@
 	outline: none;
 	width: 100%;
 	padding: 0;
+}
+
+.multilineInput {
+	display: block;
+	height: 100%;
+	min-height: 0;
+	resize: none;
+	overflow: auto;
+	line-height: 1.6;
 }
 
 .select {
