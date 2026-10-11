@@ -3060,6 +3060,14 @@ export const glossary: Record<string, any> = {
 			phase: "two",
 		},
 	},
+	ozen: {
+		he: "אוזן",
+		en: "Ear",
+		trans: "Ozen",
+		style: {
+			phase: "two",
+		},
+	},
 	zakan: {
 		he: "זקן",
 		en: "Beard",
