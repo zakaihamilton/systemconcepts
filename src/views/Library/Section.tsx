@@ -8,7 +8,10 @@ export function getLibrarySection({ id, path, translations }: any) {
 		.split("/")
 		.filter(Boolean)
 		.map(decodeURIComponent);
-	const name = decodeURIComponent(id || segments[segments.length - 1] || "");
+	const pathName = decodeURIComponent(id || segments[segments.length - 1] || "");
+	// Article deep links append the paragraph number to the tag id, e.g.
+	// #library/id/<articleId>:18. Resolve the breadcrumb from the article ID.
+	const name = pathName.replace(/:\d+$/, "");
 
 	// Identify if this is the root "Library" breadcrumb
 	const isRoot = name && name.toLowerCase() === "library";
@@ -37,7 +40,7 @@ export function getLibrarySection({ id, path, translations }: any) {
 
 	if (tags && tags.length > 0) {
 		// Check if name is an _id
-		const tagById = tags.find((t) => t._id === name);
+		const tagById = tags.find((t) => String(t._id) === name);
 		if (tagById) {
 			let label = "";
 			let fieldKey = null;
