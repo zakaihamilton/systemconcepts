@@ -114,7 +114,9 @@ export default function RebuildDialog({
 				if (!relativePath || !relativePath.toLowerCase().endsWith(".json")) {
 					return false;
 				}
-				return !INDEX_FILES.has(relativePath.split("/").pop()?.toLowerCase() || "");
+				return !INDEX_FILES.has(
+					relativePath.split("/").pop()?.toLowerCase() || "",
+				);
 			});
 
 			const indexedById = new Map<string, any>();
@@ -248,7 +250,8 @@ export default function RebuildDialog({
 				) : preview ? (
 					<Box>
 						<Typography>
-							{translations.SOURCE_FILES_SCANNED || "Source files scanned"}: {preview.sourceFiles}
+							{translations.SOURCE_FILES_SCANNED || "Source files scanned"}:{" "}
+							{preview.sourceFiles}
 						</Typography>
 						<Typography>
 							{translations.ARTICLES || "Articles"}: {preview.tags.length}
@@ -263,10 +266,7 @@ export default function RebuildDialog({
 							{translations.REMOVED || "Removed"}: {preview.removed}
 						</Typography>
 						{!hasChanges && (
-							<Typography
-								color="text.secondary"
-								style={{ marginTop: 8 }}
-							>
+							<Typography color="text.secondary" style={{ marginTop: 8 }}>
 								{translations.TAG_INDEX_UP_TO_DATE ||
 									"The tag index is already up to date."}
 							</Typography>
