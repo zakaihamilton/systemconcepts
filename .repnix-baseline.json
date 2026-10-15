@@ -1,6 +1,6 @@
 {
 	"schemaVersion": 1,
-	"generatedAt": "2026-10-15T02:56:44.000Z",
+	"generatedAt": "2026-10-15T03:06:44.000Z",
 	"entries": [
 		{
 			"fingerprint": "b002a1ae2ba0665924e15caf",
@@ -7828,6 +7828,15 @@
 			"scope": ".",
 			"file": "views/Tags/RebuildDialog/RebuildDialog.tsx",
 			"line": 1
+		},
+		{
+			"fingerprint": "1e528c37cd51fca59d22c579",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-export",
+			"scope": ".",
+			"file": "src/views/Tags/Library/Library.tsx",
+			"line": 43
 		}
 	]
 }
