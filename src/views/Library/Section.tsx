@@ -8,7 +8,9 @@ export function getLibrarySection({ id, path, translations }: any) {
 		.split("/")
 		.filter(Boolean)
 		.map(decodeURIComponent);
-	const pathName = decodeURIComponent(id || segments[segments.length - 1] || "");
+	const pathName = decodeURIComponent(
+		id || segments[segments.length - 1] || "",
+	);
 	// Article deep links append the paragraph number to the tag id, e.g.
 	// #library/id/<articleId>:18. Resolve the breadcrumb from the article ID.
 	const name = pathName.replace(/:\d+$/, "");

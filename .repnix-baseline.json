@@ -1,6 +1,6 @@
 {
 	"schemaVersion": 1,
-	"generatedAt": "2026-09-23T14:51:30.212Z",
+	"generatedAt": "2026-10-15T03:06:44.000Z",
 	"entries": [
 		{
 			"fingerprint": "b002a1ae2ba0665924e15caf",
@@ -7774,6 +7774,69 @@
 			"scope": ".",
 			"file": "views/User/User/User.test.tsx",
 			"line": 214
+		},
+		{
+			"fingerprint": "45dd1357839b0af14480920d",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Tags/Library/Library.tsx",
+			"line": 148
+		},
+		{
+			"fingerprint": "35b8edcc719a16b6d678a89e",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Tags/Library/Library.tsx",
+			"line": 174
+		},
+		{
+			"fingerprint": "e08c26331c567e6a1d7845a1",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Tags/Library/Library.tsx",
+			"line": 185
+		},
+		{
+			"fingerprint": "cf7b118b01ef9869abf4ec9e",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Tags/Library/Library.tsx",
+			"line": 210
+		},
+		{
+			"fingerprint": "e8640ea53dd1c1925c73d8b8",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Tags/Library/Library.tsx",
+			"line": 214
+		},
+		{
+			"fingerprint": "68fbac7e14f7ffe4ac809582",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Tags/RebuildDialog/RebuildDialog.tsx",
+			"line": 1
+		},
+		{
+			"fingerprint": "1e528c37cd51fca59d22c579",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-export",
+			"scope": ".",
+			"file": "src/views/Tags/Library/Library.tsx",
+			"line": 43
 		}
 	]
 }

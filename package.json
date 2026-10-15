@@ -44,7 +44,7 @@
 		"js-cookie": "^3.0.7",
 		"jszip": "^3.10.1",
 		"mongodb": "^7.2.0",
-		"next": "16.3.8",
+		"next": "16.4.1",
 		"nodemailer": "^10.0.10",
 		"p-limit": "^7.3.0",
 		"pako": "^2.1.0",
@@ -62,8 +62,8 @@
 	"devDependencies": {
 		"@axe-core/playwright": "^4.13.0",
 		"@biomejs/biome": "^2.4.15",
-		"@next/bundle-analyzer": "16.3.6",
-		"@next/eslint-plugin-next": "16.3.6",
+		"@next/bundle-analyzer": "16.4.1",
+		"@next/eslint-plugin-next": "16.4.1",
 		"@playwright/test": "^1.60.0",
 		"@svgr/core": "8.1.0",
 		"@svgr/webpack": "^8.1.0",
@@ -93,7 +93,7 @@
 		"yarn-upgrade-all": "^0.8.1"
 	},
 	"optionalDependencies": {
-		"@next/swc-linux-x64-gnu": "16.3.8"
+		"@next/swc-linux-x64-gnu": "16.4.1"
 	},
 	"resolutions": {
 		"baseline-browser-mapping": "2.11.25",
@@ -111,6 +111,9 @@
 		"nanoid": "3.3.18",
 		"postcss": "8.5.23",
 		"sharp": "0.35.5"
+	},
+	"engines": {
+		"node": ">=24.0.0 <25"
 	},
 	"packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }
