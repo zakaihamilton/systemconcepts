@@ -89,8 +89,9 @@
 		"repnix": "^1.1.0",
 		"stylelint": "^17.11.1",
 		"stylelint-config-standard": "^40.0.0",
-		"typescript": "^6.0.3",
-		"yarn-upgrade-all": "^0.8.1"
+		"typescript": "npm:@typescript/typescript6@^6.0.2",
+		"yarn-upgrade-all": "^0.8.1",
+		"@typescript/native": "npm:typescript@^7.0.2"
 	},
 	"optionalDependencies": {
 		"@next/swc-linux-x64-gnu": "16.4.1"

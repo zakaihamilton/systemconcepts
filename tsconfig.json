@@ -21,20 +21,19 @@
 		"skipLibCheck": true,
 		"strict": true,
 		"target": "ES2022",
-		"baseUrl": ".",
 		"paths": {
-			"@components/*": ["src/components/*"],
-			"@ui/*": ["src/components/ui/*"],
-			"@ui": ["src/components/ui/index.ts"],
-			"@widgets/*": ["src/components/Widgets/*"],
-			"@icons/svg/*": ["src/components/Icons/svg/*"],
-			"@icons/Audio": ["src/components/Icons/Audio.tsx"],
-			"@util/*": ["src/util/*"],
-			"@data/*": ["src/data/*"],
-			"@views/*": ["src/views/*"],
-			"@storage/*": ["src/storage/*"],
-			"@diagrams/*": ["src/diagrams/*"],
-			"@sync/*": ["src/sync/*"]
+			"@components/*": ["./src/components/*"],
+			"@ui/*": ["./src/components/ui/*"],
+			"@ui": ["./src/components/ui/index.ts"],
+			"@widgets/*": ["./src/components/Widgets/*"],
+			"@icons/svg/*": ["./src/components/Icons/svg/*"],
+			"@icons/Audio": ["./src/components/Icons/Audio.tsx"],
+			"@util/*": ["./src/util/*"],
+			"@data/*": ["./src/data/*"],
+			"@views/*": ["./src/views/*"],
+			"@storage/*": ["./src/storage/*"],
+			"@diagrams/*": ["./src/diagrams/*"],
+			"@sync/*": ["./src/sync/*"]
 		}
 	},
 	"include": [
