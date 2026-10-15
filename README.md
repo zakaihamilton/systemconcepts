@@ -5,13 +5,12 @@ System Concepts is a Next.js application for browsing, researching, playing, edi
 ## Requirements
 
 - Node.js 24 (see `.nvmrc`)
-- Yarn 1.x via Corepack
+- pnpm 10.33.0 (pinned in `package.json`)
 
 ```bash
-corepack enable
-yarn install --frozen-lockfile
+pnpm install --frozen-lockfile
 cp .env.example .env.local
-yarn dev
+pnpm dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000). The public shell and local/offline features do not require production credentials.
@@ -59,31 +58,31 @@ AWS, Wasabi, MongoDB, and email integrations are optional in local development. 
 The TypeScript sources in `src/browser-runtime/` generate the browser theme script and service worker in `public/` during development, builds, and test runs. Production builds generate a build-specific service worker that precaches the application shell, JavaScript, CSS, bundled fonts, and core public assets. Cached local content can be reopened after an offline reload, including hash deep links. Session API responses use network-first caching; authenticated APIs and media URLs are not cached by the worker. Updates activate after existing app tabs close. The service worker provides the offline fallback and runtime caching rules; `/~offline` is the document fallback. Service workers register only in production, so use a production build to test offline behavior.
 
 ```bash
-yarn build
-yarn start
+pnpm build
+pnpm start
 ```
 
-To inspect production webpack bundle sizes, run `yarn analyze`. Reports are written to `.next/analyze/` (`client.html`, `nodejs.html`, and `edge.html`) without opening a browser.
+To inspect production webpack bundle sizes, run `pnpm analyze`. Reports are written to `.next/analyze/` (`client.html`, `nodejs.html`, and `edge.html`) without opening a browser.
 
 ## Verification
 
 Linting uses Biome (`biome check .`). Type checking uses `tsc --noEmit`.
 
 ```bash
-yarn lint
-yarn typecheck
-yarn test --runInBand
-yarn test:coverage
-yarn build
-yarn test:e2e
+pnpm lint
+pnpm typecheck
+pnpm test --runInBand
+pnpm test:coverage
+pnpm build
+pnpm test:e2e
 ```
 
-`yarn verify` runs the complete sequence. Jest enforces a global coverage gate of **80%** for statements, branches, functions, and lines. Playwright tests use intercepted requests and seeded browser state; they must not depend on production databases, storage accounts, email, or user credentials.
+`pnpm verify` runs the complete sequence. Jest enforces a global coverage gate of **80%** for statements, branches, functions, and lines. Playwright tests use intercepted requests and seeded browser state; they must not depend on production databases, storage accounts, email, or user credentials.
 
-`yarn audit:dependencies` fails on high-severity dependency advisories. Before deploying a MongoDB-backed environment, run `yarn db:indexes` with `MONGO_URL` and `MONGO_DB` configured. It is idempotent and provisions the user/session/challenge/rate-limit uniqueness and expiry indexes.
+`pnpm audit:dependencies` fails on high-severity dependency advisories. Before deploying a MongoDB-backed environment, run `pnpm db:indexes` with `MONGO_URL` and `MONGO_DB` configured. It is idempotent and provisions the user/session/challenge/rate-limit uniqueness and expiry indexes.
 
 The production CSP allows only the configured site and storage origins. Set `AWS_ENDPOINT` and `WASABI_URL` to their real origins before deploying; broad third-party browser connections are intentionally not allowed.
 
 ## Deployment
 
-Deploy the production build to a Node-compatible platform such as Vercel. Configure only the environment variables required by enabled services. CI uses Node from `.nvmrc`, installs from `yarn.lock`, and runs lint, dependency audit, type checking, Jest (including the coverage gate), the production build, and deterministic Chromium smoke tests.
+Deploy the production build to a Node-compatible platform such as Vercel. Configure only the environment variables required by enabled services. CI uses Node from `.nvmrc`, installs from `pnpm-lock.yaml`, and runs lint, dependency audit, type checking, Jest (including the coverage gate), the production build, and deterministic Chromium smoke tests.

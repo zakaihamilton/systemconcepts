@@ -22,37 +22,41 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.0
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
-          cache: yarn
-      - run: corepack enable
-      - run: yarn install --frozen-lockfile
-      - run: npx playwright install --with-deps chromium
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
       - name: Repository health
-        run: yarn run health --details
-      - run: yarn lint
-      - run: yarn typecheck
-      - run: yarn audit:dependencies
-      - run: yarn test --runInBand
-      - run: yarn test:coverage
-      - run: yarn build
-      - run: npx playwright install --with-deps chromium
-      - run: yarn test:e2e
+        run: pnpm run health --details
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm audit:dependencies
+      - run: pnpm test --runInBand
+      - run: pnpm test:coverage
+      - run: pnpm build
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm test:e2e
 
   visual-regression:
     runs-on: macos-latest
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.0
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
-          cache: yarn
-      - run: corepack enable
-      - run: yarn install --frozen-lockfile
-      - run: npx playwright install chromium
-      - run: yarn health:visual
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install chromium
+      - run: pnpm health:visual
         env:
           RUN_VISUAL_REGRESSION: "1"
       - uses: actions/upload-artifact@v4

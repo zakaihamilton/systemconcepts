@@ -3,29 +3,29 @@
 	"version": "2.4.8",
 	"private": true,
 	"scripts": {
-		"dev": "yarn build:browser-runtime && next dev",
+		"dev": "pnpm build:browser-runtime && next dev",
 		"build:browser-runtime": "node --experimental-strip-types scripts/build-browser-runtime.ts",
-		"build": "yarn build:browser-runtime && next build --webpack && yarn build:browser-runtime --production",
-		"analyze": "yarn build:browser-runtime && ANALYZE=true next build --webpack && yarn build:browser-runtime --production",
+		"build": "pnpm build:browser-runtime && next build --webpack && pnpm build:browser-runtime --production",
+		"analyze": "pnpm build:browser-runtime && ANALYZE=true next build --webpack && pnpm build:browser-runtime --production",
 		"start": "next start",
 		"lint": "biome check . && eslint .",
 		"typecheck": "tsc --noEmit && tsc --noEmit --project tsconfig.tests.json",
-		"test": "yarn build:browser-runtime && jest --runInBand",
-		"test:watch": "yarn build:browser-runtime && jest --watch",
+		"test": "pnpm build:browser-runtime && jest --runInBand",
+		"test:watch": "pnpm build:browser-runtime && jest --watch",
 		"test:e2e": "playwright test",
-		"test:coverage": "yarn build:browser-runtime && jest --runInBand --coverage --coverageReporters=text-summary",
-		"audit:dependencies": "npm audit --omit=dev --audit-level=high --package-lock=false",
+		"test:coverage": "pnpm build:browser-runtime && jest --runInBand --coverage --coverageReporters=text-summary",
+		"audit:dependencies": "pnpm audit --prod --audit-level=high ",
 		"db:indexes": "node --experimental-strip-types scripts/db-indexes.ts",
-		"verify": "yarn lint && yarn typecheck && yarn test --runInBand && yarn test:coverage && yarn build && yarn test:e2e",
-		"full-start": "yarn build && next start",
+		"verify": "pnpm lint && pnpm typecheck && pnpm test --runInBand && pnpm test:coverage && pnpm build && pnpm test:e2e",
+		"full-start": "pnpm build && next start",
 		"health": "repnix check",
 		"health:dead-code": "knip",
 		"health:duplication": "jscpd app src",
-		"health:coverage": "c8 --all --reporter=text yarn test",
+		"health:coverage": "c8 --all --reporter=text pnpm test",
 		"health:architecture": "depcruise --output-type json --config .dependency-cruiser.json app src",
 		"health:documentation": "markdownlint-cli2 \"**/*.md\" \"#node_modules\"",
-		"health:a11y": "yarn build && playwright test tests/e2e/guardrails.spec.ts --project=chromium --grep=WCAG",
-		"health:visual": "if [ \"$RUN_VISUAL_REGRESSION\" = \"1\" ] || [ \"$(uname)\" = \"Darwin\" ]; then yarn build && playwright test tests/e2e/guardrails.spec.ts --project=chromium; else echo \"Visual regression runs in the macOS guardrail job.\"; fi",
+		"health:a11y": "pnpm build && playwright test tests/e2e/guardrails.spec.ts --project=chromium --grep=WCAG",
+		"health:visual": "if [ \"$RUN_VISUAL_REGRESSION\" = \"1\" ] || [ \"$(uname)\" = \"Darwin\" ]; then pnpm build && playwright test tests/e2e/guardrails.spec.ts --project=chromium; else echo \"Visual regression runs in the macOS guardrail job.\"; fi",
 		"health:interactions": "jest --runInBand src/views/Account/Account/Account.test.tsx",
 		"health:styles": "stylelint --formatter json \"**/*.{css,pcss,postcss}\""
 	},
@@ -115,5 +115,4 @@
 	"engines": {
 		"node": ">=24.0.0 <25"
 	},
-	"packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
-}
+	"packageManager": "pnpm@10.33.0"}

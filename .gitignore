@@ -38,7 +38,5 @@ yarn-error.log*
 .env.production.local
 .env
 
-pnpm-lock.yaml
-!yarn.lock
 
 .repnix/
