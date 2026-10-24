@@ -211,9 +211,7 @@ export async function getTranscriptProxyUrlFast(session: any, baseUrl: any) {
 				? `sessions/${group}/${year}.zip`
 				: null;
 		const fileName =
-			typeof id === "string" &&
-			id.length > 0 &&
-			!/[\/\\\0\n]/.test(id)
+			typeof id === "string" && id.length > 0 && !/[\/\\\0\n]/.test(id)
 				? `${id}.txt`
 				: null;
 		if (zipPath && fileName) {
