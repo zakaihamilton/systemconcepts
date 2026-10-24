@@ -49,8 +49,9 @@ async function sha256Hex(data: any) {
 }
 
 function awsUriEncode(value: any) {
-	return encodeURIComponent(value).replace(/[!'()*]/g, (character) =>
-		`%${character.charCodeAt(0).toString(16).toUpperCase()}`,
+	return encodeURIComponent(value).replace(
+		/[!'()*]/g,
+		(character) => `%${character.charCodeAt(0).toString(16).toUpperCase()}`,
 	);
 }
 
@@ -91,9 +92,7 @@ export async function createPresignedUrl({
 
 	const canonicalQueryString = Object.keys(queryParams)
 		.sort()
-		.map(
-			(k) => `${awsUriEncode(k)}=${awsUriEncode(queryParams[k])}`,
-		)
+		.map((k) => `${awsUriEncode(k)}=${awsUriEncode(queryParams[k])}`)
 		.join("&");
 
 	const canonicalRequest = [

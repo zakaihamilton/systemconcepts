@@ -105,8 +105,7 @@ async function handleRequest(request: any) {
 			secretAccessKey = process.env.AWS_SECRET;
 		}
 		const isVtt = s3Key.toLowerCase().endsWith(".vtt");
-		const isTextTranscript =
-			isVtt || s3Key.toLowerCase().endsWith(".txt");
+		const isTextTranscript = isVtt || s3Key.toLowerCase().endsWith(".txt");
 
 		if (request.method === "HEAD") {
 			try {
@@ -196,21 +195,18 @@ async function handleRequest(request: any) {
 				});
 			}
 
-			return new NextResponse(
-				normalizeTranscriptTimestamps(content, isVtt),
-				{
-					status: 200,
-					headers: {
-						"Content-Type": isVtt
-							? "text/vtt; charset=utf-8"
-							: "text/plain; charset=utf-8",
-						...(contentDisposition
-							? { "Content-Disposition": contentDisposition }
-							: {}),
-						...NO_STORE_HEADERS,
-					},
+			return new NextResponse(normalizeTranscriptTimestamps(content, isVtt), {
+				status: 200,
+				headers: {
+					"Content-Type": isVtt
+						? "text/vtt; charset=utf-8"
+						: "text/plain; charset=utf-8",
+					...(contentDisposition
+						? { "Content-Disposition": contentDisposition }
+						: {}),
+					...NO_STORE_HEADERS,
 				},
-			);
+			});
 		}
 
 		return new NextResponse(null, {

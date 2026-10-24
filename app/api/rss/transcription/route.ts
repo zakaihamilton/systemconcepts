@@ -71,10 +71,7 @@ export async function GET(request: any) {
 			});
 
 		validatePathAccess(zipPath);
-		if (
-			!zipPath.endsWith(".zip") ||
-			/[\/\\\0\n]/.test(fileName)
-		) {
+		if (!zipPath.endsWith(".zip") || /[\/\\\0\n]/.test(fileName)) {
 			return new NextResponse("Invalid Path", {
 				status: 400,
 				headers: NO_STORE_HEADERS,
