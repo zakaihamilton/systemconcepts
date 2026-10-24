@@ -1,11 +1,18 @@
 import { logger as structuredLogger } from "@util/api/logger";
 import { verifyRssMediaToken } from "@util/api/rssMediaToken";
+import { normalizeTranscriptTimestamps } from "@util/data/transcriptTimestamps";
 import { createPresignedUrl } from "@util/storage/awsFetch";
 import { NextResponse } from "next/server";
 import { NO_STORE_HEADERS } from "../cache";
 
 export const runtime = "edge";
 export const dynamic = "force-dynamic";
+
+function decodeBase64Utf8(base64: string) {
+	const binary = atob(base64);
+	const bytes = Uint8Array.from(binary, (character) => character.charCodeAt(0));
+	return new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+}
 
 async function handleRequest(request: any) {
 	try {
@@ -38,7 +45,7 @@ async function handleRequest(request: any) {
 
 		let path;
 		try {
-			path = atob(base64str);
+			path = decodeBase64Utf8(base64str);
 		} catch (_e: any) {
 			return new NextResponse("Invalid Path", {
 				status: 400,
@@ -97,6 +104,9 @@ async function handleRequest(request: any) {
 			accessKeyId = process.env.AWS_ID;
 			secretAccessKey = process.env.AWS_SECRET;
 		}
+		const isVtt = s3Key.toLowerCase().endsWith(".vtt");
+		const isTextTranscript =
+			isVtt || s3Key.toLowerCase().endsWith(".txt");
 
 		if (request.method === "HEAD") {
 			try {
@@ -137,10 +147,15 @@ async function handleRequest(request: any) {
 					status: 200,
 					headers: {
 						"Content-Type": contentType,
-						"Content-Length": headRes.headers.get("Content-Length") || "0",
-						"Accept-Ranges": "bytes",
 						"Last-Modified": headRes.headers.get("Last-Modified") || "",
-						ETag: headRes.headers.get("ETag") || "",
+						...(isTextTranscript
+							? {}
+							: {
+									"Content-Length":
+										headRes.headers.get("Content-Length") || "0",
+									"Accept-Ranges": "bytes",
+									ETag: headRes.headers.get("ETag") || "",
+								}),
 						...NO_STORE_HEADERS,
 					},
 				});
@@ -163,6 +178,40 @@ async function handleRequest(request: any) {
 			expiresIn: capabilityTtlSeconds,
 			method: "GET",
 		});
+
+		if (isTextTranscript) {
+			const storageResponse = await fetch(signedStr);
+			const content = await storageResponse.text();
+			const contentDisposition = storageResponse.headers.get(
+				"Content-Disposition",
+			);
+			if (!storageResponse.ok) {
+				return new NextResponse(content, {
+					status: storageResponse.status,
+					headers: {
+						"Content-Type":
+							storageResponse.headers.get("Content-Type") || "text/plain",
+						...NO_STORE_HEADERS,
+					},
+				});
+			}
+
+			return new NextResponse(
+				normalizeTranscriptTimestamps(content, isVtt),
+				{
+					status: 200,
+					headers: {
+						"Content-Type": isVtt
+							? "text/vtt; charset=utf-8"
+							: "text/plain; charset=utf-8",
+						...(contentDisposition
+							? { "Content-Disposition": contentDisposition }
+							: {}),
+						...NO_STORE_HEADERS,
+					},
+				},
+			);
+		}
 
 		return new NextResponse(null, {
 			status: 302,

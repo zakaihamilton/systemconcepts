@@ -114,4 +114,34 @@ export async function createRssMediaUrl({
 	return `${baseUrl}/api/rss/${route === "media" ? "s" : "transcription"}?${params}`;
 }
 
+export async function createRssTranscriptArchiveUrl({
+	baseUrl,
+	zipPath,
+	fileName,
+}: any) {
+	if (
+		typeof zipPath !== "string" ||
+		!zipPath.startsWith("sessions/") ||
+		!zipPath.endsWith(".zip") ||
+		typeof fileName !== "string" ||
+		!fileName ||
+		/[\/\\\0\n]/.test(fileName)
+	) {
+		throw new Error("INVALID_TRANSCRIPT_ARCHIVE_PATH");
+	}
+
+	const resource = `${zipPath}\n${fileName}`;
+	const { expiresAt, signature } = await createRssMediaToken({
+		route: "transcript",
+		resource,
+	});
+	const params = new URLSearchParams({
+		p: encodePath(zipPath),
+		f: encodePath(fileName),
+		exp: String(expiresAt),
+		sig: signature,
+	});
+	return `${baseUrl}/api/rss/transcription?${params}`;
+}
+
 export const RSS_MEDIA_TOKEN_TTL_SECONDS = TOKEN_TTL_SECONDS;

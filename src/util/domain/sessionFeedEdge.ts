@@ -1,5 +1,8 @@
 import { logger as structuredLogger } from "@util/api/logger";
-import { createRssMediaUrl } from "@util/api/rssMediaToken";
+import {
+	createRssMediaUrl,
+	createRssTranscriptArchiveUrl,
+} from "@util/api/rssMediaToken";
 /**
  * Edge-compatible session feed utilities.
  * Mirrors the API of sessionFeed.js but uses only Web Platform APIs:
@@ -94,11 +97,6 @@ function getStandaloneTranscriptPath(session: any) {
 		return `${folder}/${transcriptName}`;
 	}
 	return `wasabi/${session.group}/${session.year}/${transcriptName}`;
-}
-
-function getAwsTranscriptPath(session: any) {
-	if (!session.group || !session.year || !session.id) return null;
-	return `sessions/${session.group}/${session.year}/${session.id}.txt`;
 }
 
 // ---------------------------------------------------------------------------
@@ -199,11 +197,28 @@ export async function getTranscriptProxyUrlFast(session: any, baseUrl: any) {
 		return getSProxyUrl(normalizeProxyPath(explicit), baseUrl);
 	}
 
-	// Fall back to the well-known AWS path only when there is evidence a
-	// transcript actually exists (transcription flag, summary, etc.)
-	if (session.transcription || session.summaryText || session.summary) {
-		const awsPath = getAwsTranscriptPath(session);
-		if (awsPath) return getSProxyUrl(awsPath, baseUrl);
+	// Transcription metadata can come from a year-level ZIP even when there is
+	// no standalone .txt object under the session directory.
+	if (session.transcription) {
+		const group = session.group;
+		const year = String(session.year || "");
+		const id = session.id;
+		const zipPath =
+			typeof group === "string" &&
+			/^[^./\\][^/\\]*$/.test(group) &&
+			!group.includes("..") &&
+			/^\d{4}$/.test(year)
+				? `sessions/${group}/${year}.zip`
+				: null;
+		const fileName =
+			typeof id === "string" &&
+			id.length > 0 &&
+			!/[\/\\\0\n]/.test(id)
+				? `${id}.txt`
+				: null;
+		if (zipPath && fileName) {
+			return createRssTranscriptArchiveUrl({ baseUrl, zipPath, fileName });
+		}
 	}
 
 	return null;
