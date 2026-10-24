@@ -48,6 +48,12 @@ async function sha256Hex(data: any) {
 		.join("");
 }
 
+function awsUriEncode(value: any) {
+	return encodeURIComponent(value).replace(/[!'()*]/g, (character) =>
+		`%${character.charCodeAt(0).toString(16).toUpperCase()}`,
+	);
+}
+
 export async function createPresignedUrl({
 	endpoint,
 	region,
@@ -71,7 +77,7 @@ export async function createPresignedUrl({
 	// URI-encode path segments, preserving slashes
 	const canonicalUri = `/${bucket}/${key
 		.split("/")
-		.map((segment: any) => encodeURIComponent(segment).replace(/%7E/g, "~"))
+		.map((segment: any) => awsUriEncode(segment))
 		.join("/")}`;
 
 	const credentialScope = `${dateStamp}/${region}/s3/aws4_request`;
@@ -86,7 +92,7 @@ export async function createPresignedUrl({
 	const canonicalQueryString = Object.keys(queryParams)
 		.sort()
 		.map(
-			(k) => `${encodeURIComponent(k)}=${encodeURIComponent(queryParams[k])}`,
+			(k) => `${awsUriEncode(k)}=${awsUriEncode(queryParams[k])}`,
 		)
 		.join("&");
 
