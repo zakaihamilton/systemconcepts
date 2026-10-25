@@ -62,6 +62,9 @@ export async function buildSessionsJson({ sessions, baseUrl }: any) {
 			duration: session.duration ? Math.round(session.duration) : 0,
 			tags: session.tags || [],
 			summaryText: session.summaryText || session.summary || null,
+			audioUrl: session.audio?.path
+				? await getSProxyUrl(session.audio.path, baseUrl)
+				: null,
 			imageUrl:
 				session.image && session.image.path
 					? await getSProxyUrl(session.image.path, baseUrl)
