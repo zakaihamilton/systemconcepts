@@ -1,6 +1,6 @@
 {
 	"schemaVersion": 1,
-	"generatedAt": "2026-10-15T03:06:44.000Z",
+	"generatedAt": "2026-10-25T04:38:27.120Z",
 	"entries": [
 		{
 			"fingerprint": "b002a1ae2ba0665924e15caf",
@@ -7837,6 +7837,51 @@
 			"scope": ".",
 			"file": "src/views/Tags/Library/Library.tsx",
 			"line": 43
+		},
+		{
+			"fingerprint": "19b62938a0dd23205dd9aa32",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-dependency",
+			"scope": ".",
+			"file": "package.json",
+			"line": 64
+		},
+		{
+			"fingerprint": "176a585e945a873066b58ad3",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-dependency",
+			"scope": ".",
+			"file": "package.json",
+			"line": 70
+		},
+		{
+			"fingerprint": "05e1a385b16d6f48cc352180",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-dependency",
+			"scope": ".",
+			"file": "package.json",
+			"line": 75
+		},
+		{
+			"fingerprint": "8722da156ad16f79ffaa59b1",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-dependency",
+			"scope": ".",
+			"file": "package.json",
+			"line": 96
+		},
+		{
+			"fingerprint": "27dc545fa2e389422d2d0294",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-export",
+			"scope": ".",
+			"file": "src/util/api/rssMediaToken.ts",
+			"line": 147
 		}
 	]
 }
