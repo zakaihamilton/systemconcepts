@@ -1,6 +1,6 @@
 {
 	"schemaVersion": 1,
-	"generatedAt": "2026-10-25T04:38:27.120Z",
+	"generatedAt": "2026-10-25T07:08:16.803Z",
 	"entries": [
 		{
 			"fingerprint": "b002a1ae2ba0665924e15caf",
@@ -2538,13 +2538,13 @@
 			"line": 22
 		},
 		{
-			"fingerprint": "ea41f84b88a4b29f91f6508d",
+			"fingerprint": "608d8c8b548b8ee83e98e71c",
 			"provider": "jscpd",
 			"category": "duplication",
 			"type": "duplication",
 			"scope": ".",
 			"file": "util/api/apiCacheKeys.ts",
-			"line": 40
+			"line": 38
 		},
 		{
 			"fingerprint": "0686dc5a6a9f1d96e9e60e47",
