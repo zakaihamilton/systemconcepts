@@ -5,13 +5,11 @@ const CACHE_EXTENSIONS: Record<string, string> = {
 	rss: "xml.gz",
 };
 
-// Bump this when the generated RSS document changes in a way that makes a
-// previously stored document unusable (for example, enclosure URL format).
+// Bump a content version when a generated API/feed document changes shape or
+// link behavior so cached payloads are regenerated.
 const CACHE_CONTENT_VERSIONS: Record<string, string> = {
-	// Force regeneration after the sessions serializer started awaiting its
-	// signed media URLs. Older cached responses contain serialized Promises
-	// (`{}`) instead of URL strings or null.
-	sessions: "media-url-v2",
+	// v2 fixed serialized media URL Promises; v3 adds audioUrl to each item.
+	sessions: "media-url-v3",
 	// Force regeneration after media capabilities became mandatory. Cached v3
 	// documents may still contain legacy unsigned enclosure URLs, which the
 	// media proxy correctly rejects.

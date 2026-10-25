@@ -598,6 +598,11 @@ else:
         "type": ["string", "null"],
         "description": "Detailed AI-generated summary of the session."
       },
+      "audioUrl": {
+        "type": ["string", "null"],
+        "format": "uri",
+        "description": "Temporary signed URL to the session audio; expires after 24 hours. Null when no audio asset is available."
+      },
       "imageUrl": {
         "type": ["string", "null"],
         "format": "uri",
@@ -618,6 +623,7 @@ else:
       "duration",
       "tags",
       "summaryText",
+      "audioUrl",
       "imageUrl",
       "transcriptionUrl"
     ]

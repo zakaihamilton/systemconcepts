@@ -32,6 +32,7 @@ describe("buildSessionsJson", () => {
 					date: "2026-06-01",
 					name: "The Good Servant",
 					duration: 3519.4,
+					audio: { path: "sessions/jeff/2026/session.m4a" },
 					image: { path: "sessions/jeff/2026/cover.jpg" },
 					transcription: true,
 				},
@@ -49,10 +50,15 @@ describe("buildSessionsJson", () => {
 				duration: 3519,
 				tags: [],
 				summaryText: null,
+				audioUrl: "https://cdn/sessions/jeff/2026/session.m4a",
 				imageUrl: "https://cdn/sessions/jeff/2026/cover.jpg",
 				transcriptionUrl: "https://cdn/transcript.txt",
 			},
 		]);
+		expect(getSProxyUrl).toHaveBeenCalledWith(
+			"sessions/jeff/2026/session.m4a",
+			"https://systemconcepts.app",
+		);
 		expect(getSProxyUrl).toHaveBeenCalledWith(
 			"sessions/jeff/2026/cover.jpg",
 			"https://systemconcepts.app",
@@ -63,7 +69,7 @@ describe("buildSessionsJson", () => {
 		);
 	});
 
-	it("serializes missing media URLs as null instead of empty objects", async () => {
+	it("returns a null audio URL when the session has no explicit audio asset", async () => {
 		const body = await buildSessionsJson({
 			sessions: [
 				{
@@ -72,13 +78,24 @@ describe("buildSessionsJson", () => {
 					year: "2026",
 					date: "2026-09-15",
 					name: "Groundhog Day",
+					video: { path: "sessions/jeff/2026/groundhog-day.mp4" },
+					resolutions: {
+						"1280x720": {
+							path: "sessions/jeff/2026/groundhog-day_1280x720.mp4",
+						},
+					},
 				},
 			],
 			baseUrl: "https://systemconcepts.app",
 		});
 
 		expect(JSON.parse(body)[0]).toEqual(
-			expect.objectContaining({ imageUrl: null, transcriptionUrl: null }),
+			expect.objectContaining({
+				audioUrl: null,
+				imageUrl: null,
+				transcriptionUrl: null,
+			}),
 		);
+		expect(getSProxyUrl).not.toHaveBeenCalled();
 	});
 });
