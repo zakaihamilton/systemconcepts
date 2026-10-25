@@ -57,7 +57,7 @@
 		"use-dark-mode": "^2.3.1",
 		"uuid": "^14.0.0",
 		"webpack": "^5.107.0",
-		"zod": "^4.4.3"
+		"zod": "^4.6.6"
 	},
 	"devDependencies": {
 		"@axe-core/playwright": "^4.13.0",
@@ -74,6 +74,7 @@
 		"@testing-library/user-event": "^14.6.1",
 		"@types/babel__core": "^7.20.5",
 		"@types/jest": "^30.0.0",
+		"@types/node": "^24.19.0",
 		"@types/react": "^19.2.17",
 		"@types/react-dom": "^19.2.3",
 		"@typescript-eslint/parser": "^8.71.0",
@@ -115,7 +116,7 @@
 		"sharp": "0.35.5"
 	},
 	"engines": {
-		"node": ">=24.0.0 <25"
+		"node": ">=24.22.1 <25"
 	},
 	"packageManager": "pnpm@10.33.0"
 }
