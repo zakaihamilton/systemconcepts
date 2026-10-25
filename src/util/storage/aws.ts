@@ -232,7 +232,7 @@ export async function downloadFile({
 		return;
 	}
 
-	await new Promise((resolve, reject) => {
+	await new Promise<void>((resolve, reject) => {
 		fileStream.on("finish", resolve);
 		fileStream.on("error", reject);
 		response.Body.on("error", reject);
