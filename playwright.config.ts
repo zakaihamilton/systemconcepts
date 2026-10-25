@@ -18,7 +18,7 @@ export default defineConfig({
 		trace: "retain-on-failure",
 	},
 	webServer: {
-		command: "yarn start -H 127.0.0.1 -p 3107",
+		command: "pnpm start -H 127.0.0.1 -p 3107",
 		url: "http://127.0.0.1:3107",
 		env: {
 			AWS_SECRET: "playwright-internal-secret",

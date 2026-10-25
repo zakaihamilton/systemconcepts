@@ -74,6 +74,7 @@
 		"@testing-library/user-event": "^14.6.1",
 		"@types/babel__core": "^7.20.5",
 		"@types/jest": "^30.0.0",
+		"@types/node": "^24.19.0",
 		"@types/react": "^19.2.17",
 		"@types/react-dom": "^19.2.3",
 		"@typescript-eslint/parser": "^8.71.0",
