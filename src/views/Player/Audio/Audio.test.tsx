@@ -99,7 +99,7 @@ describe("Audio Component", () => {
 				onLoadError={onLoadError}
 			/>,
 		);
-		const video = container.querySelector("video");
+		const video = container.querySelector("audio");
 
 		fireEvent.error(video);
 		// Simulate a renewed signed URL arriving between attempts.
@@ -152,7 +152,7 @@ describe("Audio Component", () => {
 				renewUrl={renewUrl}
 			/>,
 		);
-		const video = container.querySelector("video");
+		const video = container.querySelector("audio");
 
 		fireEvent.error(video);
 		fireEvent.error(video);
@@ -173,7 +173,7 @@ describe("Audio Component", () => {
 				renewUrl={renewUrl}
 			/>,
 		);
-		const video = container.querySelector("video");
+		const video = container.querySelector("audio");
 
 		fireEvent.error(video);
 		fireEvent.loadedMetadata(video);
@@ -197,7 +197,7 @@ describe("Audio Component", () => {
 				renewing={false}
 			/>,
 		);
-		const video = container.querySelector("video");
+		const video = container.querySelector("audio");
 		Object.defineProperty(video, "duration", {
 			configurable: true,
 			value: 125,
@@ -261,7 +261,7 @@ describe("Audio Component", () => {
 				path="https://media.example/test.m4a"
 			/>,
 		);
-		const video = container.querySelector("video");
+		const video = container.querySelector("audio");
 		Object.defineProperty(video, "duration", {
 			configurable: true,
 			value: 125,
@@ -275,10 +275,15 @@ describe("Audio Component", () => {
 	});
 
 	it("enables the first text track when children are provided", () => {
-		const track = { mode: "disabled" };
+		const track = {
+			mode: "disabled",
+			activeCues: [],
+			addEventListener: jest.fn(),
+			removeEventListener: jest.fn(),
+		};
 		const textTracks = [track] as unknown as TextTrackList;
 		jest
-			.spyOn(HTMLVideoElement.prototype, "textTracks", "get")
+			.spyOn(HTMLMediaElement.prototype, "textTracks", "get")
 			.mockReturnValue(textTracks);
 
 		render(
@@ -287,7 +292,41 @@ describe("Audio Component", () => {
 			</Audio>,
 		);
 
-		expect(track.mode).toBe("showing");
+		expect(track.mode).toBe("hidden");
+		jest.restoreAllMocks();
+	});
+
+	it("renders active subtitle cues and clears them when the track is removed", () => {
+		const track = new EventTarget() as EventTarget & {
+			mode: string;
+			activeCues: unknown[];
+		};
+		track.mode = "disabled";
+		track.activeCues = [];
+		const tracks = [track];
+		const spy = jest
+			.spyOn(HTMLMediaElement.prototype, "textTracks", "get")
+			.mockReturnValue(tracks as unknown as TextTrackList);
+		const { getByText, queryByText, rerender } = render(
+			<Audio show name="Test" group="test">
+				<track kind="subtitles" />
+			</Audio>,
+		);
+		track.activeCues = [
+			{
+				getCueAsHTML: () => {
+					const fragment = document.createDocumentFragment();
+					fragment.append("A subtitle");
+					return fragment;
+				},
+			},
+		];
+		act(() => track.dispatchEvent(new Event("cuechange")));
+		expect(getByText("A subtitle")).toBeInTheDocument();
+		tracks.splice(0);
+		rerender(<Audio show name="Test" group="test" />);
+		expect(queryByText("A subtitle")).not.toBeInTheDocument();
+		spy.mockRestore();
 	});
 
 	it("logs when date formatting fails", () => {
@@ -312,7 +351,7 @@ describe("Audio Component", () => {
 		);
 	});
 
-	it("uses short month formatting on mobile and hides video for transcripts", () => {
+	it("uses short month formatting on mobile for transcripts", () => {
 		asMock(useDeviceType).mockReturnValue("mobile");
 		const { container } = render(
 			<Audio
@@ -329,7 +368,7 @@ describe("Audio Component", () => {
 		expect(useDateFormatter).toHaveBeenCalledWith(
 			expect.objectContaining({ month: "short" }),
 		);
-		expect(container.querySelector(".hidden")).toBeTruthy();
+		expect(container.querySelector("audio")).toBeTruthy();
 		expect(container.querySelector('[data-testid="extra"]')).toBeTruthy();
 	});
 });
