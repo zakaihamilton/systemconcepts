@@ -34,6 +34,7 @@ export default function Audio({
 	const ref = useRef<any>(null);
 	const [playerRef, setPlayerRef] = useState<any>(null);
 	const [duration, setDuration] = useState(0);
+	const [captions, setCaptions] = useState<string[]>([]);
 	const [loadedPath, setLoadedPath] = useState<any>(null);
 	const { recovering, onError, clearRecovery } = useMediaUrlRenewal({
 		path,
@@ -97,12 +98,25 @@ export default function Audio({
 	}, [playerRef, path]);
 
 	useEffect(() => {
-		if (ref.current) {
-			const tracks = ref.current.textTracks;
-			if (tracks && tracks[0]) {
-				tracks[0].mode = "showing";
-			}
-		}
+		const tracks: TextTrackList | undefined = ref.current?.textTracks;
+		const track = tracks?.[0];
+		setCaptions([]);
+		if (!track) return;
+
+		// Audio elements do not provide a visual surface for native captions.
+		track.mode = "hidden";
+		const updateCaptions = () => {
+			setCaptions(
+				Array.from(track.activeCues || [], (cue) =>
+					"getCueAsHTML" in cue
+						? (cue as VTTCue).getCueAsHTML().textContent || ""
+						: "",
+				).filter(Boolean),
+			);
+		};
+		track.addEventListener("cuechange", updateCaptions);
+		updateCaptions();
+		return () => track.removeEventListener("cuechange", updateCaptions);
 	}, [children]);
 
 	const dateFormatter = useDateFormatter({
@@ -148,17 +162,22 @@ export default function Audio({
 				</div>
 			</div>
 			{elements}
-			<video
+			<audio
 				ref={ref}
-				className={clsx(styles.video, isTranscript && styles.hidden)}
 				{...rest}
-				playsInline
 				onError={onError}
 				onLoadedMetadata={clearRecovery}
 				onPlaying={clearRecovery}
 			>
 				{children}
-			</video>
+			</audio>
+			{!isTranscript && captions.length > 0 && (
+				<div className={styles.captions} aria-live="off">
+					{captions.map((caption, index) => (
+						<div key={`${index}-${caption}`}>{caption}</div>
+					))}
+				</div>
+			)}
 			{playerRef && (
 				<Controls
 					playerRef={playerRef}
