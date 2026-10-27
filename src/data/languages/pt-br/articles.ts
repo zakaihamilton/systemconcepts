@@ -272,6 +272,32 @@ export default [
 		value: "Nunca",
 	},
 	{
+		id: "UPDATE_LOG",
+		value: "Log de atualização",
+	},
+	{
+		id: "UPDATE_LOG_EMPTY",
+		value: "Nenhum registro de atualização foi gerado ainda.",
+	},
+	{
+		id: "UPDATE_LOG_LIMIT",
+		value: "Apenas os 300 registros mais recentes são mantidos.",
+	},
+	{
+		id: "UPDATE_LOG_VERBOSE_ON",
+		value:
+			"O registro detalhado está ativado; registros detalhados anteriores podem estar ausentes.",
+	},
+	{
+		id: "UPDATE_LOG_VERBOSE_OFF",
+		value:
+			"Registros detalhados são excluídos quando o registro detalhado está desativado.",
+	},
+	{
+		id: "LOG_COPY_FAILED",
+		value: "Não foi possível copiar o log.",
+	},
+	{
 		id: "COPY_LOG",
 		value: "Copiar Log",
 	},

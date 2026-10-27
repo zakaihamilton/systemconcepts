@@ -7,22 +7,31 @@ import Chip from "@ui/Chip";
 import LinearProgress from "@ui/LinearProgress";
 import { useTranslations } from "@util/domain/translations";
 import clsx from "clsx";
+import { useLayoutEffect, useRef } from "react";
 import styles from "./ProgressDialog.module.css";
 
 export default function SyncLogPanel({
 	syncing,
 	syncProgress,
 	syncLogs,
-	syncLogCopied,
+	copyStatus,
+	logNotice,
 	onCopy,
 }: {
 	syncing: boolean;
 	syncProgress?: { processed: number; total: number };
 	syncLogs: { message: string; type: string }[];
-	syncLogCopied: boolean;
+	copyStatus: "idle" | "copied" | "error";
+	logNotice: string;
 	onCopy: () => void;
 }) {
 	const translations = useTranslations();
+	const logRef = useRef<HTMLDivElement>(null);
+	const followLog = useRef(true);
+	useLayoutEffect(() => {
+		const el = logRef.current;
+		if (el && followLog.current) el.scrollTop = el.scrollHeight;
+	}, [syncLogs, syncing]);
 	return (
 		<div className={styles.syncTabContent}>
 			{syncing || (syncLogs && syncLogs.length > 0) ? (
@@ -30,20 +39,20 @@ export default function SyncLogPanel({
 					<div className={styles.syncHeader}>
 						<UploadIcon className={styles.titleIcon} />
 						<span style={{ flex: 1 }}>
-							{translations.CLOUD_SYNC || "Cloud Sync"}
+							{translations.UPDATE_LOG || "Update log"}
 						</span>
 						{syncLogs?.length > 0 && (
 							<IconButton
 								onClick={onCopy}
 								className={styles.copySyncLogButton}
 								title={
-									syncLogCopied
+									copyStatus === "copied"
 										? translations.LOG_COPIED || "Copied"
 										: translations.COPY_LOG || "Copy log"
 								}
 								aria-label={translations.COPY_LOG || "Copy log"}
 							>
-								{syncLogCopied ? (
+								{copyStatus === "copied" ? (
 									<CheckIcon fontSize="small" />
 								) : (
 									<ContentCopyIcon fontSize="small" />
@@ -59,7 +68,15 @@ export default function SyncLogPanel({
 							/>
 						)}
 					</div>
+					<div role="status" className={styles.copyStatus}>
+						{copyStatus === "copied"
+							? translations.LOG_COPIED || "Log copied"
+							: copyStatus === "error"
+								? translations.LOG_COPY_FAILED || "Could not copy log"
+								: ""}
+					</div>
 					<div className={styles.syncContent}>
+						<p className={styles.logNotice}>{logNotice}</p>
 						<div className={styles.syncProgress}>
 							{syncing && syncProgress && (
 								<>
@@ -82,8 +99,11 @@ export default function SyncLogPanel({
 
 						<div
 							className={styles.syncLogs}
-							ref={(el) => {
-								if (el) el.scrollTop = el.scrollHeight;
+							ref={logRef}
+							onScroll={(event) => {
+								const el = event.currentTarget;
+								followLog.current =
+									el.scrollHeight - el.scrollTop - el.clientHeight < 32;
 							}}
 						>
 							{(syncLogs || []).map((log, idx) => (
@@ -100,7 +120,9 @@ export default function SyncLogPanel({
 			) : (
 				<div className={styles.empty}>
 					<InfoIcon className={styles.emptyIcon} />
-					<div>No Cloud Sync logs generated yet.</div>
+					<div>
+						{translations.UPDATE_LOG_EMPTY || "No update logs generated yet."}
+					</div>
 				</div>
 			)}
 		</div>

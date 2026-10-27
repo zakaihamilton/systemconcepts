@@ -272,6 +272,30 @@ export default [
 		value: "אף פעם",
 	},
 	{
+		id: "UPDATE_LOG",
+		value: "יומן עדכון",
+	},
+	{
+		id: "UPDATE_LOG_EMPTY",
+		value: "עדיין לא נוצרו רשומות ביומן העדכון.",
+	},
+	{
+		id: "UPDATE_LOG_LIMIT",
+		value: "נשמרות רק 300 הרשומות האחרונות.",
+	},
+	{
+		id: "UPDATE_LOG_VERBOSE_ON",
+		value: "רישום מפורט מופעל; רשומות מפורטות קודמות עשויות להיות חסרות.",
+	},
+	{
+		id: "UPDATE_LOG_VERBOSE_OFF",
+		value: "רשומות מפורטות אינן נכללות אלא אם הרישום המפורט מופעל.",
+	},
+	{
+		id: "LOG_COPY_FAILED",
+		value: "לא ניתן להעתיק את היומן.",
+	},
+	{
 		id: "COPY_LOG",
 		value: "העתק יומן",
 	},
