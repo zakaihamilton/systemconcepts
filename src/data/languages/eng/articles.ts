@@ -244,6 +244,31 @@ export default [
 		value: "Never",
 	},
 	{
+		id: "UPDATE_LOG",
+		value: "Update log",
+	},
+	{
+		id: "UPDATE_LOG_EMPTY",
+		value: "No update logs generated yet.",
+	},
+	{
+		id: "UPDATE_LOG_LIMIT",
+		value: "Only the latest 300 entries are retained.",
+	},
+	{
+		id: "UPDATE_LOG_VERBOSE_ON",
+		value:
+			"Verbose logging is enabled; earlier verbose entries may be missing.",
+	},
+	{
+		id: "UPDATE_LOG_VERBOSE_OFF",
+		value: "Verbose entries are excluded unless verbose logging is enabled.",
+	},
+	{
+		id: "LOG_COPY_FAILED",
+		value: "Could not copy log.",
+	},
+	{
 		id: "COPY_LOG",
 		value: "Copy Log",
 	},

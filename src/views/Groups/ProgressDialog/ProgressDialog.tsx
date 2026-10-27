@@ -9,7 +9,7 @@ import { SyncActiveStore, UpdateSessionsStore } from "@sync/syncState";
 import { IconButton } from "@ui";
 import Tab from "@ui/Tab";
 import { logger as structuredLogger } from "@util/api/logger";
-import { copyToClipboard, formatDuration } from "@util/data/string";
+import { formatDuration } from "@util/data/string";
 import { SessionsStore, useSessions } from "@util/domain/sessions";
 import { useTranslations } from "@util/domain/translations";
 import { useUpdateSessions } from "@util/domain/updateSessions";
@@ -29,6 +29,7 @@ export default function ProgressDialog() {
 		busy: syncing,
 		progress: syncProgress,
 		logs: syncLogs,
+		debugLevel,
 		needsSessionReload,
 	} = SyncActiveStore.useState();
 
@@ -49,7 +50,9 @@ export default function ProgressDialog() {
 	const [activeTab, setActiveTab] = useState("updates");
 	const [activeSyncingSessionId, setActiveSyncingSessionId] =
 		useState<any>(null);
-	const [syncLogCopied, setSyncLogCopied] = useState(false);
+	const [copyStatus, setCopyStatus] = useState<"idle" | "copied" | "error">(
+		"idle",
+	);
 
 	const last50 = useMemo(() => {
 		return [...(allSessions || [])]
@@ -170,11 +173,20 @@ export default function ProgressDialog() {
 		setExpandedItems(newSet);
 	};
 
-	const handleCopySyncLog = () => {
-		const logText = (syncLogs || []).map((log) => log.message).join("\n");
-		if (!logText || !copyToClipboard(logText)) return;
-		setSyncLogCopied(true);
-		setTimeout(() => setSyncLogCopied(false), 1500);
+	const logNotice = `${translations.UPDATE_LOG_LIMIT || "Only the latest 300 entries are retained."} ${debugLevel === "verbose" ? translations.UPDATE_LOG_VERBOSE_ON || "Verbose logging is enabled; earlier verbose entries may be missing." : translations.UPDATE_LOG_VERBOSE_OFF || "Verbose entries are excluded unless verbose logging is enabled."}`;
+
+	const handleCopySyncLog = async () => {
+		setCopyStatus("idle");
+		const logText = [
+			logNotice,
+			...(syncLogs || []).map((log) => log.message),
+		].join("\n");
+		try {
+			await navigator.clipboard.writeText(logText);
+			setCopyStatus("copied");
+		} catch {
+			setCopyStatus("error");
+		}
 	};
 
 	return (
@@ -276,7 +288,8 @@ export default function ProgressDialog() {
 							syncing={syncing}
 							syncProgress={syncProgress}
 							syncLogs={syncLogs}
-							syncLogCopied={syncLogCopied}
+							copyStatus={copyStatus}
+							logNotice={logNotice}
 							onCopy={handleCopySyncLog}
 						/>
 					)}

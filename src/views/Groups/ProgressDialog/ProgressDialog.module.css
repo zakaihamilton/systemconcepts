@@ -680,10 +680,15 @@
 }
 
 .logEntry {
+	color: #e2e8f0;
 	padding: 0.25rem 0.5rem;
 	border-radius: 4px;
 	word-break: break-all;
 	line-height: 1.4;
+}
+
+.logEntry.verbose {
+	color: #b8c3d1;
 }
 
 .logEntry.info {
@@ -731,4 +736,14 @@
 
 .inlineErrorIcon {
 	font-size: 1rem !important;
+}
+
+.logNotice,
+.copyStatus {
+	color: var(--text-color);
+	font-size: 0.85rem;
+}
+
+.logNotice {
+	margin: 0;
 }
