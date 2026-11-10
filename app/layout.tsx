@@ -1,6 +1,7 @@
 import "../src/css/app.css";
 import Script from "next/script";
 import ServiceWorker from "../src/components/ServiceWorker";
+import { VisitoringProvider } from "visitoring";
 
 export const metadata = {
 	title: "System Concepts",
@@ -49,7 +50,9 @@ export default function RootLayout({ children }: any) {
 					<div className="app-splash__loader" aria-label="Loading" />
 				</div>
 				<ServiceWorker />
-				{children}
+				<VisitoringProvider siteKey="vk_0i-y9JgMRD5f3w8RRbm2orQeVX3ttGLA">
+					{children}
+				</VisitoringProvider>
 			</body>
 		</html>
 	);

@@ -94,6 +94,9 @@ importers:
       uuid:
         specifier: ^14.0.0
         version: 14.0.0
+      visitoring:
+        specifier: ^0.1.0
+        version: 0.1.0(react@19.2.6)
       webpack:
         specifier: ^5.107.0
         version: 5.107.0
@@ -5404,6 +5407,11 @@ packages:
 
   vfile@6.0.3:
     resolution: {integrity: sha512-KzIbH/9tXat2u30jf+smMwFCsno4wHVdNmzFyL+T/L3UGqqk6JKfVqOFOZEpZSHADH1k40ab6NUIXZq422ov3Q==}
+
+  visitoring@0.1.0:
+    resolution: {integrity: sha512-AzaFrOphyYmZmpuOS4n2YGUUDhXVQ2Z5eUSVvX+3I10v0sObipEA/FDuFLrtG9i85iGVh5J3m/pO27lE3XiS9Q==}
+    peerDependencies:
+      react: '>=18.0.0 <20'
 
   w3c-xmlserializer@5.0.0:
     resolution: {integrity: sha512-o8qghlI8NZHU1lLPrpi2+Uq7abh4GGPpYANlalzWxyWteJOCsr/P+oPBA49TOLu5FTZO4d3F9MnWJfiMo4BkmA==}
@@ -11731,6 +11739,10 @@ snapshots:
     dependencies:
       '@types/unist': 3.0.3
       vfile-message: 4.0.3
+
+  visitoring@0.1.0(react@19.2.6):
+    dependencies:
+      react: 19.2.6
 
   w3c-xmlserializer@5.0.0:
     dependencies:
