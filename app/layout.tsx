@@ -1,6 +1,7 @@
 import "../src/css/app.css";
 import Script from "next/script";
 import ServiceWorker from "../src/components/ServiceWorker";
+import VisitoringRouteTracker from "../src/components/App/VisitoringRouteTracker";
 import { VisitoringProvider } from "visitoring";
 
 export const metadata = {
@@ -51,6 +52,7 @@ export default function RootLayout({ children }: any) {
 				</div>
 				<ServiceWorker />
 				<VisitoringProvider siteKey="vk_0i-y9JgMRD5f3w8RRbm2orQeVX3ttGLA">
+					<VisitoringRouteTracker />
 					{children}
 				</VisitoringProvider>
 			</body>

@@ -133,12 +133,14 @@ export async function list({ path }: any) {
 	do {
 		if (continuationToken) {
 			if (seenTokens.has(continuationToken)) {
-				break;
+				throw new Error("Wasabi listing repeated a continuation token");
 			}
 			seenTokens.add(continuationToken);
 		}
 		if (++pages > MAX_LIST_PAGES) {
-			break;
+			throw new Error(
+				`Wasabi listing exceeded the ${MAX_LIST_PAGES}-page limit`,
+			);
 		}
 		const listParams: import("@aws-sdk/client-s3").ListObjectsV2CommandInput = {
 			Bucket: bucket,

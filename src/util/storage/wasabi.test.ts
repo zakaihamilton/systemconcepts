@@ -246,15 +246,17 @@ describe("list", () => {
 		expect(items).toEqual([]);
 	});
 
-	it("stops when a continuation token repeats", async () => {
+	it("fails when a continuation token repeats instead of returning a partial listing", async () => {
 		asMock(sendMock).mockResolvedValue({
 			Contents: [{ Key: "a.txt", Size: 1 }],
 			NextContinuationToken: "same-token",
 		});
 
-		await list({ path: "root" });
+		await expect(list({ path: "root" })).rejects.toThrow(
+			"Wasabi listing repeated a continuation token",
+		);
 
-		// First page (no token) + second page (token once). Third would repeat.
+		// The listing must not be treated as complete after a repeated token.
 		expect(sendMock).toHaveBeenCalledTimes(2);
 	});
 });

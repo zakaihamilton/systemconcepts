@@ -213,6 +213,9 @@ describe("useUpdateSessions", () => {
 			true,
 			false,
 			false,
+			null,
+			null,
+			true,
 		);
 	});
 

@@ -40,14 +40,20 @@ async function settleLocalFs(ms = FS_SETTLE_MS) {
 	await new Promise((resolve) => setTimeout(resolve, wait));
 }
 
-export async function getListing(path: any) {
+export async function getListing(
+	path: any,
+	{ strict = false }: { strict?: boolean } = {},
+) {
 	structuredLogger.debug(`[getListing] Requesting listing for: ${path}`);
-	let listing = await storage.getListing(path);
+	const listing = await storage.getListing(path);
 	structuredLogger.debug(
 		`[getListing] Received listing with ${listing?.length || 0} items for: ${path}`,
 	);
-	if (!listing) {
+	if (!Array.isArray(listing)) {
 		structuredLogger.warn(`[getListing] No listing returned for: ${path}`);
+		if (strict) {
+			throw new Error(`Could not get a complete listing for ${path}`);
+		}
 		return [];
 	}
 	return listing;
@@ -223,7 +229,12 @@ export async function updateYearSync(
 	sessions: any,
 	previousSessions = null,
 ) {
-	if (!sessions || sessions.length === 0) {
+	// An empty year is meaningful when S3 no longer contains any sessions:
+	// persist it so the previous index entry is cleared on the next sync.
+	if (
+		!Array.isArray(sessions) ||
+		(sessions.length === 0 && !previousSessions?.length)
+	) {
 		return { ...EMPTY_YEAR_SYNC_RESULT };
 	}
 	const localPath = makePath(LOCAL_SYNC_PATH, groupName, `${year}.json`);
@@ -299,7 +310,10 @@ export async function updateYearSync(
 	}
 }
 
-export async function updateBundleFile(newSessions: any) {
+export async function updateBundleFile(
+	newSessions: any,
+	groupsToReplace: string[] = [],
+) {
 	const bundlePath = makePath(LOCAL_SYNC_PATH, "bundle.json");
 	let unlock = null;
 	try {
@@ -326,8 +340,17 @@ export async function updateBundleFile(newSessions: any) {
 			throw err;
 		}
 
-		const updatedGroups = new Set(newSessions.map((s: any) => s.group));
-		allSessions = allSessions.filter((s: any) => !updatedGroups.has(s.group));
+		const updatedGroups = new Set([
+			...groupsToReplace,
+			...newSessions.map((s: any) => s.group).filter(Boolean),
+		]);
+		const retainedSessions = allSessions.filter(
+			(s: any) => !updatedGroups.has(s.group),
+		);
+		if (retainedSessions.length === allSessions.length && newSessions.length === 0) {
+			return;
+		}
+		allSessions = retainedSessions;
 		allSessions.push(...newSessions.map(slimSessionForPersist));
 
 		const bundleData = {

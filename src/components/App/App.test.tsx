@@ -11,9 +11,6 @@ jest.mock("@vercel/speed-insights/next", () => ({
 		<div data-testid="speed-insights" data-sample-rate={sampleRate} />
 	),
 }));
-jest.mock("@vercel/analytics/react", () => ({
-	Analytics: () => <div data-testid="analytics" />,
-}));
 jest.mock("@ui", () => ({
 	NoSsr: ({ children }: any) => <div data-testid="no-ssr">{children}</div>,
 }));

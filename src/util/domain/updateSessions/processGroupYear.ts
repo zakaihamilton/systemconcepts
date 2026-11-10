@@ -23,13 +23,34 @@ import {
 	getCachedSessionsForYear,
 	getMetadataFingerprint,
 	getSessionDate,
+	getSessionYear,
 	getYearMetadata,
 	loadCachedYearSessions,
-	mergeSessionsById,
 	readYearCache,
 	writeYearCache,
 } from "./updateGroupYearMetadata";
 import { getListing, updateYearSync, yieldToMain } from "./utils";
+
+function mergeRecentSessions(
+	cachedSessions: any[],
+	refreshedSessions: any[],
+	recentCutoff: string,
+) {
+	const sessionsById = new Map<any, any>();
+	for (const session of cachedSessions || []) {
+		const id = session.id || session.name;
+		const sessionDate = getSessionDate(id);
+		if (!sessionDate || sessionDate < recentCutoff) {
+			sessionsById.set(id, session);
+		}
+	}
+	for (const session of refreshedSessions || []) {
+		sessionsById.set(session.id || session.name, session);
+	}
+	return Array.from(sessionsById.values()).sort((a, b) =>
+		(a.id || a.name).localeCompare(b.id || b.name),
+	);
+}
 
 export async function processGroupYear({
 	name,
@@ -55,7 +76,7 @@ export async function processGroupYear({
 		structuredLogger.debug(
 			`[UpdateGroup] Fetching items for year: ${year.name}, path: ${year.path}`,
 		);
-		const yearItems = await getListing(year.path);
+		const yearItems = await getListing(year.path, { strict: true });
 		structuredLogger.debug(
 			`[UpdateGroup] Year ${year.name} has ${yearItems?.length || 0} items`,
 		);
@@ -384,15 +405,18 @@ export async function processGroupYear({
 			)
 		).filter(Boolean);
 
-		const sessionsToPersist =
-			shouldRefreshOnlyRecentSessions || shouldRefreshIncrementally
-				? shouldRefreshIncrementally
-					? mergeListingSessions(
-							listingSessionIds,
-							cachedYearSessions,
-							yearSessions,
-						)
-					: mergeSessionsById(cachedYearSessions, yearSessions)
+		const sessionsToPersist = shouldRefreshIncrementally
+			? mergeListingSessions(
+					listingSessionIds,
+					cachedYearSessions,
+					yearSessions,
+				)
+			: shouldRefreshOnlyRecentSessions
+				? mergeRecentSessions(
+						cachedYearSessions,
+						yearSessions,
+						recentCutoff!,
+					)
 				: yearSessions;
 
 		// Persist can take a long time for large years; surface it so the UI
@@ -408,8 +432,14 @@ export async function processGroupYear({
 		);
 
 		if (isMerged || isBundled) {
-			// Always persist the full year view: fill-missing / recent
-			// refreshes only process a subset, so push the merged result.
+			// Replace this year's cached view with the current listing result.
+			// This preserves unprocessed years while allowing sessions removed
+			// from S3 to disappear from merged and bundled group indexes.
+			for (let index = allSessions.length - 1; index >= 0; index--) {
+				if (getSessionYear(allSessions[index]) === String(year.name)) {
+					allSessions.splice(index, 1);
+				}
+			}
 			allSessions.push(...sessionsToPersist);
 		} else {
 			const { counter, newCount, newSessions } = await updateYearSync(

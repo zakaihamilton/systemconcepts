@@ -1,11 +1,31 @@
 import { addSyncLog } from "@sync/logs";
-import { UpdateSessionsStore } from "@sync/syncState";
+import { SyncActiveStore, UpdateSessionsStore } from "@sync/syncState";
 import { logger as structuredLogger } from "@util/api/logger";
 import pLimit from "@util/data/p-limit";
 import { makePath } from "@util/data/path";
 import { useCallback, useMemo } from "react";
 import { updateGroupProcess } from "./updateGroup";
 import { getListing, updateBundleFile } from "./utils";
+
+async function persistBundledUpdates(tasks: any[], results: any[]) {
+	const updates = tasks.flatMap((task, index) => {
+		const sessions = results[index];
+		return task.isBundled && Array.isArray(sessions)
+			? [{ groupName: task.name, sessions }]
+			: [];
+	});
+	if (updates.length === 0) return;
+
+	const sessions = updates.flatMap((update: any) => update.sessions);
+	if (updates.some((update: any) => update.sessions.length === 0)) {
+		await updateBundleFile(
+			sessions,
+			updates.map((update: any) => update.groupName),
+		);
+	} else {
+		await updateBundleFile(sessions);
+	}
+}
 
 async function runUpdateSessions(label: any, work: any) {
 	UpdateSessionsStore.update((s) => {
@@ -15,6 +35,9 @@ async function runUpdateSessions(label: any, work: any) {
 	addSyncLog(`Update Sessions started (${label}).`, "info");
 	try {
 		const result = await work();
+		SyncActiveStore.update((s) => {
+			s.needsSessionReload = true;
+		});
 		addSyncLog(`Update Sessions finished (${label}).`, "success");
 		return result;
 	} catch (err: any) {
@@ -47,6 +70,7 @@ export function useUpdateSessions(groups: any) {
 					return;
 				}
 				const limit = pLimit(4);
+				const tasks: any[] = [];
 				const promises = items
 					.map((item: any) => {
 						const groupInfo = groups.find(
@@ -61,6 +85,7 @@ export function useUpdateSessions(groups: any) {
 						if (!includeDisabled && isDisabled) {
 							return null;
 						}
+						tasks.push({ name: item.name, isBundled });
 						return limit(() =>
 							updateGroupProcess(item.name, false, false, isMerged, isBundled),
 						);
@@ -71,12 +96,7 @@ export function useUpdateSessions(groups: any) {
 					"info",
 				);
 				const results = await Promise.all(promises);
-				const bundledSessions = results
-					.filter((r: any) => r && Array.isArray(r))
-					.flat();
-				if (bundledSessions.length > 0) {
-					await updateBundleFile(bundledSessions);
-				}
+				await persistBundledUpdates(tasks, results);
 				return results;
 			}),
 		[groups, prefix],
@@ -95,6 +115,7 @@ export function useUpdateSessions(groups: any) {
 					return;
 				}
 				const limit = pLimit(4);
+				const tasks: any[] = [];
 				const promises = items
 					.map((item: any) => {
 						const groupInfo = groups.find(
@@ -109,8 +130,18 @@ export function useUpdateSessions(groups: any) {
 						if (!includeDisabled && isDisabled) {
 							return null;
 						}
+						tasks.push({ name: item.name, isBundled });
 						return limit(() =>
-							updateGroupProcess(item.name, true, true, isMerged, isBundled),
+							updateGroupProcess(
+								item.name,
+								true,
+								true,
+								isMerged,
+								isBundled,
+								null,
+								null,
+								true,
+							),
 						);
 					})
 					.filter(Boolean);
@@ -119,12 +150,7 @@ export function useUpdateSessions(groups: any) {
 					"info",
 				);
 				const results = await Promise.all(promises);
-				const bundledSessions = results
-					.filter((r: any) => r && Array.isArray(r))
-					.flat();
-				if (bundledSessions.length > 0) {
-					await updateBundleFile(bundledSessions);
-				}
+				await persistBundledUpdates(tasks, results);
 				return results;
 			}),
 		[groups, prefix],
@@ -143,6 +169,7 @@ export function useUpdateSessions(groups: any) {
 					return;
 				}
 				const limit = pLimit(4);
+				const tasks: any[] = [];
 				const promises = items
 					.map((item: any) => {
 						const groupInfo = groups.find(
@@ -157,6 +184,7 @@ export function useUpdateSessions(groups: any) {
 						if (!includeDisabled && isDisabled) {
 							return null;
 						}
+						tasks.push({ name: item.name, isBundled });
 						return limit(() =>
 							updateGroupProcess(item.name, false, true, isMerged, isBundled),
 						);
@@ -167,12 +195,7 @@ export function useUpdateSessions(groups: any) {
 					"info",
 				);
 				const results = await Promise.all(promises);
-				const bundledSessions = results
-					.filter((r: any) => r && Array.isArray(r))
-					.flat();
-				if (bundledSessions.length > 0) {
-					await updateBundleFile(bundledSessions);
-				}
+				await persistBundledUpdates(tasks, results);
 				return results;
 			}),
 		[groups, prefix],
@@ -190,6 +213,7 @@ export function useUpdateSessions(groups: any) {
 				if (!items) return;
 
 				const limit = pLimit(4);
+				const tasks: any[] = [];
 				const groupPromises = items
 					.map((item: any) => {
 						const groupInfo = groups.find(
@@ -198,6 +222,7 @@ export function useUpdateSessions(groups: any) {
 						if (!groupInfo || (!includeDisabled && groupInfo.disabled)) {
 							return null;
 						}
+						tasks.push({ name: item.name, isBundled: groupInfo.bundled });
 						return limit(() =>
 							updateGroupProcess(
 								item.name,
@@ -216,12 +241,7 @@ export function useUpdateSessions(groups: any) {
 					"info",
 				);
 				const results = await Promise.all(groupPromises);
-				const bundledSessions = results
-					.filter((result: any) => Array.isArray(result))
-					.flat();
-				if (bundledSessions.length > 0) {
-					await updateBundleFile(bundledSessions);
-				}
+				await persistBundledUpdates(tasks, results);
 				return results;
 			}),
 		[groups, prefix],
@@ -238,16 +258,32 @@ export function useUpdateSessions(groups: any) {
 				const groupInfo = groups.find((g: any) => g.name === name);
 				const isMerged = groupInfo?.merged ?? groupInfo?.disabled;
 				const isBundled = groupInfo?.bundled;
-				const result = await updateGroupProcess(
-					name,
-					updateAll,
-					forceUpdate,
-					isMerged,
-					isBundled,
-					targetSessionId,
-				);
-				if (isBundled && Array.isArray(result) && result.length > 0) {
-					await updateBundleFile(result);
+				const reconcileMissingYears = Boolean(updateAll && !targetSessionId);
+				const result = reconcileMissingYears
+					? await updateGroupProcess(
+							name,
+							updateAll,
+							forceUpdate,
+							isMerged,
+							isBundled,
+							targetSessionId,
+							null,
+							true,
+						)
+					: await updateGroupProcess(
+							name,
+							updateAll,
+							forceUpdate,
+							isMerged,
+							isBundled,
+							targetSessionId,
+						);
+				if (isBundled && Array.isArray(result)) {
+					if (result.length === 0) {
+						await updateBundleFile(result, [name]);
+					} else {
+						await updateBundleFile(result);
+					}
 				}
 				return result;
 			}),
