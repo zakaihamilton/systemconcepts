@@ -141,6 +141,7 @@ const nextConfig: NextConfig = {
 							"object-src 'none'",
 							[
 								"script-src 'self' 'unsafe-inline' https://va.vercel-scripts.com",
+								"https://visitoring.vercel.app",
 								isDev && "'unsafe-eval'",
 							]
 								.filter(Boolean)
@@ -153,6 +154,7 @@ const nextConfig: NextConfig = {
 								"connect-src 'self'",
 								...externalOrigins,
 								"https://va.vercel-scripts.com",
+								"https://visitoring.vercel.app",
 							].join(" "),
 							"worker-src 'self' blob:",
 							"manifest-src 'self'",

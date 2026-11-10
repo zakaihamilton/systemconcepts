@@ -56,6 +56,7 @@
 		"remark-breaks": "^4.0.0",
 		"use-dark-mode": "^2.3.1",
 		"uuid": "^14.0.0",
+		"visitoring": "^0.1.0",
 		"webpack": "^5.107.0",
 		"zod": "^4.6.6"
 	},
