@@ -1,12 +1,43 @@
 import { fetchJSON } from "@util/api/fetch";
 import { makePath } from "@util/data/path";
 
-export default function remoteStorage({ fsEndPoint, deviceId }: any) {
-	async function getListing(path: any, options: Record<string, any> = {}) {
+type RemoteStorageConfig = {
+	fsEndPoint: string;
+	deviceId: string;
+};
+
+type RemoteFileStat = {
+	type?: "file" | "dir";
+	size?: number;
+	mtimeMs?: number;
+};
+
+type RemoteFileRecord = {
+	id?: string;
+	name?: string;
+	folder?: string;
+	path?: string;
+	type?: "file" | "dir";
+	size?: number;
+	mtimeMs?: number;
+	stat?: RemoteFileStat;
+	deleted?: boolean;
+	body?: string;
+	count?: number;
+};
+
+export default function remoteStorage({
+	fsEndPoint,
+	deviceId,
+}: RemoteStorageConfig) {
+	async function getListing(
+		path: string,
+		options: { useCount?: boolean } = {},
+	): Promise<RemoteFileRecord[]> {
 		path = makePath(path);
 		const { useCount } = options;
-		const listing = [];
-		const items = await fetchJSON(fsEndPoint, {
+		const listing: RemoteFileRecord[] = [];
+		const items = (await fetchJSON(fsEndPoint, {
 			method: "GET",
 			headers: {
 				query: encodeURIComponent(JSON.stringify({ folder: path })),
@@ -14,7 +45,7 @@ export default function remoteStorage({ fsEndPoint, deviceId }: any) {
 					JSON.stringify({ folder: 1, name: 1, stat: 1, deleted: 1 }),
 				),
 			},
-		});
+		})) as RemoteFileRecord[];
 		for (const item of items) {
 			const { name, stat = {}, deleted } = item;
 			const itemPath = makePath(path, name);
@@ -22,7 +53,7 @@ export default function remoteStorage({ fsEndPoint, deviceId }: any) {
 				continue;
 			}
 			if (useCount && stat.type === "dir") {
-				const children = await fetchJSON(fsEndPoint, {
+				const children = (await fetchJSON(fsEndPoint, {
 					method: "GET",
 					headers: {
 						query: encodeURIComponent(JSON.stringify({ folder: itemPath })),
@@ -30,10 +61,10 @@ export default function remoteStorage({ fsEndPoint, deviceId }: any) {
 							JSON.stringify({ folder: 1, name: 1, stat: 1 }),
 						),
 					},
-				});
+				})) as RemoteFileRecord[];
 				let count = 0;
 				for (const item of children) {
-					if (item.stat.type === "dir") {
+					if (item.stat?.type === "dir") {
 						count++;
 					}
 				}
@@ -47,18 +78,18 @@ export default function remoteStorage({ fsEndPoint, deviceId }: any) {
 		return listing;
 	}
 
-	async function getRecursiveList(path: any) {
+	async function getRecursiveList(path: string): Promise<RemoteFileRecord[]> {
 		path = makePath(path);
 		if (!(await exists(path))) {
 			return [];
 		}
-		const listing = [];
+		const listing: RemoteFileRecord[] = [];
 
 		// Ensure trailing slash for directory prefix match to avoid partial matches
 		// e.g. "metadata/session" matching "metadata/sessions_old"
 		const prefix = path.endsWith("/") ? path : path + "/";
 
-		const items = await fetchJSON(fsEndPoint, {
+		const items = (await fetchJSON(fsEndPoint, {
 			method: "GET",
 			headers: {
 				prefix: encodeURIComponent(prefix),
@@ -66,12 +97,12 @@ export default function remoteStorage({ fsEndPoint, deviceId }: any) {
 					JSON.stringify({ folder: 1, name: 1, stat: 1, deleted: 1, id: 1 }),
 				),
 			},
-		});
+		})) as RemoteFileRecord[];
 
-		const validFolders = new Set([path]);
+		const validFolders = new Set<string>([path]);
 		for (const item of items) {
 			const { stat = {}, deleted, id } = item;
-			if (!deleted && stat.type === "dir") {
+			if (!deleted && stat.type === "dir" && id) {
 				validFolders.add(id);
 			}
 		}
@@ -81,7 +112,7 @@ export default function remoteStorage({ fsEndPoint, deviceId }: any) {
 			if (deleted) {
 				continue;
 			}
-			if (!validFolders.has(folder)) {
+			if (!folder || !validFolders.has(folder)) {
 				continue;
 			}
 			// item.id is the full path in mongo.
@@ -97,7 +128,7 @@ export default function remoteStorage({ fsEndPoint, deviceId }: any) {
 		return listing;
 	}
 
-	async function createFolder(path: any) {
+	async function createFolder(path: string) {
 		path = makePath(path);
 		if (!(await exists(path))) {
 			await fetchJSON(fsEndPoint, {
@@ -118,9 +149,9 @@ export default function remoteStorage({ fsEndPoint, deviceId }: any) {
 		}
 	}
 
-	async function createFolders(prefix: any, folders: any) {
+	async function createFolders(prefix: string, folders: string[]) {
 		const maxBytes = 4000 * 1000;
-		let batch = [];
+		let batch: RemoteFileRecord[] = [];
 		for (const name of folders) {
 			const path = makePath(prefix + name);
 			if (JSON.stringify(batch).length > maxBytes) {
@@ -148,7 +179,7 @@ export default function remoteStorage({ fsEndPoint, deviceId }: any) {
 		}
 	}
 
-	async function createFolderPath(path: any, isFolder = false) {
+	async function createFolderPath(path: string, isFolder = false) {
 		path = makePath(path);
 		const parts = path.split("/");
 		let partIndex = parts.length - 1;
@@ -158,18 +189,22 @@ export default function remoteStorage({ fsEndPoint, deviceId }: any) {
 				break;
 			}
 		}
-		for (partIndex++; partIndex < parts.length + !!isFolder; partIndex++) {
+		for (
+			partIndex++;
+			partIndex < parts.length + Number(isFolder);
+			partIndex++
+		) {
 			const subPath = parts.slice(0, partIndex).join("/");
 			await createFolder(subPath);
 		}
 	}
 
-	async function deleteFolder(root: any) {
+	async function deleteFolder(root: string) {
 		root = makePath(root);
 		const listing = await getListing(root);
 		for (const item of listing) {
 			const path = [root, item.name].filter(Boolean).join("/");
-			if (item.stat.type === "dir") {
+			if (item.stat?.type === "dir") {
 				await deleteFolder(path);
 			} else {
 				await deleteFile(path);
@@ -192,7 +227,7 @@ export default function remoteStorage({ fsEndPoint, deviceId }: any) {
 		});
 	}
 
-	async function deleteFile(path: any) {
+	async function deleteFile(path: string) {
 		path = makePath(path);
 		await fetchJSON(fsEndPoint, {
 			method: "PUT",
@@ -213,7 +248,9 @@ export default function remoteStorage({ fsEndPoint, deviceId }: any) {
 		});
 	}
 
-	async function readFile(path: any) {
+	async function readFile(
+		path: string,
+	): Promise<string | false | null | undefined> {
 		path = makePath(path);
 		const item = await fetchJSON(fsEndPoint, {
 			method: "GET",
@@ -221,31 +258,35 @@ export default function remoteStorage({ fsEndPoint, deviceId }: any) {
 				id: encodeURIComponent(path),
 			},
 		});
-		return item && !item.deleted && item.body;
+		const file = item as RemoteFileRecord | null;
+		return file && !file.deleted && file.body;
 	}
 
-	async function readFiles(prefix: any, files: any) {
-		let results: Record<string, any> = {};
-		files = files.map((name: any) => makePath(prefix + name));
-		while (files.length) {
-			const result = await fetchJSON(fsEndPoint, {
+	async function readFiles(
+		prefix: string,
+		files: string[],
+	): Promise<Record<string, string | undefined>> {
+		const results: Record<string, string | undefined> = {};
+		let filesToRead = files.map((name) => makePath(prefix + name));
+		while (filesToRead.length) {
+			const result = (await fetchJSON(fsEndPoint, {
 				method: "POST",
-				body: JSON.stringify(files),
-			});
+				body: JSON.stringify(filesToRead),
+			})) as RemoteFileRecord[] | null;
 			if (!result || !result.length) {
 				break;
 			}
-			files = files.filter(
-				(path: any) => !result.find((item: any) => item.id === path),
+			filesToRead = filesToRead.filter(
+				(path) => !result.find((item) => item.id === path),
 			);
 			for (const item of result) {
-				results[item.id] = item.body;
+				if (item.id) results[item.id] = item.body;
 			}
 		}
 		return results;
 	}
 
-	async function writeFile(path: any, body = "") {
+	async function writeFile(path: string, body = "") {
 		path = makePath(path);
 		await fetchJSON(fsEndPoint, {
 			method: "PUT",
@@ -265,9 +306,9 @@ export default function remoteStorage({ fsEndPoint, deviceId }: any) {
 		});
 	}
 
-	async function writeFiles(prefix: any, files: any) {
+	async function writeFiles(prefix: string, files: Record<string, string>) {
 		const maxBytes = 4000 * 1000;
-		let batch = [];
+		let batch: RemoteFileRecord[] = [];
 		for (const name in files) {
 			const path = makePath(prefix + name);
 			const body = files[name] || "";
@@ -298,9 +339,8 @@ export default function remoteStorage({ fsEndPoint, deviceId }: any) {
 		}
 	}
 
-	async function exists(path: any) {
+	async function exists(path: string): Promise<boolean> {
 		path = makePath(path);
-		let exists = false;
 		try {
 			const item = await fetchJSON(fsEndPoint, {
 				method: "GET",
@@ -308,9 +348,14 @@ export default function remoteStorage({ fsEndPoint, deviceId }: any) {
 					id: encodeURIComponent(path),
 				},
 			});
-			exists = item && !item.deleted;
-		} catch {}
-		return exists;
+			return !!item && !item.deleted;
+		} catch (error) {
+			// fetchJSON rejects with the HTTP status for non-200 responses. Only a
+			// 404 means the path is absent; outages and authorization failures must
+			// reach the caller instead of making a later PUT look safe.
+			if (error === 404) return false;
+			throw error;
+		}
 	}
 
 	return {

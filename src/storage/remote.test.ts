@@ -346,10 +346,30 @@ describe("exists", () => {
 		await expect(storage.exists("root/file.txt")).resolves.toBe(false);
 	});
 
-	it("returns false when fetchJSON throws", async () => {
-		asMock(fetchJSON).mockRejectedValue(new Error("network error"));
+	it("treats only a not-found response as an absent path", async () => {
+		asMock(fetchJSON).mockRejectedValueOnce(404);
 
-		await expect(storage.exists("root/file.txt")).resolves.toBe(false);
+		await expect(storage.exists("root/missing.txt")).resolves.toBe(false);
+	});
+
+	it("propagates server errors", async () => {
+		asMock(fetchJSON).mockRejectedValueOnce(503);
+
+		await expect(storage.exists("root/file.txt")).rejects.toBe(503);
+	});
+
+	it("rethrows non-404 errors so callers do not treat an outage as absence", async () => {
+		const error = new Error("network error");
+		asMock(fetchJSON).mockRejectedValue(error);
+
+		await expect(storage.exists("root/file.txt")).rejects.toBe(error);
+	});
+
+	it("does not create a folder when checking its existence fails", async () => {
+		asMock(fetchJSON).mockRejectedValueOnce(503);
+
+		await expect(storage.createFolder("root/new")).rejects.toBe(503);
+		expect(fetchJSON).toHaveBeenCalledTimes(1);
 	});
 
 	it("recursively deletes nested folders before marking the root deleted", async () => {
