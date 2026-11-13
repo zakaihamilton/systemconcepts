@@ -227,7 +227,7 @@ export async function updateYearSync(
 	groupName: any,
 	year: any,
 	sessions: any,
-	previousSessions = null,
+	previousSessions: unknown[] | null = null,
 ) {
 	// An empty year is meaningful when S3 no longer contains any sessions:
 	// persist it so the previous index entry is cleared on the next sync.
@@ -347,7 +347,10 @@ export async function updateBundleFile(
 		const retainedSessions = allSessions.filter(
 			(s: any) => !updatedGroups.has(s.group),
 		);
-		if (retainedSessions.length === allSessions.length && newSessions.length === 0) {
+		if (
+			retainedSessions.length === allSessions.length &&
+			newSessions.length === 0
+		) {
 			return;
 		}
 		allSessions = retainedSessions;

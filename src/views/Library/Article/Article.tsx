@@ -120,7 +120,7 @@ function Article({
 				contentRef.current.scrollTop = 0;
 			}
 		}
-	}, [selectedTag?._id, contentRef]); // eslint-disable-line react-hooks/exhaustive-deps
+	}, [selectedTag?._id, contentRef]);
 
 	const { matchIndex, totalMatches, handleNextMatch, handlePrevMatch } =
 		useArticleSearch(content, search);

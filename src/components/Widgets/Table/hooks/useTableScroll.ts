@@ -43,7 +43,6 @@ export function useTableScroll({ store, loading, resetScrollDeps }: any) {
 			});
 			hasRestoredScrollRef.current = true;
 		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [...resetScrollDeps, loading]);
 
 	const saveScrollPosition = useCallback(

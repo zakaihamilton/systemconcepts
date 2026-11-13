@@ -158,7 +158,6 @@ export default function ImagePage({ name, ext = "png" }: any) {
 				onClick={downloadUrl ? undefined : downloadImage}
 				target={downloadUrl}
 			/>
-			{/* eslint-disable-next-line @next/next/no-img-element */}
 			{!loading && !error && src && (
 				<img
 					alt={name}

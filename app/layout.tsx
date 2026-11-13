@@ -1,8 +1,8 @@
 import "../src/css/app.css";
 import Script from "next/script";
-import ServiceWorker from "../src/components/ServiceWorker";
-import VisitoringRouteTracker from "../src/components/App/VisitoringRouteTracker";
 import { VisitoringProvider } from "visitoring";
+import VisitoringRouteTracker from "../src/components/App/VisitoringRouteTracker";
+import ServiceWorker from "../src/components/ServiceWorker";
 
 export const metadata = {
 	title: "System Concepts",
@@ -48,7 +48,7 @@ export default function RootLayout({ children }: any) {
 					</div>
 					<div className="app-splash__title">System Concepts</div>
 					<div className="app-splash__subtitle">One concept at a time</div>
-					<div className="app-splash__loader" aria-label="Loading" />
+					<div className="app-splash__loader" role="progressbar" aria-label="Loading" />
 				</div>
 				<ServiceWorker />
 				<VisitoringProvider siteKey="vk_0i-y9JgMRD5f3w8RRbm2orQeVX3ttGLA">

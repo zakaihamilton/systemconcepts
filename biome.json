@@ -42,6 +42,18 @@
 			},
 			"security": {
 				"noDangerouslySetInnerHtml": "off"
+			},
+			"a11y": {
+				"useAltText": "error",
+				"useAnchorContent": "error",
+				"useValidAriaProps": "error",
+				"useValidAriaValues": "error",
+				"noAriaUnsupportedElements": "error",
+				"useIframeTitle": "error",
+				"noAriaHiddenOnFocusable": "error",
+				"useAriaPropsForRole": "error",
+				"useAriaPropsSupportedByRole": "error",
+				"recommended": false
 			}
 		}
 	},

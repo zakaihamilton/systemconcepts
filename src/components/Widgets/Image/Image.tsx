@@ -137,7 +137,6 @@ export default function ImageWidget({
 					(!!imageLoading && !loaded && !thumbnailPath)) && (
 					<Progress fullscreen={true} />
 				)}
-			{/* eslint-disable-next-line @next/next/no-img-element */}
 			{hasPath && !error && (
 				<img
 					loading={loadingAttribute}
@@ -152,7 +151,6 @@ export default function ImageWidget({
 					alt={alt}
 				/>
 			)}
-			{/* eslint-disable-next-line @next/next/no-img-element */}
 			{thumbnailPath && (
 				<img
 					src={thumbnailPath}

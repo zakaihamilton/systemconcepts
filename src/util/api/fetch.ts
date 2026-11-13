@@ -256,7 +256,7 @@ export function useFetchJSON(
 				timeoutRef.current = null;
 			}
 		};
-	}, [url, cond, optionsString, isOnline, delay, dependsString, reloadCount]); // eslint-disable-line react-hooks/exhaustive-deps
+	}, [url, cond, optionsString, isOnline, delay, dependsString, reloadCount]);
 	return [result, setResult, inProgress, error, reload];
 }
 
@@ -314,6 +314,6 @@ export function useFetch(
 				timeoutRef.current = null;
 			}
 		};
-	}, [url, optionsString, cond, isOnline, delay, dependsString, reloadCount]); // eslint-disable-line react-hooks/exhaustive-deps
+	}, [url, optionsString, cond, isOnline, delay, dependsString, reloadCount]);
 	return [result, setResult, inProgress, error, reload];
 }

@@ -229,7 +229,7 @@ export function useActivePages(depends: unknown[] = []) {
 	const dependsHash = (depends || []).join(",");
 	const activePages = useMemo(() => {
 		return getPagesFromHash({ hash, translations, pages });
-	}, [hash, translations, pages, dependsHash]); // eslint-disable-line react-hooks/exhaustive-deps
+	}, [hash, translations, pages, dependsHash]);
 	return activePages;
 }
 

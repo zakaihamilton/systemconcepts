@@ -71,11 +71,9 @@ export function useToolbar({ id, items, visible = true, depends = [] }: any) {
 			});
 			toolbarItemsRegistry.delete(id);
 		};
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 	useEffect(() => {
 		setToolbarItems(id, items, visible);
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [...depends, visible]);
 }
 

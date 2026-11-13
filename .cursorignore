@@ -32,7 +32,6 @@ dist/
 .cache/
 **/.cache/
 .parcel-cache/
-.eslintcache
 .stylelintcache
 
 

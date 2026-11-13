@@ -269,7 +269,7 @@ export function useListing(url: any, depends: unknown[] = [], options?: any) {
 		return () => {
 			clearTimeout(loadingTimer);
 		};
-	}, [url, optionsString, dependsString]); // eslint-disable-line react-hooks/exhaustive-deps
+	}, [url, optionsString, dependsString]);
 	useEffect(() => {
 		return () => {
 			active.current = null;
@@ -399,7 +399,7 @@ export function useFile(
 				});
 			});
 		return () => clearTimeout(timerHandle);
-	}, [url, mappingString, setState, dependsString]); // eslint-disable-line react-hooks/exhaustive-deps
+	}, [url, mappingString, setState, dependsString]);
 	return [data, loading, error, write];
 }
 

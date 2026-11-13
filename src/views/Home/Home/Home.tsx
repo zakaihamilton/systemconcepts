@@ -109,6 +109,7 @@ function SessionSkeletons({ count = SESSION_LIMIT }: any) {
 		<div
 			className={styles.sessionGrid}
 			aria-label="Loading sessions"
+			role="status"
 			data-testid="session-skeletons"
 		>
 			{Array.from({ length: count }, (_, index) => (

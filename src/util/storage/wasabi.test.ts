@@ -51,7 +51,6 @@ describe("getWasabi", () => {
 	it("parses bucket, region, and credentials from the WASABI_URL", async () => {
 		let freshGetWasabi;
 		jest.isolateModules(() => {
-			// eslint-disable-next-line global-require
 			freshGetWasabi = require("@util/storage/wasabi").getWasabi;
 		});
 
@@ -76,7 +75,6 @@ describe("getWasabi", () => {
 			"https://access-key:secret-key@s3.wasabisys.com/my-bucket";
 		let freshGetWasabi;
 		jest.isolateModules(() => {
-			// eslint-disable-next-line global-require
 			freshGetWasabi = require("@util/storage/wasabi").getWasabi;
 		});
 
@@ -91,7 +89,6 @@ describe("getWasabi", () => {
 		delete process.env.WASABI_URL;
 		let freshGetWasabi;
 		jest.isolateModules(() => {
-			// eslint-disable-next-line global-require
 			freshGetWasabi = require("@util/storage/wasabi").getWasabi;
 		});
 
@@ -102,7 +99,6 @@ describe("getWasabi", () => {
 		delete process.env.WASABI_URL;
 		let freshGetWasabi;
 		jest.isolateModules(() => {
-			// eslint-disable-next-line global-require
 			freshGetWasabi = require("@util/storage/wasabi").getWasabi;
 		});
 

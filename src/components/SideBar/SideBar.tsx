@@ -34,7 +34,6 @@ export default function SideBar() {
 				s.libraryExpanded = true;
 			});
 		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [isLibraryActive]);
 
 	const selected = (id: any) => {

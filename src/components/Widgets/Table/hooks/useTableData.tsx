@@ -124,7 +124,6 @@ export function useTableData({
 				searchableText,
 			};
 		});
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [data, filter, mapper, searchKeys, ...depends]);
 
 	const filteredData = useMemo(() => {
