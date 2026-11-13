@@ -36,7 +36,6 @@ function readRecord(store: any, path: string): Promise<any> {
 beforeAll(() => {
 	Reflect.set(process, "browser", true);
 	jest.resetModules();
-	// eslint-disable-next-line global-require
 	const mod = require("@storage/local");
 	localStorage = mod.default;
 	clear = mod.clear;

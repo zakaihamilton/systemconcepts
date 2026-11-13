@@ -11,7 +11,7 @@
 	},
 	"categories": {
 		"accessibility": {
-			"mode": "required"
+			"mode": "optional"
 		},
 		"runtime-accessibility": {
 			"mode": "required"

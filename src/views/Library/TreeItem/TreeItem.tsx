@@ -56,7 +56,6 @@ const TreeItem = memo(function TreeItem({
 				});
 			}
 		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [selectPath, node.id]);
 
 	// Scroll the selected item into the sidebar only if it wasn't manually clicked.

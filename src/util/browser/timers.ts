@@ -20,7 +20,6 @@ export function useInterval(
 			let id = setInterval(tick, delay);
 			return () => clearInterval(id);
 		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [...depends, delay]);
 }
 
@@ -40,6 +39,5 @@ export function useTimeout(callback: any, delay: any, depends: unknown[] = []) {
 			let id = setTimeout(tick, delay);
 			return () => clearTimeout(id);
 		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [...depends, delay]);
 }

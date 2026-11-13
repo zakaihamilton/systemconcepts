@@ -1,6 +1,6 @@
 {
 	"schemaVersion": 1,
-	"generatedAt": "2026-10-25T07:08:16.803Z",
+	"generatedAt": "2026-11-13T12:00:22.852Z",
 	"entries": [
 		{
 			"fingerprint": "b002a1ae2ba0665924e15caf",
@@ -7882,6 +7882,249 @@
 			"scope": ".",
 			"file": "src/util/api/rssMediaToken.ts",
 			"line": 147
+		},
+		{
+			"fingerprint": "b8457af3da04853b8e11810e",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-dependency",
+			"scope": ".",
+			"file": "package.json",
+			"line": 42
+		},
+		{
+			"fingerprint": "b369c0e0038051d2a4f6bd66",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-dependency",
+			"scope": ".",
+			"file": "package.json",
+			"line": 74
+		},
+		{
+			"fingerprint": "2d59c8172e011bd2b7399107",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-dependency",
+			"scope": ".",
+			"file": "package.json",
+			"line": 91
+		},
+		{
+			"fingerprint": "694d7fbc7ddacb9d866078b2",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-export",
+			"scope": ".",
+			"file": "src/util/domain/updateSessions/updateGroupYearMetadata.ts",
+			"line": 146
+		},
+		{
+			"fingerprint": "804d28cf0109bd019a7ed156",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "components/SideBar/SideBar.tsx",
+			"line": 87
+		},
+		{
+			"fingerprint": "a4b8cd16c5dfd331d6d681e5",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "data/languages/eng/articles.ts",
+			"line": 449
+		},
+		{
+			"fingerprint": "1aca98eb3312d60492b715ea",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "storage/aws.ts",
+			"line": 74
+		},
+		{
+			"fingerprint": "d4324d1b14394bf5bac30edb",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "storage/remote.ts",
+			"line": 134
+		},
+		{
+			"fingerprint": "9cb28c3e08649c4918642084",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "storage/remote.ts",
+			"line": 137
+		},
+		{
+			"fingerprint": "ea221ae70130b3b67d9bd81d",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "storage/remote.ts",
+			"line": 160
+		},
+		{
+			"fingerprint": "f2b2a5551f960f5c6609a22c",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "storage/remote.ts",
+			"line": 230
+		},
+		{
+			"fingerprint": "48628925a8b2be814e6d7ab2",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/index.ts",
+			"line": 62
+		},
+		{
+			"fingerprint": "48628925a8b2be814e6d7ab2",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/index.ts",
+			"line": 62
+		},
+		{
+			"fingerprint": "8cce6645790d5dd6f8bf2e44",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/domain/updateSessions/index.ts",
+			"line": 83
+		},
+		{
+			"fingerprint": "6c9f9b10608359270d0db46e",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/storage/aws.test.ts",
+			"line": 176
+		},
+		{
+			"fingerprint": "47fc72b4b9ba7049a1060319",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/storage/aws.test.ts",
+			"line": 278
+		},
+		{
+			"fingerprint": "1df63ba9efa9fcd955ac28d7",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/storage/aws.test.ts",
+			"line": 356
+		},
+		{
+			"fingerprint": "425355e9cd6c678b7fea2721",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/storage/aws.test.ts",
+			"line": 370
+		},
+		{
+			"fingerprint": "329a5b5025e19364169aab06",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/storage/aws.test.ts",
+			"line": 392
+		},
+		{
+			"fingerprint": "f36fc7c11866d0e7296163e0",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/storage/aws.test.ts",
+			"line": 470
+		},
+		{
+			"fingerprint": "aca565f4629de884f65935f3",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/storage/aws.test.ts",
+			"line": 619
+		},
+		{
+			"fingerprint": "6977895ee267044435a48f90",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "util/storage/wasabi.test.ts",
+			"line": 88
+		},
+		{
+			"fingerprint": "79e8db5f486d35d5b12888f7",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Player/Audio/Audio.module.css",
+			"line": 82
+		},
+		{
+			"fingerprint": "dbe65cceca648638a9961de0",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Player/Audio/Audio.module.css",
+			"line": 89
+		},
+		{
+			"fingerprint": "42915385c521a6261b173267",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Player/Audio/Audio.module.css",
+			"line": 128
+		},
+		{
+			"fingerprint": "1a13783c1a1130b5e581a866",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Player/Audio/Audio.module.css",
+			"line": 142
+		},
+		{
+			"fingerprint": "209aed50454cf3730e50b44e",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Player/Audio/Audio.tsx",
+			"line": 45
 		}
 	]
 }

@@ -412,11 +412,7 @@ export async function processGroupYear({
 					yearSessions,
 				)
 			: shouldRefreshOnlyRecentSessions
-				? mergeRecentSessions(
-						cachedYearSessions,
-						yearSessions,
-						recentCutoff!,
-					)
+				? mergeRecentSessions(cachedYearSessions, yearSessions, recentCutoff!)
 				: yearSessions;
 
 		// Persist can take a long time for large years; surface it so the UI

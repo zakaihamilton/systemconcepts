@@ -392,7 +392,7 @@ export default React.memo(function Markdown({
 		TextRenderer,
 		handleParagraphZoom,
 		disableGlossary,
-	]); // eslint-disable-line react-hooks/exhaustive-deps
+	]);
 
 	return (
 		<>

@@ -136,7 +136,6 @@ export function useArticleToolbarItems(options: ArticleToolbarOptions) {
 			}
 		}
 
-		// eslint-disable-next-line react-hooks/refs
 		items.push({
 			id: "export",
 			name: options.showMarkdown

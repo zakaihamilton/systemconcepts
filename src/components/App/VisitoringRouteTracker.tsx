@@ -1,7 +1,7 @@
 "use client";
 
-import { useVisitoring } from "visitoring";
 import { useEffect, useRef } from "react";
+import { useVisitoring } from "visitoring";
 
 function getCurrentScreen() {
 	const hash = window.location.hash.replace(/^#/, "");

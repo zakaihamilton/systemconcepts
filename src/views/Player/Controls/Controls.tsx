@@ -248,7 +248,7 @@ export default function Controls({
 				// normal metadata bookmark restore.
 				if (resume && Number.isFinite(resume.position)) {
 					if (resume.position > 0) {
-						playerRef.currentTime = resume.position; // eslint-disable-line react-hooks/immutability
+						playerRef.currentTime = resume.position;
 						setCurrentTime(resume.position);
 						currentTimeRef.current = resume.position;
 					}
@@ -259,7 +259,7 @@ export default function Controls({
 					? stateRef.current.metadata?.[metadataKey] || {}
 					: stateRef.current.metadata || {};
 				if (currentMetadata.position) {
-					playerRef.currentTime = currentMetadata.position; // eslint-disable-line react-hooks/immutability
+					playerRef.currentTime = currentMetadata.position;
 					setCurrentTime(playerRef.currentTime);
 				}
 			}
@@ -349,7 +349,7 @@ export default function Controls({
 			});
 
 			if (currentMetadata.position && playerRef.currentTime < 1) {
-				playerRef.currentTime = currentMetadata.position; // eslint-disable-line react-hooks/immutability
+				playerRef.currentTime = currentMetadata.position;
 				setCurrentTime(currentMetadata.position);
 			} else {
 				structuredLogger.debug("[Controls] Not setting position:", {
@@ -364,7 +364,7 @@ export default function Controls({
 			if (isNaN(position)) {
 				return;
 			}
-			playerRef.currentTime = position; // eslint-disable-line react-hooks/immutability
+			playerRef.currentTime = position;
 			setCurrentTime(position);
 		},
 		[playerRef],
@@ -552,7 +552,7 @@ export default function Controls({
 		clearPlayPending();
 		pendingResumeRef.current = null;
 		playerRef.pause();
-		playerRef.currentTime = 0; // eslint-disable-line react-hooks/immutability
+		playerRef.currentTime = 0;
 		setCurrentTime(0);
 	}, [playerRef, clearPlayPending]);
 

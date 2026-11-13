@@ -50,7 +50,6 @@ jest.mock("@components/Virtualized/FixedSizeList", () => {
 		React.useEffect(() => {
 			if (onItemsRendered) onItemsRendered({ visibleStartIndex: 0 });
 			if (onScroll) onScroll({ scrollOffset: 12 });
-			// eslint-disable-next-line react-hooks/exhaustive-deps
 		}, []);
 		return (
 			<div

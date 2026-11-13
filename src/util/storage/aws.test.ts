@@ -99,9 +99,7 @@ describe("getS3", () => {
 		let freshGetS3;
 		let freshLogger;
 		jest.isolateModules(() => {
-			// eslint-disable-next-line global-require
 			freshGetS3 = require("@util/storage/aws").getS3;
-			// eslint-disable-next-line global-require
 			freshLogger = require("@util/api/logger").logger;
 		});
 
@@ -118,9 +116,7 @@ describe("getS3", () => {
 		let freshGetS3;
 		let freshLogger;
 		jest.isolateModules(() => {
-			// eslint-disable-next-line global-require
 			freshGetS3 = require("@util/storage/aws").getS3;
-			// eslint-disable-next-line global-require
 			freshLogger = require("@util/api/logger").logger;
 		});
 
@@ -135,7 +131,6 @@ describe("getS3", () => {
 	it("prepends https:// to bare endpoint hostnames", async () => {
 		let freshGetS3;
 		jest.isolateModules(() => {
-			// eslint-disable-next-line global-require
 			freshGetS3 = require("@util/storage/aws").getS3;
 		});
 

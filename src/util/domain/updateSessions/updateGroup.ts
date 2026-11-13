@@ -150,13 +150,14 @@ export async function updateGroupProcess(
 			: null;
 	const isRecentRefresh = Boolean(recentCutoff);
 	const shouldReconcileMissingYears =
-		isRecentRefresh ||
-		(reconcileMissingYears && updateAll && !targetSessionId);
+		isRecentRefresh || (reconcileMissingYears && updateAll && !targetSessionId);
 
 	// Only an explicit full all-years refresh can treat missing year prefixes as
 	// deletions. Recent refreshes reconcile only sessions inside their date window.
 	if (shouldReconcileMissingYears) {
-		const listedYears = new Set(years.map((year: any) => String(year.name)));
+		const listedYears = new Set<string>(
+			years.map((year: any) => String(year.name)),
+		);
 		let existingYears: string[] = [];
 		let canReconcileMissingYears = true;
 
@@ -188,8 +189,8 @@ export async function updateGroupProcess(
 
 		const missingYears = canReconcileMissingYears
 			? Array.from(new Set(existingYears))
-				.filter((year) => !listedYears.has(year))
-				.sort()
+					.filter((year) => !listedYears.has(year))
+					.sort()
 			: [];
 		if (missingYears.length > 0) {
 			const missingYearSet = new Set(missingYears);
@@ -202,9 +203,7 @@ export async function updateGroupProcess(
 				let removedCount = 0;
 				for (let index = allSessions.length - 1; index >= 0; index--) {
 					const session = allSessions[index];
-					const missingYear = missingYearSet.has(
-						getSessionYear(session) || "",
-					);
+					const missingYear = missingYearSet.has(getSessionYear(session) || "");
 					const isRemoved = isRecentRefresh
 						? missingYear && !isOutsideRecentWindow(session, recentCutoff!)
 						: missingYear;
@@ -261,9 +260,11 @@ export async function updateGroupProcess(
 		(isMerged || isBundled) &&
 		existingSessions.length > 0
 	) {
-		const listedYears = new Set(years.map((year: any) => String(year.name)));
+		const listedYears = new Set<string>(
+			years.map((year: any) => String(year.name)),
+		);
 		const missingYears = [
-			...new Set(
+			...new Set<string>(
 				existingSessions
 					.map(getSessionYear)
 					.filter((year: string | null): year is string => Boolean(year)),
