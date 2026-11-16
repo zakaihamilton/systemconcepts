@@ -4,7 +4,7 @@ System Concepts uses Perminister for password sign-in while keeping each app use
 
 ## Configuration
 
-Create a Perminister consumer client for product ID `systemconcepts` and the exact System Concepts production origin. Copy its client ID and secret into server-only environment values. Set `PERMINISTER_AUTH_ENABLED=true` and build with `NEXT_PUBLIC_PERMINISTER_LOGIN_ENABLED=true` to switch the UI and stop accepting local password sessions. Use `SITE_URL` as the canonical production origin so the OIDC callback matches the registered client origin.
+Create a Perminister consumer client for product ID `system-concepts` and the exact System Concepts production origin. Copy its client ID and secret into server-only environment values. Set `PERMINISTER_AUTH_ENABLED=true` and build with `NEXT_PUBLIC_PERMINISTER_LOGIN_ENABLED=true` to switch the UI and stop accepting local password sessions. Use `SITE_URL` as the canonical production origin so the OIDC callback matches the registered client origin.
 
 ## Password migration
 
