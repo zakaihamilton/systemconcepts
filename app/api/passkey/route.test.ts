@@ -214,7 +214,7 @@ describe("/api/passkey", () => {
 
 		expect(response.status).toBe(200);
 		expect(await response.json()).toEqual({ role: "teacher" });
-		expect(createSession).toHaveBeenCalledWith("user");
+		expect(createSession).toHaveBeenCalledWith("user", true, "passkey");
 		expect(setSessionCookies).toHaveBeenCalled();
 	});
 
