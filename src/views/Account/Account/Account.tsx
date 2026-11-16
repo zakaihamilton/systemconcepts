@@ -230,7 +230,12 @@ export default function Account({ redirect }: any) {
 			setCounter((counter) => counter + 1);
 		} else {
 			if (perministerEnabled) {
-				onContinueToPerminister();
+				const returnTo = redirect
+					? `/#/${decodeURIComponent(redirect)}`
+					: "/#/";
+				window.location.assign(
+					`/auth/perminister/start?${new URLSearchParams({ next: returnTo })}`,
+				);
 				return;
 			}
 			setValidate(true);
@@ -284,13 +289,6 @@ export default function Account({ redirect }: any) {
 					});
 			}
 		}
-	};
-
-	const onContinueToPerminister = () => {
-		const returnTo = redirect ? `/#/${decodeURIComponent(redirect)}` : "/#/";
-		window.location.assign(
-			`/auth/perminister/start?${new URLSearchParams({ next: returnTo })}`,
-		);
 	};
 
 	const onValidateField = (text: any) => {
@@ -409,17 +407,8 @@ export default function Account({ redirect }: any) {
 							)}
 						<Grid size={12}>
 							<Button
-								type={perministerEnabled && !isSignedIn ? "button" : "submit"}
-								onClick={
-									perministerEnabled && !isSignedIn
-										? onContinueToPerminister
-										: undefined
-								}
-								disabled={
-									perministerEnabled && !isSignedIn
-										? inProgress
-										: !!isInvalid || inProgress
-								}
+								type="submit"
+								disabled={!!isInvalid || inProgress}
 								fullWidth
 								variant="contained"
 								color="primary"
