@@ -54,6 +54,7 @@
 		"react-dom": "19.2.6",
 		"react-markdown": "^10.1.0",
 		"remark-breaks": "^4.0.0",
+		"server-only": "0.0.1",
 		"use-dark-mode": "^2.3.1",
 		"uuid": "^14.0.0",
 		"visitoring": "^0.1.0",
