@@ -68,6 +68,7 @@ async function handleUsers(request: any) {
 						"salt",
 						"role",
 						"credentials",
+						"perministerSubjectId",
 						"resetToken",
 						"resetTokenExpiry",
 						"date",
@@ -133,6 +134,7 @@ async function handleUsers(request: any) {
 				resetToken: _resetToken,
 				resetTokenExpiry: _resetTokenExpiry,
 				credentials: _credentials,
+				perministerSubjectId: _perministerSubjectId,
 				...rest
 			} = user;
 			const rssToken = crypto

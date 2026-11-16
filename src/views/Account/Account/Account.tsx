@@ -37,6 +37,8 @@ export default function Account({ redirect }: any) {
 	const { direction } = MainStore.useState();
 
 	const translations = useTranslations();
+	const perministerEnabled =
+		process.env.NEXT_PUBLIC_PERMINISTER_LOGIN_ENABLED === "true";
 	const idState = useState(Cookies.get("id") || "");
 	const passwordState = useState("");
 	const [remember, setRemember] = useState(true);
@@ -53,6 +55,15 @@ export default function Account({ redirect }: any) {
 	const changeRemember = (event: any) => setRemember(event.target.checked);
 	const changeCreatePasskey = (event: any) =>
 		setCreatePasskey(event.target.checked);
+
+	useEffect(() => {
+		if (window.location.hash.includes("auth=perminister-error")) {
+			setError(
+				translations.PERMINISTER_SIGN_IN_FAILED ||
+					"Perminister sign-in failed. Please try again.",
+			);
+		}
+	}, [translations]);
 
 	useEffect(() => {
 		if (isSignedIn) {
@@ -218,6 +229,15 @@ export default function Account({ redirect }: any) {
 			});
 			setCounter((counter) => counter + 1);
 		} else {
+			if (perministerEnabled) {
+				const returnTo = redirect
+					? `/#/${decodeURIComponent(redirect)}`
+					: "/#/";
+				window.location.assign(
+					`/auth/perminister/start?${new URLSearchParams({ next: returnTo })}`,
+				);
+				return;
+			}
 			setValidate(true);
 			if (!invalidFields && !inProgress) {
 				let [id] = idState;
@@ -289,7 +309,12 @@ export default function Account({ redirect }: any) {
 
 	const invalidFields =
 		onValidateField(idState[0]) || onValidatePassword(passwordState[0]);
-	const isInvalid = validate && invalidFields;
+	const isInvalid = !perministerEnabled && validate && invalidFields;
+	const submitLabel = isSignedIn
+		? translations.SIGN_OUT
+		: perministerEnabled
+			? translations.CONTINUE_TO_PERMINISTER || "Continue to Perminister"
+			: translations.SIGN_IN;
 
 	return (
 		<div className={styles.root}>
@@ -303,24 +328,26 @@ export default function Account({ redirect }: any) {
 				{error && <Typography className={styles.error}>{error}</Typography>}
 				<form className={styles.form} onSubmit={onSubmit} noValidate>
 					<Grid container spacing={2}>
-						<Grid size={12}>
-							<Input
-								state={idState}
-								required
-								id="username"
-								label={translations.ID}
-								name="username"
-								type="email"
-								autoComplete="username"
-								validate={validate}
-								readOnly={isSignedIn}
-								onValidate={onValidateField}
-								autoFocus
-								icon={<AccountCircleIcon />}
-								background={true}
-							/>
-						</Grid>
-						{!isSignedIn && (
+						{(!perministerEnabled || browserSupportsWebAuthn()) && (
+							<Grid size={12}>
+								<Input
+									state={idState}
+									required
+									id="username"
+									label={translations.ID}
+									name="username"
+									type="email"
+									autoComplete="username"
+									validate={validate}
+									readOnly={isSignedIn}
+									onValidate={onValidateField}
+									autoFocus
+									icon={<AccountCircleIcon />}
+									background={true}
+								/>
+							</Grid>
+						)}
+						{!isSignedIn && !perministerEnabled && (
 							<Grid size={12}>
 								<Input
 									state={passwordState}
@@ -337,7 +364,7 @@ export default function Account({ redirect }: any) {
 								/>
 							</Grid>
 						)}
-						{!isSignedIn && (
+						{!isSignedIn && !perministerEnabled && (
 							<Grid size={12}>
 								<FormControlLabel
 									className={clsx(
@@ -355,27 +382,29 @@ export default function Account({ redirect }: any) {
 								/>
 							</Grid>
 						)}
-						{!isSignedIn && browserSupportsWebAuthn() && (
-							<Grid size={12}>
-								<FormControlLabel
-									className={clsx(
-										styles.checkboxLabel,
-										direction === "rtl" && styles.rtlLabel,
-									)}
-									control={
-										<Checkbox
-											color="primary"
-											checked={createPasskey}
-											onChange={changeCreatePasskey}
-										/>
-									}
-									label={
-										translations.CREATE_PASSKEY ||
-										"Create Passkey for this device"
-									}
-								/>
-							</Grid>
-						)}
+						{!isSignedIn &&
+							!perministerEnabled &&
+							browserSupportsWebAuthn() && (
+								<Grid size={12}>
+									<FormControlLabel
+										className={clsx(
+											styles.checkboxLabel,
+											direction === "rtl" && styles.rtlLabel,
+										)}
+										control={
+											<Checkbox
+												color="primary"
+												checked={createPasskey}
+												onChange={changeCreatePasskey}
+											/>
+										}
+										label={
+											translations.CREATE_PASSKEY ||
+											"Create Passkey for this device"
+										}
+									/>
+								</Grid>
+							)}
 						<Grid size={12}>
 							<Button
 								type="submit"
@@ -385,7 +414,7 @@ export default function Account({ redirect }: any) {
 								color="primary"
 								className={styles.submit}
 							>
-								{translations[isSignedIn ? "SIGN_OUT" : "SIGN_IN"]}
+								{submitLabel}
 							</Button>
 						</Grid>
 						{!isSignedIn && (
@@ -445,7 +474,7 @@ export default function Account({ redirect }: any) {
 						)}
 						<Grid size={12}>
 							<div className={styles.links}>
-								{!isSignedIn && (
+								{!isSignedIn && !perministerEnabled && (
 									<>
 										<Link href="#resetpassword">
 											{translations.FORGET_PASSWORD}
@@ -455,9 +484,11 @@ export default function Account({ redirect }: any) {
 								)}
 								{isSignedIn && (
 									<>
-										<Link href="#changepassword">
-											{translations.CHANGE_PASSWORD}
-										</Link>
+										{!perministerEnabled && (
+											<Link href="#changepassword">
+												{translations.CHANGE_PASSWORD}
+											</Link>
+										)}
 										<Link
 											href={"#account/" + encodeURIComponent(`user/${userId}`)}
 										>

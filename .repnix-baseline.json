@@ -1,6 +1,6 @@
 {
 	"schemaVersion": 1,
-	"generatedAt": "2026-11-13T12:00:22.852Z",
+	"generatedAt": "2026-11-16T12:41:38.283Z",
 	"entries": [
 		{
 			"fingerprint": "b002a1ae2ba0665924e15caf",
@@ -8125,6 +8125,78 @@
 			"scope": ".",
 			"file": "views/Player/Audio/Audio.tsx",
 			"line": 45
+		},
+		{
+			"fingerprint": "e24b4c424ddac84dc263b675",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-dependency",
+			"scope": ".",
+			"file": "package.json",
+			"line": 36
+		},
+		{
+			"fingerprint": "872ee1fcea335f7d72c22549",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-dependency",
+			"scope": ".",
+			"file": "package.json",
+			"line": 61
+		},
+		{
+			"fingerprint": "475fa8bb4768f4f89955ab41",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-dependency",
+			"scope": ".",
+			"file": "package.json",
+			"line": 66
+		},
+		{
+			"fingerprint": "8704c49801289fa678787734",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-dependency",
+			"scope": ".",
+			"file": "package.json",
+			"line": 71
+		},
+		{
+			"fingerprint": "351104a5dcdf3b07702d6d78",
+			"provider": "Knip",
+			"category": "dead-code",
+			"type": "unused-dependency",
+			"scope": ".",
+			"file": "package.json",
+			"line": 76
+		},
+		{
+			"fingerprint": "76e042573a9fb0349e660656",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "api/login/route.ts",
+			"line": 150
+		},
+		{
+			"fingerprint": "17c26278bb5c1e3120468a0c",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Account/Account/Account.tsx",
+			"line": 317
+		},
+		{
+			"fingerprint": "2b678cdbe0fd3b5df9b01e8e",
+			"provider": "jscpd",
+			"category": "duplication",
+			"type": "duplication",
+			"scope": ".",
+			"file": "views/Account/Account/Account.tsx",
+			"line": 352
 		}
 	]
 }

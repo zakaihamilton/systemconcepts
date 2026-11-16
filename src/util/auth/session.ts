@@ -1,4 +1,12 @@
 import {
+	isPerministerSessionToken,
+	localUserForPerministerSession,
+	PerministerUnavailableError,
+	perministerAuthEnabled,
+	perministerLogout,
+	perministerSession,
+} from "@util/auth/perminister";
+import {
 	deleteRecord,
 	findRecord,
 	getCollection,
@@ -15,7 +23,11 @@ function digest(token: any) {
 	return crypto.createHash("sha256").update(token).digest("hex");
 }
 
-export async function createSession(userId: any, remember = true) {
+export async function createSession(
+	userId: any,
+	remember = true,
+	authMethod: "password" | "passkey" = "password",
+) {
 	const token = crypto.randomBytes(32).toString("base64url");
 	const expiresAt = new Date(Date.now() + SESSION_TTL_MS);
 	await insertRecord({
@@ -23,6 +35,7 @@ export async function createSession(userId: any, remember = true) {
 		record: {
 			id: digest(token),
 			userId: userId.toLowerCase(),
+			authMethod,
 			createdAt: new Date(),
 			expiresAt,
 		},
@@ -33,11 +46,19 @@ export async function createSession(userId: any, remember = true) {
 export async function getSessionUser(request: any) {
 	const token = request.cookies.get(SESSION_COOKIE)?.value;
 	if (!token) throw AUTHENTICATION_REQUIRED;
+	if (isPerministerSessionToken(token)) {
+		const perministerSessionRecord = await perministerSession(token);
+		if (!perministerSessionRecord) throw AUTHENTICATION_REQUIRED;
+		return localUserForPerministerSession(perministerSessionRecord);
+	}
 	const session = await findRecord({
 		collectionName: "auth_sessions",
 		query: { id: digest(token) },
 	});
 	if (!session || new Date(session.expiresAt).getTime() <= Date.now()) {
+		throw AUTHENTICATION_REQUIRED;
+	}
+	if (perministerAuthEnabled() && session.authMethod !== "passkey") {
 		throw AUTHENTICATION_REQUIRED;
 	}
 	const user = await findRecord({
@@ -49,12 +70,17 @@ export async function getSessionUser(request: any) {
 }
 
 export function getAuthErrorStatus(err: any, fallback = 403) {
+	if (err instanceof PerministerUnavailableError) return 503;
 	return err === AUTHENTICATION_REQUIRED ? 401 : fallback;
 }
 
 export async function revokeSession(request: any) {
 	const token = request.cookies.get(SESSION_COOKIE)?.value;
 	if (!token) return;
+	if (isPerministerSessionToken(token)) {
+		await perministerLogout(token).catch(() => undefined);
+		return;
+	}
 	await deleteRecord({
 		collectionName: "auth_sessions",
 		query: { id: digest(token) },

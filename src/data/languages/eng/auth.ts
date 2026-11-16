@@ -4,6 +4,14 @@ export default [
 		value: "Sign Up",
 	},
 	{
+		id: "CONTINUE_TO_PERMINISTER",
+		value: "Continue to Perminister",
+	},
+	{
+		id: "PERMINISTER_SIGN_IN_FAILED",
+		value: "Perminister sign-in failed. Please try again.",
+	},
+	{
 		id: "SIGN_OUT",
 		value: "Sign Out",
 	},
