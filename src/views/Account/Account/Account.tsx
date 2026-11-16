@@ -230,12 +230,7 @@ export default function Account({ redirect }: any) {
 			setCounter((counter) => counter + 1);
 		} else {
 			if (perministerEnabled) {
-				const returnTo = redirect
-					? `/#/${decodeURIComponent(redirect)}`
-					: "/#/";
-				window.location.assign(
-					`/auth/perminister/start?${new URLSearchParams({ next: returnTo })}`,
-				);
+				onContinueToPerminister();
 				return;
 			}
 			setValidate(true);
@@ -291,6 +286,15 @@ export default function Account({ redirect }: any) {
 		}
 	};
 
+	const onContinueToPerminister = () => {
+		const returnTo = redirect
+			? `/#/${decodeURIComponent(redirect)}`
+			: "/#/";
+		window.location.assign(
+			`/auth/perminister/start?${new URLSearchParams({ next: returnTo })}`,
+		);
+	};
+
 	const onValidateField = (text: any) => {
 		let error = "";
 		if (!text) {
@@ -328,7 +332,7 @@ export default function Account({ redirect }: any) {
 				{error && <Typography className={styles.error}>{error}</Typography>}
 				<form className={styles.form} onSubmit={onSubmit} noValidate>
 					<Grid container spacing={2}>
-						{(!perministerEnabled || browserSupportsWebAuthn()) && (
+						{!perministerEnabled && (
 							<Grid size={12}>
 								<Input
 									state={idState}
@@ -407,8 +411,17 @@ export default function Account({ redirect }: any) {
 							)}
 						<Grid size={12}>
 							<Button
-								type="submit"
-								disabled={!!isInvalid || inProgress}
+								type={perministerEnabled && !isSignedIn ? "button" : "submit"}
+								onClick={
+									perministerEnabled && !isSignedIn
+										? onContinueToPerminister
+										: undefined
+								}
+								disabled={
+									perministerEnabled && !isSignedIn
+										? inProgress
+										: !!isInvalid || inProgress
+								}
 								fullWidth
 								variant="contained"
 								color="primary"
@@ -417,7 +430,7 @@ export default function Account({ redirect }: any) {
 								{submitLabel}
 							</Button>
 						</Grid>
-						{!isSignedIn && (
+						{!isSignedIn && !perministerEnabled && (
 							<Grid size={12}>
 								<Button
 									onClick={onLoginPasskey}
