@@ -382,27 +382,29 @@ export default function Account({ redirect }: any) {
 								/>
 							</Grid>
 						)}
-						{!isSignedIn && !perministerEnabled && browserSupportsWebAuthn() && (
-							<Grid size={12}>
-								<FormControlLabel
-									className={clsx(
-										styles.checkboxLabel,
-										direction === "rtl" && styles.rtlLabel,
-									)}
-									control={
-										<Checkbox
-											color="primary"
-											checked={createPasskey}
-											onChange={changeCreatePasskey}
-										/>
-									}
-									label={
-										translations.CREATE_PASSKEY ||
-										"Create Passkey for this device"
-									}
-								/>
-							</Grid>
-						)}
+						{!isSignedIn &&
+							!perministerEnabled &&
+							browserSupportsWebAuthn() && (
+								<Grid size={12}>
+									<FormControlLabel
+										className={clsx(
+											styles.checkboxLabel,
+											direction === "rtl" && styles.rtlLabel,
+										)}
+										control={
+											<Checkbox
+												color="primary"
+												checked={createPasskey}
+												onChange={changeCreatePasskey}
+											/>
+										}
+										label={
+											translations.CREATE_PASSKEY ||
+											"Create Passkey for this device"
+										}
+									/>
+								</Grid>
+							)}
 						<Grid size={12}>
 							<Button
 								type="submit"

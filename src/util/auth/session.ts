@@ -1,18 +1,18 @@
 import {
+	isPerministerSessionToken,
+	localUserForPerministerSession,
+	PerministerUnavailableError,
+	perministerAuthEnabled,
+	perministerLogout,
+	perministerSession,
+} from "@util/auth/perminister";
+import {
 	deleteRecord,
 	findRecord,
 	getCollection,
 	insertRecord,
 } from "@util/storage/mongo";
 import crypto from "crypto";
-import {
-	isPerministerSessionToken,
-	localUserForPerministerSession,
-	perministerAuthEnabled,
-	perministerLogout,
-	perministerSession,
-	PerministerUnavailableError,
-} from "@util/auth/perminister";
 
 export const SESSION_COOKIE = "session";
 export const SESSION_MARKER_COOKIE = "hash";
