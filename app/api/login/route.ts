@@ -8,6 +8,7 @@ import {
 	resetPassword,
 	sendResetEmail,
 } from "@util/auth/login";
+import { perministerAuthEnabled } from "@util/auth/perminister";
 import { checkRateLimit } from "@util/auth/rateLimit";
 import {
 	assertSameOrigin,
@@ -23,7 +24,6 @@ import {
 	setSessionCookies,
 } from "@util/auth/session";
 import { NextResponse } from "next/server";
-import { perministerAuthEnabled } from "@util/auth/perminister";
 
 export const dynamic = "force-dynamic";
 

@@ -68,7 +68,7 @@ async function handleUsers(request: any) {
 						"salt",
 						"role",
 						"credentials",
-					"perministerSubjectId",
+						"perministerSubjectId",
 						"resetToken",
 						"resetTokenExpiry",
 						"date",
