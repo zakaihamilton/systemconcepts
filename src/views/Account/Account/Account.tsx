@@ -287,9 +287,7 @@ export default function Account({ redirect }: any) {
 	};
 
 	const onContinueToPerminister = () => {
-		const returnTo = redirect
-			? `/#/${decodeURIComponent(redirect)}`
-			: "/#/";
+		const returnTo = redirect ? `/#/${decodeURIComponent(redirect)}` : "/#/";
 		window.location.assign(
 			`/auth/perminister/start?${new URLSearchParams({ next: returnTo })}`,
 		);
