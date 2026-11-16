@@ -4,6 +4,14 @@ export default [
 		value: "Inscreva-se",
 	},
 	{
+		id: "CONTINUE_TO_PERMINISTER",
+		value: "Continuar para Perminister",
+	},
+	{
+		id: "PERMINISTER_SIGN_IN_FAILED",
+		value: "A entrada no Perminister falhou. Tente novamente.",
+	},
+	{
 		id: "EMAIL_ADDRESS",
 		value: "Endereço de E-mail",
 	},

@@ -23,6 +23,7 @@ import {
 	setSessionCookies,
 } from "@util/auth/session";
 import { NextResponse } from "next/server";
+import { perministerAuthEnabled } from "@util/auth/perminister";
 
 export const dynamic = "force-dynamic";
 
@@ -112,6 +113,12 @@ export async function POST(request: any) {
 		lastName,
 		remember = true,
 	} = validated;
+	if (perministerAuthEnabled()) {
+		return NextResponse.json(
+			{ err: "PERMINISTER_AUTH_REQUIRED" },
+			{ status: 410 },
+		);
+	}
 	if (action === "reset-request") {
 		try {
 			await limit(request, "reset-request", id, 3);

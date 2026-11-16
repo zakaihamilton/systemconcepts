@@ -142,7 +142,7 @@ export async function POST(request: any) {
 			return NextResponse.json(result);
 		} else if (action === "auth-verify") {
 			const user = await verifyPasskeyAuth({ id, response, origin, rpID });
-			const session = await createSession(user.id);
+			const session = await createSession(user.id, true, "passkey");
 			const result = NextResponse.json({ role: user.role || "visitor" });
 			setSessionCookies(result, session, user);
 			return result;

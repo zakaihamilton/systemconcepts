@@ -16,6 +16,7 @@
 		"test:coverage": "pnpm build:browser-runtime && jest --runInBand --coverage --coverageReporters=text-summary",
 		"audit:dependencies": "pnpm audit --prod --audit-level=high ",
 		"db:indexes": "node --experimental-strip-types scripts/db-indexes.ts",
+		"migration:export-auth": "node --experimental-strip-types scripts/export-auth-migration.ts",
 		"verify": "pnpm lint && pnpm typecheck && pnpm test --runInBand && pnpm test:coverage && pnpm build && pnpm test:e2e",
 		"full-start": "pnpm build && next start",
 		"health": "repnix check",

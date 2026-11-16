@@ -4,6 +4,14 @@ export default [
 		value: "הרשם",
 	},
 	{
+		id: "CONTINUE_TO_PERMINISTER",
+		value: "המשך אל Perminister",
+	},
+	{
+		id: "PERMINISTER_SIGN_IN_FAILED",
+		value: "הכניסה ל-Perminister נכשלה. נסה שוב.",
+	},
+	{
 		id: "EMAIL_ADDRESS",
 		value: "כתובת אימייל",
 	},
