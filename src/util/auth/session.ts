@@ -53,7 +53,9 @@ export async function getSessionUser(request: any) {
 	if (!session || new Date(session.expiresAt).getTime() <= Date.now()) {
 		throw AUTHENTICATION_REQUIRED;
 	}
-	if (perministerAuthEnabled()) throw AUTHENTICATION_REQUIRED;
+	if (session.authMethod === "passkey" || perministerAuthEnabled()) {
+		throw AUTHENTICATION_REQUIRED;
+	}
 	const user = await findRecord({
 		collectionName: "users",
 		query: { id: session.userId },
