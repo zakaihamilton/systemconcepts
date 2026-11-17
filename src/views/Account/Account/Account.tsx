@@ -417,7 +417,7 @@ export default function Account({ redirect }: any) {
 								{submitLabel}
 							</Button>
 						</Grid>
-						{!isSignedIn && (
+						{!isSignedIn && browserSupportsWebAuthn() && (
 							<Grid size={12}>
 								<Button
 									onClick={onLoginPasskey}
