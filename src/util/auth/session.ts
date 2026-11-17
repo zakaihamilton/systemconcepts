@@ -23,11 +23,7 @@ function digest(token: any) {
 	return crypto.createHash("sha256").update(token).digest("hex");
 }
 
-export async function createSession(
-	userId: any,
-	remember = true,
-	authMethod: "password" | "passkey" = "password",
-) {
+export async function createSession(userId: any, remember = true) {
 	const token = crypto.randomBytes(32).toString("base64url");
 	const expiresAt = new Date(Date.now() + SESSION_TTL_MS);
 	await insertRecord({
@@ -35,7 +31,6 @@ export async function createSession(
 		record: {
 			id: digest(token),
 			userId: userId.toLowerCase(),
-			authMethod,
 			createdAt: new Date(),
 			expiresAt,
 		},
@@ -58,9 +53,7 @@ export async function getSessionUser(request: any) {
 	if (!session || new Date(session.expiresAt).getTime() <= Date.now()) {
 		throw AUTHENTICATION_REQUIRED;
 	}
-	if (perministerAuthEnabled() && session.authMethod !== "passkey") {
-		throw AUTHENTICATION_REQUIRED;
-	}
+	if (perministerAuthEnabled()) throw AUTHENTICATION_REQUIRED;
 	const user = await findRecord({
 		collectionName: "users",
 		query: { id: session.userId },

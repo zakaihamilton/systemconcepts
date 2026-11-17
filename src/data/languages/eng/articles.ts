@@ -188,22 +188,6 @@ export default [
 		value: "Options",
 	},
 	{
-		id: "SIGN_IN_WITH_PASSKEY",
-		value: "Sign in with Passkey",
-	},
-	{
-		id: "REGISTER_PASSKEY",
-		value: "Register Passkey",
-	},
-	{
-		id: "CREATE_PASSKEY",
-		value: "Create Passkey for this device",
-	},
-	{
-		id: "PASSKEYS",
-		value: "Passkeys",
-	},
-	{
 		id: "SEEK",
 		value: "Seek",
 	},

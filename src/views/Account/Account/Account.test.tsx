@@ -1,9 +1,4 @@
 import { MainStore } from "@components/Main";
-import {
-	browserSupportsWebAuthn,
-	startAuthentication,
-	startRegistration,
-} from "@simplewebauthn/browser";
 import { clearBundleCache } from "@sync/sync";
 import { UpdateSessionsStore } from "@sync/syncState";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
@@ -42,11 +37,6 @@ jest.mock("@sync/syncState", () => ({
 	},
 	loadUserSyncState: jest.fn().mockResolvedValue(undefined),
 }));
-jest.mock("@simplewebauthn/browser", () => ({
-	browserSupportsWebAuthn: jest.fn().mockReturnValue(true),
-	startAuthentication: jest.fn(),
-	startRegistration: jest.fn(),
-}));
 
 describe("Account View", () => {
 	const mockTranslations = {
@@ -56,11 +46,6 @@ describe("Account View", () => {
 		PASSWORD: "Password",
 		REMEMBER_ME: "Remember me",
 		SIGN_OUT: "Sign Out",
-		CREATE_PASSKEY: "Create passkey",
-		SIGN_IN_WITH_PASSKEY: "Sign in with passkey",
-		REGISTER_PASSKEY: "Register passkey",
-		DELETE: "Delete",
-		ENTER_PASSKEY_NAME: "Enter name",
 		ERROR: "Error",
 		SIGN_UP: "Sign Up",
 		EMPTY_FIELD: "Empty field",
@@ -73,7 +58,6 @@ describe("Account View", () => {
 		asMock(Cookies.get).mockReturnValue(null);
 		Cookies.set = jest.fn();
 		asMock(fetchJSON).mockResolvedValue([]);
-		asMock(browserSupportsWebAuthn).mockReturnValue(true);
 	});
 
 	it("renders sign in form when not signed in", async () => {
@@ -89,13 +73,9 @@ describe("Account View", () => {
 			if (key === "hash") return "testhash";
 			return null;
 		});
-		asMock(fetchJSON).mockResolvedValue([
-			{ id: "pk1", name: "My Passkey", createdAt: new Date().toISOString() },
-		]);
 
 		render(<Account />);
 		expect(await screen.findByText("Signed In")).toBeInTheDocument();
-		expect(await screen.findByText("My Passkey")).toBeInTheDocument();
 	});
 
 	it("submits a boolean remember value after it is toggled", async () => {
@@ -156,15 +136,6 @@ describe("Account View", () => {
 		});
 	});
 
-	it("hides create-passkey checkbox when WebAuthn is unsupported", () => {
-		asMock(browserSupportsWebAuthn).mockReturnValue(false);
-		render(<Account />);
-		expect(screen.queryByLabelText(/Create passkey/i)).not.toBeInTheDocument();
-		expect(
-			screen.getByRole("button", { name: "Sign in with passkey" }),
-		).toBeInTheDocument();
-	});
-
 	it("respects rtl direction", () => {
 		asMock(MainStore.useState).mockReturnValue({ direction: "rtl" });
 		render(<Account />);
@@ -195,117 +166,6 @@ describe("Account View", () => {
 		});
 	});
 
-	it("registers a passkey when signed in", async () => {
-		asMock(Cookies.get).mockImplementation((key: any) => {
-			if (key === "id") return "testuser";
-			if (key === "hash") return "testhash";
-			return null;
-		});
-		window.prompt = jest.fn().mockReturnValue("Work laptop");
-		asMock(startRegistration).mockResolvedValue({ id: "cred" });
-		asMock(fetchJSON)
-			.mockResolvedValueOnce([])
-			.mockResolvedValueOnce({ challenge: "abc" })
-			.mockResolvedValueOnce({ verified: true });
-
-		render(<Account />);
-		await screen.findByText("Signed In");
-		fireEvent.click(screen.getByRole("button", { name: "Register passkey" }));
-
-		await waitFor(() => {
-			expect(startRegistration).toHaveBeenCalled();
-			expect(fetchJSON).toHaveBeenCalledWith(
-				"/api/passkey?action=register-verify&id=testuser",
-				expect.objectContaining({ method: "POST" }),
-			);
-		});
-	});
-
-	it("deletes a passkey after confirmation", async () => {
-		asMock(Cookies.get).mockImplementation((key: any) => {
-			if (key === "id") return "testuser";
-			if (key === "hash") return "testhash";
-			return null;
-		});
-		window.confirm = jest.fn().mockReturnValue(true);
-		asMock(fetchJSON).mockResolvedValue([
-			{ id: "pk1", name: "My Passkey", createdAt: new Date().toISOString() },
-		]);
-
-		render(<Account />);
-		await screen.findByText("My Passkey");
-		fireEvent.click(screen.getByRole("button", { name: "Delete My Passkey" }));
-
-		await waitFor(() => {
-			expect(fetchJSON).toHaveBeenCalledWith(
-				"/api/passkey?id=testuser&credentialId=pk1",
-				{ method: "DELETE" },
-			);
-		});
-	});
-
-	it("skips passkey deletion when confirmation is cancelled", async () => {
-		asMock(Cookies.get).mockImplementation((key: any) => {
-			if (key === "id") return "testuser";
-			if (key === "hash") return "testhash";
-			return null;
-		});
-		window.confirm = jest.fn().mockReturnValue(false);
-		asMock(fetchJSON).mockResolvedValue([
-			{ id: "pk1", name: "My Passkey", createdAt: new Date().toISOString() },
-		]);
-
-		render(<Account />);
-		await screen.findByText("My Passkey");
-		fireEvent.click(screen.getByRole("button", { name: "Delete My Passkey" }));
-
-		expect(
-			asMock(fetchJSON).mock.calls.some(
-				([url, opts]: any) =>
-					url.includes("credentialId=pk1") && opts?.method === "DELETE",
-			),
-		).toBe(false);
-	});
-
-	it("logs in with a passkey", async () => {
-		const user = userEvent.setup();
-		asMock(startAuthentication).mockResolvedValue({ id: "assertion" });
-		asMock(fetchJSON)
-			.mockResolvedValueOnce({ challenge: "abc" })
-			.mockResolvedValueOnce({ role: "user" });
-
-		render(<Account />);
-		await user.type(screen.getByLabelText("ID"), "person@example.com");
-		await user.click(
-			screen.getByRole("button", { name: "Sign in with passkey" }),
-		);
-
-		await waitFor(() => {
-			expect(startAuthentication).toHaveBeenCalled();
-			expect(setPath).toHaveBeenCalled();
-		});
-	});
-
-	it("creates a passkey after login when checkbox is checked", async () => {
-		const user = userEvent.setup();
-		window.prompt = jest.fn().mockReturnValue(null);
-		asMock(startRegistration).mockResolvedValue({ id: "cred" });
-		asMock(fetchJSON)
-			.mockResolvedValueOnce({ role: "user" })
-			.mockResolvedValueOnce({ challenge: "abc" })
-			.mockResolvedValueOnce({ verified: true });
-
-		render(<Account />);
-		await user.type(screen.getByLabelText("ID"), "person@example.com");
-		await user.type(screen.getByLabelText("Password"), "password");
-		await user.click(screen.getByLabelText(/Create passkey/i));
-		await user.click(screen.getByRole("button", { name: "Sign In" }));
-
-		await waitFor(() => {
-			expect(startRegistration).toHaveBeenCalled();
-		});
-	});
-
 	it("clears session store and bundle cache on sign out", async () => {
 		asMock(Cookies.get).mockImplementation((key: any) => {
 			if (key === "id") return "testuser";
@@ -325,146 +185,4 @@ describe("Account View", () => {
 		});
 	});
 
-	it("shows error when passkey registration options fail", async () => {
-		asMock(Cookies.get).mockImplementation((key: any) => {
-			if (key === "id") return "testuser";
-			if (key === "hash") return "testhash";
-			return null;
-		});
-		asMock(fetchJSON)
-			.mockResolvedValueOnce([])
-			.mockResolvedValueOnce({ err: "PASSKEY_DENIED" });
-
-		render(<Account />);
-		await screen.findByText("Signed In");
-		fireEvent.click(screen.getByRole("button", { name: "Register passkey" }));
-
-		await waitFor(() => {
-			expect(screen.getByText("PASSKEY_DENIED")).toBeInTheDocument();
-		});
-	});
-
-	it("shows error when passkey registration is not verified", async () => {
-		asMock(Cookies.get).mockImplementation((key: any) => {
-			if (key === "id") return "testuser";
-			if (key === "hash") return "testhash";
-			return null;
-		});
-		window.prompt = jest.fn().mockReturnValue("Key");
-		asMock(startRegistration).mockResolvedValue({ id: "cred" });
-		asMock(fetchJSON)
-			.mockResolvedValueOnce([])
-			.mockResolvedValueOnce({ challenge: "abc" })
-			.mockResolvedValueOnce({ verified: false });
-
-		render(<Account />);
-		await screen.findByText("Signed In");
-		fireEvent.click(screen.getByRole("button", { name: "Register passkey" }));
-
-		await waitFor(() => {
-			expect(
-				screen.getByText(/PASSKEY_REGISTRATION_FAILED/i),
-			).toBeInTheDocument();
-		});
-	});
-
-	it("shows error when passkey deletion fails", async () => {
-		asMock(Cookies.get).mockImplementation((key: any) => {
-			if (key === "id") return "testuser";
-			if (key === "hash") return "testhash";
-			return null;
-		});
-		window.confirm = jest.fn().mockReturnValue(true);
-		asMock(fetchJSON)
-			.mockResolvedValueOnce([
-				{ id: "pk1", name: "My Passkey", createdAt: new Date().toISOString() },
-			])
-			.mockRejectedValueOnce("DELETE_FAILED");
-
-		render(<Account />);
-		await screen.findByText("My Passkey");
-		fireEvent.click(screen.getByRole("button", { name: "Delete My Passkey" }));
-
-		await waitFor(() => {
-			expect(screen.getByText("DELETE_FAILED")).toBeInTheDocument();
-		});
-	});
-
-	it("does not start passkey login when id is empty", async () => {
-		render(<Account />);
-		fireEvent.click(
-			screen.getByRole("button", { name: "Sign in with passkey" }),
-		);
-		expect(startAuthentication).not.toHaveBeenCalled();
-	});
-
-	it("shows error when passkey login verification fails", async () => {
-		const user = userEvent.setup();
-		asMock(startAuthentication).mockResolvedValue({ id: "assertion" });
-		asMock(fetchJSON)
-			.mockResolvedValueOnce({ challenge: "abc" })
-			.mockResolvedValueOnce({ err: "PASSKEY_LOGIN_FAILED" });
-
-		render(<Account />);
-		await user.type(screen.getByLabelText("ID"), "person@example.com");
-		await user.click(
-			screen.getByRole("button", { name: "Sign in with passkey" }),
-		);
-
-		await waitFor(() => {
-			expect(screen.getByText(/PASSKEY_LOGIN_FAILED/i)).toBeInTheDocument();
-		});
-	});
-
-	it("redirects via setHash after passkey login when redirect prop is set", async () => {
-		const user = userEvent.setup();
-		asMock(startAuthentication).mockResolvedValue({ id: "assertion" });
-		asMock(fetchJSON)
-			.mockResolvedValueOnce({ challenge: "abc" })
-			.mockResolvedValueOnce({ role: "user" });
-
-		render(<Account redirect="sessions" />);
-		await user.type(screen.getByLabelText("ID"), "person@example.com");
-		await user.click(
-			screen.getByRole("button", { name: "Sign in with passkey" }),
-		);
-
-		await waitFor(() => {
-			expect(setHash).toHaveBeenCalledWith("sessions");
-		});
-	});
-
-	it("shows error when passkey auth options fail", async () => {
-		const user = userEvent.setup();
-		asMock(fetchJSON).mockResolvedValueOnce({ err: "PASSKEY_OPTIONS_FAILED" });
-
-		render(<Account />);
-		await user.type(screen.getByLabelText("ID"), "person@example.com");
-		await user.click(
-			screen.getByRole("button", { name: "Sign in with passkey" }),
-		);
-
-		await waitFor(() => {
-			expect(screen.getByText(/PASSKEY_OPTIONS_FAILED/i)).toBeInTheDocument();
-		});
-	});
-
-	it("continues login when post-login passkey creation fails", async () => {
-		const user = userEvent.setup();
-		window.prompt = jest.fn().mockReturnValue("Laptop");
-		asMock(startRegistration).mockRejectedValue(
-			new Error("registration failed"),
-		);
-		asMock(fetchJSON).mockResolvedValueOnce({ role: "user" });
-
-		render(<Account />);
-		await user.type(screen.getByLabelText("ID"), "person@example.com");
-		await user.type(screen.getByLabelText("Password"), "password");
-		await user.click(screen.getByLabelText(/Create passkey/i));
-		await user.click(screen.getByRole("button", { name: "Sign In" }));
-
-		await waitFor(() => {
-			expect(setPath).toHaveBeenCalled();
-		});
-	});
 });

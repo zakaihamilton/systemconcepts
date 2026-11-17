@@ -128,26 +128,6 @@ export default [
 		value: "Muitas tentativas, tente novamente mais tarde.",
 	},
 	{
-		id: "PASSKEY_REGISTERED",
-		value: "Passkey registrada com sucesso!",
-	},
-	{
-		id: "PASSKEY_REGISTRATION_FAILED",
-		value: "Falha no registro da passkey!",
-	},
-	{
-		id: "PASSKEY_LOGIN_FAILED",
-		value: "Falha no login com passkey!",
-	},
-	{
-		id: "ENTER_PASSKEY_NAME",
-		value: "Digite um nome para esta passkey",
-	},
-	{
-		id: "CONFIRM_DELETE_PASSKEY",
-		value: "Tem certeza de que deseja remover esta passkey?",
-	},
-	{
 		id: "PASSWORD_TOO_SHORT",
 		value: "A senha deve ter pelo menos 8 caracteres.",
 	},

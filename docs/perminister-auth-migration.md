@@ -1,6 +1,6 @@
 # Perminister authentication
 
-System Concepts uses Perminister for password sign-in while keeping each app user ID, profile, role, and app data in its existing MongoDB records. The login accepts the email address or the user's System Concepts ID. Only an existing System Concepts user record can sign in; new users must be provisioned locally before their Perminister account is linked, and deleting a local user keeps app access disabled. Local password registration, reset, and change endpoints are disabled after cutover. Existing app passkeys remain available as a local fallback because this migration transfers password verifiers only.
+System Concepts uses Perminister for password sign-in while keeping each app user ID, profile, role, and app data in its existing MongoDB records. The login accepts the email address or the user's System Concepts ID. Only an existing System Concepts user record can sign in; new users must be provisioned locally before their Perminister account is linked, and deleting a local user keeps app access disabled. Local password registration, reset, and change endpoints are disabled after cutover. System Concepts does not provide local passkey registration, authentication, or management; future passkey support will be handled by Perminister.
 
 ## Configuration
 

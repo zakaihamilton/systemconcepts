@@ -164,7 +164,7 @@ describe("nested user records", () => {
 			id: "attacker",
 			role: "student",
 			hash: "original",
-			credentials: ["passkey"],
+			credentials: ["legacy-credential"],
 		});
 		asMock(handleRequest).mockResolvedValue({});
 	});
@@ -214,7 +214,7 @@ describe("nested user records", () => {
 							id: "attacker",
 							firstName: "Updated",
 							hash: "original",
-							credentials: ["passkey"],
+							credentials: ["legacy-credential"],
 						}),
 					],
 				}),
