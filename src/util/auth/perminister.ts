@@ -293,25 +293,7 @@ export async function localUserForPerministerSession(
 
 	let user = boundUser ?? legacyUser ?? usernameUser;
 	if (!user) {
-		const now = new Date();
-		const id = legacyAccountId ?? username;
-		const created = {
-			id,
-			email: session.account.email ?? "",
-			firstName: session.account.firstName ?? null,
-			lastName: session.account.lastName ?? null,
-			date: now.toString(),
-			utc: now.getTime(),
-			role: "visitor",
-			perministerSubjectId: session.account.subjectId,
-		};
-		try {
-			await insertRecord({ collectionName, record: created });
-			user = created;
-		} catch {
-			user = await findRecord({ collectionName, query: { id } });
-			if (!user) throw new PerministerUnavailableError();
-		}
+		throw new Error("This System Concepts account has not been provisioned.");
 	}
 	if (
 		user.perministerSubjectId &&
