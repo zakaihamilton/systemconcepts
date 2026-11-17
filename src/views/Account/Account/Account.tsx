@@ -328,7 +328,7 @@ export default function Account({ redirect }: any) {
 				{error && <Typography className={styles.error}>{error}</Typography>}
 				<form className={styles.form} onSubmit={onSubmit} noValidate>
 					<Grid container spacing={2}>
-						{!perministerEnabled && (
+						{(!perministerEnabled || browserSupportsWebAuthn()) && (
 							<Grid size={12}>
 								<Input
 									state={idState}
@@ -417,7 +417,7 @@ export default function Account({ redirect }: any) {
 								{submitLabel}
 							</Button>
 						</Grid>
-						{!isSignedIn && !perministerEnabled && (
+						{!isSignedIn && (
 							<Grid size={12}>
 								<Button
 									onClick={onLoginPasskey}

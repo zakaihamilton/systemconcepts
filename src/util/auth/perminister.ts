@@ -1,6 +1,6 @@
 import "server-only";
 
-import { findRecord, insertRecord, replaceRecord } from "@util/storage/mongo";
+import { findRecord, replaceRecord } from "@util/storage/mongo";
 import { exchangePerministerOidcCode } from "./perministerOidc";
 
 const REQUEST_TIMEOUT_MS = 12_000;
@@ -161,10 +161,12 @@ export async function perministerSession(
 	token: string,
 ): Promise<PerministerSession | null> {
 	const config = authConfig();
+	const sessionUrl = new URL("/api/auth/consumer/session", config.baseUrl);
+	sessionUrl.searchParams.set("include_organizations", "false");
 	let response: Response;
 	try {
 		response = await fetch(
-			new URL("/api/auth/consumer/session", config.baseUrl),
+			sessionUrl,
 			{
 				headers: {
 					Accept: "application/json",
