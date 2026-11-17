@@ -108,6 +108,7 @@ async function handleUsers(request: any) {
 				if (existing) {
 					record.salt = existing.salt;
 					record.credentials = existing.credentials;
+					record.perministerSubjectId = existing.perministerSubjectId;
 					record.resetToken = existing.resetToken;
 					record.resetTokenExpiry = existing.resetTokenExpiry;
 					record.date = existing.date;

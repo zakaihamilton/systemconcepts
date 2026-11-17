@@ -128,26 +128,6 @@ export default [
 		value: "יותר מדי ניסיונות, אנא נסה שוב מאוחר יותר.",
 	},
 	{
-		id: "PASSKEY_REGISTERED",
-		value: "מפתח גישה נרשם בהצלחה!",
-	},
-	{
-		id: "PASSKEY_REGISTRATION_FAILED",
-		value: "רישום מפתח גישה נכשל!",
-	},
-	{
-		id: "PASSKEY_LOGIN_FAILED",
-		value: "התחברות עם מפתח גישה נכשלה!",
-	},
-	{
-		id: "ENTER_PASSKEY_NAME",
-		value: "הכנס שם עבור מפתח גישה זה",
-	},
-	{
-		id: "CONFIRM_DELETE_PASSKEY",
-		value: "האם אתה בטוח שברצונך להסיר את מפתח הגישה הזה?",
-	},
-	{
 		id: "PASSWORD_TOO_SHORT",
 		value: "הסיסמה חייבת להיות באורך של 8 תווים לפחות.",
 	},

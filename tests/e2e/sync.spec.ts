@@ -58,7 +58,6 @@ test("manual sync downloads library content that can be opened in the UI", async
 				: JSON.stringify(files[path]),
 		});
 	});
-	await page.route("**/api/passkey?**", (route) => route.fulfill({ json: [] }));
 	await page.goto("/#sync");
 	const sync = page.getByRole("button", { name: "Sync", exact: true });
 	await expect(sync).toBeEnabled();
