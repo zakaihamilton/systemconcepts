@@ -165,20 +165,17 @@ export async function perministerSession(
 	sessionUrl.searchParams.set("include_organizations", "false");
 	let response: Response;
 	try {
-		response = await fetch(
-			sessionUrl,
-			{
-				headers: {
-					Accept: "application/json",
-					"X-Perminister-Client-Id": config.clientId,
-					"X-Perminister-Client-Secret": config.clientSecret,
-					Authorization: `Bearer ${token}`,
-				},
-				cache: "no-store",
-				redirect: "error",
-				signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+		response = await fetch(sessionUrl, {
+			headers: {
+				Accept: "application/json",
+				"X-Perminister-Client-Id": config.clientId,
+				"X-Perminister-Client-Secret": config.clientSecret,
+				Authorization: `Bearer ${token}`,
 			},
-		);
+			cache: "no-store",
+			redirect: "error",
+			signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+		});
 	} catch {
 		throw new PerministerUnavailableError();
 	}

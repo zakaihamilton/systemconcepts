@@ -184,5 +184,4 @@ describe("Account View", () => {
 			expect(UpdateSessionsStore.update).toHaveBeenCalled();
 		});
 	});
-
 });
