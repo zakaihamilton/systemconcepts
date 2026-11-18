@@ -15,6 +15,18 @@ export interface PerministerSession {
 		lastName?: string | null;
 	};
 	session: { expiresAt?: string; createdAt?: string };
+	organizations: Array<{
+		organizationId: string;
+		organizationName: string;
+		organizationRole?: string;
+		productId: string;
+		platformAdmin: boolean;
+		resourceRoles: Array<{
+			scope: { kind: string; organizationId: string; productId: string };
+			role: string | null;
+			actions: string[];
+		}>;
+	}>;
 }
 
 export class PerministerUnavailableError extends Error {
@@ -157,12 +169,31 @@ function asRecord(value: unknown): Record<string, unknown> | null {
 		: null;
 }
 
+function configuredOrganizationId(): string | null {
+	const organizationId =
+		process.env.PERMINISTER_ORGANIZATION_ID?.trim().toLowerCase() ?? "";
+	if (!organizationId) return null;
+	if (
+		!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+			organizationId,
+		)
+	) {
+		throw new PerministerUnavailableError();
+	}
+	return organizationId;
+}
+
 export async function perministerSession(
 	token: string,
 ): Promise<PerministerSession | null> {
 	const config = authConfig();
 	const sessionUrl = new URL("/api/auth/consumer/session", config.baseUrl);
-	sessionUrl.searchParams.set("include_organizations", "false");
+	const organizationId = configuredOrganizationId();
+	if (organizationId) {
+		sessionUrl.searchParams.set("organization_id", organizationId);
+	} else {
+		sessionUrl.searchParams.set("include_organizations", "false");
+	}
 	let response: Response;
 	try {
 		response = await fetch(sessionUrl, {
@@ -203,6 +234,62 @@ export async function perministerSession(
 	) {
 		return null;
 	}
+	const organizations = Array.isArray(payload?.organizations)
+		? payload.organizations.flatMap((value) => {
+				const organization = asRecord(value);
+				if (
+					!organization ||
+					typeof organization.organizationId !== "string" ||
+					typeof organization.productId !== "string"
+				) {
+					return [];
+				}
+				const resourceRoles = Array.isArray(organization.resourceRoles)
+					? organization.resourceRoles.flatMap((roleValue) => {
+							const role = asRecord(roleValue);
+							const scope = asRecord(role?.scope);
+							if (
+								!role ||
+								!scope ||
+								typeof scope.kind !== "string" ||
+								typeof scope.organizationId !== "string" ||
+								typeof scope.productId !== "string" ||
+								(role.role !== null && typeof role.role !== "string") ||
+								!Array.isArray(role.actions) ||
+								!role.actions.every((action) => typeof action === "string")
+							) {
+								return [];
+							}
+							return [
+								{
+									scope: {
+										kind: scope.kind,
+										organizationId: scope.organizationId,
+										productId: scope.productId,
+									},
+									role: role.role as string | null,
+									actions: role.actions as string[],
+								},
+							];
+						})
+					: [];
+				return [
+					{
+						organizationId: organization.organizationId.toLowerCase(),
+						organizationName:
+							typeof organization.organizationName === "string"
+								? organization.organizationName
+								: "System Concepts workspace",
+						...(typeof organization.organizationRole === "string"
+							? { organizationRole: organization.organizationRole }
+							: {}),
+						productId: organization.productId.toLowerCase(),
+						platformAdmin: organization.platformAdmin === true,
+						resourceRoles,
+					},
+				];
+			})
+		: [];
 	return {
 		account: {
 			subjectId: account.subjectId,
@@ -218,6 +305,7 @@ export async function perministerSession(
 			createdAt:
 				typeof session.createdAt === "string" ? session.createdAt : undefined,
 		},
+		organizations,
 	};
 }
 
@@ -248,8 +336,43 @@ export async function perministerLogout(token: string): Promise<void> {
 export async function localUserForPerministerSession(
 	session: PerministerSession,
 ): Promise<any> {
+	const roleOrder = [
+		"visitor",
+		"student",
+		"upper",
+		"teacher",
+		"admin",
+	] as const;
+	const organizationId = configuredOrganizationId();
+	let assignedRole: (typeof roleOrder)[number] | undefined;
+	if (organizationId) {
+		const organization = session.organizations.find(
+			(item) =>
+				item.organizationId === organizationId &&
+				item.productId === "systemconcepts",
+		);
+		if (!organization) {
+			throw new Error(
+				"This Perminister account does not have access to the System Concepts organization.",
+			);
+		}
+		assignedRole = organization.resourceRoles
+			.filter(
+				(grant) =>
+					grant.scope.kind === "product" &&
+					grant.scope.organizationId.toLowerCase() === organizationId &&
+					grant.scope.productId === "systemconcepts" &&
+					typeof grant.role === "string" &&
+					roleOrder.includes(grant.role as (typeof roleOrder)[number]) &&
+					grant.actions.includes(`systemconcepts:access:${grant.role}`),
+			)
+			.map((grant) => grant.role as (typeof roleOrder)[number])
+			.sort(
+				(left, right) => roleOrder.indexOf(right) - roleOrder.indexOf(left),
+			)[0];
+	}
 	const username = session.account.username?.trim().toLowerCase() ?? "";
-	if (!/^[a-z0-9_-]{1,254}$/.test(username)) {
+	if (username && !/^[a-z0-9_-]{1,254}$/.test(username)) {
 		throw new Error(
 			"A System Concepts ID has not been assigned to this Perminister account.",
 		);
@@ -269,7 +392,9 @@ export async function localUserForPerministerSession(
 			collectionName,
 			query: { perministerSubjectId: session.account.subjectId },
 		}),
-		findRecord({ collectionName, query: { id: username } }),
+		username
+			? findRecord({ collectionName, query: { id: username } })
+			: Promise.resolve(null),
 		legacyAccountId && legacyAccountId !== username
 			? findRecord({ collectionName, query: { id: legacyAccountId } })
 			: Promise.resolve(null),
@@ -320,6 +445,13 @@ export async function localUserForPerministerSession(
 		}
 		user = linked;
 	}
-	if (!user.role) user.role = "visitor";
-	return user;
+	if (organizationId && !assignedRole) {
+		throw new Error(
+			"A System Concepts role has not been assigned in Perminister.",
+		);
+	}
+	const legacyRole = roleOrder.includes(user.role)
+		? (user.role as (typeof roleOrder)[number])
+		: "visitor";
+	return { ...user, role: assignedRole ?? legacyRole };
 }

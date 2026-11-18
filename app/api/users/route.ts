@@ -1,6 +1,7 @@
 import { logger as structuredLogger } from "@util/api/logger";
 import { getSafeError } from "@util/api/safeError";
 import { isValidNewPassword } from "@util/auth/passwordPolicy";
+import { perministerAuthEnabled } from "@util/auth/perminister";
 import { assertSameOrigin } from "@util/auth/requestSecurity";
 import { roleAuth } from "@util/auth/roles";
 import {
@@ -96,6 +97,13 @@ async function handleUsers(request: any) {
 					query: { id: record.id },
 					collectionName,
 				});
+				if (
+					perministerAuthEnabled() &&
+					existing &&
+					record.role !== existing.role
+				) {
+					throw "ACCESS_DENIED";
+				}
 				if (record.password) {
 					record.hash = await bcryptHash(record.password, 10);
 					delete record.password;
