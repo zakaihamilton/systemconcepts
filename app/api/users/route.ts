@@ -8,6 +8,7 @@ import {
 	getSessionUser,
 	revokeAllSessions,
 } from "@util/auth/session";
+import { perministerAuthEnabled } from "@util/auth/perminister";
 import { findRecord, handleRequest } from "@util/storage/mongo";
 import { hash as bcryptHash } from "bcryptjs";
 import crypto from "crypto";
@@ -96,6 +97,13 @@ async function handleUsers(request: any) {
 					query: { id: record.id },
 					collectionName,
 				});
+				if (
+					perministerAuthEnabled() &&
+					existing &&
+					record.role !== existing.role
+				) {
+					throw "ACCESS_DENIED";
+				}
 				if (record.password) {
 					record.hash = await bcryptHash(record.password, 10);
 					delete record.password;

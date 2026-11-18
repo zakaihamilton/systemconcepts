@@ -22,6 +22,8 @@ import styles from "./User.module.css";
 export default function User({ path = "" }: any) {
 	const { direction } = MainStore.useState();
 	const translations = useTranslations();
+	const perministerEnabled =
+		process.env.NEXT_PUBLIC_PERMINISTER_LOGIN_ENABLED === "true";
 	const parentPath = useParentPath();
 	const editAccount = parentPath === "#account";
 	const [data, setData, loading] = useFetchJSON("/api/users", {
@@ -194,7 +196,7 @@ export default function User({ path = "" }: any) {
 								background={true}
 							/>
 						</Grid>
-						{!editAccount && (
+						{!editAccount && !perministerEnabled && (
 							<Grid size={12}>
 								<Input
 									id="role"
