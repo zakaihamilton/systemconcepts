@@ -9,7 +9,13 @@ import {
 	getSessionUser,
 	revokeAllSessions,
 } from "@util/auth/session";
-import { findRecord, handleRequest } from "@util/storage/mongo";
+import {
+	DeleteObjectCommand,
+	DeleteObjectsCommand,
+	ListObjectsV2Command,
+} from "@aws-sdk/client-s3";
+import { getS3 } from "@util/storage/aws";
+import { findRecord, getCollection, handleRequest } from "@util/storage/mongo";
 import { hash as bcryptHash } from "bcryptjs";
 import crypto from "crypto";
 import { NextResponse } from "next/server";
@@ -17,6 +23,64 @@ import { NextResponse } from "next/server";
 export const dynamic = "force-dynamic";
 
 const collectionName = "users";
+
+async function deleteUserData(userId: string) {
+	const id = userId.trim().toLowerCase();
+	if (!/^[a-z0-9._-]{1,254}$/.test(id) || id.includes("..")) {
+		throw "INVALID_USER_ID";
+	}
+
+	const personalCollection = await getCollection({
+		collectionName: `fs_${id}`,
+	});
+	await personalCollection.deleteMany({});
+
+	const bucket = process.env.AWS_BUCKET;
+	if (bucket) {
+		const s3 = await getS3({});
+		const prefix = `personal/${id}/`;
+		const objectsToDelete: { Key: string }[] = [];
+		let continuationToken: string | undefined;
+		do {
+			const page = await s3.send(
+				new ListObjectsV2Command({
+					Bucket: bucket,
+					Prefix: prefix,
+					ContinuationToken: continuationToken,
+				}),
+			);
+			const objects = (page.Contents ?? [])
+				.map((item: any) => item.Key)
+				.filter(
+					(key: unknown): key is string =>
+						typeof key === "string" && key.startsWith(prefix),
+				)
+				.forEach((Key: string) => objectsToDelete.push({ Key }));
+			continuationToken = page.NextContinuationToken;
+		} while (continuationToken);
+
+		for (let offset = 0; offset < objectsToDelete.length; offset += 1000) {
+				const deleted = await s3.send(
+					new DeleteObjectsCommand({
+						Bucket: bucket,
+					Delete: {
+						Objects: objectsToDelete.slice(offset, offset + 1000),
+						Quiet: true,
+					},
+					}),
+				);
+				if (deleted.Errors?.length) {
+					throw new Error("PERSONAL_STORAGE_CLEANUP_FAILED");
+				}
+			}
+
+		await s3.send(
+			new DeleteObjectCommand({ Bucket: bucket, Key: `personal/${id}` }),
+		);
+	}
+
+	await revokeAllSessions(id);
+}
 
 async function handleUsers(request: any) {
 	try {
@@ -133,6 +197,11 @@ async function handleUsers(request: any) {
 			body: isWrite ? records.filter((record: any) => record != null) : body,
 			query: Object.fromEntries(url.searchParams.entries()),
 		};
+		if (request.method === "DELETE") {
+			for (const record of req.body) {
+				if (typeof record?.id === "string") await deleteUserData(record.id);
+			}
+		}
 
 		const result = await handleRequest({ collectionName, req });
 		const sanitizeUser = (user: any) => {
