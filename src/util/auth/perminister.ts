@@ -170,7 +170,8 @@ function asRecord(value: unknown): Record<string, unknown> | null {
 }
 
 function configuredOrganizationId(): string | null {
-	const organizationId = process.env.PERMINISTER_ORGANIZATION_ID?.trim().toLowerCase() ?? "";
+	const organizationId =
+		process.env.PERMINISTER_ORGANIZATION_ID?.trim().toLowerCase() ?? "";
 	if (!organizationId) return null;
 	if (
 		!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
@@ -259,30 +260,34 @@ export async function perministerSession(
 							) {
 								return [];
 							}
-							return [{
-								scope: {
-									kind: scope.kind,
-									organizationId: scope.organizationId,
-									productId: scope.productId,
+							return [
+								{
+									scope: {
+										kind: scope.kind,
+										organizationId: scope.organizationId,
+										productId: scope.productId,
+									},
+									role: role.role as string | null,
+									actions: role.actions as string[],
 								},
-								role: role.role as string | null,
-								actions: role.actions as string[],
-							}];
+							];
 						})
 					: [];
-				return [{
-					organizationId: organization.organizationId.toLowerCase(),
-					organizationName:
-						typeof organization.organizationName === "string"
-							? organization.organizationName
-							: "System Concepts workspace",
-					...(typeof organization.organizationRole === "string"
-						? { organizationRole: organization.organizationRole }
-						: {}),
-					productId: organization.productId.toLowerCase(),
-					platformAdmin: organization.platformAdmin === true,
-					resourceRoles,
-				}];
+				return [
+					{
+						organizationId: organization.organizationId.toLowerCase(),
+						organizationName:
+							typeof organization.organizationName === "string"
+								? organization.organizationName
+								: "System Concepts workspace",
+						...(typeof organization.organizationRole === "string"
+							? { organizationRole: organization.organizationRole }
+							: {}),
+						productId: organization.productId.toLowerCase(),
+						platformAdmin: organization.platformAdmin === true,
+						resourceRoles,
+					},
+				];
 			})
 		: [];
 	return {
@@ -331,7 +336,13 @@ export async function perministerLogout(token: string): Promise<void> {
 export async function localUserForPerministerSession(
 	session: PerministerSession,
 ): Promise<any> {
-	const roleOrder = ["visitor", "student", "upper", "teacher", "admin"] as const;
+	const roleOrder = [
+		"visitor",
+		"student",
+		"upper",
+		"teacher",
+		"admin",
+	] as const;
 	const organizationId = configuredOrganizationId();
 	let assignedRole: (typeof roleOrder)[number] | undefined;
 	if (organizationId) {
@@ -341,20 +352,24 @@ export async function localUserForPerministerSession(
 				item.productId === "systemconcepts",
 		);
 		if (!organization) {
-			throw new Error("This Perminister account does not have access to the System Concepts organization.");
+			throw new Error(
+				"This Perminister account does not have access to the System Concepts organization.",
+			);
 		}
 		assignedRole = organization.resourceRoles
-				.filter(
-					(grant) =>
-						grant.scope.kind === "product" &&
-						grant.scope.organizationId.toLowerCase() === organizationId &&
-						grant.scope.productId === "systemconcepts" &&
-						typeof grant.role === "string" &&
-						roleOrder.includes(grant.role as (typeof roleOrder)[number]) &&
-						grant.actions.includes(`systemconcepts:access:${grant.role}`),
-				)
-				.map((grant) => grant.role as (typeof roleOrder)[number])
-				.sort((left, right) => roleOrder.indexOf(right) - roleOrder.indexOf(left))[0];
+			.filter(
+				(grant) =>
+					grant.scope.kind === "product" &&
+					grant.scope.organizationId.toLowerCase() === organizationId &&
+					grant.scope.productId === "systemconcepts" &&
+					typeof grant.role === "string" &&
+					roleOrder.includes(grant.role as (typeof roleOrder)[number]) &&
+					grant.actions.includes(`systemconcepts:access:${grant.role}`),
+			)
+			.map((grant) => grant.role as (typeof roleOrder)[number])
+			.sort(
+				(left, right) => roleOrder.indexOf(right) - roleOrder.indexOf(left),
+			)[0];
 	}
 	const username = session.account.username?.trim().toLowerCase() ?? "";
 	if (username && !/^[a-z0-9_-]{1,254}$/.test(username)) {
@@ -431,7 +446,9 @@ export async function localUserForPerministerSession(
 		user = linked;
 	}
 	if (organizationId && !assignedRole) {
-		throw new Error("A System Concepts role has not been assigned in Perminister.");
+		throw new Error(
+			"A System Concepts role has not been assigned in Perminister.",
+		);
 	}
 	const legacyRole = roleOrder.includes(user.role)
 		? (user.role as (typeof roleOrder)[number])
