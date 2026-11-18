@@ -1,6 +1,7 @@
 import { logger as structuredLogger } from "@util/api/logger";
 import { getSafeError } from "@util/api/safeError";
 import { isValidNewPassword } from "@util/auth/passwordPolicy";
+import { perministerAuthEnabled } from "@util/auth/perminister";
 import { assertSameOrigin } from "@util/auth/requestSecurity";
 import { roleAuth } from "@util/auth/roles";
 import {
@@ -8,7 +9,6 @@ import {
 	getSessionUser,
 	revokeAllSessions,
 } from "@util/auth/session";
-import { perministerAuthEnabled } from "@util/auth/perminister";
 import { findRecord, handleRequest } from "@util/storage/mongo";
 import { hash as bcryptHash } from "bcryptjs";
 import crypto from "crypto";
