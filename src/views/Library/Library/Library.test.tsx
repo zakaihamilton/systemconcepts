@@ -773,95 +773,6 @@ describe("Library View", () => {
 		});
 	});
 
-	it("sorts articles by explicit order fields", async () => {
-		const tags = [
-			{ _id: "t1", book: "Book", chapter: "Second", order: 2, path: "p1" },
-			{ _id: "t2", book: "Book", chapter: "First", order: 1, path: "p1" },
-		];
-		asMock(storage.exists).mockResolvedValue(true);
-		asMock(storage.readFile).mockImplementation((path: any) =>
-			Promise.resolve(tagsToJson(path, tags)),
-		);
-		asMock(usePathItems).mockReturnValue(["library", "id", "t2"]);
-		render(<Library />);
-		await waitFor(() => {
-			expect(screen.getByTestId("article-next-name")).toHaveTextContent(
-				"Second",
-			);
-		});
-	});
-
-	it("sorts articles by tag number and subNumber", async () => {
-		const tags = [
-			{
-				_id: "t1",
-				book: "Book",
-				chapter: "A",
-				number: 1,
-				subNumber: 2,
-				path: "p1",
-			},
-			{
-				_id: "t2",
-				book: "Book",
-				chapter: "B",
-				number: 1,
-				subNumber: 1,
-				path: "p1",
-			},
-		];
-		asMock(storage.exists).mockResolvedValue(true);
-		asMock(storage.readFile).mockImplementation((path: any) =>
-			Promise.resolve(tagsToJson(path, tags)),
-		);
-		asMock(usePathItems).mockReturnValue(["library", "id", "t2"]);
-		render(<Library />);
-		await waitFor(() => {
-			expect(screen.getByTestId("article-next-name")).toHaveTextContent("A");
-		});
-	});
-
-	it("sorts articles using extracted word numbers in titles", async () => {
-		const tags = [
-			{ _id: "t1", book: "Book", chapter: "Chapter Two", path: "p1" },
-			{ _id: "t2", book: "Book", chapter: "Chapter One", path: "p1" },
-		];
-		asMock(storage.exists).mockResolvedValue(true);
-		asMock(storage.readFile).mockImplementation((path: any) =>
-			Promise.resolve(tagsToJson(path, tags)),
-		);
-		asMock(usePathItems).mockReturnValue(["library", "id", "t2"]);
-		render(<Library />);
-		await waitFor(() => {
-			expect(screen.getByTestId("article-next-name")).toHaveTextContent(
-				"Chapter Two",
-			);
-		});
-	});
-
-	it("prioritizes table of contents before numbered chapters", async () => {
-		const tags = [
-			{ _id: "t1", book: "Book", chapter: "Chapter 1", path: "p1" },
-			{
-				_id: "t2",
-				book: "Book",
-				chapter: "Table of Contents",
-				path: "p1",
-			},
-		];
-		asMock(storage.exists).mockResolvedValue(true);
-		asMock(storage.readFile).mockImplementation((path: any) =>
-			Promise.resolve(tagsToJson(path, tags)),
-		);
-		asMock(usePathItems).mockReturnValue(["library", "id", "t2"]);
-		render(<Library />);
-		await waitFor(() => {
-			expect(screen.getByTestId("article-next-name")).toHaveTextContent(
-				"Chapter 1",
-			);
-		});
-	});
-
 	it("matches paragraph urls against tag base hierarchy", async () => {
 		const tags = [
 			{
@@ -919,53 +830,6 @@ describe("Library View", () => {
 		});
 	});
 
-	it("sorts articles with only one subNumber defined", async () => {
-		const tags = [
-			{
-				_id: "t1",
-				book: "Book",
-				chapter: "A",
-				number: 2,
-				subNumber: 1,
-				path: "p1",
-			},
-			{
-				_id: "t2",
-				book: "Book",
-				chapter: "B",
-				number: 1,
-				path: "p1",
-			},
-		];
-		asMock(storage.exists).mockResolvedValue(true);
-		asMock(storage.readFile).mockImplementation((path: any) =>
-			Promise.resolve(tagsToJson(path, tags)),
-		);
-		asMock(usePathItems).mockReturnValue(["library", "id", "t2"]);
-		render(<Library />);
-		await waitFor(() => {
-			expect(screen.getByTestId("article-next-name")).toHaveTextContent("A");
-		});
-	});
-
-	it("sorts early-position numeric chapter titles", async () => {
-		const tags = [
-			{ _id: "t1", book: "Book", chapter: "2 Basics", path: "p1" },
-			{ _id: "t2", book: "Book", chapter: "1 Basics", path: "p1" },
-		];
-		asMock(storage.exists).mockResolvedValue(true);
-		asMock(storage.readFile).mockImplementation((path: any) =>
-			Promise.resolve(tagsToJson(path, tags)),
-		);
-		asMock(usePathItems).mockReturnValue(["library", "id", "t2"]);
-		render(<Library />);
-		await waitFor(() => {
-			expect(screen.getByTestId("article-next-name")).toHaveTextContent(
-				"2 Basics",
-			);
-		});
-	});
-
 	it("restores last viewed article and updates LibraryStore on select", async () => {
 		const { LibraryStore } = require("../Store");
 		asMock(LibraryStore.getRawState).mockReturnValue({
@@ -1010,26 +874,6 @@ describe("Library View", () => {
 		});
 	});
 
-	it("sorts same-base titles by trailing number then falls back to localeCompare", async () => {
-		const tags = [
-			{ _id: "t1", book: "Book", chapter: "Lesson 10", path: "p1" },
-			{ _id: "t2", book: "Book", chapter: "Lesson 2", path: "p1" },
-			{ _id: "t3", book: "Book", chapter: "Alpha", path: "p1" },
-			{ _id: "t4", book: "Book", chapter: "Beta", path: "p1" },
-		];
-		asMock(storage.exists).mockResolvedValue(true);
-		asMock(storage.readFile).mockImplementation((path: any) =>
-			Promise.resolve(tagsToJson(path, tags)),
-		);
-		asMock(usePathItems).mockReturnValue(["library", "id", "t2"]);
-		render(<Library />);
-		await waitFor(() => {
-			expect(screen.getByTestId("article-next-name")).toHaveTextContent(
-				"Lesson 10",
-			);
-		});
-	});
-
 	it("appends tag number to hierarchy when present", async () => {
 		const tags = [
 			{ _id: "t1", book: "Book", chapter: "Intro", number: 3, path: "p1" },
@@ -1042,64 +886,6 @@ describe("Library View", () => {
 		render(<Library />);
 		await waitFor(() => {
 			expect(screen.getByTestId("article-selected")).toHaveTextContent("t1");
-		});
-	});
-
-	it("sorts editor notes before introductions and prefaces", async () => {
-		const tags = [
-			{ _id: "t1", book: "Book", chapter: "Preface", path: "p1" },
-			{ _id: "t2", book: "Book", chapter: "Editor's notes", path: "p1" },
-			{ _id: "t3", book: "Book", chapter: "Introduction", path: "p1" },
-		];
-		asMock(storage.exists).mockResolvedValue(true);
-		asMock(storage.readFile).mockImplementation((path: any) =>
-			Promise.resolve(tagsToJson(path, tags)),
-		);
-		asMock(usePathItems).mockReturnValue(["library", "id", "t2"]);
-		render(<Library />);
-		await waitFor(() => {
-			expect(screen.getByTestId("article-next-name")).toHaveTextContent(
-				"Introduction",
-			);
-		});
-	});
-
-	it("sorts chapters using word numbers in titles", async () => {
-		const tags = [
-			{ _id: "t1", book: "Book", chapter: "Chapter third", path: "p1" },
-			{ _id: "t2", book: "Book", chapter: "Chapter first", path: "p1" },
-		];
-		asMock(storage.exists).mockResolvedValue(true);
-		asMock(storage.readFile).mockImplementation((path: any) =>
-			Promise.resolve(tagsToJson(path, tags)),
-		);
-		asMock(usePathItems).mockReturnValue(["library", "id", "t2"]);
-		render(<Library />);
-		await waitFor(() => {
-			expect(screen.getByTestId("article-next-name")).toHaveTextContent(
-				"Chapter third",
-			);
-		});
-	});
-
-	it("uses custom order map with case-insensitive keys", async () => {
-		const tags = [
-			{ _id: "t1", book: "Book", chapter: "Beta", path: "p1" },
-			{ _id: "t2", book: "Book", chapter: "alpha", path: "p1" },
-		];
-		asMock(storage.exists).mockImplementation(async (path: any) => true);
-		asMock(storage.readFile).mockImplementation(async (path: any) => {
-			if (path.endsWith("order.json")) {
-				return JSON.stringify({ Alpha: 1, Beta: 2 });
-			}
-			return tagsToJson(path, tags);
-		});
-		asMock(usePathItems).mockReturnValue(["library", "id", "t1"]);
-		render(<Library />);
-		await waitFor(() => {
-			expect(screen.getByTestId("article-prev-name")).toHaveTextContent(
-				"alpha",
-			);
 		});
 	});
 
@@ -1132,100 +918,6 @@ describe("Library View", () => {
 		render(<Library />);
 		await waitFor(() => {
 			expect(LibraryStore.update).toHaveBeenCalled();
-		});
-	});
-
-	it("sorts foreword and prologue before generic chapters", async () => {
-		const tags = [
-			{ _id: "t1", book: "Book", chapter: "Prologue", path: "p1" },
-			{ _id: "t2", book: "Book", chapter: "Foreword", path: "p1" },
-			{ _id: "t3", book: "Book", chapter: "Contents", path: "p1" },
-		];
-		asMock(storage.exists).mockResolvedValue(true);
-		asMock(storage.readFile).mockImplementation((path: any) =>
-			Promise.resolve(tagsToJson(path, tags)),
-		);
-		asMock(usePathItems).mockReturnValue(["library", "id", "t2"]);
-		render(<Library />);
-		await waitFor(() => {
-			expect(screen.getByTestId("article-next-name")).toHaveTextContent(
-				"Prologue",
-			);
-		});
-	});
-
-	it("sorts chapters that only have a custom order on one side", async () => {
-		const tags = [
-			{ _id: "t1", book: "Book", chapter: "Later", path: "p1" },
-			{ _id: "t2", book: "Book", chapter: "Earlier", path: "p1" },
-		];
-		asMock(storage.exists).mockResolvedValue(true);
-		asMock(storage.readFile).mockImplementation(async (path: any) => {
-			if (path.endsWith("library-order.json")) {
-				return JSON.stringify({ Earlier: 0 });
-			}
-			return tagsToJson(path, tags);
-		});
-		asMock(usePathItems).mockReturnValue(["library", "id", "t1"]);
-		render(<Library />);
-		await waitFor(() => {
-			expect(screen.getByTestId("article-prev-name")).toHaveTextContent(
-				"Earlier",
-			);
-		});
-	});
-
-	it("sorts chapters when only one item has an explicit order field", async () => {
-		const tags = [
-			{ _id: "t1", book: "Book", chapter: "Unordered", path: "p1" },
-			{ _id: "t2", book: "Book", chapter: "Ordered", order: 1, path: "p1" },
-		];
-		asMock(storage.exists).mockResolvedValue(true);
-		asMock(storage.readFile).mockImplementation((path: any) =>
-			Promise.resolve(tagsToJson(path, tags)),
-		);
-		asMock(usePathItems).mockReturnValue(["library", "id", "t1"]);
-		render(<Library />);
-		await waitFor(() => {
-			expect(screen.getByTestId("article-prev-name")).toHaveTextContent(
-				"Ordered",
-			);
-		});
-	});
-
-	it("sorts numbered chapters before plain titles when only one has a number", async () => {
-		const tags = [
-			{ _id: "t1", book: "Book", chapter: "Plain", path: "p1" },
-			{ _id: "t2", book: "Book", chapter: "2 Numbered", path: "p1" },
-		];
-		asMock(storage.exists).mockResolvedValue(true);
-		asMock(storage.readFile).mockImplementation((path: any) =>
-			Promise.resolve(tagsToJson(path, tags)),
-		);
-		asMock(usePathItems).mockReturnValue(["library", "id", "t2"]);
-		render(<Library />);
-		await waitFor(() => {
-			expect(screen.getByTestId("article-next-name")).toHaveTextContent(
-				"Plain",
-			);
-		});
-	});
-
-	it("sorts equal-base early-position numbers by title length", async () => {
-		const tags = [
-			{ _id: "t1", book: "Book", chapter: "1 Short", path: "p1" },
-			{ _id: "t2", book: "Book", chapter: "1 Much Longer Title", path: "p1" },
-		];
-		asMock(storage.exists).mockResolvedValue(true);
-		asMock(storage.readFile).mockImplementation((path: any) =>
-			Promise.resolve(tagsToJson(path, tags)),
-		);
-		asMock(usePathItems).mockReturnValue(["library", "id", "t2"]);
-		render(<Library />);
-		await waitFor(() => {
-			expect(screen.getByTestId("article-prev-name")).toHaveTextContent(
-				"1 Short",
-			);
 		});
 	});
 

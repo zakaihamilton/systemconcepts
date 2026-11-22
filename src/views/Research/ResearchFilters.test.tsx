@@ -1,0 +1,375 @@
+import { ContentSize } from "@components/Page/Content";
+import {
+	act,
+	fireEvent,
+	render,
+	screen,
+	waitFor,
+} from "@testing-library/react";
+import { useDeviceType } from "@util/browser/styles";
+import { useSessions } from "@util/domain/sessions";
+import { useTranslations } from "@util/domain/translations";
+import Cookies from "js-cookie";
+import Research from "./";
+
+let mockResearchState: any;
+let mockLibraryState: any;
+
+jest.mock("@util/domain/translations");
+jest.mock("@views/ResearchStore/ResearchStore", () => ({
+	ResearchStore: {
+		useState: jest.fn(() => mockResearchState),
+		update: jest.fn((updater) => updater(mockResearchState)),
+	},
+}));
+jest.mock("@util/domain/sessions");
+jest.mock("@util/data/searchIndexBinary", () => ({
+	decodeBinaryIndex: jest.fn(),
+}));
+jest.mock("@util/domain/loadParagraphs", () => ({
+	loadParagraphsForFile: jest.fn(),
+}));
+jest.mock("@views/Library/Store", () => ({
+	LibraryStore: {
+		getRawState: jest.fn(() => mockLibraryState),
+		update: jest.fn((updater) => updater(mockLibraryState)),
+	},
+}));
+jest.mock("@sync/syncState", () => ({
+	SyncActiveStore: {
+		useState: jest.fn((selector) =>
+			selector ? selector({ libraryUpdateCounter: 0 }) : 0,
+		),
+	},
+}));
+jest.mock("@util/browser/styles");
+jest.mock("@util/storage/storage", () => ({
+	exists: jest.fn().mockResolvedValue(false),
+	readFile: jest.fn().mockResolvedValue(""),
+	deleteFile: jest.fn().mockResolvedValue(undefined),
+}));
+jest.mock("@util/domain/views", () => ({
+	setHash: jest.fn(),
+	setPath: jest.fn(),
+	usePathItems: jest.fn().mockReturnValue([]),
+}));
+jest.mock("./runResearchSearch", () => ({
+	runResearchSearch: jest.fn(),
+}));
+jest.mock("@components/Virtualized/VariableSizeList", () => {
+	const React = require("react");
+	return React.forwardRef(function MockList(_props: any, ref: any) {
+		React.useImperativeHandle(ref, () => ({
+			scrollToItem: jest.fn(),
+			resetAfterIndex: jest.fn(),
+		}));
+		return <div data-testid="virtual-list" />;
+	});
+});
+jest.mock("./PageIndicator", () => () => null);
+jest.mock("./ResultsOutline", () => () => null);
+jest.mock("./SearchResultItem", () => () => (
+	<div data-testid="search-result-item" />
+));
+jest.mock("@components/Toolbar", () => ({
+	registerToolbar: jest.fn(),
+	useToolbar: jest.fn(),
+}));
+jest.mock("@views/Library/Article", () => () => <div data-testid="article" />);
+jest.mock("@views/Library/Article/JumpDialog", () => () => null);
+jest.mock("js-cookie");
+jest.mock("@util/api/logger", () => ({
+	logger: { error: jest.fn(), debug: jest.fn(), warn: jest.fn() },
+}));
+
+describe("Research View Suggestions and Filter Interactions", () => {
+	const mockSize = { width: 800, height: 600, emPixels: 16 };
+
+	beforeEach(() => {
+		jest.clearAllMocks();
+		const { runResearchSearch } = require("./runResearchSearch");
+		asMock(runResearchSearch).mockImplementation(
+			jest.requireActual("./runResearchSearch").runResearchSearch,
+		);
+		global.ResizeObserver = jest.fn().mockImplementation(() => ({
+			observe: jest.fn(),
+			disconnect: jest.fn(),
+			unobserve: jest.fn(),
+		}));
+		mockResearchState = {
+			query: "",
+			filterTags: [],
+			source: "all",
+			results: [{ docId: "1", text: "result" }],
+			hasSearched: true,
+			_loaded: true,
+			highlight: [],
+			indexing: false,
+			progress: 0,
+			status: "",
+			indexTimestamp: 0,
+		};
+		mockLibraryState = { tags: [] };
+		asMock(useTranslations).mockReturnValue({
+			RESEARCH: "Research",
+			SESSIONS: "Sessions",
+			ARTICLES: "Articles",
+			SUMMARIES: "Summaries",
+			INDEXING: "Indexing...",
+			SEARCH: "Search",
+			SEARCH_ARTICLES: "Search...",
+			ALL: "All",
+			FILTERS: "Filters",
+			SEARCH_FILTERS: "Search filters...",
+			CLOSE: "Close",
+			DONE: "Done",
+			CLEAR_ALL: "Clear all",
+			CLEAR: "Clear search",
+			RESEARCH_HELP: "Search your library",
+			SEARCH_HINT: "Use quotes for a phrase",
+			SHOW_SEARCH: "Show Search",
+			HIDE_SEARCH: "Hide Search",
+			RESEARCH_START: "Find ideas",
+			RESEARCH_START_HELP: "Search by a word",
+			RESEARCH_PREPARING: "Preparing Research",
+			RESEARCH_INDEX_HELP: "Index is preparing",
+			SUGGESTION_TITLE: "Title",
+			SUGGESTION_FILTER: "Filter",
+			SUGGESTION_TERM: "Term",
+			ARTICLE: "Article",
+			RESULTS_LIST: "Results list",
+			MATCH: "matches",
+		});
+		asMock(useSessions).mockReturnValue([
+			[{ name: "Grace in practice", group: "ai", year: "2024" }],
+			false,
+			[],
+		]);
+		asMock(useDeviceType).mockReturnValue("desktop");
+		asMock(Cookies.get).mockReturnValue("admin");
+	});
+
+	const renderResearch = () =>
+		render(
+			<ContentSize.Provider value={mockSize}>
+				<Research />
+			</ContentSize.Provider>,
+		);
+
+	describe("suggestions and filter chips", () => {
+		it("adds a filter from a suggestion without duplicating", async () => {
+			const storage = require("@util/storage/storage");
+			const { decodeBinaryIndex } = require("@util/data/searchIndexBinary");
+			mockResearchState.hasSearched = false;
+			mockResearchState.filterTags = [{ type: "author", label: "Augustine" }];
+			asMock(storage.exists).mockImplementation((path: any) =>
+				Promise.resolve(
+					path.endsWith("tags.json") || path.endsWith("search_index.bin"),
+				),
+			);
+			asMock(storage.readFile).mockImplementation((path: any) =>
+				path.endsWith("tags.json")
+					? JSON.stringify([{ author: "Augustine", book: "Confessions" }])
+					: "binary-index",
+			);
+			asMock(decodeBinaryIndex).mockReturnValue({
+				v: 5,
+				f: [],
+				t: { aug: ["aug"] },
+			});
+			const view = renderResearch();
+			const searchInput = screen.getByPlaceholderText("Search...");
+			fireEvent.focus(searchInput);
+			fireEvent.change(searchInput, { target: { value: "aug" } });
+			await waitFor(() => {
+				view.rerender(
+					<ContentSize.Provider value={mockSize}>
+						<Research />
+					</ContentSize.Provider>,
+				);
+			});
+			const filterSuggestion = await screen.findByRole("option", {
+				name: /Augustine/,
+			});
+			fireEvent.click(filterSuggestion);
+			expect(mockResearchState.filterTags).toEqual([
+				{ type: "author", label: "Augustine" },
+			]);
+		});
+
+		it("clears active filter chips from the search panel", () => {
+			mockResearchState.filterTags = [
+				{ type: "topic", label: "Grace" },
+				{ type: "topic", label: "Hope" },
+			];
+			asMock(useTranslations).mockReturnValue({
+				RESEARCH: "Research",
+				SESSIONS: "Sessions",
+				ARTICLES: "Articles",
+				SUMMARIES: "Summaries",
+				SEARCH: "Search",
+				SEARCH_ARTICLES: "Search...",
+				ALL: "All",
+				FILTERS: "Filters",
+				CLEAR_ALL: "Clear all",
+				HIDE_SEARCH: "Hide Search",
+				RESEARCH_HELP: "Search your library",
+				SEARCH_HINT: "Use quotes",
+				TOPIC: "Topic",
+			});
+			renderResearch();
+			const clearButtons = screen.getAllByRole("button", { name: "Clear all" });
+			fireEvent.click(clearButtons[0]);
+			expect(mockResearchState.filterTags).toEqual([]);
+		});
+
+		it("clears the filter list query in the drawer", async () => {
+			const storage = require("@util/storage/storage");
+			asMock(storage.exists).mockImplementation((path: any) =>
+				Promise.resolve(path.endsWith("tags.json")),
+			);
+			asMock(storage.readFile).mockResolvedValue(
+				JSON.stringify([{ author: "Augustine" }]),
+			);
+			renderResearch();
+			fireEvent.click(screen.getByRole("button", { name: "Filters" }));
+			const filterSearch =
+				await screen.findByPlaceholderText("Search filters...");
+			fireEvent.change(filterSearch, { target: { value: "aug" } });
+			fireEvent.click(screen.getByRole("button", { name: "Clear search" }));
+			expect(filterSearch).toHaveValue("");
+		});
+	});
+
+	describe("search and filter edge cases", () => {
+		beforeEach(() => {
+			jest.useFakeTimers();
+		});
+
+		afterEach(() => {
+			jest.useRealTimers();
+		});
+
+		it("defaults source tab to all when store omits source", () => {
+			delete mockResearchState.source;
+			renderResearch();
+			expect(screen.getByRole("tab", { name: "All" })).toHaveAttribute(
+				"aria-selected",
+				"true",
+			);
+		});
+
+		it("uses fallback labels when translations omit panel toggle strings", () => {
+			asMock(useTranslations).mockReturnValue({
+				RESEARCH: "Research",
+				SEARCH: "Search",
+				SEARCH_ARTICLES: "Search...",
+				ALL: "All",
+				FILTERS: "Filters",
+				HIDE_SEARCH: undefined,
+				SHOW_SEARCH: undefined,
+				RESEARCH_HELP: undefined,
+				SEARCH_HINT: undefined,
+			});
+			renderResearch();
+			expect(
+				screen.getByRole("button", { name: "Hide Search" }),
+			).toBeInTheDocument();
+			fireEvent.click(screen.getByRole("button", { name: "Hide Search" }));
+			expect(
+				screen.getByRole("button", { name: "Show Search" }),
+			).toBeInTheDocument();
+		});
+
+		it("shows singular result label for one match", () => {
+			mockResearchState.results = [
+				{
+					docId: "1",
+					tag: { title: "Only" },
+					matches: [{ index: 0 }],
+					isSession: false,
+				},
+			];
+			asMock(useTranslations).mockReturnValue({
+				RESEARCH: "Research",
+				SESSIONS: "Sessions",
+				ARTICLES: "Articles",
+				SUMMARIES: "Summaries",
+				SEARCH: "Search",
+				SEARCH_ARTICLES: "Search...",
+				ALL: "All",
+				FILTERS: "Filters",
+				HIDE_SEARCH: "Hide Search",
+				RESEARCH_HELP: "Search your library",
+				SEARCH_HINT: "Use quotes",
+				RESULT: "result",
+				RESULTS: "results",
+				MATCH: "matches",
+				ARTICLE: "Article",
+			});
+			renderResearch();
+			expect(screen.getByText(/1 result · 1 matches/)).toBeInTheDocument();
+		});
+
+		it("keeps suggestions open when blur moves focus inside the query wrap", async () => {
+			const storage = require("@util/storage/storage");
+			asMock(storage.exists).mockImplementation((path: any) =>
+				Promise.resolve(path.endsWith("tags.json")),
+			);
+			asMock(storage.readFile).mockResolvedValue(
+				JSON.stringify([{ title: "Grace and peace" }]),
+			);
+			renderResearch();
+			const searchInput = screen.getByPlaceholderText("Search...");
+			fireEvent.focus(searchInput);
+			fireEvent.change(searchInput, { target: { value: "gr" } });
+			await waitFor(() => {
+				expect(screen.getByRole("listbox")).toBeInTheDocument();
+			});
+			const suggestion = screen.getAllByRole("option")[0];
+			fireEvent.blur(searchInput, { relatedTarget: suggestion });
+			expect(screen.getByRole("listbox")).toBeInTheDocument();
+		});
+
+		it("searches on Enter when suggestions are closed", async () => {
+			const { decodeBinaryIndex } = require("@util/data/searchIndexBinary");
+			const storage = require("@util/storage/storage");
+			mockResearchState.query = "grace";
+			mockResearchState.hasSearched = false;
+			asMock(storage.exists).mockResolvedValue(true);
+			asMock(storage.readFile).mockResolvedValue("binary-index");
+			asMock(decodeBinaryIndex).mockReturnValue({ v: 5, f: ["a"], t: {} });
+			renderResearch();
+			await act(async () => {
+				await Promise.resolve();
+			});
+			const searchInput = screen.getByPlaceholderText("Search...");
+			fireEvent.keyDown(searchInput, { key: "Enter" });
+			await act(async () => {
+				jest.runOnlyPendingTimers();
+				await Promise.resolve();
+			});
+			expect(mockResearchState.hasSearched).toBe(true);
+		});
+
+		it("deselects an active filter from the drawer", async () => {
+			const storage = require("@util/storage/storage");
+			mockResearchState.filterTags = [{ type: "author", label: "Paul" }];
+			asMock(storage.exists).mockImplementation((path: any) =>
+				Promise.resolve(path.endsWith("tags.json")),
+			);
+			asMock(storage.readFile).mockResolvedValue(
+				JSON.stringify([{ author: "Paul" }]),
+			);
+			renderResearch();
+			fireEvent.click(screen.getByRole("button", { name: "Filters (1)" }));
+			await waitFor(() => {
+				expect(
+					screen.getByRole("button", { name: "Paul" }),
+				).toBeInTheDocument();
+			});
+			fireEvent.click(screen.getByRole("button", { name: "Paul" }));
+			expect(mockResearchState.filterTags).toEqual([]);
+		});
+	});
+});

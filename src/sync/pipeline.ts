@@ -2,14 +2,19 @@ import { logger as structuredLogger } from "@util/api/logger";
 import { roleAuth } from "@util/auth/roles";
 import { makePath } from "@util/data/path";
 import storage from "@util/storage/storage";
-import { FILES_MANIFEST } from "./constants";
 import {
 	getSavedLibraryCounter,
 	readLibraryCounter,
 	saveLibraryCounter,
 } from "./libraryCounter";
+import { getLibraryLocalFiles } from "./libraryLocalFiles";
 import { addSyncLog } from "./logs";
 import { applyManifestUpdates } from "./manifest";
+import type {
+	LocalFile,
+	PipelineDependencies,
+	ProgressTracker,
+} from "./pipelineTypes";
 import { SyncProgressTracker } from "./progressTracker";
 import { applyRemoteTombstones } from "./steps/applyRemoteTombstones";
 import { deleteRemoteFiles } from "./steps/deleteRemoteFiles";
@@ -22,7 +27,6 @@ import { updateLocalManifest } from "./steps/updateLocalManifest";
 import { uploadManifest } from "./steps/uploadManifest";
 import { uploadNewFiles } from "./steps/uploadNewFiles";
 import { uploadUpdates } from "./steps/uploadUpdates";
-import { readFileIfExists } from "./storageReads";
 import { SyncActiveStore } from "./syncState";
 import { createSyncTrashId } from "./trash";
 import type { Manifest, PipelineResult, SyncConfig } from "./types";
@@ -53,168 +57,79 @@ const defaultDependencies: PipelineDependencies = {
 	createSyncTrashId,
 };
 
-type LocalFile = { path: string; fullPath: string };
-type ManifestResult = {
-	manifest: Manifest;
-	hasChanges: boolean;
-	complete?: boolean;
-	cleanedRemoteManifest?: Manifest;
-};
-type ProgressTracker = Pick<
-	SyncProgressTracker,
-	| "updateProgress"
-	| "completeStep"
-	| "setComplete"
-	| "usePersonalWeights"
-	| "getCurrentOffset"
->;
-interface PipelineDependencies {
-	storage: {
-		createFolderPath(path: string): Promise<unknown>;
-		readFile(path: string): Promise<string | null>;
-	};
-	roleAuth(role: string | undefined, requiredRole: string): boolean;
-	addSyncLog(message: string, type: string): void;
-	logger: Pick<typeof structuredLogger, "warn" | "debug" | "error">;
-	ProgressTracker: new (
-		offset: number,
-		total: number | null,
-	) => ProgressTracker;
-	getLocalFiles(path: string, config: SyncConfig): Promise<LocalFile[]>;
-	readLibraryCounter(): Promise<number>;
-	getSavedLibraryCounter(): number | null;
-	saveLibraryCounter(counter: number): void;
-	syncManifest(
-		path: string,
-		locked: boolean,
-		migration: boolean,
-	): Promise<Manifest>;
-	migrateFromMongoDB(
-		userId: string,
-		manifest: Manifest,
-		path: string,
-		canUpload: boolean,
-	): Promise<{
-		migrated: boolean;
-		fileCount: number;
-		deletedKeys?: string[];
-		manifest?: Manifest | null;
-		error?: unknown;
-	}>;
-	updateLocalManifest(
-		files: LocalFile[],
-		path: string,
-		manifest: Manifest,
-		options: { skipHashing: boolean },
-	): Promise<Manifest>;
-	downloadUpdates(
-		local: Manifest,
-		remote: Manifest,
-		localPath: string,
-		remotePath: string,
-		canUpload: boolean,
-		progress: ProgressTracker,
-		restore?: boolean,
-	): Promise<ManifestResult>;
-	removeDeletedFiles(
-		local: Manifest,
-		remote: Manifest,
-		path: string,
-		readOnly: boolean,
-	): Promise<ManifestResult>;
-	uploadUpdates(
-		local: Manifest,
-		remote: Manifest,
-		localPath: string,
-		remotePath: string,
-		progress: ProgressTracker,
-	): Promise<ManifestResult>;
-	uploadNewFiles(
-		local: Manifest,
-		remote: Manifest,
-		localPath: string,
-		remotePath: string,
-		progress: ProgressTracker,
-	): Promise<ManifestResult>;
-	deleteRemoteFiles(
-		local: Manifest,
-		path: string,
-		syncId: string,
-	): Promise<{ complete: boolean }>;
-	applyRemoteTombstones(
-		local: Manifest,
-		remote: Manifest,
-		path: string,
-		canUpload: boolean,
-		syncId: string,
-	): Promise<ManifestResult>;
-	uploadManifest(manifest: Manifest, path: string): Promise<unknown>;
-	createSyncTrashId(): string;
-}
+async function runMigrationPhase({
+	dependencies,
+	config,
+	userId,
+	canUpload,
+	remoteManifest,
+	localFiles,
+	skipHashing,
+	progress,
+}: {
+	dependencies: PipelineDependencies;
+	config: SyncConfig;
+	userId: string;
+	canUpload: boolean;
+	remoteManifest: Manifest;
+	localFiles: LocalFile[];
+	skipHashing: boolean;
+	progress: ProgressTracker;
+}) {
+	const { name, localPath } = config;
+	let migrationOccurred = false;
+	let migrationComplete = true;
 
-async function getLibraryLocalFiles(
-	localPath: string,
-	config: SyncConfig,
-	dependencies: PipelineDependencies,
-) {
-	if (!config.useChangeCounter) {
-		return {
-			localFiles: await dependencies.getLocalFiles(localPath, config),
-			skipHashing: false,
-		};
-	}
-	const counter = await dependencies.readLibraryCounter();
-	const savedCounter = dependencies.getSavedLibraryCounter();
-	const manifestPath = makePath(localPath, FILES_MANIFEST);
-	let cachedManifest: Manifest | null = null;
+	progress.updateProgress("migrateFromMongoDB", { processed: 0, total: 1 });
 	try {
-		const content = await readFileIfExists(dependencies.storage, manifestPath);
-		if (content !== null) {
-			const parsed: unknown = content ? JSON.parse(content) : [];
-			if (
-				Array.isArray(parsed) &&
-				parsed.every(
-					(entry: unknown) =>
-						typeof entry === "object" &&
-						entry !== null &&
-						"path" in entry &&
-						typeof entry.path === "string",
-				)
-			)
-				cachedManifest = parsed as Manifest;
+		const migrationResult = await dependencies.migrateFromMongoDB(
+			userId,
+			remoteManifest,
+			localPath,
+			canUpload,
+		);
+		if (migrationResult.migrated) {
+			migrationOccurred = true;
+			dependencies.addSyncLog(
+				`[${name}] Migration complete: ${migrationResult.fileCount} files`,
+				"success",
+			);
+			if (migrationResult.deletedKeys) {
+				const deletedKeys = new Set(migrationResult.deletedKeys);
+				remoteManifest = remoteManifest.filter(
+					(entry) => !deletedKeys.has(entry.path),
+				);
+			}
+			if (migrationResult.manifest) {
+				const remotePaths = new Set(remoteManifest.map((entry) => entry.path));
+				for (const entry of migrationResult.manifest) {
+					if (!remotePaths.has(entry.path)) {
+						remoteManifest.push({
+							...entry,
+							hash: "FORCE_UPLOAD",
+							modified: 0,
+							version: entry.version || 1,
+						});
+					}
+				}
+			}
+			localFiles = await dependencies.getLocalFiles(localPath, config);
+			skipHashing = false;
 		}
 	} catch (error) {
-		dependencies.logger.warn(
-			"[Sync] Failed to read cached local manifest:",
-			error,
-		);
+		migrationComplete = false;
+		const message = error instanceof Error ? error.message : String(error);
+		dependencies.logger.error(`[${name}] Migration failed:`, error);
+		dependencies.addSyncLog(`Migration failed: ${message}`, "error");
 	}
-	if (cachedManifest && savedCounter === counter) {
-		dependencies.addSyncLog(
-			`Library counter unchanged (${counter}); skipping local library scan`,
-			"info",
-		);
-		return {
-			localFiles: cachedManifest
-				.filter((entry) => !entry.deleted)
-				.map((entry) => ({
-					path: entry.path,
-					fullPath: makePath(localPath, entry.path),
-				})),
-			libraryCounter: counter,
-			skipHashing: true,
-		};
-	}
-	if (savedCounter !== null) {
-		dependencies.addSyncLog(
-			`Library counter changed (${savedCounter} -> ${counter}); checking library files`,
-			"info",
-		);
-	}
+	progress.completeStep("migrateFromMongoDB");
+
 	return {
-		localFiles: await dependencies.getLocalFiles(localPath, config),
-		libraryCounter: counter,
-		skipHashing: false,
+		migrationOccurred,
+		migrationComplete,
+		remoteManifest,
+		localFiles,
+		skipHashing,
 	};
 }
 
@@ -299,54 +214,21 @@ export function createSyncPipeline(
 		let migrationOccurred = false;
 		let migrationComplete = true;
 		if (migration) {
-			progress.updateProgress("migrateFromMongoDB", {
-				processed: 0,
-				total: 1,
+			const migrationOutcome = await runMigrationPhase({
+				dependencies,
+				config,
+				userId,
+				canUpload,
+				remoteManifest,
+				localFiles,
+				skipHashing,
+				progress,
 			});
-			try {
-				const migrationResult = await dependencies.migrateFromMongoDB(
-					userId,
-					remoteManifest,
-					localPath,
-					canUpload,
-				);
-				if (migrationResult.migrated) {
-					migrationOccurred = true;
-					dependencies.addSyncLog(
-						`[${name}] Migration complete: ${migrationResult.fileCount} files`,
-						"success",
-					);
-					if (migrationResult.deletedKeys) {
-						const deletedKeys = new Set(migrationResult.deletedKeys);
-						remoteManifest = remoteManifest.filter(
-							(entry) => !deletedKeys.has(entry.path),
-						);
-					}
-					if (migrationResult.manifest) {
-						const remotePaths = new Set(
-							remoteManifest.map((entry) => entry.path),
-						);
-						for (const entry of migrationResult.manifest) {
-							if (!remotePaths.has(entry.path)) {
-								remoteManifest.push({
-									...entry,
-									hash: "FORCE_UPLOAD",
-									modified: 0,
-									version: entry.version || 1,
-								});
-							}
-						}
-					}
-					localFiles = await dependencies.getLocalFiles(localPath, config);
-					skipHashing = false;
-				}
-			} catch (error) {
-				migrationComplete = false;
-				const message = error instanceof Error ? error.message : String(error);
-				dependencies.logger.error(`[${name}] Migration failed:`, error);
-				dependencies.addSyncLog(`Migration failed: ${message}`, "error");
-			}
-			progress.completeStep("migrateFromMongoDB");
+			migrationOccurred = migrationOutcome.migrationOccurred;
+			migrationComplete = migrationOutcome.migrationComplete;
+			remoteManifest = migrationOutcome.remoteManifest;
+			localFiles = migrationOutcome.localFiles;
+			skipHashing = migrationOutcome.skipHashing;
 		}
 
 		progress.updateProgress("updateLocalManifest", { processed: 0, total: 1 });

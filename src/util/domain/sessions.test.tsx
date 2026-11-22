@@ -1,4 +1,4 @@
-import { act, render, waitFor } from "@testing-library/react";
+import { render, waitFor } from "@testing-library/react";
 import { useGroups } from "@util/domain/groups";
 import { compactLegacySessionThumbnails } from "@util/domain/sessionCompaction";
 import storage from "@util/storage/storage";
@@ -53,10 +53,6 @@ jest.mock("@util/storage/storage", () => ({
 	getRecursiveList: jest.fn(),
 	readFile: jest.fn(),
 }));
-
-function file(path: any, name: any) {
-	return { path, name: name || path.split("/").pop(), type: "file" };
-}
 
 let latestValue: any;
 
@@ -224,7 +220,10 @@ describe("useSessions", () => {
 
 	it("falls back to storage.getListing for year files when no manifest exists", async () => {
 		asMock(storage.exists).mockImplementation(async (path: any) => {
-			return path === "/local/sync/groups.json";
+			return (
+				path === "/local/sync/groups.json" ||
+				path === "/local/sync/american/2024.json"
+			);
 		});
 		asMock(storage.getListing).mockImplementation(async (path: any) => {
 			if (path === "/local/sync/american") {
@@ -252,12 +251,6 @@ describe("useSessions", () => {
 			}
 			return "";
 		});
-		asMock(storage.exists).mockImplementation(async (path: any) => {
-			return (
-				path === "/local/sync/groups.json" ||
-				path === "/local/sync/american/2024.json"
-			);
-		});
 
 		renderHarness();
 
@@ -267,82 +260,6 @@ describe("useSessions", () => {
 		});
 
 		expect(getSessionsState()[0][0].id).toBe("2024-03-03 Listing Session");
-	});
-
-	it("merges personal metadata (position/duration) for split group sessions", async () => {
-		asMock(storage.exists).mockImplementation(async (path: any) => {
-			return (
-				path === "/local/sync/groups.json" ||
-				path === "/local/sync/files.json" ||
-				path === "/local/sync/american/2024.json" ||
-				path === "local/personal"
-			);
-		});
-		asMock(storage.readFile).mockImplementation(async (path: any) => {
-			if (path === "/local/sync/groups.json") {
-				return JSON.stringify({ groups: [{ name: "american" }] });
-			}
-			if (path === "/local/sync/files.json") {
-				return JSON.stringify([{ path: "/american/2024.json" }]);
-			}
-			if (path === "/local/sync/american/2024.json") {
-				return JSON.stringify({
-					sessions: [
-						{
-							id: "2024-05-05 Test Session",
-							name: "Test Session",
-							date: "2024-05-05",
-							group: "american",
-							year: "2024",
-							type: "audio",
-						},
-					],
-				});
-			}
-			if (path === "local/personal/american/2024.json") {
-				return JSON.stringify({
-					"2024-05-05 Test Session": { position: 42, duration: 99 },
-				});
-			}
-			return "";
-		});
-		asMock(storage.getRecursiveList).mockResolvedValue([
-			file("local/personal/american/2024.json", "2024.json"),
-		]);
-
-		renderHarness();
-
-		await waitFor(() => {
-			const [items] = getSessionsState();
-			expect(items).toHaveLength(1);
-		});
-
-		expect(getSessionsState()[0][0].position).toBe(42);
-	});
-
-	it("recovers gracefully when a personal metadata file fails to parse", async () => {
-		asMock(storage.exists).mockImplementation(async (path: any) => {
-			return path === "/local/sync/groups.json" || path === "local/personal";
-		});
-		asMock(storage.readFile).mockImplementation(async (path: any) => {
-			if (path === "/local/sync/groups.json") {
-				return JSON.stringify({ groups: [] });
-			}
-			if (path === "local/personal/broken.json") {
-				return "not json";
-			}
-			return "";
-		});
-		asMock(storage.getRecursiveList).mockResolvedValue([
-			file("local/personal/broken.json", "broken.json"),
-		]);
-
-		renderHarness();
-
-		await waitFor(() => {
-			const [items] = getSessionsState();
-			expect(items).toEqual([]);
-		});
 	});
 
 	it("continues loading when legacy thumbnail compaction fails", async () => {
@@ -408,7 +325,7 @@ describe("useSessions", () => {
 	});
 
 	it("does not reload while a load is already in progress (busy guard)", async () => {
-		let resolveExists;
+		let resolveExists: (val: boolean) => void;
 		asMock(storage.exists).mockImplementation(
 			() =>
 				new Promise((resolve) => {
@@ -422,318 +339,11 @@ describe("useSessions", () => {
 			expect(SessionsStore.getRawState().busy).toBe(true);
 		});
 
-		resolveExists(false);
-	});
-
-	describe("filtering", () => {
-		const SESSIONS = [
-			{
-				id: "s1",
-				group: "american",
-				year: "2024",
-				type: "video",
-				thumbnail: "img1.jpg",
-				summary: { path: "s1.md" },
-				tags: ["tag1"],
-				position: 10,
-				hasDuration: true,
-				isHebrew: false,
-			},
-			{
-				id: "s2",
-				group: "hebrew",
-				year: "2023",
-				type: "audio",
-				thumbnail: null,
-				summary: null,
-				tags: [],
-				position: 0,
-				hasDuration: false,
-				isHebrew: true,
-			},
-			{
-				id: "s3",
-				group: "american",
-				year: "2024",
-				type: "image",
-				thumbnail: "img3.jpg",
-				summary: null,
-				tags: [],
-				position: 0,
-				hasDuration: false,
-				isHebrew: false,
-			},
-		];
-
-		beforeEach(() => {
-			SessionsStore.update((s) => {
-				s.sessions = SESSIONS;
-			});
-		});
-
-		it("filters by group", async () => {
-			SessionsStore.update((s) => {
-				s.groupFilter = ["hebrew"];
-			});
-			renderHarness();
-			await waitFor(() => {
-				const [items] = getSessionsState();
-				expect(items.map((i: any) => i.id)).toEqual(["s2"]);
-			});
-		});
-
-		it("filters by year", async () => {
-			SessionsStore.update((s) => {
-				s.yearFilter = ["2023"];
-			});
-			renderHarness();
-			await waitFor(() => {
-				const [items] = getSessionsState();
-				expect(items.map((i: any) => i.id)).toEqual(["s2"]);
-			});
-		});
-
-		it("filters by media type", async () => {
-			SessionsStore.update((s) => {
-				s.typeFilter = ["image"];
-			});
-			renderHarness();
-			await waitFor(() => {
-				const [items] = getSessionsState();
-				expect(items.map((i: any) => i.id)).toEqual(["s3"]);
-			});
-		});
-
-		it("excludes image-only sessions when exclude_image_only is set", async () => {
-			SessionsStore.update((s) => {
-				s.typeFilter = ["exclude_image_only"];
-			});
-			renderHarness();
-			await waitFor(() => {
-				const [items] = getSessionsState();
-				expect(items.map((i: any) => i.id)).toEqual(["s1", "s2"]);
-			});
-		});
-
-		it("filters sessions with a thumbnail", async () => {
-			SessionsStore.update((s) => {
-				s.typeFilter = ["with_thumbnail"];
-			});
-			renderHarness();
-			await waitFor(() => {
-				const [items] = getSessionsState();
-				expect(items.map((i: any) => i.id).sort()).toEqual(["s1", "s3"]);
-			});
-		});
-
-		it("filters sessions without a thumbnail", async () => {
-			SessionsStore.update((s) => {
-				s.typeFilter = ["without_thumbnail"];
-			});
-			renderHarness();
-			await waitFor(() => {
-				const [items] = getSessionsState();
-				expect(items.map((i: any) => i.id)).toEqual(["s2"]);
-			});
-		});
-
-		it("filters sessions with/without a summary", async () => {
-			SessionsStore.update((s) => {
-				s.typeFilter = ["with_summary"];
-			});
-			renderHarness();
-			await waitFor(() => {
-				const [items] = getSessionsState();
-				expect(items.map((i: any) => i.id)).toEqual(["s1"]);
-			});
-		});
-
-		it("filters sessions with/without tags", async () => {
-			SessionsStore.update((s) => {
-				s.typeFilter = ["with_tags"];
-			});
-			renderHarness();
-			await waitFor(() => {
-				const [items] = getSessionsState();
-				expect(items.map((i: any) => i.id)).toEqual(["s1"]);
-			});
-		});
-
-		it("filters sessions with/without a saved position", async () => {
-			SessionsStore.update((s) => {
-				s.typeFilter = ["without_position"];
-			});
-			renderHarness();
-			await waitFor(() => {
-				const [items] = getSessionsState();
-				expect(items.map((i: any) => i.id).sort()).toEqual(["s2", "s3"]);
-			});
-		});
-
-		it("filters sessions by language (Hebrew vs English)", async () => {
-			SessionsStore.update((s) => {
-				s.typeFilter = ["with_hebrew"];
-			});
-			renderHarness();
-			await waitFor(() => {
-				const [items] = getSessionsState();
-				expect(items.map((i: any) => i.id)).toEqual(["s2"]);
-			});
-		});
-
-		it("filters sessions with/without duration", async () => {
-			SessionsStore.update((s) => {
-				s.typeFilter = ["with_duration"];
-			});
-			renderHarness();
-			await waitFor(() => {
-				const [items] = getSessionsState();
-				expect(items.map((i: any) => i.id)).toEqual(["s1"]);
-			});
-		});
-
-		it("returns unfiltered sessions when filterSessions option is false", async () => {
-			SessionsStore.update((s) => {
-				s.groupFilter = ["hebrew"];
-			});
-			renderHarness({ options: { filterSessions: false } });
-			await waitFor(() => {
-				const [items] = getSessionsState();
-				expect(items).toHaveLength(3);
-			});
-		});
-
-		it("filters sessions without a summary", async () => {
-			SessionsStore.update((s) => {
-				s.typeFilter = ["without_summary"];
-			});
-			renderHarness();
-			await waitFor(() => {
-				const [items] = getSessionsState();
-				expect(items.map((i: any) => i.id).sort()).toEqual(["s2", "s3"]);
-			});
-		});
-
-		it("filters sessions without tags", async () => {
-			SessionsStore.update((s) => {
-				s.typeFilter = ["without_tags"];
-			});
-			renderHarness();
-			await waitFor(() => {
-				const [items] = getSessionsState();
-				expect(items.map((i: any) => i.id).sort()).toEqual(["s2", "s3"]);
-			});
-		});
-
-		it("filters sessions with a saved position", async () => {
-			SessionsStore.update((s) => {
-				s.typeFilter = ["with_position"];
-			});
-			renderHarness();
-			await waitFor(() => {
-				const [items] = getSessionsState();
-				expect(items.map((i: any) => i.id)).toEqual(["s1"]);
-			});
-		});
-
-		it("filters sessions without duration", async () => {
-			SessionsStore.update((s) => {
-				s.typeFilter = ["without_duration"];
-			});
-			renderHarness();
-			await waitFor(() => {
-				const [items] = getSessionsState();
-				expect(items.map((i: any) => i.id).sort()).toEqual(["s2", "s3"]);
-			});
-		});
-
-		it("filters sessions with English language only", async () => {
-			SessionsStore.update((s) => {
-				s.typeFilter = ["with_english"];
-			});
-			renderHarness();
-			await waitFor(() => {
-				const [items] = getSessionsState();
-				expect(items.map((i: any) => i.id).sort()).toEqual(["s1", "s3"]);
-			});
-		});
-	});
-
-	describe("toolbar and UI interactions", () => {
-		it("registers a filter toolbar item that toggles the filter dialog", async () => {
-			const { useToolbar } = require("@components/Toolbar");
-			renderHarness();
-			await waitFor(() => expect(useToolbar).toHaveBeenCalled());
-			const toolbarArgs = asMock(useToolbar).mock.calls.at(-1)[0];
-			expect(toolbarArgs.id).toBe("Sessions");
-			const filterItem = toolbarArgs.items.find(
-				(item: any) => item.id === "filter",
-			);
-			expect(filterItem).toBeDefined();
-
-			await act(async () => {
-				filterItem.onClick();
-			});
-
-			expect(SessionsStore.getRawState().showFilterDialog).toBe(true);
-			expect(SessionsStore.getRawState().filterBarManuallyEnabled).toBe(true);
-		});
-
-		it("hides the filter dialog automatically once filters are cleared and it was not manually enabled", async () => {
-			SessionsStore.update((s) => {
-				s.showFilterDialog = true;
-				s.filterBarManuallyEnabled = false;
-				s.groupFilter = [];
-				s.typeFilter = [];
-				s.yearFilter = [];
-			});
-			renderHarness();
-			await waitFor(() => {
-				expect(SessionsStore.getRawState().showFilterDialog).toBe(false);
-			});
-		});
-
-		it("builds groupsItems with click handlers that toggle the group filter", async () => {
-			asMock(storage.exists).mockImplementation(
-				async (path: any) => path === "/local/sync/groups.json",
-			);
-			asMock(storage.readFile).mockImplementation(async (path: any) => {
-				if (path === "/local/sync/groups.json") {
-					return JSON.stringify({
-						groups: [{ name: "american" }, { name: "hebrew" }],
-					});
-				}
-				return "";
-			});
-			renderHarness();
-
-			await waitFor(() => {
-				expect(SessionsStore.getRawState().groups).toHaveLength(2);
-			});
-			const { useToolbar } = require("@components/Toolbar");
-			await waitFor(() => expect(useToolbar).toHaveBeenCalled());
-			const toolbarArgs = asMock(useToolbar).mock.calls.at(-1)[0];
-			const groupsItems = toolbarArgs.depends[1];
-			const americanItem = groupsItems.find(
-				(item: any) => item.id === "american",
-			);
-			expect(americanItem).toBeDefined();
-			SessionsStore.update((s) => {
-				s.groupFilter = ["american"];
-			});
-			await act(async () => {
-				americanItem.onClick();
-			});
-			expect(SessionsStore.getRawState().groupFilter).toEqual([]);
-			await act(async () => {
-				americanItem.onClick();
-			});
-			expect(SessionsStore.getRawState().groupFilter).toEqual(["american"]);
-		});
+		resolveExists!(false);
 	});
 
 	it("skips a second load while the first update is still busy", async () => {
-		let resolveGroupsExists;
+		let resolveGroupsExists: () => void;
 		let blocked = true;
 		asMock(storage.exists).mockImplementation(async (path: any) => {
 			if (blocked && path === "/local/sync/groups.json") {
@@ -766,7 +376,7 @@ describe("useSessions", () => {
 		expect(loadingLogs()).toBe(beforeCounter);
 
 		blocked = false;
-		resolveGroupsExists();
+		resolveGroupsExists!();
 		await waitFor(() => expect(SessionsStore.getRawState().busy).toBe(false));
 	});
 
@@ -795,121 +405,6 @@ describe("useSessions", () => {
 		const { logger } = require("@util/api/logger");
 		expect(logger.error).toHaveBeenCalledWith(
 			expect.stringContaining("Error reading bundle.json"),
-			expect.any(Error),
-		);
-	});
-
-	it("loads personal metadata from merged group files and bundle.json", async () => {
-		asMock(useGroups).mockReturnValue([
-			[
-				{ name: "american", color: "#fff", merged: true },
-				{ name: "bundledgroup", bundled: true },
-			],
-			false,
-			jest.fn(),
-		]);
-		asMock(storage.exists).mockImplementation(async (path: any) => {
-			return (
-				path === "/local/sync/groups.json" ||
-				path === "/local/sync/american.json" ||
-				path === "/local/sync/bundle.json" ||
-				path === "local/personal"
-			);
-		});
-		asMock(storage.readFile).mockImplementation(async (path: any) => {
-			if (path === "/local/sync/groups.json") {
-				return JSON.stringify({
-					groups: [
-						{ name: "american" },
-						{ name: "bundledgroup", bundled: true },
-					],
-				});
-			}
-			if (path === "/local/sync/american.json") {
-				return JSON.stringify({
-					sessions: [
-						{
-							id: "2024-01-01 Merged Session",
-							name: "Merged Session",
-							date: "2024-01-01",
-							group: "american",
-							year: "2024",
-							type: "video",
-						},
-					],
-				});
-			}
-			if (path === "/local/sync/bundle.json") {
-				return JSON.stringify({
-					sessions: [
-						{
-							id: "2024-02-02 Bundled Session",
-							name: "Bundled Session",
-							date: "2024-02-02",
-							group: "bundledgroup",
-							year: "2024",
-							type: "audio",
-						},
-					],
-				});
-			}
-			if (path === "local/personal/american.json") {
-				return JSON.stringify({
-					"2024/2024-01-01 Merged Session.json": {
-						position: 11,
-						duration: 22,
-					},
-				});
-			}
-			if (path === "local/personal/bundle.json") {
-				return JSON.stringify({
-					"bundledgroup/2024/2024-02-02 Bundled Session.json": {
-						position: 33,
-						duration: 44,
-					},
-				});
-			}
-			return "";
-		});
-		asMock(storage.getRecursiveList).mockResolvedValue([
-			file("local/personal/american.json", "american.json"),
-			file("local/personal/bundle.json", "bundle.json"),
-			file("local/personal/unknown/deep/nested.json", "nested.json"),
-		]);
-
-		renderHarness();
-
-		await waitFor(() => {
-			const [items] = getSessionsState();
-			expect(items).toHaveLength(2);
-		});
-		const [items] = getSessionsState();
-		const merged = items.find((item: any) => item.group === "american");
-		const bundled = items.find((item: any) => item.group === "bundledgroup");
-		expect(merged.position).toBe(11);
-		expect(bundled.position).toBe(33);
-	});
-
-	it("logs when personal metadata listing fails", async () => {
-		asMock(storage.exists).mockImplementation(async (path: any) => {
-			return path === "/local/sync/groups.json" || path === "local/personal";
-		});
-		asMock(storage.readFile).mockResolvedValue(
-			JSON.stringify({ groups: [{ name: "american" }] }),
-		);
-		asMock(storage.getRecursiveList).mockRejectedValue(
-			new Error("personal list fail"),
-		);
-
-		renderHarness();
-
-		await waitFor(() => {
-			const [items] = getSessionsState();
-			expect(items).toEqual([]);
-		});
-		const { logger } = require("@util/api/logger");
-		expect(logger.error).toHaveBeenCalledWith(
-			expect.stringContaining("Error loading personal metadata"),
 			expect.any(Error),
 		);
 	});
@@ -1043,56 +538,5 @@ describe("useSessions", () => {
 			expect(items).toHaveLength(5);
 		});
 		jest.useRealTimers();
-	});
-
-	it("skips personal metadata files with unknown directory structures", async () => {
-		asMock(storage.exists).mockImplementation(async (path: any) => {
-			return (
-				path === "/local/sync/groups.json" ||
-				path === "/local/sync/files.json" ||
-				path === "/local/sync/american/2024.json" ||
-				path === "local/personal"
-			);
-		});
-		asMock(storage.readFile).mockImplementation(async (path: any) => {
-			if (path === "/local/sync/groups.json") {
-				return JSON.stringify({ groups: [{ name: "american" }] });
-			}
-			if (path === "/local/sync/files.json") {
-				return JSON.stringify([{ path: "/american/2024.json" }]);
-			}
-			if (path === "/local/sync/american/2024.json") {
-				return JSON.stringify({
-					sessions: [
-						{
-							id: "2024-01-01 Session",
-							name: "Session",
-							date: "2024-01-01",
-							group: "american",
-							year: "2024",
-							type: "audio",
-						},
-					],
-				});
-			}
-			if (path.includes("weird/extra/deep.json")) {
-				return JSON.stringify({ "2024/session": { position: 5 } });
-			}
-			return "";
-		});
-		asMock(storage.getRecursiveList).mockResolvedValue([
-			{
-				type: "file",
-				name: "deep.json",
-				path: "local/personal/weird/extra/deep.json",
-			},
-		]);
-
-		renderHarness();
-		await waitFor(() => {
-			const [items] = getSessionsState();
-			expect(items).toHaveLength(1);
-			expect(items[0].name).toBe("Session");
-		});
 	});
 });

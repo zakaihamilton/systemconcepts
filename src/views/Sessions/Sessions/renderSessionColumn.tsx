@@ -12,7 +12,9 @@ import Row from "@widgets/Row";
 import SessionIcon from "@widgets/SessionIcon";
 import Tooltip from "@widgets/Tooltip";
 import clsx from "clsx";
-import styles from "./Sessions.module.css";
+import badgeStyles from "./SessionBadges.module.css";
+import gridStyles from "./SessionsGrid.module.css";
+import listStyles from "./SessionsList.module.css";
 
 export function renderSessionColumn(
 	columnId: any,
@@ -38,14 +40,14 @@ export function renderSessionColumn(
 					});
 				};
 				const icon = (
-					<div className={styles.icon} onClick={toggleFolder}>
+					<div className={listStyles.icon} onClick={toggleFolder}>
 						{item.isExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
 					</div>
 				);
 				const nameContent = (
-					<div className={styles.nameContainer}>
+					<div className={listStyles.nameContainer}>
 						<span
-							className={clsx(styles.labelText, styles.singleLine)}
+							className={clsx(listStyles.labelText, listStyles.singleLine)}
 							style={{ fontWeight: "bold" }}
 						>
 							{item.name}{" "}
@@ -65,7 +67,7 @@ export function renderSessionColumn(
 			const icon = (
 				<div
 					style={style}
-					className={styles.icon}
+					className={listStyles.icon}
 					onClick={() => handleIconClick(item.type)}
 					id={item.type}
 				>
@@ -76,21 +78,21 @@ export function renderSessionColumn(
 			const nameContentInner = (
 				<span
 					className={clsx(
-						styles.labelText,
-						viewMode !== "grid" && styles.singleLine,
-						viewMode === "grid" && styles.gridLineClamp,
+						viewMode === "grid" ? gridStyles.labelText : listStyles.labelText,
+						viewMode !== "grid" && listStyles.singleLine,
+						viewMode === "grid" && gridStyles.gridLineClamp,
 					)}
 				>
 					{item.name}
 					{viewMode !== "grid" && (
 						<div
 							className={clsx(
-								styles.percentageContainer,
-								item.percentage && styles.visible,
+								listStyles.percentageContainer,
+								item.percentage && listStyles.visible,
 							)}
 						>
 							<div
-								className={styles.percentage}
+								className={listStyles.percentage}
 								style={{ width: item.percentage + "%" }}
 							/>
 						</div>
@@ -100,15 +102,15 @@ export function renderSessionColumn(
 
 			const nameContent = (
 				<Tooltip title={item.name}>
-					<div className={styles.nameContainer}>{nameContentInner}</div>
+					<div className={listStyles.nameContainer}>{nameContentInner}</div>
 				</Tooltip>
 			);
 
 			const href = target(item);
 			return viewMode === "grid" ? (
 				<Label
-					className={clsx(styles.labelName, styles[viewMode])}
-					icon={viewMode !== "grid" && icon}
+					className={clsx(gridStyles.labelName, gridStyles.grid)}
+					icon={false}
 					name={nameContent}
 				/>
 			) : (
@@ -136,9 +138,9 @@ export function renderSessionColumn(
 
 			const aiBadge = item.ai && viewMode === "grid" && (
 				<Tooltip title="AI Summary Available">
-					<div className={styles.aiBadge}>
+					<div className={badgeStyles.aiBadge}>
 						<AutoAwesomeIcon />
-						<span className={styles.aiText}>AI</span>
+						<span className={badgeStyles.aiText}>AI</span>
 					</div>
 				</Tooltip>
 			);
@@ -147,16 +149,16 @@ export function renderSessionColumn(
 				!isNaN(item.percentage) &&
 				item.percentage > 0 &&
 				viewMode === "grid" && (
-					<div className={clsx(styles.gridProgressBar, styles.visible)}>
+					<div className={clsx(gridStyles.gridProgressBar, gridStyles.visible)}>
 						<div
-							className={styles.gridProgressFill}
+							className={gridStyles.gridProgressFill}
 							style={{ width: item.percentage + "%" }}
 						/>
 					</div>
 				);
 
 			return (
-				<div className={styles.thumbnailContainer}>
+				<div className={gridStyles.thumbnailContainer}>
 					<Image
 						href={target(item)}
 						onClick={() => gotoItem(item)}
@@ -181,8 +183,8 @@ export function renderSessionColumn(
 					color={item.color}
 					className={
 						viewMode === "grid"
-							? styles.gridGroupContainer
-							: styles.listGroupContainer
+							? badgeStyles.gridGroupContainer
+							: badgeStyles.listGroupContainer
 					}
 				/>
 			);
@@ -194,14 +196,14 @@ export function renderSessionColumn(
 			const formatted = formatDate(item.date);
 			if (viewMode === "grid") {
 				return (
-					<div className={styles.gridDateBadge}>
-						<span className={styles.gridDateText}>{formatted}</span>
+					<div className={badgeStyles.gridDateBadge}>
+						<span className={badgeStyles.gridDateText}>{formatted}</span>
 					</div>
 				);
 			}
 			return (
-				<div className={styles.dateBadge}>
-					<span className={styles.dateText}>{formatted}</span>
+				<div className={badgeStyles.dateBadge}>
+					<span className={badgeStyles.dateText}>{formatted}</span>
 				</div>
 			);
 		}
@@ -213,9 +215,14 @@ export function renderSessionColumn(
 		case "tags":
 		case "tagsWidget":
 			return item.tags.length ? (
-				<div className={styles.tags}>
+				<div className={badgeStyles.tags}>
 					{item.tags.map((tag: any) => (
-						<Chip key={tag} label={tag} size="small" className={styles.tag} />
+						<Chip
+							key={tag}
+							label={tag}
+							size="small"
+							className={badgeStyles.tag}
+						/>
 					))}
 				</div>
 			) : null;

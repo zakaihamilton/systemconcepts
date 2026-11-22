@@ -17,7 +17,10 @@ import Cookies from "js-cookie";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { buildTreePrefixMap } from "./buildTreePrefixMap";
 import { renderSessionColumn } from "./renderSessionColumn";
+import badgeStyles from "./SessionBadges.module.css";
 import styles from "./Sessions.module.css";
+import gridStyles from "./SessionsGrid.module.css";
+import listStyles from "./SessionsList.module.css";
 import {
 	collectSessionIds,
 	getSessionDateLocale,
@@ -58,7 +61,7 @@ export default function SessionsPage() {
 							part.type === "day" ? (
 								<strong
 									key={`${part.type}-${index}`}
-									className={styles.dateDay}
+									className={badgeStyles.dateDay}
 								>
 									{part.value}
 								</strong>
@@ -69,7 +72,7 @@ export default function SessionsPage() {
 					}
 					return (
 						<>
-							<strong className={styles.dateDay}>{day}</strong>{" "}
+							<strong className={badgeStyles.dateDay}>{day}</strong>{" "}
 							{monthFormatter.format(d)} {year}
 						</>
 					);
@@ -183,7 +186,7 @@ export default function SessionsPage() {
 					title: translations.THUMBNAIL,
 					viewModes: {
 						grid: {
-							className: styles.gridThumbnail,
+							className: gridStyles.gridThumbnail,
 						},
 					},
 				},
@@ -194,14 +197,14 @@ export default function SessionsPage() {
 					padding: false,
 					viewModes: {
 						tree: {
-							className: styles.compactNameCell,
+							className: listStyles.compactNameCell,
 						},
 						list: {
-							className: styles.compactNameCell,
+							className: listStyles.compactNameCell,
 						},
 						table: null,
 						grid: {
-							className: styles.gridName,
+							className: gridStyles.gridName,
 						},
 					},
 				},
@@ -220,15 +223,15 @@ export default function SessionsPage() {
 					viewModes: {
 						...((!isMobile || orderBy !== "duration") && {
 							tree: {
-								className: styles.compactDateCell,
+								className: listStyles.compactDateCell,
 							},
 							list: {
-								className: styles.compactDateCell,
+								className: listStyles.compactDateCell,
 							},
 							table: null,
 						}),
 						grid: {
-							className: styles.gridDate,
+							className: gridStyles.gridDate,
 						},
 					},
 				},
@@ -257,7 +260,7 @@ export default function SessionsPage() {
 							table: null,
 						}),
 						grid: {
-							className: styles.gridDuration,
+							className: gridStyles.gridDuration,
 						},
 					},
 				},
@@ -287,15 +290,15 @@ export default function SessionsPage() {
 					},
 					viewModes: {
 						tree: {
-							className: styles.compactGroupCell,
+							className: listStyles.compactGroupCell,
 						},
 						list: {
-							className: styles.compactGroupCell,
+							className: listStyles.compactGroupCell,
 						},
 						table: null,
 						grid: {
-							className: styles.gridGroup,
-							selectedClassName: styles.gridGroupSelected,
+							className: badgeStyles.gridGroup,
+							selectedClassName: badgeStyles.gridGroupSelected,
 						},
 					},
 				},
@@ -417,14 +420,14 @@ export default function SessionsPage() {
 	const viewModes = useMemo(
 		() => ({
 			tree: {
-				className: isMobile ? styles.treePhoneItem : styles.treeItem,
+				className: isMobile ? listStyles.treePhoneItem : listStyles.treeItem,
 			},
 			list: {
-				className: isMobile ? styles.listPhoneItem : styles.listItem,
+				className: isMobile ? listStyles.listPhoneItem : listStyles.listItem,
 			},
 			table: null,
 			grid: {
-				className: styles.gridItem,
+				className: gridStyles.gridItem,
 			},
 		}),
 		[isMobile],
@@ -461,10 +464,14 @@ export default function SessionsPage() {
 					renderColumn={renderColumn}
 					rowClassName={(item: any) => {
 						const classes = [];
-						if (item.isPlaying) classes.push(styles.playing);
+						if (item.isPlaying) {
+							classes.push(
+								viewMode === "grid" ? gridStyles.playing : listStyles.playing,
+							);
+						}
 						if (item.isExpanded || item.isTreeChild)
-							classes.push(styles.expandedGroupHighlight);
-						if (item.isTreeChild) classes.push(styles.treeChild);
+							classes.push(listStyles.expandedGroupHighlight);
+						if (item.isTreeChild) classes.push(listStyles.treeChild);
 						return classes.join(" ");
 					}}
 					emptyLabel={

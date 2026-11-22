@@ -10,7 +10,7 @@ import { useTranslations } from "@util/domain/translations";
 import SessionIcon from "@widgets/SessionIcon";
 import clsx from "clsx";
 import { useState } from "react";
-import styles from "./ProgressDialog.module.css";
+import styles from "./ProgressItem.module.css";
 
 function NewSessionItem({ session }: any) {
 	const [expanded, setExpanded] = useState(false);

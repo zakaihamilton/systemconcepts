@@ -2,55 +2,23 @@ import { addSyncLog } from "@sync/sync";
 import { UpdateSessionsStore } from "@sync/syncState";
 import { logger as structuredLogger } from "@util/api/logger";
 import pLimit from "@util/data/p-limit";
-import { isDurationFile, isSummaryFile, isTagsFile } from "@util/data/path";
-import storage from "@util/storage/storage";
-import { getCombinedYearFingerprint } from "./fingerprints";
-import { createSessionItem } from "./mapper";
+import {
+	inspectYearRefreshPlan,
+	mergeRefreshedSessions,
+	selectSessionIdsToProcess,
+} from "./planYearRefresh";
+import { resolveSessionMetadata } from "./resolveSessionMetadata";
 import { recordGroupError, toSessionProgress } from "./sessionProgress";
 import {
 	buildMetadataLookup,
-	getDigitalOceanSessionFiles,
-	getListingSessionFingerprints,
-	getMetadataValue,
-	getMissingSessionIds,
-	getSessionIdsNeedingRefresh,
-	getWasabiSessionFiles,
 	groupFilesBySessionId,
-	hasImageFile,
-	mergeListingSessions,
 } from "./updateGroupSessionFiles";
 import {
-	getCachedSessionsForYear,
-	getMetadataFingerprint,
-	getSessionDate,
 	getSessionYear,
 	getYearMetadata,
-	loadCachedYearSessions,
-	readYearCache,
 	writeYearCache,
 } from "./updateGroupYearMetadata";
 import { getListing, updateYearSync, yieldToMain } from "./utils";
-
-function mergeRecentSessions(
-	cachedSessions: any[],
-	refreshedSessions: any[],
-	recentCutoff: string,
-) {
-	const sessionsById = new Map<any, any>();
-	for (const session of cachedSessions || []) {
-		const id = session.id || session.name;
-		const sessionDate = getSessionDate(id);
-		if (!sessionDate || sessionDate < recentCutoff) {
-			sessionsById.set(id, session);
-		}
-	}
-	for (const session of refreshedSessions || []) {
-		sessionsById.set(session.id || session.name, session);
-	}
-	return Array.from(sessionsById.values()).sort((a, b) =>
-		(a.id || a.name).localeCompare(b.id || b.name),
-	);
-}
 
 export async function processGroupYear({
 	name,
@@ -81,48 +49,30 @@ export async function processGroupYear({
 			`[UpdateGroup] Year ${year.name} has ${yearItems?.length || 0} items`,
 		);
 		yearItems.sort((a: any, b: any) => a.name.localeCompare(b.name));
-		const metadataFingerprint = getMetadataFingerprint(
-			groupMetadataFiles,
-			year.name,
-		);
-		const yearFingerprint = getCombinedYearFingerprint(
-			yearItems,
+
+		const {
 			metadataFingerprint,
-		);
-		const cachedYear = await readYearCache(name, year.name);
-		const cachedYearSessions =
-			isMerged || isBundled
-				? getCachedSessionsForYear(existingSessions, year.name)
-				: await loadCachedYearSessions(name, year.name, isMerged, isBundled);
-
-		const isTargetInThisYear =
-			targetSessionId &&
-			(cachedYearSessions || []).some(
-				(s: any) => s.id === targetSessionId || s.name === targetSessionId,
-			);
-
-		const listingSessionFingerprints = getListingSessionFingerprints(
-			yearItems,
-			year.name,
-		);
-		const listingSessionIds = Object.keys(listingSessionFingerprints).sort(
-			(a, b) => a.localeCompare(b),
-		);
-		const missingSessionIds = getMissingSessionIds(
-			yearItems,
+			yearFingerprint,
 			cachedYearSessions,
-			year.name,
-		);
-		const fingerprintMatches = cachedYear?.fingerprint === yearFingerprint;
-		const hasCachedSessions =
-			cachedYearSessions && cachedYearSessions.length > 0;
-		if (
-			!forceUpdate &&
-			!isTargetInThisYear &&
-			fingerprintMatches &&
-			missingSessionIds.length === 0 &&
-			hasCachedSessions
-		) {
+			listingSessionFingerprints,
+			listingSessionIds,
+			shouldSkip,
+			shouldRefreshIncrementally,
+			incrementalSessionIds,
+		} = await inspectYearRefreshPlan({
+			name,
+			yearName: year.name,
+			yearItems,
+			groupMetadataFiles,
+			existingSessions,
+			forceUpdate,
+			isMerged,
+			isBundled,
+			targetSessionId,
+			recentCutoff,
+		});
+
+		if (shouldSkip) {
 			if (isMerged || isBundled) {
 				allSessions.push(...cachedYearSessions);
 			}
@@ -132,20 +82,6 @@ export async function processGroupYear({
 			addSyncLog(`[${name}/${year.name}] ✓ Skipped unchanged year.`, "info");
 			return;
 		}
-
-		// Prefer incremental rematerialization whenever we already have local
-		// sessions. A changed year fingerprint (new Wasabi media) used to force
-		// a full-year rebuild and hang large groups before any progress painted.
-		const shouldRefreshIncrementally =
-			!forceUpdate && !isTargetInThisYear && !recentCutoff && hasCachedSessions;
-		const incrementalSessionIds = shouldRefreshIncrementally
-			? getSessionIdsNeedingRefresh(
-					yearItems,
-					cachedYearSessions,
-					year.name,
-					cachedYear?.sessionFingerprints,
-				)
-			: null;
 
 		UpdateSessionsStore.update((s) => {
 			s.status[itemIndex].phase = "metadata";
@@ -176,36 +112,19 @@ export async function processGroupYear({
 			metadataYearItems,
 			year.name,
 		);
-		const sortedIds = Array.from(
-			new Set([
-				...Object.keys(wasabiFilesMap),
-				...Object.keys(digitalOceanFilesMap).filter((id) =>
-					hasImageFile(digitalOceanFilesMap[id]),
-				),
-			]),
-		).sort((a, b) => a.localeCompare(b));
-		const shouldRefreshOnlyRecentSessions =
-			recentCutoff && cachedYearSessions && cachedYearSessions.length > 0;
-		let sessionIds = shouldRefreshIncrementally
-			? incrementalSessionIds || []
-			: shouldRefreshOnlyRecentSessions
-				? sortedIds.filter((id) => {
-						const sessionDate = getSessionDate(id);
-						return sessionDate && sessionDate >= recentCutoff;
-					})
-				: sortedIds;
 
-		if (shouldRefreshIncrementally) {
-			addSyncLog(
-				`[${name}/${year.name}] Refreshing ${sessionIds.length} changed session(s) (of ${listingSessionIds.length}).`,
-				"info",
-			);
-		} else if (recentCutoff && !shouldRefreshOnlyRecentSessions) {
-			addSyncLog(
-				`[${name}/${year.name}] No local year cache; refreshing the full year.`,
-				"info",
-			);
-		}
+		const { sessionIds, shouldRefreshOnlyRecentSessions } =
+			selectSessionIdsToProcess({
+				name,
+				yearName: year.name,
+				wasabiFilesMap,
+				digitalOceanFilesMap,
+				listingSessionIds,
+				cachedYearSessions,
+				shouldRefreshIncrementally,
+				incrementalSessionIds,
+				recentCutoff,
+			});
 
 		UpdateSessionsStore.update((s) => {
 			s.status[itemIndex].phase = "sessions";
@@ -221,172 +140,19 @@ export async function processGroupYear({
 				sessionIds.map((id) =>
 					yearSessionsLimit(async () => {
 						try {
-							if (targetSessionId && id !== targetSessionId) {
-								const cachedSession = (cachedYearSessions || []).find(
-									(s: any) => s.id === id || s.name === id,
-								);
-								if (cachedSession) {
-									return cachedSession;
-								}
-							} else if (targetSessionId && id === targetSessionId) {
-								addSyncLog(
-									`[${name}] Force re-fetching metadata for targeted session: ${id}`,
-									"info",
-								);
-							}
-
-							const [, , sessionName] =
-								id.trim().match(/(\d+-\d+-\d+) (.*)/) || [];
-							let tags =
-								getMetadataValue(sessionTagsMap, id, sessionName) || [];
-							let duration = getMetadataValue(
-								sessionDurationMap,
+							return await resolveSessionMetadata({
 								id,
-								sessionName,
-							);
-							let summary = getMetadataValue(
-								sessionSummariesMap,
-								id,
-								sessionName,
-							);
-							let transcription = getMetadataValue(
-								sessionTranscriptionMap,
-								id,
-								sessionName,
-							);
-							if (targetSessionId && id === targetSessionId) {
-								addSyncLog(
-									`[${name}] Resolved metadata keys - id: "${id}", sessionName: "${sessionName || "none"}"`,
-									"info",
-								);
-								addSyncLog(
-									`[${name}] Resolved tags from S3: ${JSON.stringify(tags)}`,
-									"info",
-								);
-								addSyncLog(
-									`[${name}] Resolved duration from S3: ${duration || "none"}`,
-									"info",
-								);
-								addSyncLog(
-									`[${name}] Resolved summary from S3: ${summary ? summary.substring(0, 80) + "..." : "none"}`,
-									"info",
-								);
-								addSyncLog(
-									`[${name}] Resolved transcription from S3: ${transcription || "none"}`,
-									"info",
-								);
-							}
-							let transcriptPath = null;
-							const wasabiFiles = wasabiFilesMap[id] || [];
-							const digitalOceanFiles = getDigitalOceanSessionFiles(
-								digitalOceanFilesMap[id],
-								wasabiFiles,
-							);
-							const files = [
-								...getWasabiSessionFiles(wasabiFiles),
-								...digitalOceanFiles,
-							];
-							const metadataFallbackFiles = [
-								...digitalOceanFiles,
-								...wasabiFiles,
-							];
-
-							if (!tags.length) {
-								const tagsFile = metadataFallbackFiles.find((f) =>
-									isTagsFile(f.name),
-								);
-								if (tagsFile) {
-									try {
-										const content = await storage.readFile(tagsFile.path);
-										const parsed = JSON.parse(content);
-										if (Array.isArray(parsed)) {
-											tags = parsed;
-										} else if (parsed && Array.isArray(parsed.tags)) {
-											tags = parsed.tags;
-										}
-									} catch (err: any) {
-										structuredLogger.warn(
-											`[Sync] Failed to read tags file ${tagsFile.path}`,
-											err,
-										);
-									}
-								}
-							}
-
-							if (!duration || duration < 1) {
-								const durationFile = metadataFallbackFiles.find((f) =>
-									isDurationFile(f.name),
-								);
-								if (durationFile) {
-									try {
-										const content = await storage.readFile(durationFile.path);
-										try {
-											const parsed = JSON.parse(content);
-											if (parsed && typeof parsed.duration === "number") {
-												duration = parsed.duration;
-											} else {
-												duration = parseFloat(content);
-											}
-										} catch {
-											duration = parseFloat(content);
-										}
-									} catch (err: any) {
-										structuredLogger.warn(
-											`[Sync] Failed to read duration file ${durationFile.path}`,
-											err,
-										);
-									}
-								}
-							}
-
-							if (!summary) {
-								const summaryFile = metadataFallbackFiles.find((f) =>
-									isSummaryFile(f.name),
-								);
-								if (summaryFile) {
-									try {
-										summary = await storage.readFile(summaryFile.path);
-									} catch (err: any) {
-										structuredLogger.warn(
-											`[Sync] Failed to read summary file ${summaryFile.path}`,
-											err,
-										);
-									}
-								}
-							}
-
-							// If not in consolidated zip, check for individual file or .txt inside the folder.
-							// Usually it's sessionID.txt. If we didn't get it from zip, check files list.
-							if (!transcription) {
-								const txtFile = metadataFallbackFiles.find((f) =>
-									f.name.toLowerCase().endsWith(".txt"),
-								);
-								if (txtFile) {
-									transcription = true;
-									transcriptPath = txtFile.path;
-								}
-							}
-
-							const item = createSessionItem(
-								id,
-								files,
-								year.name,
 								name,
-								tags,
-								duration,
-								summary,
-								transcription,
-								transcriptPath,
-							);
-
-							if (targetSessionId && id === targetSessionId) {
-								addSyncLog(
-									`[${name}] Targeted session metadata updated successfully: ${id}`,
-									"success",
-								);
-							}
-
-							return item;
+								yearName: year.name,
+								targetSessionId,
+								cachedYearSessions,
+								wasabiFilesMap,
+								digitalOceanFilesMap,
+								sessionTagsMap,
+								sessionDurationMap,
+								sessionSummariesMap,
+								sessionTranscriptionMap,
+							});
 						} finally {
 							completedSessions++;
 							if (
@@ -405,18 +171,15 @@ export async function processGroupYear({
 			)
 		).filter(Boolean);
 
-		const sessionsToPersist = shouldRefreshIncrementally
-			? mergeListingSessions(
-					listingSessionIds,
-					cachedYearSessions,
-					yearSessions,
-				)
-			: shouldRefreshOnlyRecentSessions
-				? mergeRecentSessions(cachedYearSessions, yearSessions, recentCutoff!)
-				: yearSessions;
+		const sessionsToPersist = mergeRefreshedSessions({
+			shouldRefreshIncrementally,
+			shouldRefreshOnlyRecentSessions,
+			listingSessionIds,
+			cachedYearSessions,
+			yearSessions,
+			recentCutoff,
+		});
 
-		// Persist can take a long time for large years; surface it so the UI
-		// does not look stuck at N/N sessions with an empty year bar.
 		UpdateSessionsStore.update((s) => {
 			s.status[itemIndex].phase = "persisting";
 			s.status = [...s.status];
@@ -428,9 +191,6 @@ export async function processGroupYear({
 		);
 
 		if (isMerged || isBundled) {
-			// Replace this year's cached view with the current listing result.
-			// This preserves unprocessed years while allowing sessions removed
-			// from S3 to disappear from merged and bundled group indexes.
 			for (let index = allSessions.length - 1; index >= 0; index--) {
 				if (getSessionYear(allSessions[index]) === String(year.name)) {
 					allSessions.splice(index, 1);
@@ -444,7 +204,6 @@ export async function processGroupYear({
 				sessionsToPersist,
 				cachedYearSessions,
 			);
-			// Track sessions for total count regardless of whether file was updated
 			sessionsToPersist.forEach((session: any) =>
 				allSessionNames.add(session.id),
 			);
@@ -459,8 +218,8 @@ export async function processGroupYear({
 				});
 			}
 		}
-		// Year cache is an optimization — defer so it does not contend with
-		// other local FS work during the persist phase.
+
+		// Year cache is an optimization — defer so it does not contend with other local FS work.
 		void (async () => {
 			try {
 				await new Promise((resolve) => setTimeout(resolve, 800));
@@ -488,7 +247,7 @@ export async function processGroupYear({
 	} catch (err: any) {
 		structuredLogger.error(err);
 		recordGroupError(itemIndex, err);
-		throw err; // Abort this year's processing and fail the group update
+		throw err;
 	} finally {
 		UpdateSessionsStore.update((s) => {
 			s.status[itemIndex].progress++;

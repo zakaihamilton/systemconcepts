@@ -1,0 +1,206 @@
+.listItem {
+	grid-template-columns: auto minmax(7.25em, 9%) 8em 6.25em;
+	border-bottom: 1px solid var(--border-color) !important;
+	background-color: var(--main-background) !important;
+	padding: 4px 12px !important;
+	transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.listItem:hover {
+	background-color: color-mix(
+		in srgb,
+		var(--primary-color) 4%,
+		var(--main-background-alternative)
+	) !important;
+
+	.icon svg {
+		transform: scale(1.15);
+	}
+}
+
+.listPhoneItem {
+	grid-template-columns: auto minmax(4.85em, 10%) 6em;
+	border-bottom: 1px solid var(--border-color) !important;
+	background-color: var(--main-background) !important;
+	padding: 4px 10px !important;
+	transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.listPhoneItem:hover {
+	background-color: color-mix(
+		in srgb,
+		var(--primary-color) 4%,
+		var(--main-background-alternative)
+	) !important;
+}
+
+.treeItem {
+	grid-template-columns: auto minmax(7.25em, 9%) 8em 6.25em;
+	border-bottom: 1px solid var(--border-color) !important;
+	background-color: var(--main-background) !important;
+	padding: 4px 12px !important;
+	transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.treeItem:hover {
+	background-color: color-mix(
+		in srgb,
+		var(--primary-color) 4%,
+		var(--main-background-alternative)
+	) !important;
+
+	.icon svg {
+		transform: scale(1.15);
+	}
+}
+
+.treePhoneItem {
+	grid-template-columns: auto minmax(4.85em, 10%) 6em;
+	border-bottom: 1px solid var(--border-color) !important;
+	background-color: var(--main-background) !important;
+	padding: 4px 10px !important;
+	transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.treePhoneItem:hover {
+	background-color: color-mix(
+		in srgb,
+		var(--primary-color) 4%,
+		var(--main-background-alternative)
+	) !important;
+}
+
+.compactDateCell {
+	justify-content: flex-start !important;
+	padding-left: 0.2em !important;
+	padding-right: 0.35em !important;
+}
+
+.compactGroupCell {
+	justify-content: center !important;
+	padding-left: 0.35em !important;
+	padding-right: 0.35em !important;
+}
+
+.compactNameCell {
+	padding-right: 0.1em !important;
+}
+
+.labelText.singleLine {
+	display: block;
+	max-width: 100%;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	overflow: hidden;
+}
+
+.treeChild {
+	margin-left: 1.5em !important;
+	padding-left: 0.75em !important;
+	border-left: 2px solid var(--group-color, var(--border-color)) !important;
+	background-color: color-mix(
+		in srgb,
+		var(--group-color, var(--main-background-alternative)) 6%,
+		transparent
+	) !important;
+}
+
+.expandedGroupHighlight {
+	background-color: color-mix(
+		in srgb,
+		var(--group-color, var(--expanded-color)) 6%,
+		transparent
+	) !important;
+	transition: background-color 0.2s ease;
+
+	&:hover {
+		background-color: color-mix(
+			in srgb,
+			var(--group-color, var(--expanded-color)) 12%,
+			transparent
+		) !important;
+	}
+}
+
+.percentageContainer {
+	width: 80px;
+	border: 1px solid transparent;
+	height: 0.2em;
+	margin: 0.1em;
+}
+
+.percentageContainer.visible {
+	border: 1px solid var(--text-color);
+}
+
+.percentage {
+	background-color: var(--text-color);
+	width: 0%;
+	height: 0.1em;
+}
+
+.icon {
+	position: relative;
+	cursor: pointer;
+	height: 100%;
+	width: 40px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-direction: column;
+
+	svg {
+		color: color-mix(
+			in srgb,
+			var(--group-color, var(--primary-color)) 45%,
+			var(--text-color)
+		) !important;
+		transition: transform 0.25s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+	}
+}
+
+.icon.active {
+	background: var(--info-background) !important;
+}
+
+.nameContainer {
+	display: flex;
+	align-items: center;
+	overflow: hidden;
+	min-width: 0;
+	width: 100%;
+}
+
+.playing {
+	border-left: 3px solid var(--group-color, var(--playing-color)) !important;
+	background-color: color-mix(
+		in srgb,
+		var(--group-color, var(--playing-color)) 8%,
+		var(--main-background-alternative)
+	) !important;
+	/* Keep the accent on the playback affordance, not the row text. Group
+	 * colors can be intentionally light, which made the active row illegible. */
+	color: var(--text-color) !important;
+
+	.labelText {
+		color: var(--text-color) !important;
+		font-weight: 600 !important;
+	}
+
+	.icon svg {
+		color: var(--group-color, var(--playing-color)) !important;
+		animation: pulse 1.5s infinite ease-in-out !important;
+	}
+}
+
+@keyframes pulse {
+	0% {
+		transform: scale(1);
+	}
+	50% {
+		transform: scale(1.15);
+	}
+	100% {
+		transform: scale(1);
+	}
+}
