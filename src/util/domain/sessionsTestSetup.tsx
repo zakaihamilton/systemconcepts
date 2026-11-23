@@ -1,22 +1,79 @@
 import { render } from "@testing-library/react";
 
+jest.mock("@components/Toolbar", () => ({
+	registerToolbar: jest.fn(),
+	useToolbar: jest.fn(),
+}));
+
+jest.mock("@sync/sync", () => ({
+	useSync: jest.fn(() => [0]),
+}));
+
+jest.mock("@util/api/logger", () => ({
+	logger: {
+		debug: jest.fn(),
+		error: jest.fn(),
+		info: jest.fn(),
+		warn: jest.fn(),
+	},
+}));
+
+jest.mock("@util/browser/store", () => ({
+	...jest.requireActual("@util/browser/store"),
+	useLocalStorage: jest.fn(),
+}));
+
+jest.mock("@util/browser/styles", () => ({
+	useDeviceType: jest.fn(() => "desktop"),
+}));
+
+jest.mock("@util/domain/groups", () => {
+	const { Store } = require("pullstate");
+	return {
+		GroupsStore: new Store({ settings: {} }),
+		useGroups: jest.fn(),
+	};
+});
+
+jest.mock("@util/domain/sessionCompaction", () => ({
+	compactLegacySessionThumbnails: jest.fn(),
+}));
+
+jest.mock("@util/domain/translations", () => ({
+	useTranslations: jest.fn(() => ({ FILTER: "Filter" })),
+}));
+
+jest.mock("@util/storage/storage", () => ({
+	exists: jest.fn(),
+	getListing: jest.fn(),
+	getRecursiveList: jest.fn(),
+	readFile: jest.fn(),
+}));
+
 const GROUP_METADATA = [{ name: "american", color: "#fff" }];
 
 export function createSessionsTestHarness(
-	useSessions: any,
-	SessionsStore: any,
-	useGroups: any,
-	compactLegacySessionThumbnails: any,
-	storage: any,
+	useSessions: typeof import("./sessions").useSessions,
+	SessionsStore: typeof import("./sessions").SessionsStore,
+	useGroups: typeof import("@util/domain/groups").useGroups,
+	compactLegacySessionThumbnails: typeof import(
+		"@util/domain/sessionCompaction"
+	).compactLegacySessionThumbnails,
+	storage: typeof import("@util/storage/storage").default,
 ) {
 	let latestValue: any;
 
-	function Harness({ depends = [], options = {} }: any) {
+	type HarnessProps = {
+		depends?: Parameters<typeof useSessions>[0];
+		options?: Parameters<typeof useSessions>[1];
+	};
+
+	function Harness({ depends = [], options = {} }: HarnessProps) {
 		latestValue = useSessions(depends, options);
 		return null;
 	}
 
-	function renderHarness(props: any = {}) {
+	function renderHarness(props: Parameters<typeof Harness>[0] = {}) {
 		return render(<Harness {...props} />);
 	}
 
@@ -27,7 +84,7 @@ export function createSessionsTestHarness(
 	function resetSessionsTestState() {
 		jest.clearAllMocks();
 		latestValue = null;
-		SessionsStore.update((s: any) => {
+		SessionsStore.update((s) => {
 			s.sessions = null;
 			s.groups = [];
 			s.groupFilter = [];

@@ -1,5 +1,9 @@
-import { clear, localFileSystem } from "./local/fsOperations";
+import {
+	clear,
+	localFileSystem,
+	resetLocalFileSystem,
+} from "./local/fsOperations";
 
-export { clear };
+export { clear, resetLocalFileSystem };
 
 export default localFileSystem;

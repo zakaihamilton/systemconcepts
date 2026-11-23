@@ -1,59 +1,9 @@
+import { createSessionsTestHarness } from "../sessionsTestSetup";
 import { waitFor } from "@testing-library/react";
 import { useGroups } from "@util/domain/groups";
 import { compactLegacySessionThumbnails } from "@util/domain/sessionCompaction";
 import storage from "@util/storage/storage";
 import { SessionsStore, useSessions } from "../sessions";
-import { createSessionsTestHarness } from "../sessionsTestSetup";
-
-jest.mock("@components/Toolbar", () => ({
-	registerToolbar: jest.fn(),
-	useToolbar: jest.fn(),
-}));
-
-jest.mock("@sync/sync", () => ({
-	useSync: jest.fn(() => [0]),
-}));
-
-jest.mock("@util/api/logger", () => ({
-	logger: {
-		debug: jest.fn(),
-		error: jest.fn(),
-		info: jest.fn(),
-		warn: jest.fn(),
-	},
-}));
-
-jest.mock("@util/browser/store", () => ({
-	...jest.requireActual("@util/browser/store"),
-	useLocalStorage: jest.fn(),
-}));
-
-jest.mock("@util/browser/styles", () => ({
-	useDeviceType: jest.fn(() => "desktop"),
-}));
-
-jest.mock("@util/domain/groups", () => {
-	const { Store } = require("pullstate");
-	return {
-		GroupsStore: new Store({ settings: {} }),
-		useGroups: jest.fn(),
-	};
-});
-
-jest.mock("@util/domain/sessionCompaction", () => ({
-	compactLegacySessionThumbnails: jest.fn(),
-}));
-
-jest.mock("@util/domain/translations", () => ({
-	useTranslations: jest.fn(() => ({ FILTER: "Filter" })),
-}));
-
-jest.mock("@util/storage/storage", () => ({
-	exists: jest.fn(),
-	getListing: jest.fn(),
-	getRecursiveList: jest.fn(),
-	readFile: jest.fn(),
-}));
 
 function file(path: string, name?: string) {
 	return { path, name: name || path.split("/").pop(), type: "file" };
