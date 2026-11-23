@@ -11,6 +11,7 @@ import { fetchSessionMetadata } from "./sessionMetadataClient";
 import { updateGroupProcess } from "./updateGroup";
 import {
 	emptyMetadataFingerprint,
+	expectSessionField,
 	file,
 	mockListingResponses,
 	mockYearCacheAndSessions,
@@ -148,8 +149,8 @@ describe("updateGroupProcess metadata resolution", () => {
 		await updateGroupProcess("test", true, false);
 
 		const [, , sessions] = asMock(updateYearSync).mock.calls[0];
-		expect(sessions[0].id).toBe("2024-05-05 Test Session");
-		expect(sessions[0].tags).toEqual(["hd"]);
+		expectSessionField(sessions[0], "id", "2024-05-05 Test Session");
+		expectSessionField(sessions[0], "tags", ["hd"]);
 	});
 
 	it("matches metadata keys with normalized punctuation and casing", async () => {

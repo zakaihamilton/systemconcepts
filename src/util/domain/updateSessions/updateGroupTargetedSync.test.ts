@@ -7,7 +7,7 @@ import {
 	cachedYearSession,
 	emptyYearMetadata,
 	file,
-	mockCachedYearListing,
+	mockRecentYearCache,
 	mockUnchangedYearCache,
 	mockYearCacheAndSessions,
 	mockYearListing,
@@ -33,13 +33,9 @@ describe("updateGroupProcess targeted and recent-days sync", () => {
 			currentYear,
 			{ tags: ["preserve"] },
 		);
-		const recentId = recentSessionId();
-
-		mockCachedYearListing(
-			currentYear,
-			[`${oldSession.id}.mp4`, `${recentId}.mp4`],
-			[oldSession],
-		);
+		const recentId = mockRecentYearCache(currentYear, oldSession.id, [
+			oldSession,
+		]);
 
 		asMock(fetchSessionMetadata).mockResolvedValue(
 			yearMetadata({
@@ -134,12 +130,10 @@ describe("updateGroupProcess targeted and recent-days sync", () => {
 	it("merges recent session updates using name-only cached session keys", async () => {
 		const currentYear = String(new Date().getFullYear());
 		const oldId = `${currentYear}-01-01 Historical Session`;
-		const recentId = recentSessionId();
 		const localYearPath = `/local/sync/test/${currentYear}.json`;
-
-		mockCachedYearListing(
+		const recentId = mockRecentYearCache(
 			currentYear,
-			[`${oldId}.mp4`, `${recentId}.mp4`],
+			oldId,
 			[
 				{
 					name: oldId,

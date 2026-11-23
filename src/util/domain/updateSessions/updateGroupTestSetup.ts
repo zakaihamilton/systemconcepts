@@ -159,6 +159,26 @@ export function groupUpdateStatus() {
 	);
 }
 
+export function expectSessionField<T extends object, K extends keyof T>(
+	session: T,
+	field: K,
+	expected: T[K],
+) {
+	expect(session[field]).toEqual(expected);
+}
+
+export function expectAddedSessionMetadataFlags() {
+	const status = groupUpdateStatus();
+	expect(status.addedCount).toBe(1);
+	expect(status.newSessions[0].metadata).toEqual({
+		hasTags: true,
+		hasDuration: true,
+		hasSummary: true,
+		hasTranscription: true,
+		hasThumbnail: true,
+	});
+}
+
 export function mockYearListing(
 	year: string,
 	items: TestListingItem[],
@@ -355,4 +375,20 @@ export function recentSessionId() {
 		.toISOString()
 		.slice(0, 10);
 	return `${recentDate} Recent Session`;
+}
+
+export function mockRecentYearCache(
+	year: string,
+	historicalSessionId: string,
+	sessions: unknown[],
+	options: Pick<YearCacheFixtureOptions, "localPath"> = {},
+) {
+	const recentId = recentSessionId();
+	mockCachedYearListing(
+		year,
+		[`${historicalSessionId}.mp4`, `${recentId}.mp4`],
+		sessions,
+		options,
+	);
+	return recentId;
 }

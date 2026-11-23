@@ -6,6 +6,8 @@ import storage from "@util/storage/storage";
 import { fetchSessionMetadata } from "./sessionMetadataClient";
 import { updateGroupProcess } from "./updateGroup";
 import {
+	expectAddedSessionMetadataFlags,
+	expectSessionField,
 	file,
 	groupUpdateStatus,
 	mockListingResponses,
@@ -152,9 +154,9 @@ describe("updateGroupProcess", () => {
 
 		const [, , sessions] = asMock(updateYearSync).mock.calls[0];
 		expect(sessions).toHaveLength(1);
-		expect(sessions[0].id).toBe("2024-05-07 Orphan Cover");
+		expectSessionField(sessions[0], "id", "2024-05-07 Orphan Cover");
 		expect(sessions[0].image).toBeTruthy();
-		expect(sessions[0].tags).toEqual(["do-only"]);
+		expectSessionField(sessions[0], "tags", ["do-only"]);
 	});
 
 	it("recognizes year folders listed with stat.type instead of type", async () => {
@@ -210,15 +212,7 @@ describe("updateGroupProcess", () => {
 
 		await updateGroupProcess("test", true, false);
 
-		const status = groupUpdateStatus();
-		expect(status.addedCount).toBe(1);
-		expect(status.newSessions[0].metadata).toEqual({
-			hasTags: true,
-			hasDuration: true,
-			hasSummary: true,
-			hasTranscription: true,
-			hasThumbnail: true,
-		});
+		expectAddedSessionMetadataFlags();
 		expect(SyncActiveStore.getRawState().needsSessionReload).toBe(true);
 	});
 

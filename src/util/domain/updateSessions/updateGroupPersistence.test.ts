@@ -10,6 +10,7 @@ import { fetchSessionMetadata } from "./sessionMetadataClient";
 import { updateGroupProcess } from "./updateGroup";
 import {
 	emptyYearMetadata,
+	expectAddedSessionMetadataFlags,
 	file,
 	groupUpdateStatus,
 	mockListingResponses,
@@ -338,15 +339,7 @@ describe("updateGroupProcess persistence and migration", () => {
 
 		await updateGroupProcess("test", true, false, false, true);
 
-		const status = groupUpdateStatus();
-		expect(status.addedCount).toBe(1);
-		expect(status.newSessions[0].metadata).toEqual({
-			hasTags: true,
-			hasDuration: true,
-			hasSummary: true,
-			hasTranscription: true,
-			hasThumbnail: true,
-		});
+		expectAddedSessionMetadataFlags();
 	});
 
 	it("records merged new session metadata when sessions are added", async () => {
@@ -381,15 +374,7 @@ describe("updateGroupProcess persistence and migration", () => {
 
 		await updateGroupProcess("test", true, false, true, false);
 
-		const status = groupUpdateStatus();
-		expect(status.addedCount).toBe(1);
-		expect(status.newSessions[0].metadata).toEqual({
-			hasTags: true,
-			hasDuration: true,
-			hasSummary: true,
-			hasTranscription: true,
-			hasThumbnail: true,
-		});
+		expectAddedSessionMetadataFlags();
 	});
 
 	it("forces bundled updates even when session payloads are unchanged", async () => {
