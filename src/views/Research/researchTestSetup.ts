@@ -93,7 +93,9 @@ function createResearchState() {
 	};
 }
 
-function createResearchTranslations() {
+export function createResearchTranslations(
+	overrides: Record<string, string> = {},
+) {
 	return {
 		RESEARCH: "Research",
 		SESSIONS: "Sessions",
@@ -123,6 +125,7 @@ function createResearchTranslations() {
 		ARTICLE: "Article",
 		RESULTS_LIST: "Results list",
 		MATCH: "matches",
+		...overrides,
 	};
 }
 

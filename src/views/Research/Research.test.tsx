@@ -7,7 +7,10 @@ import { useSessions } from "@util/domain/sessions";
 import { useTranslations } from "@util/domain/translations";
 import Cookies from "js-cookie";
 import Research from "./";
-import { setupResearchViewTest } from "./researchTestSetup";
+import {
+	createResearchTranslations,
+	setupResearchViewTest,
+} from "./researchTestSetup";
 import { renderResearchView } from "./researchViewTestUtils";
 
 let mockResearchState: any;
@@ -381,39 +384,13 @@ describe("Research View", () => {
 		mockResearchState.results = [];
 		mockResearchState.filterTags = [{ type: "topic", label: "Grace" }];
 		mockResearchState.hasSearched = true;
-		asMock(useTranslations).mockReturnValue({
-			RESEARCH: "Research",
-			SESSIONS: "Sessions",
-			ARTICLES: "Articles",
-			SUMMARIES: "Summaries",
-			INDEXING: "Indexing...",
-			SEARCH: "Search",
-			SEARCH_ARTICLES: "Search...",
-			ALL: "All",
-			FILTERS: "Filters",
-			SEARCH_FILTERS: "Search filters...",
-			CLOSE: "Close",
-			DONE: "Done",
-			CLEAR_ALL: "Clear all",
-			CLEAR: "Clear search",
-			RESEARCH_HELP: "Search your library",
-			SEARCH_HINT: "Use quotes for a phrase",
-			SHOW_SEARCH: "Show Search",
-			HIDE_SEARCH: "Hide Search",
-			RESEARCH_START: "Find ideas",
-			RESEARCH_START_HELP: "Search by a word",
-			RESEARCH_PREPARING: "Preparing Research",
-			RESEARCH_INDEX_HELP: "Index is preparing",
-			SUGGESTION_TITLE: "Title",
-			SUGGESTION_FILTER: "Filter",
-			SUGGESTION_TERM: "Term",
-			ARTICLE: "Article",
-			RESULTS_LIST: "Results list",
-			MATCH: "matches",
-			NO_RESULTS: "No results",
-			CLEAR_FILTERS: "Clear filters",
-			TOPIC: "Topic",
-		});
+		asMock(useTranslations).mockReturnValue(
+			createResearchTranslations({
+				NO_RESULTS: "No results",
+				CLEAR_FILTERS: "Clear filters",
+				TOPIC: "Topic",
+			}),
+		);
 		renderResearch();
 		expect(screen.getByText("No results")).toBeInTheDocument();
 		fireEvent.click(screen.getByRole("button", { name: "Clear filters" }));
@@ -589,37 +566,9 @@ describe("Research View", () => {
 
 	it("shows active filter chips and removes one on delete", () => {
 		mockResearchState.filterTags = [{ type: "topic", label: "Grace" }];
-		asMock(useTranslations).mockReturnValue({
-			RESEARCH: "Research",
-			SESSIONS: "Sessions",
-			ARTICLES: "Articles",
-			SUMMARIES: "Summaries",
-			INDEXING: "Indexing...",
-			SEARCH: "Search",
-			SEARCH_ARTICLES: "Search...",
-			ALL: "All",
-			FILTERS: "Filters",
-			SEARCH_FILTERS: "Search filters...",
-			CLOSE: "Close",
-			DONE: "Done",
-			CLEAR_ALL: "Clear all",
-			CLEAR: "Clear search",
-			RESEARCH_HELP: "Search your library",
-			SEARCH_HINT: "Use quotes for a phrase",
-			SHOW_SEARCH: "Show Search",
-			HIDE_SEARCH: "Hide Search",
-			RESEARCH_START: "Find ideas",
-			RESEARCH_START_HELP: "Search by a word",
-			RESEARCH_PREPARING: "Preparing Research",
-			RESEARCH_INDEX_HELP: "Index is preparing",
-			SUGGESTION_TITLE: "Title",
-			SUGGESTION_FILTER: "Filter",
-			SUGGESTION_TERM: "Term",
-			ARTICLE: "Article",
-			RESULTS_LIST: "Results list",
-			MATCH: "matches",
-			TOPIC: "Topic",
-		});
+		asMock(useTranslations).mockReturnValue(
+			createResearchTranslations({ TOPIC: "Topic" }),
+		);
 		renderResearch();
 		expect(screen.getByText(/Topic: Grace/)).toBeInTheDocument();
 		const chipDelete = screen
