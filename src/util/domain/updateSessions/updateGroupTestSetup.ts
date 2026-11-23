@@ -81,6 +81,36 @@ export function mockYearListing(year: string, items: TestListingItem[]) {
 	});
 }
 
+type YearCacheFixtureOptions = {
+	cache?: unknown;
+	group?: string;
+	localPath?: string;
+};
+
+export function mockYearCacheAndSessions(
+	year: string,
+	sessions: unknown,
+	options: YearCacheFixtureOptions = {},
+) {
+	const group = options.group ?? "test";
+	const localPath = options.localPath ?? `/local/sync/${group}/${year}.json`;
+	asMock(storage.exists).mockImplementation(async (path: string) =>
+		path.endsWith(localPath),
+	);
+	asMock(storage.readFile).mockImplementation(async (path: string) => {
+		if (path.endsWith(localPath)) {
+			return JSON.stringify({ sessions });
+		}
+		if (path.includes(`.group-update-cache/${group}/${year}.json`)) {
+			return options.cache === undefined
+				? ""
+				: (JSON.stringify(options.cache) ?? "");
+		}
+		return "";
+	});
+	return localPath;
+}
+
 export function emptyYearMetadata() {
 	return {
 		items: [],

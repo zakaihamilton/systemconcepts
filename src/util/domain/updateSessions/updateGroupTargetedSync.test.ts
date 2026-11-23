@@ -14,6 +14,7 @@ import { updateGroupProcess } from "./updateGroup";
 import {
 	emptyYearMetadata,
 	file,
+	mockYearCacheAndSessions,
 	mockYearListing,
 } from "./updateGroupTestSetup";
 import { getListing, updateYearSync } from "./utils";
@@ -67,7 +68,6 @@ describe("updateGroupProcess targeted and recent-days sync", () => {
 			tags: ["preserve"],
 		};
 		const recentId = `${recentDate} Recent Session`;
-		const localYearPath = `/local/sync/test/${currentYear}.json`;
 
 		mockYearListing(currentYear, [
 			file(
@@ -76,14 +76,8 @@ describe("updateGroupProcess targeted and recent-days sync", () => {
 			),
 			file(`${recentId}.mp4`, `wasabi/test/${currentYear}/${recentId}.mp4`),
 		]);
-		asMock(storage.exists).mockImplementation(
-			async (path: any) => path === localYearPath,
-		);
-		asMock(storage.readFile).mockImplementation(async (path: any) => {
-			if (path === localYearPath)
-				return JSON.stringify({ sessions: [oldSession] });
-			return "";
-		});
+		mockYearCacheAndSessions(currentYear, [oldSession]);
+
 		asMock(fetchSessionMetadata).mockResolvedValue({
 			items: [],
 			tags: { [recentId]: ["recent"] },
@@ -109,38 +103,28 @@ describe("updateGroupProcess targeted and recent-days sync", () => {
 		const currentYear = String(new Date().getFullYear());
 		const keepId = `${currentYear}-01-01 Keep Session`;
 		const targetId = `${currentYear}-02-02 Target Session`;
-		const localYearPath = `/local/sync/test/${currentYear}.json`;
 
 		mockYearListing(currentYear, [
 			file(`${keepId}.mp4`, `wasabi/test/${currentYear}/${keepId}.mp4`),
 			file(`${targetId}.mp4`, `wasabi/test/${currentYear}/${targetId}.mp4`),
 		]);
-		asMock(storage.exists).mockImplementation(
-			async (path: any) => path === localYearPath,
-		);
-		asMock(storage.readFile).mockImplementation(async (path: any) => {
-			if (path === localYearPath) {
-				return JSON.stringify({
-					sessions: [
-						{
-							id: keepId,
-							name: keepId,
-							group: "test",
-							year: currentYear,
-							tags: ["keep"],
-						},
-						{
-							id: targetId,
-							name: targetId,
-							group: "test",
-							year: currentYear,
-							tags: ["stale"],
-						},
-					],
-				});
-			}
-			return "";
-		});
+		mockYearCacheAndSessions(currentYear, [
+			{
+				id: keepId,
+				name: keepId,
+				group: "test",
+				year: currentYear,
+				tags: ["keep"],
+			},
+			{
+				id: targetId,
+				name: targetId,
+				group: "test",
+				year: currentYear,
+				tags: ["stale"],
+			},
+		]);
+
 		asMock(fetchSessionMetadata).mockResolvedValue({
 			items: [],
 			tags: { [targetId]: ["fresh"], [keepId]: ["keep"] },
@@ -339,21 +323,13 @@ describe("updateGroupProcess targeted and recent-days sync", () => {
 		};
 
 		mockYearListing(currentYear, yearItems);
-		asMock(storage.exists).mockImplementation(async (path: any) =>
-			path.endsWith("/local/sync/bundle.json"),
-		);
-		asMock(storage.readFile).mockImplementation(async (path: any) => {
-			if (path.includes(`.group-update-cache/test/${currentYear}.json`)) {
-				return JSON.stringify({
-					fingerprint: yearFingerprint,
-					metadataFingerprint: JSON.stringify(metadataFingerprint),
-					metadata: emptyYearMetadata(),
-				});
-			}
-			if (path.endsWith("/local/sync/bundle.json")) {
-				return JSON.stringify({ sessions: [cachedSession] });
-			}
-			return "";
+		mockYearCacheAndSessions(currentYear, [cachedSession], {
+			localPath: "/local/sync/bundle.json",
+			cache: {
+				fingerprint: yearFingerprint,
+				metadataFingerprint: JSON.stringify(metadataFingerprint),
+				metadata: emptyYearMetadata(),
+			},
 		});
 
 		await updateGroupProcess("test", false, false, false, true);
@@ -378,30 +354,24 @@ describe("updateGroupProcess targeted and recent-days sync", () => {
 		);
 
 		mockYearListing(currentYear, yearItems);
-		asMock(storage.exists).mockImplementation(async (path: any) =>
-			path.endsWith("/local/sync/bundle.json"),
-		);
-		asMock(storage.readFile).mockImplementation(async (path: any) => {
-			if (path.includes(`.group-update-cache/test/${currentYear}.json`)) {
-				return JSON.stringify({
+		mockYearCacheAndSessions(
+			currentYear,
+			[
+				{
+					name: sessionId,
+					group: "test",
+					year: currentYear,
+				},
+			],
+			{
+				localPath: "/local/sync/bundle.json",
+				cache: {
 					fingerprint: yearFingerprint,
 					metadataFingerprint: JSON.stringify(metadataFingerprint),
 					metadata: emptyYearMetadata(),
-				});
-			}
-			if (path.endsWith("/local/sync/bundle.json")) {
-				return JSON.stringify({
-					sessions: [
-						{
-							name: sessionId,
-							group: "test",
-							year: currentYear,
-						},
-					],
-				});
-			}
-			return "";
-		});
+				},
+			},
+		);
 
 		await updateGroupProcess("test", false, false, false, true);
 
@@ -415,37 +385,27 @@ describe("updateGroupProcess targeted and recent-days sync", () => {
 		const currentYear = String(new Date().getFullYear());
 		const keepName = `${currentYear}-05-05 Keep By Name`;
 		const targetId = `${currentYear}-05-06 Target Session`;
-		const localYearPath = `/local/sync/test/${currentYear}.json`;
 
 		mockYearListing(currentYear, [
 			file(`${keepName}.mp4`, `wasabi/test/${currentYear}/${keepName}.mp4`),
 			file(`${targetId}.mp4`, `wasabi/test/${currentYear}/${targetId}.mp4`),
 		]);
-		asMock(storage.exists).mockImplementation(
-			async (path: any) => path === localYearPath,
-		);
-		asMock(storage.readFile).mockImplementation(async (path: any) => {
-			if (path === localYearPath) {
-				return JSON.stringify({
-					sessions: [
-						{
-							name: keepName,
-							group: "test",
-							year: currentYear,
-							tags: ["cached-by-name"],
-						},
-						{
-							id: targetId,
-							name: targetId,
-							group: "test",
-							year: currentYear,
-							tags: ["stale"],
-						},
-					],
-				});
-			}
-			return "";
-		});
+		mockYearCacheAndSessions(currentYear, [
+			{
+				name: keepName,
+				group: "test",
+				year: currentYear,
+				tags: ["cached-by-name"],
+			},
+			{
+				id: targetId,
+				name: targetId,
+				group: "test",
+				year: currentYear,
+				tags: ["stale"],
+			},
+		]);
+
 		asMock(fetchSessionMetadata).mockResolvedValue({
 			items: [],
 			tags: { [targetId]: ["fresh-target"] },

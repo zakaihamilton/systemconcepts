@@ -17,6 +17,7 @@ import { updateGroupProcess } from "./updateGroup";
 import {
 	emptyYearMetadata,
 	file,
+	mockYearCacheAndSessions,
 	mockYearListing,
 	setupUpdateGroupTest,
 } from "./updateGroupTestSetup";
@@ -80,38 +81,22 @@ describe("updateGroupProcess caching, incremental refresh, and targeted sync", (
 
 	it("uses cached metadata for non-forced updates without calling the aggregated endpoint", async () => {
 		const currentYear = String(new Date().getFullYear());
+		const sessionId = `${currentYear}-05-05 Cached Session`;
 		mockYearListing(currentYear, [
-			file(
-				`${currentYear}-05-05 Cached Session.mp4`,
-				`wasabi/test/${currentYear}/${currentYear}-05-05 Cached Session.mp4`,
-			),
+			file(`${sessionId}.mp4`, `wasabi/test/${currentYear}/${sessionId}.mp4`),
 		]);
-		const localYearPath = `/local/sync/test/${currentYear}.json`;
-		asMock(storage.exists).mockImplementation(
-			async (path: any) => path === localYearPath,
-		);
-		asMock(storage.readFile).mockImplementation(async (path: any) => {
-			if (path.includes(".group-update-cache")) {
-				return "";
-			}
-			if (path === localYearPath) {
-				return JSON.stringify({
-					sessions: [
-						{
-							id: `${currentYear}-05-05 Cached Session`,
-							name: `${currentYear}-05-05 Cached Session`,
-							group: "test",
-							tags: ["cached"],
-							duration: 321,
-							summaryText: "Cached summary",
-							transcription: true,
-						},
-					],
-				});
-			}
-			return "";
-		});
-
+		mockYearCacheAndSessions(currentYear, [
+			{
+				id: sessionId,
+				name: sessionId,
+				group: "test",
+				year: currentYear,
+				tags: ["cached"],
+				duration: 321,
+				summaryText: "Cached summary",
+				transcription: true,
+			},
+		]);
 		await updateGroupProcess("test", false, false);
 
 		expect(fetchSessionMetadata).not.toHaveBeenCalled();
@@ -141,7 +126,6 @@ describe("updateGroupProcess caching, incremental refresh, and targeted sync", (
 			yearItems,
 			metadataFingerprint,
 		);
-		const localYearPath = `/local/sync/test/${currentYear}.json`;
 
 		asMock(getListing).mockImplementation(async (path: any) => {
 			if (path === "wasabi/test") {
@@ -162,31 +146,25 @@ describe("updateGroupProcess caching, incremental refresh, and targeted sync", (
 			return [];
 		});
 
-		asMock(storage.exists).mockImplementation(
-			async (path: any) => path === localYearPath,
-		);
-		asMock(storage.readFile).mockImplementation(async (path: any) => {
-			if (path.includes(`.group-update-cache/test/${currentYear}.json`)) {
-				return JSON.stringify({
+		mockYearCacheAndSessions(
+			currentYear,
+			[
+				{
+					id: existingId,
+					name: existingId,
+					group: "test",
+					year: currentYear,
+				},
+			],
+			{
+				cache: {
 					fingerprint: yearFingerprint,
 					metadataFingerprint: JSON.stringify(metadataFingerprint),
 					metadata: emptyYearMetadata(),
-				});
-			}
-			if (path === localYearPath) {
-				return JSON.stringify({
-					sessions: [
-						{
-							id: existingId,
-							name: existingId,
-							group: "test",
-							year: currentYear,
-						},
-					],
-				});
-			}
-			return "";
-		});
+				},
+			},
+		);
+
 		asMock(fetchSessionMetadata).mockResolvedValue({
 			items: [],
 			tags: {},
@@ -245,15 +223,22 @@ describe("updateGroupProcess caching, incremental refresh, and targeted sync", (
 			[yearItems[0]],
 			metadataFingerprint,
 		);
-		const localYearPath = `/local/sync/test/${currentYear}.json`;
 
 		mockYearListing(currentYear, yearItems);
-		asMock(storage.exists).mockImplementation(
-			async (path: any) => path === localYearPath,
-		);
-		asMock(storage.readFile).mockImplementation(async (path: any) => {
-			if (path.includes(`.group-update-cache/test/${currentYear}.json`)) {
-				return JSON.stringify({
+		mockYearCacheAndSessions(
+			currentYear,
+			[
+				{
+					id: existingId,
+					name: existingId,
+					group: "test",
+					year: currentYear,
+					files: [`${existingId}.mp4`],
+					tags: ["keep"],
+				},
+			],
+			{
+				cache: {
 					fingerprint: staleFingerprint,
 					metadataFingerprint: JSON.stringify(metadataFingerprint),
 					sessionFingerprints: {
@@ -267,24 +252,10 @@ describe("updateGroupProcess caching, incremental refresh, and targeted sync", (
 						]),
 					},
 					metadata: emptyYearMetadata(),
-				});
-			}
-			if (path === localYearPath) {
-				return JSON.stringify({
-					sessions: [
-						{
-							id: existingId,
-							name: existingId,
-							group: "test",
-							year: currentYear,
-							files: [`${existingId}.mp4`],
-							tags: ["keep"],
-						},
-					],
-				});
-			}
-			return "";
-		});
+				},
+			},
+		);
+
 		asMock(fetchSessionMetadata).mockResolvedValue({
 			items: [],
 			tags: {},
@@ -559,7 +530,6 @@ describe("updateGroupProcess caching, incremental refresh, and targeted sync", (
 	it("ignores non-session and metadata-only listing entries when checking for missing sessions", async () => {
 		const currentYear = String(new Date().getFullYear());
 		const sessionId = `${currentYear}-05-05 Cached Session`;
-		const localYearPath = `/local/sync/test/${currentYear}.json`;
 		const yearItems = [
 			file("notes.txt", `wasabi/test/${currentYear}/notes.txt`),
 			file(
@@ -580,31 +550,24 @@ describe("updateGroupProcess caching, incremental refresh, and targeted sync", (
 		);
 
 		mockYearListing(currentYear, yearItems);
-		asMock(storage.exists).mockImplementation(
-			async (path: any) => path === localYearPath,
-		);
-		asMock(storage.readFile).mockImplementation(async (path: any) => {
-			if (path.includes(`.group-update-cache/test/${currentYear}.json`)) {
-				return JSON.stringify({
+		mockYearCacheAndSessions(
+			currentYear,
+			[
+				{
+					id: sessionId,
+					name: sessionId,
+					group: "test",
+					year: currentYear,
+				},
+			],
+			{
+				cache: {
 					fingerprint: yearFingerprint,
 					metadataFingerprint: JSON.stringify(metadataFingerprint),
 					metadata: emptyYearMetadata(),
-				});
-			}
-			if (path === localYearPath) {
-				return JSON.stringify({
-					sessions: [
-						{
-							id: sessionId,
-							name: sessionId,
-							group: "test",
-							year: currentYear,
-						},
-					],
-				});
-			}
-			return "";
-		});
+				},
+			},
+		);
 
 		await updateGroupProcess("test", false, false);
 
@@ -617,7 +580,6 @@ describe("updateGroupProcess caching, incremental refresh, and targeted sync", (
 
 	it("treats cached year files with non-array sessions as empty", async () => {
 		const currentYear = String(new Date().getFullYear());
-		const localYearPath = `/local/sync/test/${currentYear}.json`;
 
 		mockYearListing(currentYear, [
 			file(
@@ -625,15 +587,7 @@ describe("updateGroupProcess caching, incremental refresh, and targeted sync", (
 				`wasabi/test/${currentYear}/${currentYear}-08-02 Fresh Session.mp4`,
 			),
 		]);
-		asMock(storage.exists).mockImplementation(
-			async (path: any) => path === localYearPath,
-		);
-		asMock(storage.readFile).mockImplementation(async (path: any) => {
-			if (path === localYearPath) {
-				return JSON.stringify({ sessions: "not-an-array" });
-			}
-			return "";
-		});
+		mockYearCacheAndSessions(currentYear, "not-an-array");
 
 		await updateGroupProcess("test", false, false);
 
@@ -653,34 +607,26 @@ describe("updateGroupProcess caching, incremental refresh, and targeted sync", (
 			yearItems,
 			metadataFingerprint,
 		);
-		const localYearPath = `/local/sync/test/${currentYear}.json`;
 
 		mockYearListing(currentYear, yearItems);
-		asMock(storage.exists).mockImplementation(
-			async (path: any) => path === localYearPath,
-		);
-		asMock(storage.readFile).mockImplementation(async (path: any) => {
-			if (path.includes(`.group-update-cache/test/${currentYear}.json`)) {
-				return JSON.stringify({
+		mockYearCacheAndSessions(
+			currentYear,
+			[
+				{
+					id: existingId,
+					name: existingId,
+					group: "test",
+					year: currentYear,
+				},
+			],
+			{
+				cache: {
 					fingerprint: yearFingerprint,
 					metadataFingerprint: JSON.stringify(metadataFingerprint),
 					metadata: emptyYearMetadata(),
-				});
-			}
-			if (path === localYearPath) {
-				return JSON.stringify({
-					sessions: [
-						{
-							id: existingId,
-							name: existingId,
-							group: "test",
-							year: currentYear,
-						},
-					],
-				});
-			}
-			return "";
-		});
+				},
+			},
+		);
 
 		await updateGroupProcess("test", false, false);
 
