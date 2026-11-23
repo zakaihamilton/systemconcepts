@@ -1,7 +1,6 @@
 import { MainStore } from "@components/Main";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { fetchJSON } from "@util/api/fetch";
-import { useTranslations } from "@util/domain/translations";
 import { setHash, setPath } from "@util/domain/views";
 import Cookies from "js-cookie";
 import { setupAuthViewTest } from "../../authTestSetup";
