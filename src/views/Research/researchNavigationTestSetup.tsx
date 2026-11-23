@@ -1,3 +1,21 @@
+export const mockResearchListState = {
+	scrollToItem: jest.fn(),
+	resetAfterIndex: jest.fn(),
+	latestProps: null as any,
+};
+
+jest.mock("@components/Virtualized/VariableSizeList", () => {
+	const React = require("react");
+	return React.forwardRef(function MockList(props: any, ref: any) {
+		mockResearchListState.latestProps = props;
+		React.useImperativeHandle(ref, () => ({
+			scrollToItem: mockResearchListState.scrollToItem,
+			resetAfterIndex: mockResearchListState.resetAfterIndex,
+		}));
+		return <div data-testid="virtual-list" />;
+	});
+});
+
 jest.mock(
 	"./PageIndicator",
 	() =>

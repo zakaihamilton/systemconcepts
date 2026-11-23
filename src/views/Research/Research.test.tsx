@@ -1,33 +1,20 @@
-import "./researchTestSetup";
-import "./researchNavigationTestSetup";
 import { ContentSize } from "@components/Page/Content";
 import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { useDeviceType } from "@util/browser/styles";
 import { useSessions } from "@util/domain/sessions";
 import { useTranslations } from "@util/domain/translations";
 import Cookies from "js-cookie";
-import Research from "./";
 import {
 	createResearchTranslations,
 	setupResearchViewTest,
 } from "./researchTestSetup";
+import { mockResearchListState } from "./researchNavigationTestSetup";
+import Research from "./";
 import { renderResearchView } from "./researchViewTestUtils";
 
 let mockResearchState: any;
 let mockLibraryState: any;
-const mockListScrollToItem = jest.fn();
-const mockListResetAfterIndex = jest.fn();
 
-jest.mock("@components/Virtualized/VariableSizeList", () => {
-	const React = require("react");
-	return React.forwardRef(function MockList(_props: any, ref: any) {
-		React.useImperativeHandle(ref, () => ({
-			scrollToItem: mockListScrollToItem,
-			resetAfterIndex: mockListResetAfterIndex,
-		}));
-		return <div data-testid="virtual-list" />;
-	});
-});
 describe("Research View", () => {
 	const mockSize = { width: 800, height: 600, emPixels: 16 };
 

@@ -1,32 +1,17 @@
-import "./researchTestSetup";
-import "./researchNavigationTestSetup";
 import { ContentSize } from "@components/Page/Content";
 import { act, fireEvent, screen, waitFor } from "@testing-library/react";
 import { useDeviceType } from "@util/browser/styles";
 import { useTranslations } from "@util/domain/translations";
 import { setHash, setPath, usePathItems } from "@util/domain/views";
 import Cookies from "js-cookie";
-import Research from "./";
 import { setupResearchViewTest } from "./researchTestSetup";
+import { mockResearchListState } from "./researchNavigationTestSetup";
+import Research from "./";
 import { renderResearchView } from "./researchViewTestUtils";
 
 let mockResearchState: any;
 let mockLibraryState: any;
-const mockListScrollToItem = jest.fn();
-const mockListResetAfterIndex = jest.fn();
-let latestListProps: any;
 
-jest.mock("@components/Virtualized/VariableSizeList", () => {
-	const React = require("react");
-	return React.forwardRef(function MockList(props: any, ref: any) {
-		latestListProps = props;
-		React.useImperativeHandle(ref, () => ({
-			scrollToItem: mockListScrollToItem,
-			resetAfterIndex: mockListResetAfterIndex,
-		}));
-		return <div data-testid="virtual-list" />;
-	});
-});
 describe("Research View Toolbar, Print, and Navigation", () => {
 	const mockSize = { width: 800, height: 600, emPixels: 16 };
 
@@ -34,7 +19,7 @@ describe("Research View Toolbar, Print, and Navigation", () => {
 		const state = setupResearchViewTest({
 			cookies: Cookies,
 			resetAdditionalState: () => {
-				latestListProps = null;
+				mockResearchListState.latestProps = null;
 			},
 		});
 		mockResearchState = state.researchState;
@@ -114,7 +99,7 @@ describe("Research View Toolbar, Print, and Navigation", () => {
 				</ContentSize.Provider>,
 			);
 			fireEvent.click(screen.getByRole("button", { name: "jump-page" }));
-			expect(mockListScrollToItem).toHaveBeenCalledWith(1, "start");
+			expect(mockResearchListState.scrollToItem).toHaveBeenCalledWith(1, "start");
 			getToolbarItems()
 				.find((item: any) => item.id === "jump")
 				.onClick();
@@ -140,9 +125,9 @@ describe("Research View Toolbar, Print, and Navigation", () => {
 					<Research />
 				</ContentSize.Provider>,
 			);
-			asMock(mockListScrollToItem).mockClear();
+			asMock(mockResearchListState.scrollToItem).mockClear();
 			fireEvent.click(screen.getByRole("button", { name: "jump-page" }));
-			expect(mockListScrollToItem).not.toHaveBeenCalled();
+			expect(mockResearchListState.scrollToItem).not.toHaveBeenCalled();
 		});
 
 		it("prints results after preparing the print layout", () => {
@@ -253,11 +238,11 @@ describe("Research View Toolbar, Print, and Navigation", () => {
 			mockResearchState.results = results;
 			renderResearch();
 			await act(async () => {
-				latestListProps.onItemsRendered({ visibleStartIndex: 0 });
+				mockResearchListState.latestProps.onItemsRendered({ visibleStartIndex: 0 });
 				await Promise.resolve();
 			});
 			act(() => {
-				latestListProps.onItemsRendered({ visibleStartIndex: 1 });
+				mockResearchListState.latestProps.onItemsRendered({ visibleStartIndex: 1 });
 			});
 			await waitFor(() => {
 				expect(setPath).toHaveBeenCalledWith("research:2");
@@ -269,7 +254,7 @@ describe("Research View Toolbar, Print, and Navigation", () => {
 			asMock(usePathItems).mockReturnValue(["research:2"]);
 			renderResearch();
 			await waitFor(() => {
-				expect(mockListScrollToItem).toHaveBeenCalledWith(1, "start");
+				expect(mockResearchListState.scrollToItem).toHaveBeenCalledWith(1, "start");
 			});
 		});
 
@@ -278,16 +263,16 @@ describe("Research View Toolbar, Print, and Navigation", () => {
 			asMock(usePathItems).mockReturnValue(["research:1"]);
 			renderResearch();
 			await act(async () => {
-				latestListProps.onItemsRendered({ visibleStartIndex: 0 });
+				mockResearchListState.latestProps.onItemsRendered({ visibleStartIndex: 0 });
 				await Promise.resolve();
 			});
-			asMock(mockListScrollToItem).mockClear();
+			asMock(mockResearchListState.scrollToItem).mockClear();
 			asMock(usePathItems).mockReturnValue(["research:1"]);
 			await act(async () => {
 				jest.advanceTimersByTime(50);
 				await Promise.resolve();
 			});
-			expect(mockListScrollToItem).not.toHaveBeenCalled();
+			expect(mockResearchListState.scrollToItem).not.toHaveBeenCalled();
 		});
 
 		it("scrolls when selecting from the results outline", async () => {
@@ -298,7 +283,7 @@ describe("Research View Toolbar, Print, and Navigation", () => {
 			});
 			fireEvent.click(indicator);
 			fireEvent.click(screen.getByRole("menuitem", { name: "Hope" }));
-			expect(mockListScrollToItem).toHaveBeenCalledWith(1, "start");
+			expect(mockResearchListState.scrollToItem).toHaveBeenCalledWith(1, "start");
 			act(() => {
 				jest.advanceTimersByTime(1000);
 			});
@@ -322,23 +307,23 @@ describe("Research View Toolbar, Print, and Navigation", () => {
 		it("measures row heights and scrolls back to top", async () => {
 			mockResearchState.results = results;
 			renderResearch();
-			expect(latestListProps.itemSize(0)).toBeGreaterThan(400);
+			expect(mockResearchListState.latestProps.itemSize(0)).toBeGreaterThan(400);
 			act(() => {
-				latestListProps.itemData.setRowHeight(0, 100);
-				latestListProps.itemData.setRowHeight(0, 200);
+				mockResearchListState.latestProps.itemData.setRowHeight(0, 100);
+				mockResearchListState.latestProps.itemData.setRowHeight(0, 200);
 			});
 			act(() => {
 				jest.advanceTimersByTime(200);
 			});
-			expect(mockListResetAfterIndex).toHaveBeenCalled();
+			expect(mockResearchListState.resetAfterIndex).toHaveBeenCalled();
 			act(() => {
-				latestListProps.onItemsRendered({ visibleStartIndex: 2 });
+				mockResearchListState.latestProps.onItemsRendered({ visibleStartIndex: 2 });
 			});
 			const scrollTop = await screen.findByRole("button", {
 				name: "scroll back to top",
 			});
 			fireEvent.click(scrollTop);
-			expect(mockListScrollToItem).toHaveBeenCalledWith(0, "start");
+			expect(mockResearchListState.scrollToItem).toHaveBeenCalledWith(0, "start");
 		});
 
 		it("uses cached row height in getItemSize", () => {
@@ -347,10 +332,10 @@ describe("Research View Toolbar, Print, and Navigation", () => {
 			];
 			renderResearch();
 			act(() => {
-				latestListProps.itemData.setRowHeight(0, 250);
+				mockResearchListState.latestProps.itemData.setRowHeight(0, 250);
 				jest.advanceTimersByTime(200);
 			});
-			expect(latestListProps.itemSize(0)).toBe(250);
+			expect(mockResearchListState.latestProps.itemSize(0)).toBe(250);
 		});
 
 		it("does not update scroll pages when rendered page is unchanged", async () => {
@@ -359,8 +344,8 @@ describe("Research View Toolbar, Print, and Navigation", () => {
 			];
 			renderResearch();
 			await act(async () => {
-				latestListProps.onItemsRendered({ visibleStartIndex: 0 });
-				latestListProps.onItemsRendered({ visibleStartIndex: 0 });
+				mockResearchListState.latestProps.onItemsRendered({ visibleStartIndex: 0 });
+				mockResearchListState.latestProps.onItemsRendered({ visibleStartIndex: 0 });
 				await Promise.resolve();
 			});
 		});
@@ -371,7 +356,7 @@ describe("Research View Toolbar, Print, and Navigation", () => {
 			];
 			renderResearch();
 			await act(async () => {
-				latestListProps.onItemsRendered({ visibleStartIndex: 2 });
+				mockResearchListState.latestProps.onItemsRendered({ visibleStartIndex: 2 });
 				jest.advanceTimersByTime(1600);
 				await Promise.resolve();
 			});
@@ -382,7 +367,7 @@ describe("Research View Toolbar, Print, and Navigation", () => {
 			mockResearchState.results = results;
 			renderResearch();
 			act(() => {
-				latestListProps.onItemsRendered({ visibleStartIndex: 1 });
+				mockResearchListState.latestProps.onItemsRendered({ visibleStartIndex: 1 });
 			});
 			expect(
 				screen.queryByPlaceholderText("Search..."),
@@ -411,14 +396,14 @@ describe("Research View Toolbar, Print, and Navigation", () => {
 			mockResearchState.hasSearched = true;
 			renderResearch();
 			await act(async () => {
-				latestListProps.itemData.gotoArticle(
+				mockResearchListState.latestProps.itemData.gotoArticle(
 					{
 						_id: "session|ai|2026|2026-01-01|Grace study",
 						title: "Grace study",
 					},
 					0,
 				);
-				latestListProps.itemData.gotoArticle(
+				mockResearchListState.latestProps.itemData.gotoArticle(
 					{ _id: "article-1", title: "Article" },
 					1,
 				);
@@ -439,7 +424,7 @@ describe("Research View Toolbar, Print, and Navigation", () => {
 			];
 			renderResearch();
 			await act(async () => {
-				latestListProps.itemData.gotoArticle(
+				mockResearchListState.latestProps.itemData.gotoArticle(
 					{ _id: "session|short", title: "Bad" },
 					0,
 				);
@@ -450,7 +435,7 @@ describe("Research View Toolbar, Print, and Navigation", () => {
 		it("navigates to library id without paragraph suffix", async () => {
 			renderResearch();
 			await act(async () => {
-				latestListProps.itemData.gotoArticle({ _id: "article-1", title: "A" });
+				mockResearchListState.latestProps.itemData.gotoArticle({ _id: "article-1", title: "A" });
 			});
 			expect(setPath).toHaveBeenCalledWith("library", "id", "article-1");
 		});
