@@ -10,6 +10,7 @@ import {
 	mockListingResponses,
 	mockYearListing,
 	setupUpdateGroupTest,
+	yearMetadata,
 } from "./updateGroupTestSetup";
 import { getListing, updateYearSync } from "./utils";
 
@@ -97,19 +98,18 @@ describe("updateGroupProcess", () => {
 				"wasabi/test/2024/2024-05-06 Name Key Session.mp4",
 			),
 		]);
-		asMock(fetchSessionMetadata).mockResolvedValue({
-			items: [],
-			tags: {
-				"2024-05-05 Test Session": ["by-id"],
-				"Name Key Session": ["by-name"],
-			},
-			durations: {
-				"2024-05-05 Test Session": 11,
-				"Name Key Session": 22,
-			},
-			summaries: {},
-			transcriptions: {},
-		});
+		asMock(fetchSessionMetadata).mockResolvedValue(
+			yearMetadata({
+				tags: {
+					"2024-05-05 Test Session": ["by-id"],
+					"Name Key Session": ["by-name"],
+				},
+				durations: {
+					"2024-05-05 Test Session": 11,
+					"Name Key Session": 22,
+				},
+			}),
+		);
 
 		await updateGroupProcess("test", true, false);
 
@@ -135,18 +135,17 @@ describe("updateGroupProcess", () => {
 				),
 			],
 		});
-		asMock(fetchSessionMetadata).mockResolvedValue({
-			items: [
-				file(
-					"2024-05-07 Orphan Cover.png",
-					"/aws/sessions/test/2024/2024-05-07 Orphan Cover.png",
-				),
-			],
-			tags: { "2024-05-07 Orphan Cover": ["do-only"] },
-			durations: {},
-			summaries: {},
-			transcriptions: {},
-		});
+		asMock(fetchSessionMetadata).mockResolvedValue(
+			yearMetadata({
+				items: [
+					file(
+						"2024-05-07 Orphan Cover.png",
+						"/aws/sessions/test/2024/2024-05-07 Orphan Cover.png",
+					),
+				],
+				tags: { "2024-05-07 Orphan Cover": ["do-only"] },
+			}),
+		);
 
 		await updateGroupProcess("test", true, false);
 
