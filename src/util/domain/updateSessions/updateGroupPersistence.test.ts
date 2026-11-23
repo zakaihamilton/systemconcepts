@@ -15,6 +15,7 @@ import {
 	mockListingResponses,
 	mockYearListing,
 	setupUpdateGroupTest,
+	yearMetadata,
 } from "./updateGroupTestSetup";
 import { getListing } from "./utils";
 
@@ -326,13 +327,14 @@ describe("updateGroupProcess persistence and migration", () => {
 				"wasabi/test/2024/2024-05-05 Test Session.jpg",
 			),
 		]);
-		asMock(fetchSessionMetadata).mockResolvedValue({
-			items: [],
-			tags: { "2024-05-05 Test Session": ["bundle"] },
-			durations: { "2024-05-05 Test Session": 90 },
-			summaries: { "2024-05-05 Test Session": "Bundled summary" },
-			transcriptions: { "2024-05-05 Test Session": true },
-		});
+		asMock(fetchSessionMetadata).mockResolvedValue(
+			yearMetadata({
+				tags: { "2024-05-05 Test Session": ["bundle"] },
+				durations: { "2024-05-05 Test Session": 90 },
+				summaries: { "2024-05-05 Test Session": "Bundled summary" },
+				transcriptions: { "2024-05-05 Test Session": true },
+			}),
+		);
 
 		await updateGroupProcess("test", true, false, false, true);
 
@@ -364,18 +366,20 @@ describe("updateGroupProcess persistence and migration", () => {
 				),
 			],
 		});
-		asMock(fetchSessionMetadata).mockResolvedValue({
-			items: [
-				file(
-					"2024-05-05 Test Session.png",
-					"/aws/sessions/test/2024/2024-05-05 Test Session.png",
-				),
-			],
-			tags: { "2024-05-05 Test Session": ["merged"] },
-			durations: { "2024-05-05 Test Session": 75 },
-			summaries: { "2024-05-05 Test Session": "Merged summary" },
-			transcriptions: { "2024-05-05 Test Session": true },
-		});
+		asMock(fetchSessionMetadata).mockResolvedValue(
+			yearMetadata({
+				items: [
+					file(
+						"2024-05-05 Test Session.png",
+						"/aws/sessions/test/2024/2024-05-05 Test Session.png",
+					),
+				],
+				tags: { "2024-05-05 Test Session": ["merged"] },
+				durations: { "2024-05-05 Test Session": 75 },
+				summaries: { "2024-05-05 Test Session": "Merged summary" },
+				transcriptions: { "2024-05-05 Test Session": true },
+			}),
+		);
 
 		await updateGroupProcess("test", true, false, true, false);
 
@@ -420,13 +424,12 @@ describe("updateGroupProcess persistence and migration", () => {
 	it("records bundled additions without thumbnails when no image is present", async () => {
 		mockStoredGroupSessions("bundle.json", []);
 		mockStandardYearListing();
-		asMock(fetchSessionMetadata).mockResolvedValue({
-			items: [],
-			tags: { "2024-05-05 Test Session": ["bundle"] },
-			durations: { "2024-05-05 Test Session": 1 },
-			summaries: {},
-			transcriptions: {},
-		});
+		asMock(fetchSessionMetadata).mockResolvedValue(
+			yearMetadata({
+				tags: { "2024-05-05 Test Session": ["bundle"] },
+				durations: { "2024-05-05 Test Session": 1 },
+			}),
+		);
 
 		await updateGroupProcess("test", true, false, false, true);
 
@@ -439,13 +442,12 @@ describe("updateGroupProcess persistence and migration", () => {
 	it("records merged additions without thumbnails when no image is present", async () => {
 		mockStoredGroupSessions("test.json", []);
 		mockStandardYearListing();
-		asMock(fetchSessionMetadata).mockResolvedValue({
-			items: [],
-			tags: { "2024-05-05 Test Session": ["merged"] },
-			durations: { "2024-05-05 Test Session": 1 },
-			summaries: {},
-			transcriptions: {},
-		});
+		asMock(fetchSessionMetadata).mockResolvedValue(
+			yearMetadata({
+				tags: { "2024-05-05 Test Session": ["merged"] },
+				durations: { "2024-05-05 Test Session": 1 },
+			}),
+		);
 
 		await updateGroupProcess("test", true, false, true, false);
 
