@@ -1,5 +1,6 @@
 import { MainStore } from "@components/Main";
 import { fireEvent, screen } from "@testing-library/react";
+import { fetchJSON } from "@util/api/fetch";
 import { useTranslations } from "@util/domain/translations";
 import Cookies from "js-cookie";
 
@@ -28,4 +29,13 @@ export function mockSignedInCookies() {
 		if (key === "hash") return "testhash";
 		return null;
 	});
+}
+
+export function expectLoginPostRequest() {
+	expect(fetchJSON).toHaveBeenCalledWith(
+		"/api/login",
+		expect.objectContaining({
+			method: "POST",
+		}),
+	);
 }
