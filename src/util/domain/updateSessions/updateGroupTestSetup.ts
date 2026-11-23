@@ -203,14 +203,34 @@ export function mockYearCacheAndSessions(
 	return localPath;
 }
 
-export function emptyYearMetadata() {
+type YearMetadata = Awaited<ReturnType<typeof fetchSessionMetadata>>;
+
+export function yearMetadata(
+	overrides: Partial<YearMetadata> = {},
+): YearMetadata {
 	return {
 		items: [],
 		tags: {},
 		durations: {},
 		summaries: {},
 		transcriptions: {},
+		...overrides,
 	};
+}
+
+export function sessionMetadataFiles(
+	year: string,
+	sessionName: string,
+	extensions: string[],
+) {
+	return extensions.map((extension) => {
+		const name = `${sessionName}.${extension}`;
+		return file(name, `/aws/sessions/test/${year}/${name}`);
+	});
+}
+
+export function emptyYearMetadata() {
+	return yearMetadata();
 }
 
 export function mockCachedYearSession(
