@@ -1,46 +1,21 @@
 import "./updateGroupTestSetup";
-import { SyncActiveStore, UpdateSessionsStore } from "@sync/syncState";
 import { logger } from "@util/api/logger";
 import storage from "@util/storage/storage";
-import {
-	loadDurations,
-	loadSummaries,
-	loadTags,
-	loadTranscriptions,
-} from "./metadata";
-import { fetchSessionMetadata } from "./sessionMetadataClient";
 import { updateGroupProcess } from "./updateGroup";
-import { file, mockYearListing } from "./updateGroupTestSetup";
-import { getListing, updateYearSync } from "./utils";
+import {
+	emptyYearMetadata,
+	file,
+	mockYearListing,
+	setupUpdateGroupTest,
+} from "./updateGroupTestSetup";
+import { updateYearSync } from "./utils";
 
 describe("updateGroupProcess merged-to-split migration", () => {
 	beforeEach(() => {
-		jest.clearAllMocks();
-		UpdateSessionsStore.update((s) => {
-			s.status = [];
-		});
-		SyncActiveStore.update((s) => {
-			s.needsSessionReload = false;
-		});
-
-		asMock(storage.exists).mockResolvedValue(false);
-		asMock(storage.readFile).mockResolvedValue("");
-		asMock(loadTags).mockResolvedValue({});
-		asMock(loadDurations).mockResolvedValue({});
-		asMock(loadSummaries).mockResolvedValue({});
-		asMock(loadTranscriptions).mockResolvedValue({});
-		asMock(fetchSessionMetadata).mockResolvedValue({
-			items: [],
-			tags: {},
-			durations: {},
-			summaries: {},
-			transcriptions: {},
-		});
-		asMock(getListing).mockResolvedValue([]);
-		asMock(updateYearSync).mockResolvedValue({
-			counter: 0,
-			newCount: 0,
-			newSessions: [],
+		setupUpdateGroupTest({
+			readFile: async () => "",
+			sessionMetadata: emptyYearMetadata(),
+			listing: async () => [],
 		});
 	});
 
