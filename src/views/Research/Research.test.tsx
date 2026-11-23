@@ -9,6 +9,8 @@ import Research from "./";
 import { mockResearchListFactory } from "./researchNavigationTestSetup";
 import {
 	createResearchTranslations,
+	mockResearchIndex,
+	mockResearchTags,
 	setupResearchViewTest,
 } from "./researchTestSetup";
 import {
@@ -95,16 +97,10 @@ describe("Research View", () => {
 	});
 
 	it("filters the filter list in the drawer", async () => {
-		const storage = require("@util/storage/storage");
-		asMock(storage.exists).mockImplementation((path: any) =>
-			Promise.resolve(path.endsWith("tags.json")),
-		);
-		asMock(storage.readFile).mockResolvedValue(
-			JSON.stringify([
-				{ author: "Augustine", book: "Confessions" },
-				{ author: "Aquinas", book: "Summa" },
-			]),
-		);
+		mockResearchTags([
+			{ author: "Augustine", book: "Confessions" },
+			{ author: "Aquinas", book: "Summa" },
+		]);
 
 		renderResearch();
 		fireEvent.click(screen.getByRole("button", { name: "Filters" }));
@@ -135,17 +131,11 @@ describe("Research View", () => {
 	});
 
 	it("sorts numbered filter labels numerically", async () => {
-		const storage = require("@util/storage/storage");
-		asMock(storage.exists).mockImplementation((path: any) =>
-			Promise.resolve(path.endsWith("tags.json")),
-		);
-		asMock(storage.readFile).mockResolvedValue(
-			JSON.stringify([
-				{ article: "10. Later" },
-				{ article: "2. Middle" },
-				{ article: "1. First" },
-			]),
-		);
+		mockResearchTags([
+			{ article: "10. Later" },
+			{ article: "2. Middle" },
+			{ article: "1. First" },
+		]);
 
 		renderResearch();
 		fireEvent.click(screen.getByRole("button", { name: "Filters" }));
@@ -276,9 +266,7 @@ describe("Research View", () => {
 	});
 
 	it("returns session matches from the v5 index", async () => {
-		const { decodeBinaryIndex } = require("@util/data/searchIndexBinary");
 		const { loadParagraphsForFile } = require("@util/domain/loadParagraphs");
-		const storage = require("@util/storage/storage");
 		const sessionId = "session|american|2026|2026-01-01|Grace study";
 		Object.assign(mockResearchState, {
 			query: "grace",
@@ -296,9 +284,7 @@ describe("Research View", () => {
 				},
 			],
 		]);
-		asMock(storage.exists).mockResolvedValue(true);
-		asMock(storage.readFile).mockResolvedValue("binary-index");
-		asMock(decodeBinaryIndex).mockReturnValue({
+		mockResearchIndex({
 			v: 5,
 			f: [sessionId],
 			// compressed v5 refs: -(fileIndex+1), paraIndex
@@ -328,13 +314,9 @@ describe("Research View", () => {
 	});
 
 	it("shows start guidance when index is ready and no search yet", async () => {
-		const { decodeBinaryIndex } = require("@util/data/searchIndexBinary");
-		const storage = require("@util/storage/storage");
 		mockResearchState.hasSearched = false;
 		mockResearchState.results = [];
-		asMock(storage.exists).mockResolvedValue(true);
-		asMock(storage.readFile).mockResolvedValue("binary-index");
-		asMock(decodeBinaryIndex).mockReturnValue({ v: 5, f: [], t: {} });
+		mockResearchIndex({ v: 5, f: [], t: {} });
 
 		renderResearch();
 		await waitFor(() => {
@@ -380,13 +362,7 @@ describe("Research View", () => {
 	});
 
 	it("adds a filter from the drawer and clears all", async () => {
-		const storage = require("@util/storage/storage");
-		asMock(storage.exists).mockImplementation((path: any) =>
-			Promise.resolve(path.endsWith("tags.json")),
-		);
-		asMock(storage.readFile).mockResolvedValue(
-			JSON.stringify([{ author: "Augustine", book: "Confessions" }]),
-		);
+		mockResearchTags([{ author: "Augustine", book: "Confessions" }]);
 
 		renderResearch();
 		fireEvent.click(screen.getByRole("button", { name: "Filters" }));
@@ -544,14 +520,10 @@ describe("Research View", () => {
 	});
 
 	it("falls back to empty search when query and filters are empty", async () => {
-		const { decodeBinaryIndex } = require("@util/data/searchIndexBinary");
-		const storage = require("@util/storage/storage");
 		mockResearchState.query = "";
 		mockResearchState.filterTags = [];
 		mockResearchState.hasSearched = false;
-		asMock(storage.exists).mockResolvedValue(true);
-		asMock(storage.readFile).mockResolvedValue("binary-index");
-		asMock(decodeBinaryIndex).mockReturnValue({ v: 5, f: ["a"], t: {} });
+		mockResearchIndex({ v: 5, f: ["a"], t: {} });
 
 		renderResearch();
 		await waitFor(() => {

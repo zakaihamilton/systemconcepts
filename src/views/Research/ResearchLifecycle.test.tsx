@@ -7,6 +7,8 @@ import Cookies from "js-cookie";
 import Research from "./";
 import {
 	createResearchScenarioTranslations,
+	mockResearchIndex,
+	mockResearchTags,
 	setResearchTestLibraryUpdateCounter,
 	setupResearchViewTest,
 } from "./researchTestSetup";
@@ -73,11 +75,8 @@ describe("Research View Lifecycle and Search Progress", () => {
 		});
 
 		it("reloads index and tags when the library update counter changes", async () => {
-			const { decodeBinaryIndex } = require("@util/data/searchIndexBinary");
 			const storage = require("@util/storage/storage");
-			asMock(storage.exists).mockResolvedValue(true);
-			asMock(storage.readFile).mockResolvedValue("binary-index");
-			asMock(decodeBinaryIndex).mockReturnValue({ v: 5, f: [], t: {} });
+			mockResearchIndex({ v: 5, f: [], t: {} });
 			const view = renderResearch();
 			await waitFor(() => {
 				expect(storage.readFile).toHaveBeenCalled();
@@ -94,18 +93,11 @@ describe("Research View Lifecycle and Search Progress", () => {
 
 		it("skips initial search while store state is still loading", async () => {
 			const { runResearchSearch } = require("./runResearchSearch");
-			const { decodeBinaryIndex } = require("@util/data/searchIndexBinary");
 			const storage = require("@util/storage/storage");
 			mockResearchState._loaded = false;
 			mockResearchState.query = "grace";
 			mockResearchState.hasSearched = false;
-			asMock(storage.exists).mockResolvedValue(true);
-			asMock(storage.readFile).mockResolvedValue("binary-index");
-			asMock(decodeBinaryIndex).mockReturnValue({
-				v: 5,
-				f: ["a"],
-				t: { grace: [-1, 0] },
-			});
+			mockResearchIndex({ v: 5, f: ["a"], t: { grace: [-1, 0] } });
 			renderResearch();
 			await waitFor(() => {
 				expect(storage.readFile).toHaveBeenCalled();
@@ -116,7 +108,6 @@ describe("Research View Lifecycle and Search Progress", () => {
 
 	describe("session-derived and tag filters", () => {
 		it("loads session group, year, and type filters", async () => {
-			const storage = require("@util/storage/storage");
 			asMock(useSessions).mockReturnValue([
 				[
 					{
@@ -127,10 +118,7 @@ describe("Research View Lifecycle and Search Progress", () => {
 					},
 				],
 			]);
-			asMock(storage.exists).mockImplementation((path: any) =>
-				Promise.resolve(path.endsWith("tags.json")),
-			);
-			asMock(storage.readFile).mockResolvedValue(JSON.stringify([]));
+			mockResearchTags([]);
 			renderResearch();
 			fireEvent.click(screen.getByRole("button", { name: "Filters" }));
 			await waitFor(() => {
@@ -141,14 +129,8 @@ describe("Research View Lifecycle and Search Progress", () => {
 		});
 
 		it("loads filters when sessions is null", async () => {
-			const storage = require("@util/storage/storage");
 			asMock(useSessions).mockReturnValue([null]);
-			asMock(storage.exists).mockImplementation((path: any) =>
-				Promise.resolve(path.endsWith("tags.json")),
-			);
-			asMock(storage.readFile).mockResolvedValue(
-				JSON.stringify([{ author: "Paul" }]),
-			);
+			mockResearchTags([{ author: "Paul" }]);
 			renderResearch();
 			fireEvent.click(screen.getByRole("button", { name: "Filters" }));
 			await waitFor(() => {
@@ -159,14 +141,10 @@ describe("Research View Lifecycle and Search Progress", () => {
 		});
 
 		it("skips session filters when group year and type are empty", async () => {
-			const storage = require("@util/storage/storage");
 			asMock(useSessions).mockReturnValue([
 				[{ name: "Bare session", group: "", year: "", type: "" }],
 			]);
-			asMock(storage.exists).mockImplementation((path: any) =>
-				Promise.resolve(path.endsWith("tags.json")),
-			);
-			asMock(storage.readFile).mockResolvedValue(JSON.stringify([]));
+			mockResearchTags([]);
 			renderResearch();
 			fireEvent.click(screen.getByRole("button", { name: "Filters" }));
 			await waitFor(() => {
@@ -221,11 +199,7 @@ describe("Research View Lifecycle and Search Progress", () => {
 		});
 
 		const loadIndex = () => {
-			const { decodeBinaryIndex } = require("@util/data/searchIndexBinary");
-			const storage = require("@util/storage/storage");
-			asMock(storage.exists).mockResolvedValue(true);
-			asMock(storage.readFile).mockResolvedValue("binary-index");
-			asMock(decodeBinaryIndex).mockReturnValue({
+			mockResearchIndex({
 				v: 5,
 				f: ["article-1"],
 				t: { grace: [-1, 0] },
@@ -344,14 +318,10 @@ describe("Research View Lifecycle and Search Progress", () => {
 		});
 
 		it("reports search progress from runResearchSearch callbacks", async () => {
-			const { decodeBinaryIndex } = require("@util/data/searchIndexBinary");
-			const storage = require("@util/storage/storage");
 			const { runResearchSearch } = require("./runResearchSearch");
 			mockResearchState.query = "grace";
 			mockResearchState.hasSearched = false;
-			asMock(storage.exists).mockResolvedValue(true);
-			asMock(storage.readFile).mockResolvedValue("binary-index");
-			asMock(decodeBinaryIndex).mockReturnValue({ v: 5, f: ["a"], t: {} });
+			mockResearchIndex({ v: 5, f: ["a"], t: {} });
 			asMock(runResearchSearch).mockImplementation(
 				async ({ onProgress }: any) => {
 					onProgress(42);

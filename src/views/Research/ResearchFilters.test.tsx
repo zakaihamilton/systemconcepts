@@ -7,6 +7,8 @@ import Cookies from "js-cookie";
 import Research from "./";
 import {
 	createResearchScenarioTranslations,
+	mockResearchIndex,
+	mockResearchTags,
 	setupResearchViewTest,
 } from "./researchTestSetup";
 import { renderResearchView } from "./researchViewTestUtils";
@@ -83,13 +85,7 @@ describe("Research View Suggestions and Filter Interactions", () => {
 		});
 
 		it("clears the filter list query in the drawer", async () => {
-			const storage = require("@util/storage/storage");
-			asMock(storage.exists).mockImplementation((path: any) =>
-				Promise.resolve(path.endsWith("tags.json")),
-			);
-			asMock(storage.readFile).mockResolvedValue(
-				JSON.stringify([{ author: "Augustine" }]),
-			);
+			mockResearchTags([{ author: "Augustine" }]);
 			renderResearch();
 			fireEvent.click(screen.getByRole("button", { name: "Filters" }));
 			const filterSearch =
@@ -162,13 +158,7 @@ describe("Research View Suggestions and Filter Interactions", () => {
 		});
 
 		it("keeps suggestions open when blur moves focus inside the query wrap", async () => {
-			const storage = require("@util/storage/storage");
-			asMock(storage.exists).mockImplementation((path: any) =>
-				Promise.resolve(path.endsWith("tags.json")),
-			);
-			asMock(storage.readFile).mockResolvedValue(
-				JSON.stringify([{ title: "Grace and peace" }]),
-			);
+			mockResearchTags([{ title: "Grace and peace" }]);
 			renderResearch();
 			const searchInput = screen.getByPlaceholderText("Search...");
 			fireEvent.focus(searchInput);
@@ -182,13 +172,9 @@ describe("Research View Suggestions and Filter Interactions", () => {
 		});
 
 		it("searches on Enter when suggestions are closed", async () => {
-			const { decodeBinaryIndex } = require("@util/data/searchIndexBinary");
-			const storage = require("@util/storage/storage");
 			mockResearchState.query = "grace";
 			mockResearchState.hasSearched = false;
-			asMock(storage.exists).mockResolvedValue(true);
-			asMock(storage.readFile).mockResolvedValue("binary-index");
-			asMock(decodeBinaryIndex).mockReturnValue({ v: 5, f: ["a"], t: {} });
+			mockResearchIndex({ v: 5, f: ["a"], t: {} });
 			renderResearch();
 			await act(async () => {
 				await Promise.resolve();
@@ -203,14 +189,8 @@ describe("Research View Suggestions and Filter Interactions", () => {
 		});
 
 		it("deselects an active filter from the drawer", async () => {
-			const storage = require("@util/storage/storage");
 			mockResearchState.filterTags = [{ type: "author", label: "Paul" }];
-			asMock(storage.exists).mockImplementation((path: any) =>
-				Promise.resolve(path.endsWith("tags.json")),
-			);
-			asMock(storage.readFile).mockResolvedValue(
-				JSON.stringify([{ author: "Paul" }]),
-			);
+			mockResearchTags([{ author: "Paul" }]);
 			renderResearch();
 			fireEvent.click(screen.getByRole("button", { name: "Filters (1)" }));
 			await waitFor(() => {

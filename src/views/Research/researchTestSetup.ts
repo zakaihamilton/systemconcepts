@@ -73,6 +73,30 @@ jest.mock("@util/api/logger", () => ({
 	logger: { error: jest.fn(), debug: jest.fn(), warn: jest.fn() },
 }));
 
+type ResearchIndexFixture = {
+	v: number;
+	f: string[];
+	t: Record<string, Array<number | string>>;
+};
+
+export function mockResearchIndex(index: ResearchIndexFixture) {
+	const storage = jest.requireMock("@util/storage/storage");
+	const { decodeBinaryIndex } = jest.requireMock(
+		"@util/data/searchIndexBinary",
+	);
+	asMock(storage.exists).mockResolvedValue(true);
+	asMock(storage.readFile).mockResolvedValue("binary-index");
+	asMock(decodeBinaryIndex).mockReturnValue(index);
+}
+
+export function mockResearchTags(tags: object[]) {
+	const storage = jest.requireMock("@util/storage/storage");
+	asMock(storage.exists).mockImplementation((path: string) =>
+		Promise.resolve(path.endsWith("tags.json")),
+	);
+	asMock(storage.readFile).mockResolvedValue(JSON.stringify(tags) ?? "[]");
+}
+
 export function setResearchTestLibraryUpdateCounter(value: number) {
 	mockResearchTestState.libraryUpdateCounter = value;
 }
