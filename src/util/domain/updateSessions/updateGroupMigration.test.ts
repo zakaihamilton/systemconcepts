@@ -10,6 +10,32 @@ import {
 } from "./updateGroupTestSetup";
 import { updateYearSync } from "./utils";
 
+function mockMergedFile(
+	options: {
+		sessions?: unknown[];
+		remoteExists?: boolean;
+		malformed?: boolean;
+	} = {},
+) {
+	mockYearListing("2024", [
+		file(
+			"2024-05-05 Test Session.mp4",
+			"wasabi/test/2024/2024-05-05 Test Session.mp4",
+		),
+	]);
+	asMock(storage.exists).mockImplementation(async (path: string) => {
+		return (
+			path.endsWith("/local/sync/test.json") ||
+			Boolean(options.remoteExists && path.endsWith("/aws/sync/test.json.gz"))
+		);
+	});
+	asMock(storage.readFile).mockImplementation(async (path: string) => {
+		if (!path.endsWith("/local/sync/test.json")) return "";
+		if (options.malformed) return "{bad";
+		return JSON.stringify({ sessions: options.sessions ?? [] });
+	});
+}
+
 describe("updateGroupProcess merged-to-split migration", () => {
 	beforeEach(() => {
 		setupUpdateGroupTest({
@@ -20,38 +46,22 @@ describe("updateGroupProcess merged-to-split migration", () => {
 	});
 
 	it("migrates leftover years from a merged file when switching to split", async () => {
-		mockYearListing("2024", [
-			file(
-				"2024-05-05 Test Session.mp4",
-				"wasabi/test/2024/2024-05-05 Test Session.mp4",
-			),
-		]);
-		asMock(storage.exists).mockImplementation(async (path: any) => {
-			return (
-				path.endsWith("/local/sync/test.json") ||
-				path.endsWith("/aws/sync/test.json.gz")
-			);
-		});
-		asMock(storage.readFile).mockImplementation(async (path: any) => {
-			if (path.endsWith("/local/sync/test.json")) {
-				return JSON.stringify({
-					sessions: [
-						{
-							id: "2023-01-01 Old Year",
-							name: "2023-01-01 Old Year",
-							group: "test",
-							year: "2023",
-						},
-						{
-							id: "2024-05-05 Test Session",
-							name: "2024-05-05 Test Session",
-							group: "test",
-							year: "2024",
-						},
-					],
-				});
-			}
-			return "";
+		mockMergedFile({
+			remoteExists: true,
+			sessions: [
+				{
+					id: "2023-01-01 Old Year",
+					name: "2023-01-01 Old Year",
+					group: "test",
+					year: "2023",
+				},
+				{
+					id: "2024-05-05 Test Session",
+					name: "2024-05-05 Test Session",
+					group: "test",
+					year: "2024",
+				},
+			],
 		});
 
 		await updateGroupProcess("test", false, false, false, false);
@@ -72,19 +82,7 @@ describe("updateGroupProcess merged-to-split migration", () => {
 	});
 
 	it("logs when migrating from merged file fails and still deletes local merged", async () => {
-		mockYearListing("2024", [
-			file(
-				"2024-05-05 Test Session.mp4",
-				"wasabi/test/2024/2024-05-05 Test Session.mp4",
-			),
-		]);
-		asMock(storage.exists).mockImplementation(async (path: any) =>
-			path.endsWith("/local/sync/test.json"),
-		);
-		asMock(storage.readFile).mockImplementation(async (path: any) => {
-			if (path.endsWith("/local/sync/test.json")) return "{bad";
-			return "";
-		});
+		mockMergedFile({ malformed: true });
 
 		await updateGroupProcess("test", false, false, false, false);
 
@@ -98,24 +96,7 @@ describe("updateGroupProcess merged-to-split migration", () => {
 	});
 
 	it("logs when remote merged file deletion fails after split migration", async () => {
-		mockYearListing("2024", [
-			file(
-				"2024-05-05 Test Session.mp4",
-				"wasabi/test/2024/2024-05-05 Test Session.mp4",
-			),
-		]);
-		asMock(storage.exists).mockImplementation(async (path: any) => {
-			return (
-				path.endsWith("/local/sync/test.json") ||
-				path.endsWith("/aws/sync/test.json.gz")
-			);
-		});
-		asMock(storage.readFile).mockImplementation(async (path: any) => {
-			if (path.endsWith("/local/sync/test.json")) {
-				return JSON.stringify({ sessions: [] });
-			}
-			return "";
-		});
+		mockMergedFile({ remoteExists: true, sessions: [] });
 		asMock(storage.deleteFile).mockImplementation(async (path: any) => {
 			if (String(path).includes("test.json.gz")) {
 				throw new Error("remote delete fail");
@@ -131,28 +112,14 @@ describe("updateGroupProcess merged-to-split migration", () => {
 	});
 
 	it("migrates merged sessions grouped by inferred year when year field is missing", async () => {
-		mockYearListing("2024", [
-			file(
-				"2024-05-05 Test Session.mp4",
-				"wasabi/test/2024/2024-05-05 Test Session.mp4",
-			),
-		]);
-		asMock(storage.exists).mockImplementation(async (path: any) =>
-			path.endsWith("/local/sync/test.json"),
-		);
-		asMock(storage.readFile).mockImplementation(async (path: any) => {
-			if (path.endsWith("/local/sync/test.json")) {
-				return JSON.stringify({
-					sessions: [
-						{
-							id: "2023-06-01 Legacy Session",
-							name: "2023-06-01 Legacy Session",
-							group: "test",
-						},
-					],
-				});
-			}
-			return "";
+		mockMergedFile({
+			sessions: [
+				{
+					id: "2023-06-01 Legacy Session",
+					name: "2023-06-01 Legacy Session",
+					group: "test",
+				},
+			],
 		});
 
 		await updateGroupProcess("test", false, false, false, false);
