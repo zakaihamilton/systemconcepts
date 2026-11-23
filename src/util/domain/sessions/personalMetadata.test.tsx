@@ -1,9 +1,9 @@
-import "../sessionsTestSetup";
 import { waitFor } from "@testing-library/react";
 import { useGroups } from "@util/domain/groups";
 import { compactLegacySessionThumbnails } from "@util/domain/sessionCompaction";
 import storage from "@util/storage/storage";
 import { SessionsStore, useSessions } from "../sessions";
+import { createSessionsTestHarness } from "../sessionsTestSetup";
 
 function file(path: string, name?: string) {
 	return { path, name: name || path.split("/").pop(), type: "file" };
