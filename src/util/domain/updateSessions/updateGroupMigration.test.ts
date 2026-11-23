@@ -1,4 +1,3 @@
-import { file } from "./updateGroupTestSetup";
 import { SyncActiveStore, UpdateSessionsStore } from "@sync/syncState";
 import { logger } from "@util/api/logger";
 import storage from "@util/storage/storage";
@@ -10,7 +9,12 @@ import {
 } from "./metadata";
 import { fetchSessionMetadata } from "./sessionMetadataClient";
 import { updateGroupProcess } from "./updateGroup";
+import { file } from "./updateGroupTestSetup";
 import { getListing, updateYearSync } from "./utils";
+
+jest.mock("@util/storage/storage", () =>
+	require("./updateGroupMockFactories").storageMockFactory(),
+);
 
 describe("updateGroupProcess merged-to-split migration", () => {
 	beforeEach(() => {

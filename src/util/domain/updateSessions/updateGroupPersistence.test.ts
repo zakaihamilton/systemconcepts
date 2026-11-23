@@ -11,6 +11,10 @@ import { updateGroupProcess } from "./updateGroup";
 import { file, setupUpdateGroupTest } from "./updateGroupTestSetup";
 import { getListing } from "./utils";
 
+jest.mock("@util/storage/storage", () =>
+	require("./updateGroupMockFactories").storageMockFactory(),
+);
+
 describe("updateGroupProcess persistence and migration", () => {
 	beforeEach(() => {
 		setupUpdateGroupTest();

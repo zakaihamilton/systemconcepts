@@ -8,6 +8,10 @@ import { fetchSessionMetadata } from "./sessionMetadataClient";
 import { updateGroupProcess } from "./updateGroup";
 import { getListing, updateYearSync } from "./utils";
 
+jest.mock("@util/storage/storage", () =>
+	require("./updateGroupMockFactories").storageMockFactory(),
+);
+
 describe("updateGroupProcess", () => {
 	beforeEach(() => {
 		setupUpdateGroupTest();
