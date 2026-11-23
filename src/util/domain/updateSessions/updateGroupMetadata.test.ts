@@ -12,12 +12,13 @@ import { updateGroupProcess } from "./updateGroup";
 import {
 	emptyMetadataFingerprint,
 	file,
+	mockListingResponses,
 	mockYearCacheAndSessions,
 	mockYearListing,
 	setupUpdateGroupTest,
 	yearListingFiles,
 } from "./updateGroupTestSetup";
-import { getListing, updateYearSync } from "./utils";
+import { updateYearSync } from "./utils";
 
 describe("updateGroupProcess metadata resolution", () => {
 	beforeEach(() => {
@@ -223,22 +224,15 @@ describe("updateGroupProcess metadata resolution", () => {
 	});
 
 	it("warns when group metadata listing fails but continues processing", async () => {
-		asMock(getListing).mockImplementation(async (path: any) => {
-			if (path === "/aws/sessions/test") {
-				throw new Error("metadata listing down");
-			}
-			if (path === "wasabi/test") {
-				return [{ name: "2024", type: "dir", path: "wasabi/test/2024" }];
-			}
-			if (path === "wasabi/test/2024") {
-				return [
-					file(
-						"2024-05-05 Test Session.mp4",
-						"wasabi/test/2024/2024-05-05 Test Session.mp4",
-					),
-				];
-			}
-			return [];
+		mockListingResponses({
+			"/aws/sessions/test": new Error("metadata listing down"),
+			"wasabi/test": [{ name: "2024", type: "dir", path: "wasabi/test/2024" }],
+			"wasabi/test/2024": [
+				file(
+					"2024-05-05 Test Session.mp4",
+					"wasabi/test/2024/2024-05-05 Test Session.mp4",
+				),
+			],
 		});
 
 		await updateGroupProcess("test", true, false);
@@ -252,22 +246,15 @@ describe("updateGroupProcess metadata resolution", () => {
 
 	it("warns when legacy metadata folder listing fails", async () => {
 		asMock(fetchSessionMetadata).mockRejectedValue(new Error("backend busy"));
-		asMock(getListing).mockImplementation(async (path: any) => {
-			if (path === "wasabi/test") {
-				return [{ name: "2024", type: "dir", path: "wasabi/test/2024" }];
-			}
-			if (path === "wasabi/test/2024") {
-				return [
-					file(
-						"2024-05-05 Test Session.mp4",
-						"wasabi/test/2024/2024-05-05 Test Session.mp4",
-					),
-				];
-			}
-			if (path === "/aws/sessions/test/2024") {
-				throw new Error("metadata year listing fail");
-			}
-			return [];
+		mockListingResponses({
+			"wasabi/test": [{ name: "2024", type: "dir", path: "wasabi/test/2024" }],
+			"wasabi/test/2024": [
+				file(
+					"2024-05-05 Test Session.mp4",
+					"wasabi/test/2024/2024-05-05 Test Session.mp4",
+				),
+			],
+			"/aws/sessions/test/2024": new Error("metadata year listing fail"),
 		});
 		asMock(loadTags).mockResolvedValue({});
 
