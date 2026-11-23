@@ -7,7 +7,10 @@ type AuthViewTestOptions = {
 	cookieId: string | null;
 };
 
-export function setupAuthViewTest({ translations, cookieId }: AuthViewTestOptions) {
+export function setupAuthViewTest({
+	translations,
+	cookieId,
+}: AuthViewTestOptions) {
 	jest.clearAllMocks();
 	asMock(useTranslations).mockReturnValue(translations);
 	asMock(MainStore.useState).mockReturnValue({ direction: "ltr" });
