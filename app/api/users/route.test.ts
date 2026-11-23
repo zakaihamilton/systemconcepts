@@ -253,7 +253,9 @@ test("returns user-write acknowledgements without requiring storage secrets", as
 	delete process.env.AWS_SECRET;
 	delete process.env.RSS_SECRET;
 	delete process.env.AWS_BUCKET;
-	asMock(getCollection).mockResolvedValue({ deleteMany: jest.fn().mockResolvedValue(undefined) });
+	asMock(getCollection).mockResolvedValue({
+		deleteMany: jest.fn().mockResolvedValue(undefined),
+	});
 	try {
 		asMock(getSessionUser).mockResolvedValue({
 			id: "attacker",
