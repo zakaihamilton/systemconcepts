@@ -1,5 +1,6 @@
 import { SyncActiveStore, UpdateSessionsStore } from "@sync/syncState";
 import storage from "@util/storage/storage";
+import { getCombinedYearFingerprint } from "./fingerprints";
 import {
 	loadDurations,
 	loadSummaries,
@@ -56,7 +57,7 @@ jest.mock("./utils", () => ({
 	yieldToMain: jest.fn(() => Promise.resolve()),
 }));
 
-export function file(name: any, path: any) {
+export function file(name: string, path: string) {
 	return { id: path, name, type: "file" as const, path };
 }
 
@@ -324,4 +325,38 @@ export function setupUpdateGroupTest(
 		newCount: 0,
 		newSessions: [],
 	});
+}
+
+type YearFingerprintItem = Parameters<
+	typeof getCombinedYearFingerprint
+>[0][number];
+
+export function mockUnchangedYearCache(
+	year: string,
+	yearItems: YearFingerprintItem[],
+	sessions: unknown[],
+	options: Omit<YearCacheFixtureOptions, "cache"> = {},
+) {
+	const metadataFingerprint = emptyMetadataFingerprint();
+	const fingerprint = getCombinedYearFingerprint(
+		yearItems,
+		metadataFingerprint,
+	);
+	mockYearListing(year, yearItems);
+	mockYearCacheAndSessions(year, sessions, {
+		...options,
+		cache: {
+			fingerprint,
+			metadataFingerprint: JSON.stringify(metadataFingerprint),
+			metadata: emptyYearMetadata(),
+		},
+	});
+	return { fingerprint, metadataFingerprint };
+}
+
+export function recentSessionId() {
+	const recentDate = new Date(Date.now() - 24 * 60 * 60 * 1000)
+		.toISOString()
+		.slice(0, 10);
+	return `${recentDate} Recent Session`;
 }
