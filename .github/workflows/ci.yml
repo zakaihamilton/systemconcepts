@@ -31,6 +31,48 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec playwright install --with-deps chromium
+      - name: Diagnose repository health findings
+        continue-on-error: true
+        run: |
+          for category in duplication dead-code; do
+            report="/tmp/repnix-${category}.json"
+            pnpm exec repnix check "${category}" --format json > "${report}" 2>&1 || true
+            REPNIX_CATEGORY="${category}" REPNIX_REPORT="${report}" node <<'NODE'
+          const fs = require("node:fs");
+          const category = process.env.REPNIX_CATEGORY;
+          const raw = fs.readFileSync(process.env.REPNIX_REPORT, "utf8");
+          const baseline = JSON.parse(fs.readFileSync(".repnix-baseline.json", "utf8"));
+          const known = new Set((baseline.entries || []).map((entry) => entry.fingerprint));
+          let parsed;
+          try {
+            parsed = JSON.parse(raw);
+          } catch (error) {
+            console.log(JSON.stringify({ category, parseError: String(error), output: raw.slice(0, 3000) }, null, 2));
+            process.exit(0);
+          }
+          const findings = new Map();
+          function visit(value) {
+            if (Array.isArray(value)) return value.forEach(visit);
+            if (!value || typeof value !== "object") return;
+            if (typeof value.fingerprint === "string") findings.set(value.fingerprint, value);
+            Object.values(value).forEach(visit);
+          }
+          visit(parsed);
+          const fresh = [...findings.entries()]
+            .filter(([fingerprint]) => !known.has(fingerprint))
+            .map(([fingerprint, finding]) => ({
+              fingerprint, provider: finding.provider, category: finding.category,
+              type: finding.type, scope: finding.scope, file: finding.file,
+              line: finding.line, message: finding.message, baseline: finding.baseline,
+            }));
+          console.log(JSON.stringify({
+            category, parsedFindings: findings.size, newFindings: fresh.length,
+            findings: fresh, topLevelKeys: parsed && typeof parsed === "object" ? Object.keys(parsed) : [],
+            sample: findings.size ? undefined : raw.slice(0, 1500),
+          }, null, 2));
+          NODE
+          done
+
       - name: Repository health
         run: pnpm run health --details
       - run: pnpm lint
