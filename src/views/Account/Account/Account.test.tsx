@@ -4,7 +4,6 @@ import { UpdateSessionsStore } from "@sync/syncState";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { fetchJSON } from "@util/api/fetch";
-import { useTranslations } from "@util/domain/translations";
 import { setHash, setPath } from "@util/domain/views";
 import storage from "@util/storage/storage";
 import Cookies from "js-cookie";
