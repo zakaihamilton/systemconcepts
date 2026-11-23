@@ -46,6 +46,11 @@ jest.mock(
 		},
 );
 
+const submitPasswordResetRequest = () => {
+	changeAuthInput("input-userid", "testuser");
+	fireEvent.click(screen.getByRole("button", { name: /Reset Password/i }));
+};
+
 describe("ResetPassword View", () => {
 	const mockTranslations = {
 		RESET_PASSWORD: "Reset Password",
@@ -84,8 +89,7 @@ describe("ResetPassword View", () => {
 		asMock(fetchJSON).mockResolvedValue({});
 		render(<ResetPassword />);
 
-		changeAuthInput("input-userid", "testuser");
-		fireEvent.click(screen.getByRole("button", { name: /Reset Password/i }));
+		submitPasswordResetRequest();
 
 		await waitFor(() => {
 			expect(fetchJSON).toHaveBeenCalledWith(
@@ -125,8 +129,7 @@ describe("ResetPassword View", () => {
 	it("shows reset email confirmation after a successful request", async () => {
 		asMock(fetchJSON).mockResolvedValue({});
 		render(<ResetPassword />);
-		changeAuthInput("input-userid", "testuser");
-		fireEvent.click(screen.getByRole("button", { name: /Reset Password/i }));
+		submitPasswordResetRequest();
 		await waitFor(() => {
 			expect(screen.getByText("Reset email sent")).toBeInTheDocument();
 		});
@@ -159,8 +162,7 @@ describe("ResetPassword View", () => {
 	it("shows translated errors from the API response", async () => {
 		asMock(fetchJSON).mockResolvedValue({ err: "ACCESS_DENIED" });
 		render(<ResetPassword />);
-		changeAuthInput("input-userid", "testuser");
-		fireEvent.click(screen.getByRole("button", { name: /Reset Password/i }));
+		submitPasswordResetRequest();
 		await waitFor(() => {
 			expect(screen.getByText("Access denied")).toBeInTheDocument();
 		});
