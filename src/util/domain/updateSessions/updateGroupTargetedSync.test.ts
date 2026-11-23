@@ -12,10 +12,12 @@ import {
 import { fetchSessionMetadata } from "./sessionMetadataClient";
 import { updateGroupProcess } from "./updateGroup";
 import {
+	emptyMetadataFingerprint,
 	emptyYearMetadata,
 	file,
 	mockYearCacheAndSessions,
 	mockYearListing,
+	yearListingFiles,
 } from "./updateGroupTestSetup";
 import { getListing, updateYearSync } from "./utils";
 
@@ -104,10 +106,10 @@ describe("updateGroupProcess targeted and recent-days sync", () => {
 		const keepId = `${currentYear}-01-01 Keep Session`;
 		const targetId = `${currentYear}-02-02 Target Session`;
 
-		mockYearListing(currentYear, [
-			file(`${keepId}.mp4`, `wasabi/test/${currentYear}/${keepId}.mp4`),
-			file(`${targetId}.mp4`, `wasabi/test/${currentYear}/${targetId}.mp4`),
-		]);
+		mockYearListing(
+			currentYear,
+			yearListingFiles(currentYear, [`${keepId}.mp4`, `${targetId}.mp4`]),
+		);
 		mockYearCacheAndSessions(currentYear, [
 			{
 				id: keepId,
@@ -198,10 +200,10 @@ describe("updateGroupProcess targeted and recent-days sync", () => {
 		const recentId = `${recentDate} Recent Session`;
 		const localYearPath = `/local/sync/test/${currentYear}.json`;
 
-		mockYearListing(currentYear, [
-			file(`${oldId}.mp4`, `wasabi/test/${currentYear}/${oldId}.mp4`),
-			file(`${recentId}.mp4`, `wasabi/test/${currentYear}/${recentId}.mp4`),
-		]);
+		mockYearListing(
+			currentYear,
+			yearListingFiles(currentYear, [`${oldId}.mp4`, `${recentId}.mp4`]),
+		);
 		asMock(storage.exists).mockImplementation(
 			async (path: any) => path === localYearPath,
 		);
@@ -246,10 +248,10 @@ describe("updateGroupProcess targeted and recent-days sync", () => {
 		const localYearPath = `/local/sync/test/${currentYear}.json`;
 		const longSummary = "A".repeat(120);
 
-		mockYearListing(currentYear, [
-			file(`${keepId}.mp4`, `wasabi/test/${currentYear}/${keepId}.mp4`),
-			file(`${targetId}.mp4`, `wasabi/test/${currentYear}/${targetId}.mp4`),
-		]);
+		mockYearListing(
+			currentYear,
+			yearListingFiles(currentYear, [`${keepId}.mp4`, `${targetId}.mp4`]),
+		);
 		asMock(storage.exists).mockImplementation(
 			async (path: any) => path === localYearPath,
 		);
@@ -306,10 +308,8 @@ describe("updateGroupProcess targeted and recent-days sync", () => {
 	it("uses cached bundled sessions matched by explicit year field", async () => {
 		const currentYear = String(new Date().getFullYear());
 		const sessionId = `${currentYear}-03-03 Year Field Session`;
-		const yearItems = [
-			file(`${sessionId}.mp4`, `wasabi/test/${currentYear}/${sessionId}.mp4`),
-		];
-		const metadataFingerprint = [null, null, null, null];
+		const yearItems = yearListingFiles(currentYear, [`${sessionId}.mp4`]);
+		const metadataFingerprint = emptyMetadataFingerprint();
 		const yearFingerprint = getCombinedYearFingerprint(
 			yearItems,
 			metadataFingerprint,
@@ -344,10 +344,8 @@ describe("updateGroupProcess targeted and recent-days sync", () => {
 	it("skips unchanged bundled years using sessions keyed by name only", async () => {
 		const currentYear = String(new Date().getFullYear());
 		const sessionId = `${currentYear}-04-04 Name Only Session`;
-		const yearItems = [
-			file(`${sessionId}.mp4`, `wasabi/test/${currentYear}/${sessionId}.mp4`),
-		];
-		const metadataFingerprint = [null, null, null, null];
+		const yearItems = yearListingFiles(currentYear, [`${sessionId}.mp4`]);
+		const metadataFingerprint = emptyMetadataFingerprint();
 		const yearFingerprint = getCombinedYearFingerprint(
 			yearItems,
 			metadataFingerprint,

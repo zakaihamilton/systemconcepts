@@ -10,10 +10,12 @@ import {
 import { fetchSessionMetadata } from "./sessionMetadataClient";
 import { updateGroupProcess } from "./updateGroup";
 import {
+	emptyMetadataFingerprint,
 	file,
 	mockYearCacheAndSessions,
 	mockYearListing,
 	setupUpdateGroupTest,
+	yearListingFiles,
 } from "./updateGroupTestSetup";
 import { getListing, updateYearSync } from "./utils";
 
@@ -304,11 +306,12 @@ describe("updateGroupProcess metadata resolution", () => {
 	it("loads metadata from local year files when year cache has no metadata payload", async () => {
 		const currentYear = String(new Date().getFullYear());
 		const sessionId = `${currentYear}-08-01 Cached Metadata Session`;
-		const metadataFingerprint = [null, null, null, null];
+		const metadataFingerprint = emptyMetadataFingerprint();
 
-		mockYearListing(currentYear, [
-			file(`${sessionId}.mp4`, `wasabi/test/${currentYear}/${sessionId}.mp4`),
-		]);
+		mockYearListing(
+			currentYear,
+			yearListingFiles(currentYear, [`${sessionId}.mp4`]),
+		);
 		mockYearCacheAndSessions(
 			currentYear,
 			[
@@ -344,7 +347,7 @@ describe("updateGroupProcess metadata resolution", () => {
 	it("loads cached metadata using name-only session keys from local year files", async () => {
 		const currentYear = String(new Date().getFullYear());
 		const sessionName = `${currentYear}-09-01 Name Metadata Session`;
-		const metadataFingerprint = [null, null, null, null];
+		const metadataFingerprint = emptyMetadataFingerprint();
 
 		mockYearListing(currentYear, [
 			file(

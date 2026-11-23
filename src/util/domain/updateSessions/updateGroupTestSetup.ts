@@ -60,6 +60,14 @@ export function file(name: any, path: any) {
 	return { id: path, name, type: "file" as const, path };
 }
 
+export function yearListingFiles(year: string, filenames: string[]) {
+	return filenames.map((name) => file(name, `wasabi/test/${year}/${name}`));
+}
+
+export function emptyMetadataFingerprint() {
+	return [null, null, null, null];
+}
+
 type TestListingItem = {
 	id?: string;
 	name?: string;

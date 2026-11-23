@@ -15,11 +15,13 @@ import {
 import { fetchSessionMetadata } from "./sessionMetadataClient";
 import { updateGroupProcess } from "./updateGroup";
 import {
+	emptyMetadataFingerprint,
 	emptyYearMetadata,
 	file,
 	mockYearCacheAndSessions,
 	mockYearListing,
 	setupUpdateGroupTest,
+	yearListingFiles,
 } from "./updateGroupTestSetup";
 import { getListing, updateYearSync } from "./utils";
 
@@ -29,10 +31,8 @@ function setupUnchangedYearCache(
 ) {
 	const currentYear = String(new Date().getFullYear());
 	const sessionId = `${currentYear}-03-03 ${sessionTitle}`;
-	const yearItems = [
-		file(`${sessionId}.mp4`, `wasabi/test/${currentYear}/${sessionId}.mp4`),
-	];
-	const metadataFingerprint = [null, null, null, null];
+	const yearItems = yearListingFiles(currentYear, [`${sessionId}.mp4`]);
+	const metadataFingerprint = emptyMetadataFingerprint();
 	const yearFingerprint = getCombinedYearFingerprint(
 		yearItems,
 		metadataFingerprint,
@@ -82,9 +82,10 @@ describe("updateGroupProcess caching, incremental refresh, and targeted sync", (
 	it("uses cached metadata for non-forced updates without calling the aggregated endpoint", async () => {
 		const currentYear = String(new Date().getFullYear());
 		const sessionId = `${currentYear}-05-05 Cached Session`;
-		mockYearListing(currentYear, [
-			file(`${sessionId}.mp4`, `wasabi/test/${currentYear}/${sessionId}.mp4`),
-		]);
+		mockYearListing(
+			currentYear,
+			yearListingFiles(currentYear, [`${sessionId}.mp4`]),
+		);
 		mockYearCacheAndSessions(currentYear, [
 			{
 				id: sessionId,
@@ -117,11 +118,11 @@ describe("updateGroupProcess caching, incremental refresh, and targeted sync", (
 		const currentYear = String(new Date().getFullYear());
 		const existingId = `${currentYear}-07-17 Overview - Kabbalah & Suffering`;
 		const newId = `${currentYear}-07-20 Overview - The Grip & Shells`;
-		const yearItems = [
-			file(`${existingId}.mp4`, `wasabi/test/${currentYear}/${existingId}.mp4`),
-			file(`${newId}.mp4`, `wasabi/test/${currentYear}/${newId}.mp4`),
-		];
-		const metadataFingerprint = [null, null, null, null];
+		const yearItems = yearListingFiles(currentYear, [
+			`${existingId}.mp4`,
+			`${newId}.mp4`,
+		]);
+		const metadataFingerprint = emptyMetadataFingerprint();
 		const yearFingerprint = getCombinedYearFingerprint(
 			yearItems,
 			metadataFingerprint,
@@ -218,7 +219,7 @@ describe("updateGroupProcess caching, incremental refresh, and targeted sync", (
 				stat: { type: "file" as const, size: 20, mtimeMs: 2 },
 			},
 		];
-		const metadataFingerprint = [null, null, null, null];
+		const metadataFingerprint = emptyMetadataFingerprint();
 		const staleFingerprint = getCombinedYearFingerprint(
 			[yearItems[0]],
 			metadataFingerprint,
@@ -543,7 +544,7 @@ describe("updateGroupProcess caching, incremental refresh, and targeted sync", (
 			file(`${sessionId}.txt`, `wasabi/test/${currentYear}/${sessionId}.txt`),
 			file(`${sessionId}.mp4`, `wasabi/test/${currentYear}/${sessionId}.mp4`),
 		];
-		const metadataFingerprint = [null, null, null, null];
+		const metadataFingerprint = emptyMetadataFingerprint();
 		const yearFingerprint = getCombinedYearFingerprint(
 			yearItems,
 			metadataFingerprint,
@@ -598,11 +599,11 @@ describe("updateGroupProcess caching, incremental refresh, and targeted sync", (
 		const currentYear = String(new Date().getFullYear());
 		const existingId = `${currentYear}-01-01 Existing Session`;
 		const newAudioId = `${currentYear}-08-03 Audio Only Session`;
-		const yearItems = [
-			file(`${existingId}.mp4`, `wasabi/test/${currentYear}/${existingId}.mp4`),
-			file(`${newAudioId}.m4a`, `wasabi/test/${currentYear}/${newAudioId}.m4a`),
-		];
-		const metadataFingerprint = [null, null, null, null];
+		const yearItems = yearListingFiles(currentYear, [
+			`${existingId}.mp4`,
+			`${newAudioId}.m4a`,
+		]);
+		const metadataFingerprint = emptyMetadataFingerprint();
 		const yearFingerprint = getCombinedYearFingerprint(
 			yearItems,
 			metadataFingerprint,
