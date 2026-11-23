@@ -104,6 +104,13 @@ function tagsToJson(path: any, tags: any) {
 	return "{}";
 }
 
+function mockStoredLibraryTags(tags: object[]) {
+	asMock(storage.exists).mockResolvedValue(true);
+	asMock(storage.readFile).mockImplementation((path: any) =>
+		Promise.resolve(tagsToJson(path, tags)),
+	);
+}
+
 describe("Library View", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
@@ -449,10 +456,7 @@ describe("Library View", () => {
 		];
 
 		beforeEach(() => {
-			asMock(storage.exists).mockResolvedValue(true);
-			asMock(storage.readFile).mockImplementation((path: any) =>
-				Promise.resolve(tagsToJson(path, tags)),
-			);
+			mockStoredLibraryTags(tags);
 		});
 
 		it("computes prev/next article names for a middle article", async () => {
@@ -511,10 +515,7 @@ describe("Library View", () => {
 		];
 
 		beforeEach(() => {
-			asMock(storage.exists).mockResolvedValue(true);
-			asMock(storage.readFile).mockImplementation((path: any) =>
-				Promise.resolve(tagsToJson(path, tags)),
-			);
+			mockStoredLibraryTags(tags);
 		});
 
 		it("selects a tag from a hierarchy path without an id", async () => {
@@ -784,10 +785,7 @@ describe("Library View", () => {
 				path: "p1",
 			},
 		];
-		asMock(storage.exists).mockResolvedValue(true);
-		asMock(storage.readFile).mockImplementation((path: any) =>
-			Promise.resolve(tagsToJson(path, tags)),
-		);
+		mockStoredLibraryTags(tags);
 		asMock(usePathItems).mockReturnValue([
 			"library",
 			"Augustine",
@@ -805,10 +803,7 @@ describe("Library View", () => {
 	it("updates scrollToParagraph when the same tag is already selected", async () => {
 		const { LibraryStore } = require("../Store");
 		const tags = [{ _id: "t1", book: "Book", chapter: "One", path: "p1" }];
-		asMock(storage.exists).mockResolvedValue(true);
-		asMock(storage.readFile).mockImplementation((path: any) =>
-			Promise.resolve(tagsToJson(path, tags)),
-		);
+		mockStoredLibraryTags(tags);
 		asMock(usePathItems).mockReturnValue(["library", "id", "t1:5"]);
 		render(<Library />);
 		await waitFor(() => {
@@ -820,10 +815,7 @@ describe("Library View", () => {
 	it("stores tags in LibraryStore after loading", async () => {
 		const { LibraryStore } = require("../Store");
 		const tags = [{ _id: "t1", book: "Book", chapter: "One", path: "p1" }];
-		asMock(storage.exists).mockResolvedValue(true);
-		asMock(storage.readFile).mockImplementation((path: any) =>
-			Promise.resolve(tagsToJson(path, tags)),
-		);
+		mockStoredLibraryTags(tags);
 		render(<Library />);
 		await waitFor(() => {
 			expect(LibraryStore.update).toHaveBeenCalled();
@@ -836,10 +828,7 @@ describe("Library View", () => {
 			lastViewedArticle: { _id: "t1" },
 		});
 		const tags = [{ _id: "t1", book: "Book", chapter: "One", path: "p1" }];
-		asMock(storage.exists).mockResolvedValue(true);
-		asMock(storage.readFile).mockImplementation((path: any) =>
-			Promise.resolve(tagsToJson(path, tags)),
-		);
+		mockStoredLibraryTags(tags);
 		asMock(usePathItems).mockReturnValue(["library"]);
 		render(<Library />);
 		await waitFor(() => {
@@ -850,10 +839,7 @@ describe("Library View", () => {
 	it("sets scrollToParagraph when selecting a tag from an id url", async () => {
 		const { LibraryStore } = require("../Store");
 		const tags = [{ _id: "t1", book: "Book", chapter: "One", path: "p1" }];
-		asMock(storage.exists).mockResolvedValue(true);
-		asMock(storage.readFile).mockImplementation((path: any) =>
-			Promise.resolve(tagsToJson(path, tags)),
-		);
+		mockStoredLibraryTags(tags);
 		asMock(usePathItems).mockReturnValue(["library", "id", "t1:12"]);
 		render(<Library />);
 		await waitFor(() => {
@@ -863,10 +849,7 @@ describe("Library View", () => {
 
 	it("returns an empty article title when no tag fields are set", async () => {
 		const tags = [{ _id: "t1", path: "p1" }];
-		asMock(storage.exists).mockResolvedValue(true);
-		asMock(storage.readFile).mockImplementation((path: any) =>
-			Promise.resolve(tagsToJson(path, tags)),
-		);
+		mockStoredLibraryTags(tags);
 		asMock(usePathItems).mockReturnValue(["library", "id", "t1"]);
 		render(<Library />);
 		await waitFor(() => {
@@ -878,10 +861,7 @@ describe("Library View", () => {
 		const tags = [
 			{ _id: "t1", book: "Book", chapter: "Intro", number: 3, path: "p1" },
 		];
-		asMock(storage.exists).mockResolvedValue(true);
-		asMock(storage.readFile).mockImplementation((path: any) =>
-			Promise.resolve(tagsToJson(path, tags)),
-		);
+		mockStoredLibraryTags(tags);
 		asMock(usePathItems).mockReturnValue(["library", "Book|Intro:3"]);
 		render(<Library />);
 		await waitFor(() => {
@@ -891,10 +871,7 @@ describe("Library View", () => {
 
 	it("keeps loading state when re-selecting the same tag", async () => {
 		const tags = [{ _id: "t1", book: "Book", chapter: "One", path: "p1" }];
-		asMock(storage.exists).mockResolvedValue(true);
-		asMock(storage.readFile).mockImplementation((path: any) =>
-			Promise.resolve(tagsToJson(path, tags)),
-		);
+		mockStoredLibraryTags(tags);
 		asMock(usePathItems).mockReturnValue(["library", "id", "t1"]);
 		render(<Library />);
 		await waitFor(() => {
