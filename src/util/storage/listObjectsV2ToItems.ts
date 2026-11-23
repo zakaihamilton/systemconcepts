@@ -11,6 +11,12 @@ type ListedStorageItem = {
 	};
 };
 
+type ListObjectContentWithType = NonNullable<
+	ListObjectsV2CommandOutput["Contents"]
+>[number] & {
+	ContentType?: string;
+};
+
 type ListObjectsOptions = {
 	excludePrivateDirectory?: boolean;
 };
@@ -36,8 +42,9 @@ export function listObjectsV2ToItems(
 		const name = content.Key!.split("/").pop();
 		if (!name) return;
 
+		const contentType = (content as ListObjectContentWithType).ContentType;
 		const type =
-			content.ContentType === "application/x-directory" ? "dir" : "file";
+			contentType === "application/x-directory" ? "dir" : "file";
 		items.push({
 			name,
 			stat: {
