@@ -26,11 +26,9 @@ type UpdateGroupMockFactoryName =
 	keyof typeof import("./updateGroupMockFactories").updateGroupMockFactories;
 
 function mockUtilsFactory(name: UpdateGroupMockFactoryName) {
-	return jest
-		.requireActual<typeof import("./updateGroupMockFactories")>(
-			"./updateGroupMockFactories",
-		)
-		.updateGroupMockFactories[name]();
+	return (
+		require("./updateGroupMockFactories") as typeof import("./updateGroupMockFactories")
+	).updateGroupMockFactories[name]();
 }
 
 jest.mock("@util/api/logger", () => mockUtilsFactory("utilsLogger"));

@@ -11,42 +11,32 @@ import { fetchSessionMetadata } from "./sessionMetadataClient";
 import * as updateSessionUtils from "./utils";
 
 jest.mock("@sync/bundle", () =>
-	jest
-		.requireActual<typeof import("./updateGroupMockFactories")>(
-			"./updateGroupMockFactories",
-		)
-		.updateGroupMockFactories.groupBundle(),
+	(
+		require("./updateGroupMockFactories") as typeof import("./updateGroupMockFactories")
+	).updateGroupMockFactories.groupBundle(),
 );
 jest.mock("@sync/hash", () =>
-	jest
-		.requireActual<typeof import("./updateGroupMockFactories")>(
-			"./updateGroupMockFactories",
-		)
-		.updateGroupMockFactories.groupHash(),
+	(
+		require("./updateGroupMockFactories") as typeof import("./updateGroupMockFactories")
+	).updateGroupMockFactories.groupHash(),
 );
 jest.mock("@sync/manifest", () =>
-	jest
-		.requireActual<typeof import("./updateGroupMockFactories")>(
-			"./updateGroupMockFactories",
-		)
-		.updateGroupMockFactories.groupManifest(),
+	(
+		require("./updateGroupMockFactories") as typeof import("./updateGroupMockFactories")
+	).updateGroupMockFactories.groupManifest(),
 );
 jest.mock("@sync/sync", () => ({
 	addSyncLog: jest.fn(),
 }));
 jest.mock("@util/api/logger", () =>
-	jest
-		.requireActual<typeof import("./updateGroupMockFactories")>(
-			"./updateGroupMockFactories",
-		)
-		.updateGroupMockFactories.groupLogger(),
+	(
+		require("./updateGroupMockFactories") as typeof import("./updateGroupMockFactories")
+	).updateGroupMockFactories.groupLogger(),
 );
 jest.mock("@util/storage/storage", () =>
-	jest
-		.requireActual<typeof import("./updateGroupMockFactories")>(
-			"./updateGroupMockFactories",
-		)
-		.updateGroupMockFactories.groupStorage(),
+	(
+		require("./updateGroupMockFactories") as typeof import("./updateGroupMockFactories")
+	).updateGroupMockFactories.groupStorage(),
 );
 jest.mock("./cleanup", () => ({
 	cleanupBundledGroup: jest.fn(),
