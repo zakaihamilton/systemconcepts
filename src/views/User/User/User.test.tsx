@@ -3,6 +3,7 @@ import { fireEvent, render, waitFor } from "@testing-library/react";
 import { fetchJSON, useFetchJSON } from "@util/api/fetch";
 import { useTranslations } from "@util/domain/translations";
 import { goBackPage, useParentPath } from "@util/domain/views";
+import { createAuthInputMock as mockCreateAuthInputMock } from "../../authInputTestMock";
 import User from "./index";
 
 jest.mock("@util/domain/translations");
@@ -13,35 +14,12 @@ jest.mock("@components/Main", () => ({
 }));
 jest.mock("@util/domain/views");
 jest.mock("@util/api/fetch");
-jest.mock(
-	"@widgets/Input",
-	() =>
-		({
-			state,
-			label,
-			onValidate,
-			validate,
-			background,
-			select,
-			fullWidth,
-			icon,
-			tooltip,
-			mapping,
-			helperText,
-			...props
-		}: any) => {
-			const [value, setValue] = state || [];
-			const error = validate && onValidate ? onValidate(value) : "";
-			return (
-				<input
-					data-testid={`input-${props.id}`}
-					data-error={error || ""}
-					value={value || ""}
-					onChange={(e) => setValue && setValue(e.target.value)}
-					{...props}
-				/>
-			);
-		},
+jest.mock("@widgets/Input", () =>
+	mockCreateAuthInputMock({
+		testIdProp: "id",
+		allowMissingState: true,
+		includeValidationError: true,
+	}),
 );
 
 describe("User View", () => {

@@ -3,6 +3,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { fetchJSON } from "@util/api/fetch";
 import { setHash, setPath } from "@util/domain/views";
 import Cookies from "js-cookie";
+import { createAuthInputMock as mockCreateAuthInputMock } from "../../authInputTestMock";
 import {
 	changeAuthInput,
 	expectLoginPostRequest,
@@ -27,34 +28,7 @@ const enterValidPasswordChange = () => {
 };
 jest.mock("@util/api/fetch");
 jest.mock("@util/domain/views");
-jest.mock(
-	"@widgets/Input",
-	() =>
-		({
-			state,
-			label,
-			onValidate,
-			validate,
-			background,
-			select,
-			fullWidth,
-			icon,
-			tooltip,
-			mapping,
-			helperText,
-			...props
-		}: any) => {
-			const [value, setValue] = state;
-			return (
-				<input
-					data-testid={`input-${props.name}`}
-					value={value || ""}
-					onChange={(e) => setValue(e.target.value)}
-					{...props}
-				/>
-			);
-		},
-);
+jest.mock("@widgets/Input", () => mockCreateAuthInputMock());
 
 describe("ChangePassword View", () => {
 	const mockTranslations = {

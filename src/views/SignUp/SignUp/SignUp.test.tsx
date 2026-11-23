@@ -4,6 +4,7 @@ import { fetchJSON } from "@util/api/fetch";
 import { useTranslations } from "@util/domain/translations";
 import { setHash, setPath } from "@util/domain/views";
 import Cookies from "js-cookie";
+import { createAuthInputMock as mockCreateAuthInputMock } from "../../authInputTestMock";
 import { changeAuthInput, expectLoginPostRequest } from "../../authTestSetup";
 import SignUp from "./index";
 
@@ -19,34 +20,7 @@ jest.mock("@components/Main", () => ({
 jest.mock("@util/api/fetch");
 jest.mock("js-cookie");
 jest.mock("@util/domain/views");
-jest.mock(
-	"@widgets/Input",
-	() =>
-		({
-			state,
-			label,
-			onValidate,
-			validate,
-			background,
-			select,
-			fullWidth,
-			icon,
-			tooltip,
-			mapping,
-			helperText,
-			...props
-		}: any) => {
-			const [value, setValue] = state;
-			return (
-				<input
-					data-testid={`input-${props.name}`}
-					value={value || ""}
-					onChange={(e) => setValue(e.target.value)}
-					{...props}
-				/>
-			);
-		},
-);
+jest.mock("@widgets/Input", () => mockCreateAuthInputMock());
 
 const fillValidSignUpForm = () => {
 	changeAuthInput("input-username", "testuser");
