@@ -60,6 +60,35 @@ export function file(name: any, path: any) {
 	return { id: path, name, type: "file" as const, path };
 }
 
+function defaultMetadataFiles() {
+	return [
+		file(
+			"2024-05-05 Test Session.duration",
+			"/aws/sessions/test/2024/2024-05-05 Test Session.duration",
+		),
+		file(
+			"2024-05-05 Test Session.md",
+			"/aws/sessions/test/2024/2024-05-05 Test Session.md",
+		),
+		file(
+			"2024-05-05 Test Session.txt",
+			"/aws/sessions/test/2024/2024-05-05 Test Session.txt",
+		),
+		file(
+			"2024-05-05 Test Session.en.vtt",
+			"/aws/sessions/test/2024/2024-05-05 Test Session.en.vtt",
+		),
+		file(
+			"2024-05-05 Test Session.png",
+			"/aws/sessions/test/2024/2024-05-05 Test Session.png",
+		),
+		file(
+			"2024-05-06 Metadata Only.txt",
+			"/aws/sessions/test/2024/2024-05-06 Metadata Only.txt",
+		),
+	];
+}
+
 export function yearListingFiles(year: string, filenames: string[]) {
 	return filenames.map((name) => file(name, `wasabi/test/${year}/${name}`));
 }
@@ -237,32 +266,7 @@ export function setupUpdateGroupTest(
 	asMock(loadTranscriptions).mockResolvedValue({});
 	asMock(fetchSessionMetadata).mockResolvedValue(
 		options.sessionMetadata ?? {
-			items: [
-				file(
-					"2024-05-05 Test Session.duration",
-					"/aws/sessions/test/2024/2024-05-05 Test Session.duration",
-				),
-				file(
-					"2024-05-05 Test Session.md",
-					"/aws/sessions/test/2024/2024-05-05 Test Session.md",
-				),
-				file(
-					"2024-05-05 Test Session.txt",
-					"/aws/sessions/test/2024/2024-05-05 Test Session.txt",
-				),
-				file(
-					"2024-05-05 Test Session.en.vtt",
-					"/aws/sessions/test/2024/2024-05-05 Test Session.en.vtt",
-				),
-				file(
-					"2024-05-05 Test Session.png",
-					"/aws/sessions/test/2024/2024-05-05 Test Session.png",
-				),
-				file(
-					"2024-05-06 Metadata Only.txt",
-					"/aws/sessions/test/2024/2024-05-06 Metadata Only.txt",
-				),
-			],
+			items: defaultMetadataFiles(),
 			tags: {},
 			durations: {},
 			summaries: {},
@@ -289,32 +293,7 @@ export function setupUpdateGroupTest(
 					];
 				}
 				if (path === "/aws/sessions/test/2024") {
-					return [
-						file(
-							"2024-05-05 Test Session.duration",
-							"/aws/sessions/test/2024/2024-05-05 Test Session.duration",
-						),
-						file(
-							"2024-05-05 Test Session.md",
-							"/aws/sessions/test/2024/2024-05-05 Test Session.md",
-						),
-						file(
-							"2024-05-05 Test Session.txt",
-							"/aws/sessions/test/2024/2024-05-05 Test Session.txt",
-						),
-						file(
-							"2024-05-05 Test Session.en.vtt",
-							"/aws/sessions/test/2024/2024-05-05 Test Session.en.vtt",
-						),
-						file(
-							"2024-05-05 Test Session.png",
-							"/aws/sessions/test/2024/2024-05-05 Test Session.png",
-						),
-						file(
-							"2024-05-06 Metadata Only.txt",
-							"/aws/sessions/test/2024/2024-05-06 Metadata Only.txt",
-						),
-					];
+					return defaultMetadataFiles();
 				}
 				return [];
 			}),
