@@ -13,38 +13,28 @@ import {
 	updateYearSync,
 } from "./utils";
 
-jest.mock("@sync/bundle", () => ({
-	writeCompressedFile: jest.fn(),
-}));
-jest.mock("@sync/hash", () => ({
-	getFileInfo: jest.fn(),
-}));
+jest.mock("@sync/bundle", () => mockUtilsFactory("utilsBundle"));
+jest.mock("@sync/hash", () => mockUtilsFactory("utilsHash"));
 jest.mock("@sync/logs", () => ({
 	addSyncLog: jest.fn(),
 }));
-jest.mock("@sync/manifest", () => ({
-	updateManifestEntry: jest.fn(),
-}));
+jest.mock("@sync/manifest", () => mockUtilsFactory("utilsManifest"));
 jest.mock("@sync/mutex", () => ({
 	lockMutex: jest.fn(async () => jest.fn()),
 }));
-jest.mock("@util/api/logger", () => ({
-	logger: {
-		debug: jest.fn(),
-		error: jest.fn(),
-		info: jest.fn(),
-		warn: jest.fn(),
-	},
-}));
-jest.mock("@util/storage/storage", () => ({
-	exists: jest.fn(),
-	getListing: jest.fn(),
-	readFile: jest.fn(),
-	writeFile: jest.fn(),
-	deleteFile: jest.fn(),
-	createFolderPath: jest.fn(),
-	rename: jest.fn(),
-}));
+type UpdateGroupMockFactoryName =
+	keyof typeof import("./updateGroupMockFactories").updateGroupMockFactories;
+
+function mockUtilsFactory(name: UpdateGroupMockFactoryName) {
+	return jest
+		.requireActual<typeof import("./updateGroupMockFactories")>(
+			"./updateGroupMockFactories",
+		)
+		.updateGroupMockFactories[name]();
+}
+
+jest.mock("@util/api/logger", () => mockUtilsFactory("utilsLogger"));
+jest.mock("@util/storage/storage", () => mockUtilsFactory("utilsStorage"));
 describe("getListing", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();

@@ -10,33 +10,44 @@ import {
 import { fetchSessionMetadata } from "./sessionMetadataClient";
 import * as updateSessionUtils from "./utils";
 
-jest.mock("@sync/bundle", () => ({
-	writeCompressedFile: jest.fn(),
-}));
-jest.mock("@sync/hash", () => ({
-	getFileInfo: jest.fn(),
-}));
-jest.mock("@sync/manifest", () => ({
-	updateManifestEntry: jest.fn(),
-}));
+jest.mock("@sync/bundle", () =>
+	jest
+		.requireActual<typeof import("./updateGroupMockFactories")>(
+			"./updateGroupMockFactories",
+		)
+		.updateGroupMockFactories.groupBundle(),
+);
+jest.mock("@sync/hash", () =>
+	jest
+		.requireActual<typeof import("./updateGroupMockFactories")>(
+			"./updateGroupMockFactories",
+		)
+		.updateGroupMockFactories.groupHash(),
+);
+jest.mock("@sync/manifest", () =>
+	jest
+		.requireActual<typeof import("./updateGroupMockFactories")>(
+			"./updateGroupMockFactories",
+		)
+		.updateGroupMockFactories.groupManifest(),
+);
 jest.mock("@sync/sync", () => ({
 	addSyncLog: jest.fn(),
 }));
-jest.mock("@util/api/logger", () => ({
-	logger: {
-		debug: jest.fn(),
-		error: jest.fn(),
-		info: jest.fn(),
-		warn: jest.fn(),
-	},
-}));
-jest.mock("@util/storage/storage", () => ({
-	createFolderPath: jest.fn(),
-	deleteFile: jest.fn(),
-	exists: jest.fn(),
-	readFile: jest.fn(),
-	writeFile: jest.fn(),
-}));
+jest.mock("@util/api/logger", () =>
+	jest
+		.requireActual<typeof import("./updateGroupMockFactories")>(
+			"./updateGroupMockFactories",
+		)
+		.updateGroupMockFactories.groupLogger(),
+);
+jest.mock("@util/storage/storage", () =>
+	jest
+		.requireActual<typeof import("./updateGroupMockFactories")>(
+			"./updateGroupMockFactories",
+		)
+		.updateGroupMockFactories.groupStorage(),
+);
 jest.mock("./cleanup", () => ({
 	cleanupBundledGroup: jest.fn(),
 	cleanupMergedGroup: jest.fn(),
