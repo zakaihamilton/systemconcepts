@@ -4,7 +4,7 @@ import { fetchJSON } from "@util/api/fetch";
 import { useTranslations } from "@util/domain/translations";
 import { setHash, setPath } from "@util/domain/views";
 import Cookies from "js-cookie";
-import { changeAuthInput } from "../../authTestSetup";
+import { changeAuthInput, expectLoginPostRequest } from "../../authTestSetup";
 import SignUp from "./index";
 
 jest.mock("@util/domain/translations");
@@ -48,6 +48,14 @@ jest.mock(
 		},
 );
 
+const fillValidSignUpForm = () => {
+	changeAuthInput("input-username", "testuser");
+	changeAuthInput("input-fname", "Test");
+	changeAuthInput("input-lname", "User");
+	changeAuthInput("input-email", "test@example.com");
+	changeAuthInput("input-password", "password123");
+};
+
 describe("SignUp View", () => {
 	const mockTranslations = {
 		SIGN_UP: "Sign Up",
@@ -89,21 +97,12 @@ describe("SignUp View", () => {
 		asMock(fetchJSON).mockResolvedValue({ hash: "newhash" });
 		render(<SignUp />);
 
-		changeAuthInput("input-username", "testuser");
-		changeAuthInput("input-fname", "Test");
-		changeAuthInput("input-lname", "User");
-		changeAuthInput("input-email", "test@example.com");
-		changeAuthInput("input-password", "password123");
+		fillValidSignUpForm();
 
 		fireEvent.click(screen.getByRole("button", { name: /Sign Up/i }));
 
 		await waitFor(() => {
-			expect(fetchJSON).toHaveBeenCalledWith(
-				"/api/login",
-				expect.objectContaining({
-					method: "POST",
-				}),
-			);
+			expectLoginPostRequest();
 		});
 	});
 
@@ -127,11 +126,7 @@ describe("SignUp View", () => {
 	it("navigates home after a successful registration", async () => {
 		asMock(fetchJSON).mockResolvedValue({});
 		render(<SignUp />);
-		changeAuthInput("input-username", "testuser");
-		changeAuthInput("input-fname", "Test");
-		changeAuthInput("input-lname", "User");
-		changeAuthInput("input-email", "test@example.com");
-		changeAuthInput("input-password", "password123");
+		fillValidSignUpForm();
 		fireEvent.submit(
 			screen.getByRole("button", { name: /Sign Up/i }).closest("form"),
 		);
@@ -143,11 +138,7 @@ describe("SignUp View", () => {
 	it("clears cookies and shows translated errors on failure", async () => {
 		asMock(fetchJSON).mockResolvedValue({ err: "ACCESS_DENIED" });
 		render(<SignUp />);
-		changeAuthInput("input-username", "testuser");
-		changeAuthInput("input-fname", "Test");
-		changeAuthInput("input-lname", "User");
-		changeAuthInput("input-email", "test@example.com");
-		changeAuthInput("input-password", "password123");
+		fillValidSignUpForm();
 		fireEvent.click(screen.getByRole("button", { name: /Sign Up/i }));
 		await waitFor(() => {
 			expect(Cookies.set).toHaveBeenCalledWith("id", "");
