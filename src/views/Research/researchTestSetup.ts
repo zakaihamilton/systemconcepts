@@ -203,3 +203,35 @@ export function setupResearchViewTest(options: ResearchSetupOptions) {
 	asMock(options.cookies.get).mockReturnValue("admin");
 	return { researchState, libraryState };
 }
+
+export function createOutlineResearchResults(secondMatchIndex = 1) {
+	return [
+		{ docId: "1", tag: { title: "Grace" }, matches: [{ index: 0 }] },
+		{
+			docId: "2",
+			tag: { title: "Hope" },
+			matches: [{ index: secondMatchIndex }],
+		},
+	];
+}
+
+export function createSourceFilteredResearchResults() {
+	return [
+		{
+			docId: "1",
+			tag: { title: "Article" },
+			matches: [{ index: 0 }],
+			isSession: false,
+		},
+		{
+			docId: "2",
+			tag: { title: "Session" },
+			matches: [{ index: 0 }],
+			isSession: true,
+		},
+	];
+}
+
+export function setupResearchTestState(options: ResearchSetupOptions) {
+	return setupResearchViewTest(options).researchState;
+}
