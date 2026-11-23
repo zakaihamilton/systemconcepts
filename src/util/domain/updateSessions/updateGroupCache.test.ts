@@ -22,6 +22,57 @@ import {
 } from "./updateGroupTestSetup";
 import { getListing, updateYearSync } from "./utils";
 
+function setupUnchangedYearCache(
+	sessionTitle: string,
+	location: "year" | "bundle",
+) {
+	const currentYear = String(new Date().getFullYear());
+	const sessionId = `${currentYear}-03-03 ${sessionTitle}`;
+	const yearItems = [
+		file(`${sessionId}.mp4`, `wasabi/test/${currentYear}/${sessionId}.mp4`),
+	];
+	const metadataFingerprint = [null, null, null, null];
+	const yearFingerprint = getCombinedYearFingerprint(
+		yearItems,
+		metadataFingerprint,
+	);
+	const localSessionsPath =
+		location === "bundle"
+			? "/local/sync/test.json"
+			: `/local/sync/test/${currentYear}.json`;
+	const isLocalSessionsPath = (path: string) =>
+		location === "bundle"
+			? path.endsWith("/local/sync/test.json")
+			: path === localSessionsPath;
+
+	mockYearListing(currentYear, yearItems);
+	asMock(storage.exists).mockImplementation(async (path: string) =>
+		isLocalSessionsPath(path),
+	);
+	asMock(storage.readFile).mockImplementation(async (path: string) => {
+		if (path.includes(`.group-update-cache/test/${currentYear}.json`)) {
+			return JSON.stringify({
+				fingerprint: yearFingerprint,
+				metadataFingerprint: JSON.stringify(metadataFingerprint),
+				metadata: emptyYearMetadata(),
+			});
+		}
+		if (isLocalSessionsPath(path)) {
+			return JSON.stringify({
+				sessions: [
+					{
+						id: sessionId,
+						name: sessionId,
+						group: "test",
+						year: currentYear,
+					},
+				],
+			});
+		}
+		return "";
+	});
+}
+
 describe("updateGroupProcess caching, incremental refresh, and targeted sync", () => {
 	beforeEach(() => {
 		setupUpdateGroupTest();
@@ -441,44 +492,7 @@ describe("updateGroupProcess caching, incremental refresh, and targeted sync", (
 	});
 
 	it("skips an unchanged year when fingerprint and sessions match", async () => {
-		const currentYear = String(new Date().getFullYear());
-		const sessionId = `${currentYear}-03-03 Unchanged Session`;
-		const yearItems = [
-			file(`${sessionId}.mp4`, `wasabi/test/${currentYear}/${sessionId}.mp4`),
-		];
-		const metadataFingerprint = [null, null, null, null];
-		const yearFingerprint = getCombinedYearFingerprint(
-			yearItems,
-			metadataFingerprint,
-		);
-		const localYearPath = `/local/sync/test/${currentYear}.json`;
-
-		mockYearListing(currentYear, yearItems);
-		asMock(storage.exists).mockImplementation(
-			async (path: any) => path === localYearPath,
-		);
-		asMock(storage.readFile).mockImplementation(async (path: any) => {
-			if (path.includes(`.group-update-cache/test/${currentYear}.json`)) {
-				return JSON.stringify({
-					fingerprint: yearFingerprint,
-					metadataFingerprint: JSON.stringify(metadataFingerprint),
-					metadata: emptyYearMetadata(),
-				});
-			}
-			if (path === localYearPath) {
-				return JSON.stringify({
-					sessions: [
-						{
-							id: sessionId,
-							name: sessionId,
-							group: "test",
-							year: currentYear,
-						},
-					],
-				});
-			}
-			return "";
-		});
+		setupUnchangedYearCache("Unchanged Session", "year");
 
 		await updateGroupProcess("test", false, false);
 
@@ -524,40 +538,8 @@ describe("updateGroupProcess caching, incremental refresh, and targeted sync", (
 	});
 
 	it("reuses cached merged sessions when an unchanged year is skipped", async () => {
-		const currentYear = String(new Date().getFullYear());
-		const sessionId = `${currentYear}-03-03 Cached Merged`;
-		const yearItems = [
-			file(`${sessionId}.mp4`, `wasabi/test/${currentYear}/${sessionId}.mp4`),
-		];
-		const metadataFingerprint = [null, null, null, null];
-		const yearFingerprint = getCombinedYearFingerprint(
-			yearItems,
-			metadataFingerprint,
-		);
-		const cachedSession = {
-			id: sessionId,
-			name: sessionId,
-			group: "test",
-			year: currentYear,
-		};
+		setupUnchangedYearCache("Cached Merged", "bundle");
 
-		mockYearListing(currentYear, yearItems);
-		asMock(storage.exists).mockImplementation(async (path: any) =>
-			path.endsWith("/local/sync/test.json"),
-		);
-		asMock(storage.readFile).mockImplementation(async (path: any) => {
-			if (path.includes(`.group-update-cache/test/${currentYear}.json`)) {
-				return JSON.stringify({
-					fingerprint: yearFingerprint,
-					metadataFingerprint: JSON.stringify(metadataFingerprint),
-					metadata: emptyYearMetadata(),
-				});
-			}
-			if (path.endsWith("/local/sync/test.json")) {
-				return JSON.stringify({ sessions: [cachedSession] });
-			}
-			return "";
-		});
 		asMock(getFileInfo).mockResolvedValue({ hash: "abc", size: 10 });
 
 		await updateGroupProcess("test", false, false, true, false);
