@@ -4,7 +4,7 @@ import {
 	getSessionUser,
 	revokeAllSessions,
 } from "@util/auth/session";
-import { findRecord, handleRequest } from "@util/storage/mongo";
+import { findRecord, getCollection, handleRequest } from "@util/storage/mongo";
 import { hash as bcryptHash } from "bcryptjs";
 import { DELETE, PUT } from "./route";
 
@@ -16,6 +16,7 @@ jest.mock("@util/auth/session", () => ({
 jest.mock("@util/auth/roles", () => ({ roleAuth: jest.fn() }));
 jest.mock("@util/storage/mongo", () => ({
 	findRecord: jest.fn(),
+	getCollection: jest.fn(),
 	handleRequest: jest.fn(),
 }));
 jest.mock("@util/api/safeError", () => ({
@@ -223,20 +224,36 @@ describe("nested user records", () => {
 	});
 
 	it("forwards a single own-account deletion as an authorized array", async () => {
-		await DELETE(request({ method: "DELETE", body: { id: "attacker" } }));
-		expect(handleRequest).toHaveBeenCalledWith(
-			expect.objectContaining({
-				req: expect.objectContaining({ body: [{ id: "attacker" }] }),
-			}),
-		);
+		const originalAwsBucket = process.env.AWS_BUCKET;
+		delete process.env.AWS_BUCKET;
+		const deleteMany = jest.fn().mockResolvedValue(undefined);
+		asMock(getCollection).mockResolvedValue({ deleteMany });
+		try {
+			await DELETE(request({ method: "DELETE", body: { id: "attacker" } }));
+			expect(getCollection).toHaveBeenCalledWith({
+				collectionName: "fs_attacker",
+			});
+			expect(deleteMany).toHaveBeenCalledWith({});
+			expect(handleRequest).toHaveBeenCalledWith(
+				expect.objectContaining({
+					req: expect.objectContaining({ body: [{ id: "attacker" }] }),
+				}),
+			);
+		} finally {
+			if (originalAwsBucket === undefined) delete process.env.AWS_BUCKET;
+			else process.env.AWS_BUCKET = originalAwsBucket;
+		}
 	});
 });
 
 test("returns user-write acknowledgements without requiring storage secrets", async () => {
 	const originalAwsSecret = process.env.AWS_SECRET;
 	const originalRssSecret = process.env.RSS_SECRET;
+	const originalAwsBucket = process.env.AWS_BUCKET;
 	delete process.env.AWS_SECRET;
 	delete process.env.RSS_SECRET;
+	delete process.env.AWS_BUCKET;
+	asMock(getCollection).mockResolvedValue({ deleteMany: jest.fn().mockResolvedValue(undefined) });
 	try {
 		asMock(getSessionUser).mockResolvedValue({
 			id: "attacker",
@@ -254,5 +271,7 @@ test("returns user-write acknowledgements without requiring storage secrets", as
 		else process.env.AWS_SECRET = originalAwsSecret;
 		if (originalRssSecret === undefined) delete process.env.RSS_SECRET;
 		else process.env.RSS_SECRET = originalRssSecret;
+		if (originalAwsBucket === undefined) delete process.env.AWS_BUCKET;
+		else process.env.AWS_BUCKET = originalAwsBucket;
 	}
 });
