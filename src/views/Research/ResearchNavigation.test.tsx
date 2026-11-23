@@ -6,12 +6,12 @@ import { useDeviceType } from "@util/browser/styles";
 import { useTranslations } from "@util/domain/translations";
 import { setHash, setPath, usePathItems } from "@util/domain/views";
 import Cookies from "js-cookie";
-import { setupResearchViewTest } from "./researchTestSetup";
+import Research from "./";
 import {
 	mockResearchListFactory,
 	mockResearchListState,
 } from "./researchNavigationTestSetup";
-import Research from "./";
+import { setupResearchViewTest } from "./researchTestSetup";
 import { renderResearchView } from "./researchViewTestUtils";
 
 jest.mock("@components/Virtualized/VariableSizeList", () =>
