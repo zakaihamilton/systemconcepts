@@ -1,18 +1,19 @@
 import "./updateGroupTestSetup";
 import { addSyncLog } from "@sync/sync";
 import storage from "@util/storage/storage";
-import { getCombinedYearFingerprint } from "./fingerprints";
 import { fetchSessionMetadata } from "./sessionMetadataClient";
 import { updateGroupProcess } from "./updateGroup";
 import {
 	cachedYearSession,
-	emptyMetadataFingerprint,
 	emptyYearMetadata,
 	file,
+	mockUnchangedYearCache,
 	mockYearCacheAndSessions,
 	mockYearListing,
+	recentSessionId,
 	setupUpdateGroupTest,
 	yearListingFiles,
+	yearMetadata,
 } from "./updateGroupTestSetup";
 import { updateYearSync } from "./utils";
 
@@ -26,15 +27,12 @@ describe("updateGroupProcess targeted and recent-days sync", () => {
 
 	it("updates only recent sessions while preserving cached sessions from the same year", async () => {
 		const currentYear = String(new Date().getFullYear());
-		const recentDate = new Date(Date.now() - 24 * 60 * 60 * 1000)
-			.toISOString()
-			.slice(0, 10);
 		const oldSession = cachedYearSession(
 			`${currentYear}-01-01 Historical Session`,
 			currentYear,
 			{ tags: ["preserve"] },
 		);
-		const recentId = `${recentDate} Recent Session`;
+		const recentId = recentSessionId();
 
 		mockYearListing(currentYear, [
 			file(
@@ -45,13 +43,11 @@ describe("updateGroupProcess targeted and recent-days sync", () => {
 		]);
 		mockYearCacheAndSessions(currentYear, [oldSession]);
 
-		asMock(fetchSessionMetadata).mockResolvedValue({
-			items: [],
-			tags: { [recentId]: ["recent"] },
-			durations: {},
-			summaries: {},
-			transcriptions: {},
-		});
+		asMock(fetchSessionMetadata).mockResolvedValue(
+			yearMetadata({
+				tags: { [recentId]: ["recent"] },
+			}),
+		);
 
 		await updateGroupProcess("test", false, true, false, false, null, 30);
 
@@ -80,13 +76,11 @@ describe("updateGroupProcess targeted and recent-days sync", () => {
 			cachedYearSession(targetId, currentYear, { tags: ["stale"] }),
 		]);
 
-		asMock(fetchSessionMetadata).mockResolvedValue({
-			items: [],
-			tags: { [targetId]: ["fresh"], [keepId]: ["keep"] },
-			durations: {},
-			summaries: {},
-			transcriptions: {},
-		});
+		asMock(fetchSessionMetadata).mockResolvedValue(
+			yearMetadata({
+				tags: { [targetId]: ["fresh"], [keepId]: ["keep"] },
+			}),
+		);
 
 		await updateGroupProcess(
 			"test",
@@ -119,22 +113,17 @@ describe("updateGroupProcess targeted and recent-days sync", () => {
 
 	it("logs a full-year refresh when recentDays is set without local cache", async () => {
 		const currentYear = String(new Date().getFullYear());
-		const recentDate = new Date(Date.now() - 24 * 60 * 60 * 1000)
-			.toISOString()
-			.slice(0, 10);
-		const recentId = `${recentDate} Recent Session`;
+		const recentId = recentSessionId();
 
 		mockYearListing(currentYear, [
 			file(`${recentId}.mp4`, `wasabi/test/${currentYear}/${recentId}.mp4`),
 		]);
 		asMock(storage.exists).mockResolvedValue(false);
-		asMock(fetchSessionMetadata).mockResolvedValue({
-			items: [],
-			tags: { [recentId]: ["recent"] },
-			durations: {},
-			summaries: {},
-			transcriptions: {},
-		});
+		asMock(fetchSessionMetadata).mockResolvedValue(
+			yearMetadata({
+				tags: { [recentId]: ["recent"] },
+			}),
+		);
 
 		await updateGroupProcess("test", false, true, false, false, null, 30);
 
@@ -146,11 +135,8 @@ describe("updateGroupProcess targeted and recent-days sync", () => {
 
 	it("merges recent session updates using name-only cached session keys", async () => {
 		const currentYear = String(new Date().getFullYear());
-		const recentDate = new Date(Date.now() - 24 * 60 * 60 * 1000)
-			.toISOString()
-			.slice(0, 10);
 		const oldId = `${currentYear}-01-01 Historical Session`;
-		const recentId = `${recentDate} Recent Session`;
+		const recentId = recentSessionId();
 		const localYearPath = `/local/sync/test/${currentYear}.json`;
 
 		mockYearListing(
@@ -169,13 +155,11 @@ describe("updateGroupProcess targeted and recent-days sync", () => {
 			],
 			{ localPath: localYearPath },
 		);
-		asMock(fetchSessionMetadata).mockResolvedValue({
-			items: [],
-			tags: { [recentId]: ["recent"] },
-			durations: {},
-			summaries: {},
-			transcriptions: {},
-		});
+		asMock(fetchSessionMetadata).mockResolvedValue(
+			yearMetadata({
+				tags: { [recentId]: ["recent"] },
+			}),
+		);
 
 		await updateGroupProcess("test", false, true, false, false, null, 30);
 
@@ -225,13 +209,14 @@ describe("updateGroupProcess targeted and recent-days sync", () => {
 			}
 			return "";
 		});
-		asMock(fetchSessionMetadata).mockResolvedValue({
-			items: [],
-			tags: { [targetId]: ["fresh"] },
-			durations: { [targetId]: 321 },
-			summaries: { [targetId]: longSummary },
-			transcriptions: { [targetId]: true },
-		});
+		asMock(fetchSessionMetadata).mockResolvedValue(
+			yearMetadata({
+				tags: { [targetId]: ["fresh"] },
+				durations: { [targetId]: 321 },
+				summaries: { [targetId]: longSummary },
+				transcriptions: { [targetId]: true },
+			}),
+		);
 
 		await updateGroupProcess("test", false, true, false, false, targetId, null);
 
@@ -256,28 +241,16 @@ describe("updateGroupProcess targeted and recent-days sync", () => {
 		const currentYear = String(new Date().getFullYear());
 		const sessionId = `${currentYear}-03-03 Year Field Session`;
 		const yearItems = yearListingFiles(currentYear, [`${sessionId}.mp4`]);
-		const metadataFingerprint = emptyMetadataFingerprint();
-		const yearFingerprint = getCombinedYearFingerprint(
+		mockUnchangedYearCache(
+			currentYear,
 			yearItems,
-			metadataFingerprint,
+			[
+				cachedYearSession(sessionId, currentYear, {
+					tags: ["year-field"],
+				}),
+			],
+			{ localPath: "/local/sync/bundle.json" },
 		);
-		const cachedSession = {
-			id: sessionId,
-			name: sessionId,
-			group: "test",
-			year: currentYear,
-			tags: ["year-field"],
-		};
-
-		mockYearListing(currentYear, yearItems);
-		mockYearCacheAndSessions(currentYear, [cachedSession], {
-			localPath: "/local/sync/bundle.json",
-			cache: {
-				fingerprint: yearFingerprint,
-				metadataFingerprint: JSON.stringify(metadataFingerprint),
-				metadata: emptyYearMetadata(),
-			},
-		});
 
 		await updateGroupProcess("test", false, false, false, true);
 
@@ -292,15 +265,9 @@ describe("updateGroupProcess targeted and recent-days sync", () => {
 		const currentYear = String(new Date().getFullYear());
 		const sessionId = `${currentYear}-04-04 Name Only Session`;
 		const yearItems = yearListingFiles(currentYear, [`${sessionId}.mp4`]);
-		const metadataFingerprint = emptyMetadataFingerprint();
-		const yearFingerprint = getCombinedYearFingerprint(
-			yearItems,
-			metadataFingerprint,
-		);
-
-		mockYearListing(currentYear, yearItems);
-		mockYearCacheAndSessions(
+		mockUnchangedYearCache(
 			currentYear,
+			yearItems,
 			[
 				{
 					name: sessionId,
@@ -308,14 +275,7 @@ describe("updateGroupProcess targeted and recent-days sync", () => {
 					year: currentYear,
 				},
 			],
-			{
-				localPath: "/local/sync/bundle.json",
-				cache: {
-					fingerprint: yearFingerprint,
-					metadataFingerprint: JSON.stringify(metadataFingerprint),
-					metadata: emptyYearMetadata(),
-				},
-			},
+			{ localPath: "/local/sync/bundle.json" },
 		);
 
 		await updateGroupProcess("test", false, false, false, true);
@@ -351,13 +311,11 @@ describe("updateGroupProcess targeted and recent-days sync", () => {
 			},
 		]);
 
-		asMock(fetchSessionMetadata).mockResolvedValue({
-			items: [],
-			tags: { [targetId]: ["fresh-target"] },
-			durations: {},
-			summaries: {},
-			transcriptions: {},
-		});
+		asMock(fetchSessionMetadata).mockResolvedValue(
+			yearMetadata({
+				tags: { [targetId]: ["fresh-target"] },
+			}),
+		);
 
 		await updateGroupProcess("test", false, true, false, false, targetId, null);
 
