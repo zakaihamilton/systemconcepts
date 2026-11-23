@@ -8,6 +8,7 @@ import {
 	screen,
 	waitFor,
 } from "@testing-library/react";
+import { useDeviceType } from "@util/browser/styles";
 import { useTranslations } from "@util/domain/translations";
 import { setHash, setPath, usePathItems } from "@util/domain/views";
 import Cookies from "js-cookie";

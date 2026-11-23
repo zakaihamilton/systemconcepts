@@ -126,7 +126,7 @@ function createResearchTranslations() {
 	};
 }
 
-export function setupResearchViewTest(options: ResearchSetupOptions = {}) {
+export function setupResearchViewTest(options: ResearchSetupOptions) {
 	const { useDeviceType } = jest.requireMock("@util/browser/styles");
 	const { useSessions } = jest.requireMock("@util/domain/sessions");
 	const { useTranslations } = jest.requireMock("@util/domain/translations");
