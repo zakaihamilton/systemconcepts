@@ -4,7 +4,11 @@ import { useGroups } from "@util/domain/groups";
 import { compactLegacySessionThumbnails } from "@util/domain/sessionCompaction";
 import storage from "@util/storage/storage";
 import { SessionsStore, useSessions } from "./sessions";
-import { createSessionsTestHarness } from "./sessionsTestSetup";
+import {
+	createSessionsTestHarness,
+	mockSessionsStorageFiles,
+	sessionFixture,
+} from "./sessionsTestSetup";
 
 const {
 	GROUP_METADATA,
@@ -23,36 +27,34 @@ describe("useSessions", () => {
 	beforeEach(resetSessionsTestState);
 
 	it("loads sessions for a non-bundled group using year files found via the manifest", async () => {
-		asMock(storage.exists).mockImplementation(async (path: any) => {
-			return (
-				path === "/local/sync/groups.json" ||
-				path === "/local/sync/files.json" ||
-				path === "/local/sync/american/2024.json"
-			);
-		});
-		asMock(storage.readFile).mockImplementation(async (path: any) => {
-			if (path === "/local/sync/groups.json") {
-				return JSON.stringify({ groups: [{ name: "american" }] });
-			}
-			if (path === "/local/sync/files.json") {
-				return JSON.stringify([{ path: "/american/2024.json" }]);
-			}
-			if (path === "/local/sync/american/2024.json") {
-				return JSON.stringify({
+		mockSessionsStorageFiles(
+			storage,
+			[
+				"/local/sync/groups.json",
+				"/local/sync/files.json",
+				"/local/sync/american/2024.json",
+			],
+			{
+				"/local/sync/groups.json": JSON.stringify({
+					groups: [{ name: "american" }],
+				}),
+				"/local/sync/files.json": JSON.stringify([
+					{ path: "/american/2024.json" },
+				]),
+				"/local/sync/american/2024.json": JSON.stringify({
 					sessions: [
-						{
-							id: "2024-05-05 Test Session",
-							name: "2024-05-05 Test Session",
-							date: "2024-05-05",
-							group: "american",
-							year: "2024",
-							type: "audio",
-						},
+						sessionFixture(
+							"2024-05-05 Test Session",
+							"2024-05-05 Test Session",
+							"2024-05-05",
+							"american",
+							"2024",
+							"audio",
+						),
 					],
-				});
-			}
-			return "";
-		});
+				}),
+			},
+		);
 
 		renderHarness();
 
@@ -67,32 +69,27 @@ describe("useSessions", () => {
 	});
 
 	it("loads a merged group from its single json file", async () => {
-		asMock(storage.exists).mockImplementation(async (path: any) => {
-			return (
-				path === "/local/sync/groups.json" ||
-				path === "/local/sync/american.json"
-			);
-		});
-		asMock(storage.readFile).mockImplementation(async (path: any) => {
-			if (path === "/local/sync/groups.json") {
-				return JSON.stringify({ groups: [{ name: "american" }] });
-			}
-			if (path === "/local/sync/american.json") {
-				return JSON.stringify({
+		mockSessionsStorageFiles(
+			storage,
+			["/local/sync/groups.json", "/local/sync/american.json"],
+			{
+				"/local/sync/groups.json": JSON.stringify({
+					groups: [{ name: "american" }],
+				}),
+				"/local/sync/american.json": JSON.stringify({
 					sessions: [
-						{
-							id: "2024-01-01 Merged Session",
-							name: "2024-01-01 Merged Session",
-							date: "2024-01-01",
-							group: "american",
-							year: "2024",
-							type: "video",
-						},
+						sessionFixture(
+							"2024-01-01 Merged Session",
+							"2024-01-01 Merged Session",
+							"2024-01-01",
+							"american",
+							"2024",
+							"video",
+						),
 					],
-				});
-			}
-			return "";
-		});
+				}),
+			},
+		);
 
 		renderHarness();
 
@@ -105,33 +102,27 @@ describe("useSessions", () => {
 	});
 
 	it("loads bundled sessions from bundle.json and skips per-year fetching", async () => {
-		asMock(storage.exists).mockImplementation(async (path: any) => {
-			return (
-				path === "/local/sync/groups.json" || path === "/local/sync/bundle.json"
-			);
-		});
-		asMock(storage.readFile).mockImplementation(async (path: any) => {
-			if (path === "/local/sync/groups.json") {
-				return JSON.stringify({
+		mockSessionsStorageFiles(
+			storage,
+			["/local/sync/groups.json", "/local/sync/bundle.json"],
+			{
+				"/local/sync/groups.json": JSON.stringify({
 					groups: [{ name: "bundledgroup", bundled: true }],
-				});
-			}
-			if (path === "/local/sync/bundle.json") {
-				return JSON.stringify({
+				}),
+				"/local/sync/bundle.json": JSON.stringify({
 					sessions: [
-						{
-							id: "2024-02-02 Bundled Session",
-							name: "2024-02-02 Bundled Session",
-							date: "2024-02-02",
-							group: "bundledgroup",
-							year: "2024",
-							type: "audio",
-						},
+						sessionFixture(
+							"2024-02-02 Bundled Session",
+							"2024-02-02 Bundled Session",
+							"2024-02-02",
+							"bundledgroup",
+							"2024",
+							"audio",
+						),
 					],
-				});
-			}
-			return "";
-		});
+				}),
+			},
+		);
 
 		renderHarness();
 
@@ -192,14 +183,8 @@ describe("useSessions", () => {
 		asMock(compactLegacySessionThumbnails).mockRejectedValue(
 			new Error("compaction failed"),
 		);
-		asMock(storage.exists).mockImplementation(
-			async (path: any) => path === "/local/sync/groups.json",
-		);
-		asMock(storage.readFile).mockImplementation(async (path: any) => {
-			if (path === "/local/sync/groups.json") {
-				return JSON.stringify({ groups: [] });
-			}
-			return "";
+		mockSessionsStorageFiles(storage, ["/local/sync/groups.json"], {
+			"/local/sync/groups.json": JSON.stringify({ groups: [] }),
 		});
 
 		renderHarness();

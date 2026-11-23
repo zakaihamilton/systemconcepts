@@ -52,6 +52,30 @@ jest.mock("@util/storage/storage", () => ({
 
 const GROUP_METADATA = [{ name: "american", color: "#fff" }];
 
+export function sessionFixture(
+	id: string,
+	name: string,
+	date: string,
+	group: string,
+	year: string,
+	type: string,
+) {
+	return { id, name, date, group, year, type };
+}
+
+export function mockSessionsStorageFiles(
+	storage: typeof import("@util/storage/storage").default,
+	existingPaths: string[],
+	fileContents: Record<string, string>,
+) {
+	asMock(storage.exists).mockImplementation(async (path: string) =>
+		existingPaths.includes(path),
+	);
+	asMock(storage.readFile).mockImplementation(
+		async (path: string) => fileContents[path] ?? "",
+	);
+}
+
 export function createSessionsTestHarness(
 	useSessions: typeof import("./sessions").useSessions,
 	SessionsStore: typeof import("./sessions").SessionsStore,

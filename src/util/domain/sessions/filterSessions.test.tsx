@@ -4,7 +4,10 @@ import { useGroups } from "@util/domain/groups";
 import { compactLegacySessionThumbnails } from "@util/domain/sessionCompaction";
 import storage from "@util/storage/storage";
 import { SessionsStore, useSessions } from "../sessions";
-import { createSessionsTestHarness } from "../sessionsTestSetup";
+import {
+	createSessionsTestHarness,
+	mockSessionsStorageFiles,
+} from "../sessionsTestSetup";
 
 const { getSessionsState, renderHarness, resetSessionsTestState } =
 	createSessionsTestHarness(
@@ -287,16 +290,10 @@ describe("useSessions filtering and toolbar", () => {
 		});
 
 		it("builds groupsItems with click handlers that toggle the group filter", async () => {
-			asMock(storage.exists).mockImplementation(
-				async (path: any) => path === "/local/sync/groups.json",
-			);
-			asMock(storage.readFile).mockImplementation(async (path: any) => {
-				if (path === "/local/sync/groups.json") {
-					return JSON.stringify({
-						groups: [{ name: "american" }, { name: "hebrew" }],
-					});
-				}
-				return "";
+			mockSessionsStorageFiles(storage, ["/local/sync/groups.json"], {
+				"/local/sync/groups.json": JSON.stringify({
+					groups: [{ name: "american" }, { name: "hebrew" }],
+				}),
 			});
 			renderHarness();
 
