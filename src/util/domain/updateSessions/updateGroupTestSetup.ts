@@ -230,7 +230,7 @@ export function mockYearCacheAndSessions(
 	return localPath;
 }
 
-export function mockCachedYearListing(
+function mockCachedYearListing(
 	year: string,
 	filenames: string[],
 	sessions: unknown[],
@@ -238,6 +238,21 @@ export function mockCachedYearListing(
 ) {
 	mockYearListing(year, yearListingFiles(year, filenames));
 	mockYearCacheAndSessions(year, sessions, options);
+}
+
+export function mockStaleLocalYearCache(
+	year: string,
+	sessionId: string,
+	sessions: unknown[],
+) {
+	const metadataFingerprint = emptyMetadataFingerprint();
+	mockYearListing(year, yearListingFiles(year, [`${sessionId}.mp4`]));
+	mockYearCacheAndSessions(year, sessions, {
+		cache: {
+			fingerprint: "stale",
+			metadataFingerprint: JSON.stringify(metadataFingerprint),
+		},
+	});
 }
 
 type YearMetadata = Awaited<ReturnType<typeof fetchSessionMetadata>>;
@@ -389,6 +404,9 @@ export function mockRecentYearCache(
 		[`${historicalSessionId}.mp4`, `${recentId}.mp4`],
 		sessions,
 		options,
+	);
+	asMock(fetchSessionMetadata).mockResolvedValue(
+		yearMetadata({ tags: { [recentId]: ["recent"] } }),
 	);
 	return recentId;
 }

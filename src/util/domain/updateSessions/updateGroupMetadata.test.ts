@@ -10,15 +10,13 @@ import {
 import { fetchSessionMetadata } from "./sessionMetadataClient";
 import { updateGroupProcess } from "./updateGroup";
 import {
-	emptyMetadataFingerprint,
 	expectSessionField,
 	file,
 	mockListingResponses,
-	mockYearCacheAndSessions,
+	mockStaleLocalYearCache,
 	mockYearListing,
 	sessionMetadataFiles,
 	setupUpdateGroupTest,
-	yearListingFiles,
 	yearMetadata,
 } from "./updateGroupTestSetup";
 import { updateYearSync } from "./utils";
@@ -257,33 +255,18 @@ describe("updateGroupProcess metadata resolution", () => {
 	it("loads metadata from local year files when year cache has no metadata payload", async () => {
 		const currentYear = String(new Date().getFullYear());
 		const sessionId = `${currentYear}-08-01 Cached Metadata Session`;
-		const metadataFingerprint = emptyMetadataFingerprint();
-
-		mockYearListing(
-			currentYear,
-			yearListingFiles(currentYear, [`${sessionId}.mp4`]),
-		);
-		mockYearCacheAndSessions(
-			currentYear,
-			[
-				{
-					id: sessionId,
-					name: sessionId,
-					group: "test",
-					year: currentYear,
-					tags: ["local-meta"],
-					duration: 444,
-					summaryText: "From local year file",
-					transcription: true,
-				},
-			],
+		mockStaleLocalYearCache(currentYear, sessionId, [
 			{
-				cache: {
-					fingerprint: "stale",
-					metadataFingerprint: JSON.stringify(metadataFingerprint),
-				},
+				id: sessionId,
+				name: sessionId,
+				group: "test",
+				year: currentYear,
+				tags: ["local-meta"],
+				duration: 444,
+				summaryText: "From local year file",
+				transcription: true,
 			},
-		);
+		]);
 
 		await updateGroupProcess("test", false, false);
 
@@ -298,32 +281,15 @@ describe("updateGroupProcess metadata resolution", () => {
 	it("loads cached metadata using name-only session keys from local year files", async () => {
 		const currentYear = String(new Date().getFullYear());
 		const sessionName = `${currentYear}-09-01 Name Metadata Session`;
-		const metadataFingerprint = emptyMetadataFingerprint();
-
-		mockYearListing(currentYear, [
-			file(
-				`${sessionName}.mp4`,
-				`wasabi/test/${currentYear}/${sessionName}.mp4`,
-			),
-		]);
-		mockYearCacheAndSessions(
-			currentYear,
-			[
-				{
-					name: sessionName,
-					group: "test",
-					year: currentYear,
-					tags: ["name-key"],
-					duration: 12,
-				},
-			],
+		mockStaleLocalYearCache(currentYear, sessionName, [
 			{
-				cache: {
-					fingerprint: "stale",
-					metadataFingerprint: JSON.stringify(metadataFingerprint),
-				},
+				name: sessionName,
+				group: "test",
+				year: currentYear,
+				tags: ["name-key"],
+				duration: 12,
 			},
-		);
+		]);
 
 		await updateGroupProcess("test", false, false);
 

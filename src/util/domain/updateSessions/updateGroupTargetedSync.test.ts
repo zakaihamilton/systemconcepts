@@ -37,12 +37,6 @@ describe("updateGroupProcess targeted and recent-days sync", () => {
 			oldSession,
 		]);
 
-		asMock(fetchSessionMetadata).mockResolvedValue(
-			yearMetadata({
-				tags: { [recentId]: ["recent"] },
-			}),
-		);
-
 		await updateGroupProcess("test", false, true, false, false, null, 30);
 
 		const [, year, sessions] = asMock(updateYearSync).mock.calls[0];
@@ -114,9 +108,7 @@ describe("updateGroupProcess targeted and recent-days sync", () => {
 		]);
 		asMock(storage.exists).mockResolvedValue(false);
 		asMock(fetchSessionMetadata).mockResolvedValue(
-			yearMetadata({
-				tags: { [recentId]: ["recent"] },
-			}),
+			yearMetadata({ tags: { [recentId]: ["recent"] } }),
 		);
 
 		await updateGroupProcess("test", false, true, false, false, null, 30);
@@ -143,11 +135,6 @@ describe("updateGroupProcess targeted and recent-days sync", () => {
 				},
 			],
 			{ localPath: localYearPath },
-		);
-		asMock(fetchSessionMetadata).mockResolvedValue(
-			yearMetadata({
-				tags: { [recentId]: ["recent"] },
-			}),
 		);
 
 		await updateGroupProcess("test", false, true, false, false, null, 30);

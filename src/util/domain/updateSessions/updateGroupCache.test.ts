@@ -30,13 +30,29 @@ import {
 } from "./updateGroupTestSetup";
 import { updateYearSync } from "./utils";
 
-function overviewSessionIds(newSessionDateAndTitle: string) {
+function overviewSessionFixture(
+	newSessionDateAndTitle: string,
+	includeFileStats = false,
+) {
 	const year = String(new Date().getFullYear());
-	return {
-		year,
-		existingId: `${year}-07-17 Overview - Kabbalah & Suffering`,
-		newId: `${year}-${newSessionDateAndTitle}`,
-	};
+	const existingId = `${year}-07-17 Overview - Kabbalah & Suffering`;
+	const newId = `${year}-${newSessionDateAndTitle}`;
+	const yearItems = yearListingFiles(year, [
+		`${existingId}.mp4`,
+		`${newId}.mp4`,
+	]).map((item, index) => ({
+		...item,
+		...(includeFileStats
+			? {
+					stat: {
+						type: "file" as const,
+						size: (index + 1) * 10,
+						mtimeMs: index + 1,
+					},
+				}
+			: {}),
+	}));
+	return { year, existingId, newId, yearItems };
 }
 
 function setupUnchangedYearCache(
@@ -120,11 +136,8 @@ describe("updateGroupProcess caching, incremental refresh, and targeted sync", (
 			year: currentYear,
 			existingId,
 			newId,
-		} = overviewSessionIds("07-20 Overview - The Grip & Shells");
-		const yearItems = yearListingFiles(currentYear, [
-			`${existingId}.mp4`,
-			`${newId}.mp4`,
-		]);
+			yearItems,
+		} = overviewSessionFixture("07-20 Overview - The Grip & Shells");
 		mockUnchangedYearCache(currentYear, yearItems, [
 			cachedYearSession(existingId, currentYear),
 		]);
@@ -161,23 +174,8 @@ describe("updateGroupProcess caching, incremental refresh, and targeted sync", (
 			year: currentYear,
 			existingId,
 			newId,
-		} = overviewSessionIds("07-23 Conclusion");
-		const yearItems = [
-			{
-				id: `wasabi/test/${currentYear}/${existingId}.mp4`,
-				type: "file" as const,
-				name: `${existingId}.mp4`,
-				path: `wasabi/test/${currentYear}/${existingId}.mp4`,
-				stat: { type: "file" as const, size: 10, mtimeMs: 1 },
-			},
-			{
-				id: `wasabi/test/${currentYear}/${newId}.mp4`,
-				type: "file" as const,
-				name: `${newId}.mp4`,
-				path: `wasabi/test/${currentYear}/${newId}.mp4`,
-				stat: { type: "file" as const, size: 20, mtimeMs: 2 },
-			},
-		];
+			yearItems,
+		} = overviewSessionFixture("07-23 Conclusion", true);
 		const metadataFingerprint = emptyMetadataFingerprint();
 		const staleFingerprint = getCombinedYearFingerprint(
 			[yearItems[0]],
