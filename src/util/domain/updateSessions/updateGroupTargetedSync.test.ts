@@ -19,12 +19,6 @@ import { updateYearSync } from "./utils";
 describe("updateGroupProcess targeted and recent-days sync", () => {
 	beforeEach(() => {
 		setupUpdateGroupTest({
-			readFile: async (path: string) => {
-				if (path.endsWith(".duration")) return "123";
-				if (path.endsWith(".md")) return "Summary from DigitalOcean";
-				if (path.endsWith(".tags")) return JSON.stringify(["ai", "sync"]);
-				return "";
-			},
 			sessionMetadata: emptyYearMetadata(),
 			listing: async () => [],
 		});
