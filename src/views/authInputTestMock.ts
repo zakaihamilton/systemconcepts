@@ -26,7 +26,8 @@ export function createAuthInputMock({
 		...props
 	}: any) {
 		const [value, setValue] = allowMissingState ? state || [] : state;
-		const error = includeValidationError && validate && onValidate ? onValidate(value) : "";
+		const error =
+			includeValidationError && validate && onValidate ? onValidate(value) : "";
 
 		return createElement("input", {
 			"data-testid": `input-${props[testIdProp]}`,
