@@ -17,33 +17,47 @@ import {
 } from "./updateGroupTestSetup";
 import { getListing } from "./utils";
 
+type GroupFileName = "bundle.json" | "test.json";
+
+const historicalSession = {
+	id: "2022-01-01 Historical Session",
+	name: "2022-01-01 Historical Session",
+	group: "test",
+	year: "2022",
+};
+const historicalSessionWithoutYear = {
+	id: "2022-01-01 Historical Session",
+	name: "2022-01-01 Historical Session",
+	group: "test",
+};
+
+function mockStoredGroupContents(fileName: GroupFileName, contents: string) {
+	const storedPath = `/local/sync/${fileName}`;
+	asMock(storage.exists).mockImplementation(async (path: string) =>
+		path.endsWith(storedPath),
+	);
+	asMock(storage.readFile).mockImplementation(async (path: string) =>
+		path.endsWith(storedPath) ? contents : "",
+	);
+}
+
+function mockStoredGroupSessions(fileName: GroupFileName, sessions: unknown[]) {
+	mockStoredGroupContents(fileName, JSON.stringify({ sessions }));
+}
+
 describe("updateGroupProcess persistence and migration", () => {
 	beforeEach(() => {
 		setupUpdateGroupTest();
 	});
 
 	it("preserves older bundled sessions when a full update omits their year", async () => {
-		const oldSession = {
-			id: "2022-01-01 Historical Session",
-			name: "2022-01-01 Historical Session",
-			group: "test",
-			year: "2022",
-		};
-		asMock(storage.exists).mockImplementation(async (path: any) =>
-			path.endsWith("/local/sync/bundle.json"),
-		);
-		asMock(storage.readFile).mockImplementation(async (path: any) => {
-			if (path.endsWith("/local/sync/bundle.json")) {
-				return JSON.stringify({ sessions: [oldSession] });
-			}
-			return "";
-		});
+		mockStoredGroupSessions("bundle.json", [historicalSession]);
 
 		const sessions = await updateGroupProcess("test", true, false, false, true);
 
 		expect(sessions).toEqual(
 			expect.arrayContaining([
-				expect.objectContaining({ id: oldSession.id }),
+				expect.objectContaining({ id: historicalSession.id }),
 				expect.objectContaining({ id: "2024-05-05 Test Session" }),
 			]),
 		);
@@ -57,21 +71,7 @@ describe("updateGroupProcess persistence and migration", () => {
 	});
 
 	it("preserves older merged sessions when a full update omits their year", async () => {
-		const oldSession = {
-			id: "2022-01-01 Historical Session",
-			name: "2022-01-01 Historical Session",
-			group: "test",
-			year: "2022",
-		};
-		asMock(storage.exists).mockImplementation(async (path: any) =>
-			path.endsWith("/local/sync/test.json"),
-		);
-		asMock(storage.readFile).mockImplementation(async (path: any) => {
-			if (path.endsWith("/local/sync/test.json")) {
-				return JSON.stringify({ sessions: [oldSession] });
-			}
-			return "";
-		});
+		mockStoredGroupSessions("test.json", [historicalSession]);
 
 		await updateGroupProcess("test", true, false, true, false);
 
@@ -83,7 +83,7 @@ describe("updateGroupProcess persistence and migration", () => {
 		const mergedData = JSON.parse(mergedJson);
 		expect(mergedData.sessions).toEqual(
 			expect.arrayContaining([
-				expect.objectContaining({ id: oldSession.id }),
+				expect.objectContaining({ id: historicalSession.id }),
 				expect.objectContaining({ id: "2024-05-05 Test Session" }),
 			]),
 		);
@@ -101,21 +101,7 @@ describe("updateGroupProcess persistence and migration", () => {
 	});
 
 	it("does not replace a bundled group when a year fetch fails", async () => {
-		const oldSession = {
-			id: "2022-01-01 Historical Session",
-			name: "2022-01-01 Historical Session",
-			group: "test",
-			year: "2022",
-		};
-		asMock(storage.exists).mockImplementation(async (path: any) =>
-			path.endsWith("/local/sync/bundle.json"),
-		);
-		asMock(storage.readFile).mockImplementation(async (path: any) => {
-			if (path.endsWith("/local/sync/bundle.json")) {
-				return JSON.stringify({ sessions: [oldSession] });
-			}
-			return "";
-		});
+		mockStoredGroupSessions("bundle.json", [historicalSession]);
 		asMock(getListing).mockImplementation(async (path: any) => {
 			if (path === "wasabi/test") {
 				return [{ name: "2024", type: "dir", path: "wasabi/test/2024" }];
@@ -137,13 +123,7 @@ describe("updateGroupProcess persistence and migration", () => {
 	});
 
 	it("warns when an existing merged group file cannot be parsed", async () => {
-		asMock(storage.exists).mockImplementation(async (path: any) =>
-			path.endsWith("/local/sync/test.json"),
-		);
-		asMock(storage.readFile).mockImplementation(async (path: any) => {
-			if (path.endsWith("/local/sync/test.json")) return "{bad";
-			return "";
-		});
+		mockStoredGroupContents("test.json", "{bad");
 		mockYearListing("2024", [
 			file(
 				"2024-05-05 Test Session.mp4",
@@ -160,13 +140,7 @@ describe("updateGroupProcess persistence and migration", () => {
 	});
 
 	it("warns when an existing bundle file cannot be parsed", async () => {
-		asMock(storage.exists).mockImplementation(async (path: any) =>
-			path.endsWith("/local/sync/bundle.json"),
-		);
-		asMock(storage.readFile).mockImplementation(async (path: any) => {
-			if (path.endsWith("/local/sync/bundle.json")) return "{bad";
-			return "";
-		});
+		mockStoredGroupContents("bundle.json", "{bad");
 		mockYearListing("2024", [
 			file(
 				"2024-05-05 Test Session.mp4",
@@ -183,20 +157,7 @@ describe("updateGroupProcess persistence and migration", () => {
 	});
 
 	it("infers missing years from session ids when warning about omitted years", async () => {
-		const oldSession = {
-			id: "2022-01-01 Historical Session",
-			name: "2022-01-01 Historical Session",
-			group: "test",
-		};
-		asMock(storage.exists).mockImplementation(async (path: any) =>
-			path.endsWith("/local/sync/bundle.json"),
-		);
-		asMock(storage.readFile).mockImplementation(async (path: any) => {
-			if (path.endsWith("/local/sync/bundle.json")) {
-				return JSON.stringify({ sessions: [oldSession] });
-			}
-			return "";
-		});
+		mockStoredGroupSessions("bundle.json", [historicalSessionWithoutYear]);
 
 		await updateGroupProcess("test", true, false, false, true);
 
