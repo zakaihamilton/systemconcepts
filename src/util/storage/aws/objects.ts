@@ -10,6 +10,7 @@ import {
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import fs from "fs";
 import pLimit from "p-limit";
+import { listObjectsV2ToItems } from "../listObjectsV2ToItems";
 import { getS3 } from "./client";
 import { normalizePath, parseUrl, validatePathAccess } from "./pathSecurity";
 
@@ -262,30 +263,11 @@ export async function list({
 		};
 		const listResponse = await s3.send(new ListObjectsV2Command(listParams));
 
-		listResponse.CommonPrefixes?.forEach((prefix: any) => {
-			const name = prefix.Prefix.substring(0, prefix.Prefix.length - 1)
-				.split("/")
-				.pop();
-			if (name === "private") return;
-
-			items.push({ type: "dir", name });
-		});
-
-		listResponse.Contents?.forEach((content: any) => {
-			const name = content.Key.split("/").pop();
-			if (!name) return;
-
-			const type =
-				content.ContentType === "application/x-directory" ? "dir" : "file";
-			items.push({
-				name,
-				stat: {
-					type,
-					size: content.Size,
-					mtimeMs: content.LastModified && content.LastModified.valueOf(),
-				},
-			});
-		});
+		items.push(
+			...listObjectsV2ToItems(listResponse, {
+				excludePrivateDirectory: true,
+			}),
+		);
 
 		continuationToken = listResponse.NextContinuationToken;
 	} while (continuationToken);

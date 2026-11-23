@@ -7,6 +7,7 @@ import {
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { lockMutex } from "@sync/mutex";
 import { validatePathAccess } from "@util/storage/aws";
+import { listObjectsV2ToItems } from "./listObjectsV2ToItems";
 
 let wasabiClient: any = null;
 let wasabiBucket: any = null;
@@ -152,28 +153,7 @@ export async function list({ path }: any) {
 			new ListObjectsV2Command(listParams),
 		);
 
-		listResponse.CommonPrefixes?.forEach((prefix: any) => {
-			const name = prefix.Prefix.substring(0, prefix.Prefix.length - 1)
-				.split("/")
-				.pop();
-			items.push({ type: "dir", name });
-		});
-
-		listResponse.Contents?.forEach((content: any) => {
-			const name = content.Key.split("/").pop();
-			if (!name) return;
-
-			const type =
-				content.ContentType === "application/x-directory" ? "dir" : "file";
-			items.push({
-				name,
-				stat: {
-					type,
-					size: content.Size,
-					mtimeMs: content.LastModified && content.LastModified.valueOf(),
-				},
-			});
-		});
+		items.push(...listObjectsV2ToItems(listResponse));
 
 		continuationToken = listResponse.NextContinuationToken;
 	} while (continuationToken);
