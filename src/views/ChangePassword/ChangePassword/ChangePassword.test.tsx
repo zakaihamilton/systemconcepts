@@ -4,6 +4,7 @@ import { fetchJSON } from "@util/api/fetch";
 import { useTranslations } from "@util/domain/translations";
 import { setHash, setPath } from "@util/domain/views";
 import Cookies from "js-cookie";
+import { setupAuthViewTest } from "../../authTestSetup";
 import ChangePassword from "./index";
 
 jest.mock("@util/domain/translations");
@@ -63,10 +64,7 @@ describe("ChangePassword View", () => {
 	};
 
 	beforeEach(() => {
-		jest.clearAllMocks();
-		asMock(useTranslations).mockReturnValue(mockTranslations);
-		asMock(MainStore.useState).mockReturnValue({ direction: "ltr" });
-		asMock(Cookies.get).mockReturnValue("testuser");
+		setupAuthViewTest({ translations: mockTranslations, cookieId: "testuser" });
 	});
 
 	it("renders change password form", () => {
