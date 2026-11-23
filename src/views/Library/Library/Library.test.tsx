@@ -104,11 +104,52 @@ function tagsToJson(path: any, tags: any) {
 	return "{}";
 }
 
-function mockStoredLibraryTags(tags: object[]) {
+function mockLibraryStorage(
+	tags: object[],
+	fileContents: Record<string, string> = {},
+	fallback = "{}",
+) {
 	asMock(storage.exists).mockResolvedValue(true);
-	asMock(storage.readFile).mockImplementation((path: any) =>
-		Promise.resolve(tagsToJson(path, tags)),
+	asMock(storage.readFile).mockImplementation((path: any) => {
+		if (path.endsWith("tags.json")) {
+			return Promise.resolve(JSON.stringify(tags));
+		}
+		const filePath = Object.keys(fileContents).find((suffix) =>
+			path.includes(suffix),
+		);
+		return Promise.resolve(filePath ? fileContents[filePath] : fallback);
+	});
+}
+
+function mockStoredLibraryTags(tags: object[]) {
+	mockLibraryStorage(tags);
+}
+
+async function renderLibraryAtPath(pathItems: string[], ready: () => void) {
+	asMock(usePathItems).mockReturnValue(pathItems);
+	render(<Library />);
+	await waitFor(ready);
+}
+
+async function renderSelectedLibraryArticle(
+	pathItems: string[],
+	selectedTagId: string,
+) {
+	await renderLibraryAtPath(pathItems, () =>
+		expect(screen.getByTestId("article-selected")).toHaveTextContent(
+			selectedTagId,
+		),
 	);
+}
+
+async function expectSelectedArticleAndStoreUpdate(selectedTagId: string) {
+	const { LibraryStore } = require("../Store");
+	await waitFor(() => {
+		expect(screen.getByTestId("article-selected")).toHaveTextContent(
+			selectedTagId,
+		);
+	});
+	expect(LibraryStore.update).toHaveBeenCalled();
 }
 
 describe("Library View", () => {
@@ -146,20 +187,10 @@ describe("Library View", () => {
 
 	it("does not show edit controls for a non-admin visitor", async () => {
 		asMock(Cookies.get).mockReturnValue("visitor");
-		asMock(usePathItems).mockReturnValue(["library", "id", "t1"]);
-		asMock(storage.exists).mockResolvedValue(true);
-		asMock(storage.readFile).mockImplementation((path: any) =>
-			Promise.resolve(
-				tagsToJson(path, [
-					{ _id: "t1", book: "Confessions", path: "path-visitor" },
-				]),
-			),
-		);
-
-		render(<Library />);
-		await waitFor(() => {
-			expect(screen.getByTestId("article-selected")).toHaveTextContent("t1");
-		});
+		mockStoredLibraryTags([
+			{ _id: "t1", book: "Confessions", path: "path-visitor" },
+		]);
+		await renderSelectedLibraryArticle(["library", "id", "t1"], "t1");
 		expect(screen.queryByTestId("edit-tags-dialog")).not.toBeInTheDocument();
 		expect(screen.queryByTestId("edit-content-dialog")).not.toBeInTheDocument();
 	});
@@ -170,41 +201,25 @@ describe("Library View", () => {
 		});
 
 		it("shows edit dialogs for admins once a tag is selected", async () => {
-			asMock(usePathItems).mockReturnValue(["library", "id", "t1"]);
-			asMock(storage.exists).mockResolvedValue(true);
-			asMock(storage.readFile).mockImplementation((path: any) =>
-				Promise.resolve(
-					tagsToJson(path, [
-						{ _id: "t1", book: "Confessions", path: "path-admin-1" },
-					]),
-				),
+			mockStoredLibraryTags([
+				{ _id: "t1", book: "Confessions", path: "path-admin-1" },
+			]);
+			await renderLibraryAtPath(["library", "id", "t1"], () =>
+				expect(screen.getByTestId("edit-tags-dialog")).toBeInTheDocument(),
 			);
-
-			render(<Library />);
-			await waitFor(() => {
-				expect(screen.getByTestId("edit-tags-dialog")).toBeInTheDocument();
-			});
 			expect(screen.getByTestId("edit-content-dialog")).toBeInTheDocument();
 		});
 
 		it("opens the edit tags and edit content dialogs", async () => {
-			asMock(usePathItems).mockReturnValue(["library", "id", "t1"]);
-			asMock(storage.exists).mockResolvedValue(true);
-			asMock(storage.readFile).mockImplementation((path: any) =>
-				Promise.resolve(
-					tagsToJson(path, [
-						{ _id: "t1", book: "Confessions", path: "path-admin-2" },
-					]),
-				),
-			);
-
-			render(<Library />);
-			await waitFor(() => {
+			mockStoredLibraryTags([
+				{ _id: "t1", book: "Confessions", path: "path-admin-2" },
+			]);
+			await renderLibraryAtPath(["library", "id", "t1"], () =>
 				expect(screen.getByTestId("edit-tags-dialog")).toHaveAttribute(
 					"data-open",
 					"false",
-				);
-			});
+				),
+			);
 
 			fireEvent.click(screen.getByRole("button", { name: "open-edit-tags" }));
 			await waitFor(() => {
@@ -472,29 +487,17 @@ describe("Library View", () => {
 		});
 
 		it("has no prev article for the first article", async () => {
-			asMock(usePathItems).mockReturnValue(["library", "id", "t1"]);
-			render(<Library />);
-			await waitFor(() => {
-				expect(screen.getByTestId("article-selected")).toHaveTextContent("t1");
-			});
+			await renderSelectedLibraryArticle(["library", "id", "t1"], "t1");
 			expect(screen.getByTestId("article-prev-name")).toHaveTextContent("");
 		});
 
 		it("has no next article for the last article", async () => {
-			asMock(usePathItems).mockReturnValue(["library", "id", "t3"]);
-			render(<Library />);
-			await waitFor(() => {
-				expect(screen.getByTestId("article-selected")).toHaveTextContent("t3");
-			});
+			await renderSelectedLibraryArticle(["library", "id", "t3"], "t3");
 			expect(screen.getByTestId("article-next-name")).toHaveTextContent("");
 		});
 
 		it("navigates to the next article and updates the path", async () => {
-			asMock(usePathItems).mockReturnValue(["library", "id", "t1"]);
-			render(<Library />);
-			await waitFor(() => {
-				expect(screen.getByTestId("article-selected")).toHaveTextContent("t1");
-			});
+			await renderSelectedLibraryArticle(["library", "id", "t1"], "t1");
 
 			fireEvent.click(screen.getByRole("button", { name: "goto-next" }));
 
@@ -583,22 +586,13 @@ describe("Library View", () => {
 					path: "articles/test",
 				},
 			];
-			asMock(storage.exists).mockResolvedValue(true);
-			asMock(storage.readFile).mockImplementation((path: any) => {
-				if (path.endsWith("tags.json")) {
-					return Promise.resolve(JSON.stringify(deepTags));
-				}
-				if (path.includes("articles/test")) {
-					return Promise.resolve(
-						JSON.stringify([
-							{
-								_id: "5c665fb30551dbb6a6615a92",
-								text: "Hello from deep link",
-							},
-						]),
-					);
-				}
-				return Promise.resolve("{}");
+			mockLibraryStorage(deepTags, {
+				"articles/test": JSON.stringify([
+					{
+						_id: "5c665fb30551dbb6a6615a92",
+						text: "Hello from deep link",
+					},
+				]),
 			});
 			render(<Library />);
 			await waitFor(() => {
@@ -618,15 +612,11 @@ describe("Library View", () => {
 			const numericTags = [
 				{ _id: 42, book: "Numbers", chapter: "One", path: "numeric-unique" },
 			];
-			asMock(storage.exists).mockResolvedValue(true);
-			asMock(storage.readFile).mockImplementation((path: any) => {
-				if (path.endsWith("tags.json")) {
-					return Promise.resolve(JSON.stringify(numericTags));
-				}
-				return Promise.resolve(
-					JSON.stringify([{ _id: 42, text: "Numeric id content" }]),
-				);
-			});
+			mockLibraryStorage(
+				numericTags,
+				{},
+				JSON.stringify([{ _id: 42, text: "Numeric id content" }]),
+			);
 			render(<Library />);
 			await waitFor(() => {
 				expect(screen.getByTestId("article-selected")).toHaveTextContent("42");
@@ -644,17 +634,10 @@ describe("Library View", () => {
 				{ _id: "store-sel", book: "Book", chapter: "One", path: "path-sel" },
 			];
 			LibraryStore.__state.selectedId = "store-sel";
-			asMock(storage.exists).mockResolvedValue(true);
-			asMock(storage.readFile).mockImplementation((path: any) => {
-				if (path.endsWith("tags.json")) {
-					return Promise.resolve("[]");
-				}
-				if (path.includes("path-sel")) {
-					return Promise.resolve(
-						JSON.stringify([{ _id: "store-sel", text: "From selectedId" }]),
-					);
-				}
-				return Promise.resolve("{}");
+			mockLibraryStorage([], {
+				"path-sel": JSON.stringify([
+					{ _id: "store-sel", text: "From selectedId" },
+				]),
 			});
 			asMock(usePathItems).mockReturnValue(["library"]);
 			render(<Library />);
@@ -792,24 +775,16 @@ describe("Library View", () => {
 			"Confessions",
 			"One:33",
 		]);
-		const { LibraryStore } = require("../Store");
 		render(<Library />);
-		await waitFor(() => {
-			expect(screen.getByTestId("article-selected")).toHaveTextContent("t1");
-		});
-		expect(LibraryStore.update).toHaveBeenCalled();
+		await expectSelectedArticleAndStoreUpdate("t1");
 	});
 
 	it("updates scrollToParagraph when the same tag is already selected", async () => {
-		const { LibraryStore } = require("../Store");
 		const tags = [{ _id: "t1", book: "Book", chapter: "One", path: "p1" }];
 		mockStoredLibraryTags(tags);
 		asMock(usePathItems).mockReturnValue(["library", "id", "t1:5"]);
 		render(<Library />);
-		await waitFor(() => {
-			expect(screen.getByTestId("article-selected")).toHaveTextContent("t1");
-		});
-		expect(LibraryStore.update).toHaveBeenCalled();
+		await expectSelectedArticleAndStoreUpdate("t1");
 	});
 
 	it("stores tags in LibraryStore after loading", async () => {
