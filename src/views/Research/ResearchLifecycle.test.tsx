@@ -10,7 +10,7 @@ import {
 	mockResearchIndex,
 	mockResearchTags,
 	setResearchTestLibraryUpdateCounter,
-	setupResearchViewTest,
+	setupResearchTestState,
 } from "./researchTestSetup";
 import {
 	renderResearchView,
@@ -23,12 +23,27 @@ describe("Research View Lifecycle and Search Progress", () => {
 	const mockSize = { width: 800, height: 600, emPixels: 16 };
 
 	beforeEach(() => {
-		mockResearchState = setupResearchViewTest({
-			cookies: Cookies,
-		}).researchState;
+		mockResearchState = setupResearchTestState({ cookies: Cookies });
 	});
 
 	const renderResearch = () => renderResearchView(Research, mockSize);
+
+	const flushResearchUpdates = () =>
+		act(async () => {
+			await Promise.resolve();
+		});
+
+	const triggerResearchSearch = async (advanceMilliseconds?: number) => {
+		fireEvent.click(screen.getByRole("button", { name: "Search" }));
+		await act(async () => {
+			if (advanceMilliseconds === undefined) {
+				jest.runOnlyPendingTimers();
+			} else {
+				jest.advanceTimersByTime(advanceMilliseconds);
+			}
+			await Promise.resolve();
+		});
+	};
 
 	describe("index lifecycle and sync", () => {
 		it("auto-builds the index when no index files exist", async () => {
@@ -229,9 +244,7 @@ describe("Research View Lifecycle and Search Progress", () => {
 				createResearchScenarioTranslations({ SEARCHING: "Searching..." }),
 			);
 			renderResearch();
-			await act(async () => {
-				await Promise.resolve();
-			});
+			await flushResearchUpdates();
 			fireEvent.click(screen.getByRole("button", { name: "Search" }));
 			act(() => {
 				jest.advanceTimersByTime(1000);
@@ -255,14 +268,8 @@ describe("Research View Lifecycle and Search Progress", () => {
 				cancelled: true,
 			});
 			const view = renderResearch();
-			await act(async () => {
-				await Promise.resolve();
-			});
-			fireEvent.click(screen.getByRole("button", { name: "Search" }));
-			await act(async () => {
-				jest.runOnlyPendingTimers();
-				await Promise.resolve();
-			});
+			await flushResearchUpdates();
+			await triggerResearchSearch();
 			rerenderResearchView(view, Research, mockSize);
 			expect(mockResearchState.results[0].docId).toBe("keep");
 		});
@@ -274,14 +281,8 @@ describe("Research View Lifecycle and Search Progress", () => {
 			mockResearchState.hasSearched = false;
 			asMock(runResearchSearch).mockRejectedValue(new Error("search failed"));
 			renderResearch();
-			await act(async () => {
-				await Promise.resolve();
-			});
-			fireEvent.click(screen.getByRole("button", { name: "Search" }));
-			await act(async () => {
-				jest.runOnlyPendingTimers();
-				await Promise.resolve();
-			});
+			await flushResearchUpdates();
+			await triggerResearchSearch();
 			expect(screen.getByRole("button", { name: "Search" })).not.toBeDisabled();
 		});
 
@@ -292,9 +293,7 @@ describe("Research View Lifecycle and Search Progress", () => {
 			mockResearchState.hasSearched = true;
 			mockResearchState.results = [{ docId: "1", matches: [{ index: 0 }] }];
 			const view = renderResearch();
-			await act(async () => {
-				await Promise.resolve();
-			});
+			await flushResearchUpdates();
 			const initialCalls = asMock(runResearchSearch).mock.calls.length;
 			asMock(useSessions).mockReturnValue([
 				[
@@ -342,14 +341,8 @@ describe("Research View Lifecycle and Search Progress", () => {
 				}),
 			);
 			renderResearch();
-			await act(async () => {
-				await Promise.resolve();
-			});
-			fireEvent.click(screen.getByRole("button", { name: "Search" }));
-			await act(async () => {
-				jest.advanceTimersByTime(1000);
-				await Promise.resolve();
-			});
+			await flushResearchUpdates();
+			await triggerResearchSearch(1000);
 			expect(screen.getByText("Searching...")).toBeInTheDocument();
 		});
 
@@ -371,14 +364,8 @@ describe("Research View Lifecycle and Search Progress", () => {
 				createResearchScenarioTranslations({ SEARCHING: "Searching..." }),
 			);
 			const view = renderResearch();
-			await act(async () => {
-				await Promise.resolve();
-			});
-			fireEvent.click(screen.getByRole("button", { name: "Search" }));
-			await act(async () => {
-				jest.advanceTimersByTime(1000);
-				await Promise.resolve();
-			});
+			await flushResearchUpdates();
+			await triggerResearchSearch(1000);
 			expect(screen.getByText("Searching...")).toBeInTheDocument();
 			await act(async () => {
 				jest.advanceTimersByTime(600);
