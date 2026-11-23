@@ -5,6 +5,7 @@ import { useSessions } from "@util/domain/sessions";
 import { useTranslations } from "@util/domain/translations";
 import Cookies from "js-cookie";
 import Research from "./";
+import { setupResearchViewTest } from "./researchTestSetup";
 
 let mockResearchState: any;
 let mockLibraryState: any;
@@ -126,68 +127,21 @@ describe("Research View", () => {
 	const mockSize = { width: 800, height: 600, emPixels: 16 };
 
 	beforeEach(() => {
-		jest.clearAllMocks();
-		mockLibraryUpdateCounter = 0;
-		const { runResearchSearch } = require("./runResearchSearch");
-		asMock(runResearchSearch).mockImplementation(
-			jest.requireActual("./runResearchSearch").runResearchSearch,
-		);
-		global.ResizeObserver = jest.fn().mockImplementation(() => ({
-			observe: jest.fn(),
-			disconnect: jest.fn(),
-			unobserve: jest.fn(),
-		}));
-		mockResearchState = {
-			query: "",
-			filterTags: [],
-			source: "all",
-			results: [{ docId: "1", text: "result" }],
-			hasSearched: true,
-			_loaded: true,
-			highlight: [],
-			indexing: false,
-			progress: 0,
-			status: "",
-			indexTimestamp: 0,
-		};
-		mockLibraryState = { tags: [] };
-		asMock(useTranslations).mockReturnValue({
-			RESEARCH: "Research",
-			SESSIONS: "Sessions",
-			ARTICLES: "Articles",
-			SUMMARIES: "Summaries",
-			INDEXING: "Indexing...",
-			SEARCH: "Search",
-			SEARCH_ARTICLES: "Search...",
-			ALL: "All",
-			FILTERS: "Filters",
-			SEARCH_FILTERS: "Search filters...",
-			CLOSE: "Close",
-			DONE: "Done",
-			CLEAR_ALL: "Clear all",
-			CLEAR: "Clear search",
-			RESEARCH_HELP: "Search your library",
-			SEARCH_HINT: "Use quotes for a phrase",
-			SHOW_SEARCH: "Show Search",
-			HIDE_SEARCH: "Hide Search",
-			RESEARCH_START: "Find ideas",
-			RESEARCH_START_HELP: "Search by a word",
-			RESEARCH_PREPARING: "Preparing Research",
-			RESEARCH_INDEX_HELP: "Index is preparing",
-			SUGGESTION_TITLE: "Title",
-			SUGGESTION_FILTER: "Filter",
-			SUGGESTION_TERM: "Term",
-			ARTICLE: "Article",
-			RESULTS_LIST: "Results list",
-			MATCH: "matches",
+		setupResearchViewTest({
+			setResearchState: (state) => {
+				mockResearchState = state;
+			},
+			setLibraryState: (state) => {
+				mockLibraryState = state;
+			},
+			resetAdditionalState: () => {
+				mockLibraryUpdateCounter = 0;
+			},
+			useTranslations,
+			useSessions,
+			useDeviceType,
+			cookies: Cookies,
 		});
-		asMock(useSessions).mockReturnValue([
-			[{ name: "Grace in practice", group: "ai", year: "2024" }],
-			false,
-			[],
-		]);
-		asMock(useDeviceType).mockReturnValue("desktop");
-		asMock(Cookies.get).mockReturnValue("admin");
 	});
 
 	const renderResearch = () =>
