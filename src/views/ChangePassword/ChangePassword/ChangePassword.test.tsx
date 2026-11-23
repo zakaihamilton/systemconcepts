@@ -3,7 +3,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { fetchJSON } from "@util/api/fetch";
 import { setHash, setPath } from "@util/domain/views";
 import Cookies from "js-cookie";
-import { setupAuthViewTest } from "../../authTestSetup";
+import { changeAuthInput, setupAuthViewTest } from "../../authTestSetup";
 import ChangePassword from "./index";
 
 jest.mock("@util/domain/translations");
@@ -78,12 +78,8 @@ describe("ChangePassword View", () => {
 		asMock(fetchJSON).mockResolvedValue({ hash: "newhash" });
 		render(<ChangePassword />);
 
-		fireEvent.change(screen.getByTestId("input-oldpassword"), {
-			target: { value: "oldpassword123" },
-		});
-		fireEvent.change(screen.getByTestId("input-newpassword"), {
-			target: { value: "newpassword123" },
-		});
+		changeAuthInput("input-oldpassword", "oldpassword123");
+		changeAuthInput("input-newpassword", "newpassword123");
 
 		fireEvent.click(screen.getByRole("button", { name: "Change Password" }));
 
@@ -105,12 +101,8 @@ describe("ChangePassword View", () => {
 
 	it("blocks submit when passwords fail validation", () => {
 		render(<ChangePassword />);
-		fireEvent.change(screen.getByTestId("input-oldpassword"), {
-			target: { value: "short" },
-		});
-		fireEvent.change(screen.getByTestId("input-newpassword"), {
-			target: { value: "x".repeat(73) },
-		});
+		changeAuthInput("input-oldpassword", "short");
+		changeAuthInput("input-newpassword", "x".repeat(73));
 		fireEvent.click(screen.getByRole("button", { name: "Change Password" }));
 		expect(fetchJSON).not.toHaveBeenCalled();
 	});
@@ -118,12 +110,8 @@ describe("ChangePassword View", () => {
 	it("submits on Enter and navigates home on success", async () => {
 		asMock(fetchJSON).mockResolvedValue({});
 		render(<ChangePassword />);
-		fireEvent.change(screen.getByTestId("input-oldpassword"), {
-			target: { value: "oldpassword123" },
-		});
-		fireEvent.change(screen.getByTestId("input-newpassword"), {
-			target: { value: "newpassword123" },
-		});
+		changeAuthInput("input-oldpassword", "oldpassword123");
+		changeAuthInput("input-newpassword", "newpassword123");
 		fireEvent.keyDown(screen.getByTestId("input-newpassword"), {
 			keyCode: 13,
 		});
@@ -136,12 +124,8 @@ describe("ChangePassword View", () => {
 	it("shows translated errors from the API response", async () => {
 		asMock(fetchJSON).mockResolvedValue({ err: "ACCESS_DENIED" });
 		render(<ChangePassword />);
-		fireEvent.change(screen.getByTestId("input-oldpassword"), {
-			target: { value: "oldpassword123" },
-		});
-		fireEvent.change(screen.getByTestId("input-newpassword"), {
-			target: { value: "newpassword123" },
-		});
+		changeAuthInput("input-oldpassword", "oldpassword123");
+		changeAuthInput("input-newpassword", "newpassword123");
 		fireEvent.click(screen.getByRole("button", { name: "Change Password" }));
 		await waitFor(() => {
 			expect(screen.getByText("Access denied")).toBeInTheDocument();
@@ -151,12 +135,8 @@ describe("ChangePassword View", () => {
 	it("shows a fallback error when the request rejects", async () => {
 		asMock(fetchJSON).mockRejectedValue("NETWORK_ERROR");
 		render(<ChangePassword />);
-		fireEvent.change(screen.getByTestId("input-oldpassword"), {
-			target: { value: "oldpassword123" },
-		});
-		fireEvent.change(screen.getByTestId("input-newpassword"), {
-			target: { value: "newpassword123" },
-		});
+		changeAuthInput("input-oldpassword", "oldpassword123");
+		changeAuthInput("input-newpassword", "newpassword123");
 		fireEvent.click(screen.getByRole("button", { name: "Change Password" }));
 		await waitFor(() => {
 			expect(screen.getByText("NETWORK_ERROR")).toBeInTheDocument();
@@ -174,21 +154,13 @@ describe("ChangePassword View", () => {
 	it("rejects an empty id and an overlong password", () => {
 		asMock(Cookies.get).mockReturnValue(null);
 		render(<ChangePassword />);
-		fireEvent.change(screen.getByTestId("input-oldpassword"), {
-			target: { value: "validpass1" },
-		});
-		fireEvent.change(screen.getByTestId("input-newpassword"), {
-			target: { value: "validpass1" },
-		});
+		changeAuthInput("input-oldpassword", "validpass1");
+		changeAuthInput("input-newpassword", "validpass1");
 		fireEvent.click(screen.getByRole("button", { name: "Change Password" }));
 		expect(fetchJSON).not.toHaveBeenCalled();
 
-		fireEvent.change(screen.getByTestId("input-userid"), {
-			target: { value: "user" },
-		});
-		fireEvent.change(screen.getByTestId("input-newpassword"), {
-			target: { value: "x".repeat(73) },
-		});
+		changeAuthInput("input-userid", "user");
+		changeAuthInput("input-newpassword", "x".repeat(73));
 		fireEvent.click(screen.getByRole("button", { name: "Change Password" }));
 		expect(fetchJSON).not.toHaveBeenCalled();
 	});
