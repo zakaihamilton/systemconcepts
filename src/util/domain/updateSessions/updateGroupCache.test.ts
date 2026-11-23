@@ -92,6 +92,16 @@ function mockYearMetadataCache(
 	);
 }
 
+async function refreshChangedYearWithNewSession(newId: string) {
+	asMock(fetchSessionMetadata).mockResolvedValue(emptyYearMetadata());
+	asMock(updateYearSync).mockResolvedValue({
+		counter: 1,
+		newCount: 1,
+		newSessions: [{ id: newId }],
+	});
+	await updateGroupProcess("test", false, false);
+}
+
 describe("updateGroupProcess caching, incremental refresh, and targeted sync", () => {
 	beforeEach(() => {
 		setupUpdateGroupTest();
@@ -141,14 +151,7 @@ describe("updateGroupProcess caching, incremental refresh, and targeted sync", (
 		} = overviewSessionFixture("07-20 Overview - The Grip & Shells");
 		mockUnchangedYearCacheWithSession(currentYear, yearItems, existingId);
 
-		asMock(fetchSessionMetadata).mockResolvedValue(emptyYearMetadata());
-		asMock(updateYearSync).mockResolvedValue({
-			counter: 1,
-			newCount: 1,
-			newSessions: [{ id: newId }],
-		});
-
-		await updateGroupProcess("test", false, false);
+		await refreshChangedYearWithNewSession(newId);
 
 		expect(addSyncLog).not.toHaveBeenCalledWith(
 			expect.stringContaining("Skipped unchanged year"),
@@ -213,14 +216,7 @@ describe("updateGroupProcess caching, incremental refresh, and targeted sync", (
 			},
 		);
 
-		asMock(fetchSessionMetadata).mockResolvedValue(emptyYearMetadata());
-		asMock(updateYearSync).mockResolvedValue({
-			counter: 1,
-			newCount: 1,
-			newSessions: [{ id: newId }],
-		});
-
-		await updateGroupProcess("test", false, false);
+		await refreshChangedYearWithNewSession(newId);
 
 		expect(addSyncLog).toHaveBeenCalledWith(
 			expect.stringContaining("Refreshing 1 changed session(s)"),

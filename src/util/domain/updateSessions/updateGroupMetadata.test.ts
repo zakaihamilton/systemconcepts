@@ -22,6 +22,18 @@ import {
 } from "./updateGroupTestSetup";
 import { updateYearSync } from "./utils";
 
+async function updateFromStaleLocalYearCache(
+	year: string,
+	sessionKey: string,
+	sessions: Parameters<typeof mockStaleLocalYearCache>[2],
+) {
+	mockStaleLocalYearCache(year, sessionKey, sessions);
+	await updateGroupProcess("test", false, false);
+	expect(fetchSessionMetadata).not.toHaveBeenCalled();
+	const [, , updatedSessions] = asMock(updateYearSync).mock.calls[0];
+	return updatedSessions;
+}
+
 describe("updateGroupProcess metadata resolution", () => {
 	beforeEach(() => {
 		setupUpdateGroupTest();
@@ -256,19 +268,18 @@ describe("updateGroupProcess metadata resolution", () => {
 	it("loads metadata from local year files when year cache has no metadata payload", async () => {
 		const currentYear = String(new Date().getFullYear());
 		const sessionId = `${currentYear}-08-01 Cached Metadata Session`;
-		mockStaleLocalYearCache(currentYear, sessionId, [
-			cachedYearSession(sessionId, currentYear, {
-				tags: ["local-meta"],
-				duration: 444,
-				summaryText: "From local year file",
-				transcription: true,
-			}),
-		]);
-
-		await updateGroupProcess("test", false, false);
-
-		expect(fetchSessionMetadata).not.toHaveBeenCalled();
-		const [, , sessions] = asMock(updateYearSync).mock.calls[0];
+		const sessions = await updateFromStaleLocalYearCache(
+			currentYear,
+			sessionId,
+			[
+				cachedYearSession(sessionId, currentYear, {
+					tags: ["local-meta"],
+					duration: 444,
+					summaryText: "From local year file",
+					transcription: true,
+				}),
+			],
+		);
 		expect(sessions[0].tags).toEqual(["local-meta"]);
 		expect(sessions[0].duration).toBe(444);
 		expect(sessions[0].summaryText).toBe("From local year file");
@@ -278,20 +289,19 @@ describe("updateGroupProcess metadata resolution", () => {
 	it("loads cached metadata using name-only session keys from local year files", async () => {
 		const currentYear = String(new Date().getFullYear());
 		const sessionName = `${currentYear}-09-01 Name Metadata Session`;
-		mockStaleLocalYearCache(currentYear, sessionName, [
-			{
-				name: sessionName,
-				group: "test",
-				year: currentYear,
-				tags: ["name-key"],
-				duration: 12,
-			},
-		]);
-
-		await updateGroupProcess("test", false, false);
-
-		expect(fetchSessionMetadata).not.toHaveBeenCalled();
-		const [, , sessions] = asMock(updateYearSync).mock.calls[0];
+		const sessions = await updateFromStaleLocalYearCache(
+			currentYear,
+			sessionName,
+			[
+				{
+					name: sessionName,
+					group: "test",
+					year: currentYear,
+					tags: ["name-key"],
+					duration: 12,
+				},
+			],
+		);
 		expect(sessions[0].tags).toEqual(["name-key"]);
 		expect(sessions[0].duration).toBe(12);
 	});
