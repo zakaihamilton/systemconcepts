@@ -10,7 +10,10 @@ import {
 	mockResearchListFactory,
 	mockResearchListState,
 } from "./researchNavigationTestSetup";
-import { setupResearchViewTest } from "./researchTestSetup";
+import {
+	createOutlineResearchResults,
+	setupResearchViewTest,
+} from "./researchTestSetup";
 import {
 	renderResearchView,
 	rerenderResearchView,
@@ -223,10 +226,7 @@ describe("Research View Toolbar, Print, and Navigation", () => {
 			jest.useRealTimers();
 		});
 
-		const results = [
-			{ docId: "1", tag: { title: "Grace" }, matches: [{ index: 0 }] },
-			{ docId: "2", tag: { title: "Hope" }, matches: [{ index: 0 }] },
-		];
+		const results = createOutlineResearchResults(0);
 
 		it("updates the URL when rendered items change", async () => {
 			mockResearchState.results = results;
