@@ -64,6 +64,38 @@ export function yearListingFiles(year: string, filenames: string[]) {
 	return filenames.map((name) => file(name, `wasabi/test/${year}/${name}`));
 }
 
+type MetadataListingOptions = {
+	extensions?: string[];
+	size?: number;
+	mtimeMs?: number;
+};
+
+export function metadataListingFiles(
+	year: string,
+	{
+		extensions = ["tags", "duration", "md", "zip"],
+		size = 100,
+		mtimeMs = 1,
+	}: MetadataListingOptions = {},
+) {
+	return extensions.map((extension) => ({
+		name: `${year}.${extension}`,
+		size,
+		mtimeMs,
+	}));
+}
+
+export function fingerprintMetadataFiles(
+	files: Array<{ name: string; size: number; mtimeMs: number }>,
+) {
+	return files.map(({ name, size, mtimeMs }) => ({
+		name,
+		type: "",
+		size,
+		mtimeMs,
+	}));
+}
+
 export function emptyMetadataFingerprint() {
 	return [null, null, null, null];
 }
@@ -79,14 +111,27 @@ type TestListingItem = {
 	[key: string]: unknown;
 };
 
-export function mockYearListing(year: string, items: TestListingItem[]) {
+export function mockYearListing(
+	year: string,
+	items: TestListingItem[],
+	metadataItems?: TestListingItem[],
+) {
 	asMock(getListing).mockImplementation(async (path: string) => {
 		if (path === "wasabi/test") {
 			return [{ name: year, type: "dir", path: `wasabi/test/${year}` }];
 		}
 		if (path === `wasabi/test/${year}`) return items;
+		if (path === "/aws/sessions/test" && metadataItems) return metadataItems;
 		return [];
 	});
+}
+
+export function cachedYearSession(
+	id: string,
+	year: string,
+	overrides: Record<string, unknown> = {},
+) {
+	return { id, name: id, group: "test", year, ...overrides };
 }
 
 type YearCacheFixtureOptions = {
@@ -127,6 +172,26 @@ export function emptyYearMetadata() {
 		summaries: {},
 		transcriptions: {},
 	};
+}
+
+export function mockCachedYearSession(
+	year: string,
+	id: string,
+	fingerprint: string,
+	metadataFingerprint: unknown,
+	sessionOverrides: Record<string, unknown> = {},
+) {
+	return mockYearCacheAndSessions(
+		year,
+		[cachedYearSession(id, year, sessionOverrides)],
+		{
+			cache: {
+				fingerprint,
+				metadataFingerprint: JSON.stringify(metadataFingerprint),
+				metadata: emptyYearMetadata(),
+			},
+		},
+	);
 }
 
 export function setupUpdateGroupTest() {

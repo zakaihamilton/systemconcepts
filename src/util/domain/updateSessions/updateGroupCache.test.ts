@@ -18,6 +18,9 @@ import {
 	emptyMetadataFingerprint,
 	emptyYearMetadata,
 	file,
+	fingerprintMetadataFiles,
+	metadataListingFiles,
+	mockCachedYearSession,
 	mockYearCacheAndSessions,
 	mockYearListing,
 	setupUpdateGroupTest,
@@ -74,6 +77,23 @@ function setupUnchangedYearCache(
 	});
 }
 
+function mockYearMetadataCache(
+	year: string,
+	fingerprint: string,
+	metadataFingerprint: unknown,
+	metadata: unknown,
+) {
+	const cachePath = `.group-update-cache/test/${year}.json`;
+	const contents = JSON.stringify({
+		fingerprint,
+		metadataFingerprint: JSON.stringify(metadataFingerprint),
+		metadata,
+	});
+	asMock(storage.readFile).mockImplementation(async (path: string) =>
+		path.includes(cachePath) ? contents : "",
+	);
+}
+
 describe("updateGroupProcess caching, incremental refresh, and targeted sync", () => {
 	beforeEach(() => {
 		setupUpdateGroupTest();
@@ -128,51 +148,15 @@ describe("updateGroupProcess caching, incremental refresh, and targeted sync", (
 			metadataFingerprint,
 		);
 
-		asMock(getListing).mockImplementation(async (path: any) => {
-			if (path === "wasabi/test") {
-				return [
-					{
-						name: currentYear,
-						type: "dir",
-						path: `wasabi/test/${currentYear}`,
-					},
-				];
-			}
-			if (path === `wasabi/test/${currentYear}`) {
-				return yearItems;
-			}
-			if (path === "/aws/sessions/test") {
-				return [];
-			}
-			return [];
-		});
-
-		mockYearCacheAndSessions(
+		mockYearListing(currentYear, yearItems);
+		mockCachedYearSession(
 			currentYear,
-			[
-				{
-					id: existingId,
-					name: existingId,
-					group: "test",
-					year: currentYear,
-				},
-			],
-			{
-				cache: {
-					fingerprint: yearFingerprint,
-					metadataFingerprint: JSON.stringify(metadataFingerprint),
-					metadata: emptyYearMetadata(),
-				},
-			},
+			existingId,
+			yearFingerprint,
+			metadataFingerprint,
 		);
 
-		asMock(fetchSessionMetadata).mockResolvedValue({
-			items: [],
-			tags: {},
-			durations: {},
-			summaries: {},
-			transcriptions: {},
-		});
+		asMock(fetchSessionMetadata).mockResolvedValue(emptyYearMetadata());
 		asMock(updateYearSync).mockResolvedValue({
 			counter: 1,
 			newCount: 1,
@@ -257,13 +241,7 @@ describe("updateGroupProcess caching, incremental refresh, and targeted sync", (
 			},
 		);
 
-		asMock(fetchSessionMetadata).mockResolvedValue({
-			items: [],
-			tags: {},
-			durations: {},
-			summaries: {},
-			transcriptions: {},
-		});
+		asMock(fetchSessionMetadata).mockResolvedValue(emptyYearMetadata());
 		asMock(updateYearSync).mockResolvedValue({
 			counter: 1,
 			newCount: 1,
@@ -286,62 +264,31 @@ describe("updateGroupProcess caching, incremental refresh, and targeted sync", (
 	});
 
 	it("skips remote metadata fetch when year cache metadata fingerprint is unchanged", async () => {
-		const metadataFiles = [
-			{ name: "2024.tags", size: 100, mtimeMs: 1 },
-			{ name: "2024.duration", size: 100, mtimeMs: 1 },
-			{ name: "2024.md", size: 100, mtimeMs: 1 },
-			{ name: "2024.zip", size: 100, mtimeMs: 1 },
-		];
-		const metadataFingerprint = [
-			{ name: "2024.tags", type: "", size: 100, mtimeMs: 1 },
-			{ name: "2024.duration", type: "", size: 100, mtimeMs: 1 },
-			{ name: "2024.md", type: "", size: 100, mtimeMs: 1 },
-			{ name: "2024.zip", type: "", size: 100, mtimeMs: 1 },
-		];
+		const metadataFiles = metadataListingFiles("2024");
+		const metadataFingerprint = fingerprintMetadataFiles(metadataFiles);
+		const yearItems = yearListingFiles("2024", [
+			"2024-05-05 Test Session.mp4",
+			"2024-05-06 New Session.mp4",
+		]);
 
-		asMock(getListing).mockImplementation(async (path: any) => {
-			if (path === "wasabi/test") {
-				return [{ name: "2024", type: "dir", path: "wasabi/test/2024" }];
-			}
-			if (path === "wasabi/test/2024") {
-				return [
+		mockYearListing("2024", yearItems, metadataFiles);
+		mockYearMetadataCache(
+			"2024",
+			"stale-combined-fingerprint",
+			metadataFingerprint,
+			{
+				items: [
 					file(
-						"2024-05-05 Test Session.mp4",
-						"wasabi/test/2024/2024-05-05 Test Session.mp4",
+						"2024-05-05 Test Session.png",
+						"/aws/sessions/test/2024/2024-05-05 Test Session.png",
 					),
-					file(
-						"2024-05-06 New Session.mp4",
-						"wasabi/test/2024/2024-05-06 New Session.mp4",
-					),
-				];
-			}
-			if (path === "/aws/sessions/test") {
-				return metadataFiles;
-			}
-			return [];
-		});
-
-		asMock(storage.readFile).mockImplementation(async (path: any) => {
-			if (path.includes(".group-update-cache/test/2024.json")) {
-				return JSON.stringify({
-					fingerprint: "stale-combined-fingerprint",
-					metadataFingerprint: JSON.stringify(metadataFingerprint),
-					metadata: {
-						items: [
-							file(
-								"2024-05-05 Test Session.png",
-								"/aws/sessions/test/2024/2024-05-05 Test Session.png",
-							),
-						],
-						tags: { "2024-05-05 Test Session": ["cached-tag"] },
-						durations: { "2024-05-05 Test Session": 999 },
-						summaries: { "2024-05-05 Test Session": "Cached summary" },
-						transcriptions: { "2024-05-05 Test Session": true },
-					},
-				});
-			}
-			return "";
-		});
+				],
+				tags: { "2024-05-05 Test Session": ["cached-tag"] },
+				durations: { "2024-05-05 Test Session": 999 },
+				summaries: { "2024-05-05 Test Session": "Cached summary" },
+				transcriptions: { "2024-05-05 Test Session": true },
+			},
+		);
 
 		await updateGroupProcess("test", true, false);
 
@@ -353,52 +300,23 @@ describe("updateGroupProcess caching, incremental refresh, and targeted sync", (
 	});
 
 	it("fetches remote metadata on forceUpdate when metadata fingerprint is unchanged", async () => {
-		const metadataFingerprint = [
-			{ name: "2024.tags", type: "", size: 100, mtimeMs: 1 },
-			{ name: "2024.duration", type: "", size: 100, mtimeMs: 1 },
-			{ name: "2024.md", type: "", size: 100, mtimeMs: 1 },
-			{ name: "2024.zip", type: "", size: 100, mtimeMs: 1 },
-		];
+		const metadataFiles = metadataListingFiles("2024");
+		const metadataFingerprint = fingerprintMetadataFiles(metadataFiles);
+		const yearItems = yearListingFiles("2024", ["2024-05-05 Test Session.mp4"]);
 
-		asMock(getListing).mockImplementation(async (path: any) => {
-			if (path === "wasabi/test") {
-				return [{ name: "2024", type: "dir", path: "wasabi/test/2024" }];
-			}
-			if (path === "wasabi/test/2024") {
-				return [
-					file(
-						"2024-05-05 Test Session.mp4",
-						"wasabi/test/2024/2024-05-05 Test Session.mp4",
-					),
-				];
-			}
-			if (path === "/aws/sessions/test") {
-				return [
-					{ name: "2024.tags", size: 100, mtimeMs: 1 },
-					{ name: "2024.duration", size: 100, mtimeMs: 1 },
-					{ name: "2024.md", size: 100, mtimeMs: 1 },
-					{ name: "2024.zip", size: 100, mtimeMs: 1 },
-				];
-			}
-			return [];
-		});
-
-		asMock(storage.readFile).mockImplementation(async (path: any) => {
-			if (path.includes(".group-update-cache/test/2024.json")) {
-				return JSON.stringify({
-					fingerprint: "stale-combined-fingerprint",
-					metadataFingerprint: JSON.stringify(metadataFingerprint),
-					metadata: {
-						items: [],
-						tags: { "2024-05-05 Test Session": ["forced-cache"] },
-						durations: { "2024-05-05 Test Session": 555 },
-						summaries: {},
-						transcriptions: {},
-					},
-				});
-			}
-			return "";
-		});
+		mockYearListing("2024", yearItems, metadataFiles);
+		mockYearMetadataCache(
+			"2024",
+			"stale-combined-fingerprint",
+			metadataFingerprint,
+			{
+				items: [],
+				tags: { "2024-05-05 Test Session": ["forced-cache"] },
+				durations: { "2024-05-05 Test Session": 555 },
+				summaries: {},
+				transcriptions: {},
+			},
+		);
 		asMock(fetchSessionMetadata).mockResolvedValueOnce({
 			items: [],
 			tags: { "2024-05-05 Test Session": ["fresh"] },
@@ -551,23 +469,11 @@ describe("updateGroupProcess caching, incremental refresh, and targeted sync", (
 		);
 
 		mockYearListing(currentYear, yearItems);
-		mockYearCacheAndSessions(
+		mockCachedYearSession(
 			currentYear,
-			[
-				{
-					id: sessionId,
-					name: sessionId,
-					group: "test",
-					year: currentYear,
-				},
-			],
-			{
-				cache: {
-					fingerprint: yearFingerprint,
-					metadataFingerprint: JSON.stringify(metadataFingerprint),
-					metadata: emptyYearMetadata(),
-				},
-			},
+			sessionId,
+			yearFingerprint,
+			metadataFingerprint,
 		);
 
 		await updateGroupProcess("test", false, false);

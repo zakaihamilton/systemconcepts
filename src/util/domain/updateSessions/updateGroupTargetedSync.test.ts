@@ -12,6 +12,7 @@ import {
 import { fetchSessionMetadata } from "./sessionMetadataClient";
 import { updateGroupProcess } from "./updateGroup";
 import {
+	cachedYearSession,
 	emptyMetadataFingerprint,
 	emptyYearMetadata,
 	file,
@@ -42,13 +43,7 @@ describe("updateGroupProcess targeted and recent-days sync", () => {
 		asMock(loadDurations).mockResolvedValue({});
 		asMock(loadSummaries).mockResolvedValue({});
 		asMock(loadTranscriptions).mockResolvedValue({});
-		asMock(fetchSessionMetadata).mockResolvedValue({
-			items: [],
-			tags: {},
-			durations: {},
-			summaries: {},
-			transcriptions: {},
-		});
+		asMock(fetchSessionMetadata).mockResolvedValue(emptyYearMetadata());
 		asMock(getListing).mockResolvedValue([]);
 		asMock(updateYearSync).mockResolvedValue({
 			counter: 0,
@@ -62,13 +57,11 @@ describe("updateGroupProcess targeted and recent-days sync", () => {
 		const recentDate = new Date(Date.now() - 24 * 60 * 60 * 1000)
 			.toISOString()
 			.slice(0, 10);
-		const oldSession = {
-			id: `${currentYear}-01-01 Historical Session`,
-			name: `${currentYear}-01-01 Historical Session`,
-			group: "test",
-			year: currentYear,
-			tags: ["preserve"],
-		};
+		const oldSession = cachedYearSession(
+			`${currentYear}-01-01 Historical Session`,
+			currentYear,
+			{ tags: ["preserve"] },
+		);
 		const recentId = `${recentDate} Recent Session`;
 
 		mockYearListing(currentYear, [
@@ -111,20 +104,8 @@ describe("updateGroupProcess targeted and recent-days sync", () => {
 			yearListingFiles(currentYear, [`${keepId}.mp4`, `${targetId}.mp4`]),
 		);
 		mockYearCacheAndSessions(currentYear, [
-			{
-				id: keepId,
-				name: keepId,
-				group: "test",
-				year: currentYear,
-				tags: ["keep"],
-			},
-			{
-				id: targetId,
-				name: targetId,
-				group: "test",
-				year: currentYear,
-				tags: ["stale"],
-			},
+			cachedYearSession(keepId, currentYear, { tags: ["keep"] }),
+			cachedYearSession(targetId, currentYear, { tags: ["stale"] }),
 		]);
 
 		asMock(fetchSessionMetadata).mockResolvedValue({
@@ -204,24 +185,18 @@ describe("updateGroupProcess targeted and recent-days sync", () => {
 			currentYear,
 			yearListingFiles(currentYear, [`${oldId}.mp4`, `${recentId}.mp4`]),
 		);
-		asMock(storage.exists).mockImplementation(
-			async (path: any) => path === localYearPath,
+		mockYearCacheAndSessions(
+			currentYear,
+			[
+				{
+					name: oldId,
+					group: "test",
+					year: currentYear,
+					tags: ["preserve"],
+				},
+			],
+			{ localPath: localYearPath },
 		);
-		asMock(storage.readFile).mockImplementation(async (path: any) => {
-			if (path === localYearPath) {
-				return JSON.stringify({
-					sessions: [
-						{
-							name: oldId,
-							group: "test",
-							year: currentYear,
-							tags: ["preserve"],
-						},
-					],
-				});
-			}
-			return "";
-		});
 		asMock(fetchSessionMetadata).mockResolvedValue({
 			items: [],
 			tags: { [recentId]: ["recent"] },
