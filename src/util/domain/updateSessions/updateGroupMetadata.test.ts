@@ -9,7 +9,11 @@ import {
 } from "./metadata";
 import { fetchSessionMetadata } from "./sessionMetadataClient";
 import { updateGroupProcess } from "./updateGroup";
-import { file, setupUpdateGroupTest } from "./updateGroupTestSetup";
+import {
+	file,
+	mockYearListing,
+	setupUpdateGroupTest,
+} from "./updateGroupTestSetup";
 import { getListing, updateYearSync } from "./utils";
 
 describe("updateGroupProcess metadata resolution", () => {
@@ -148,20 +152,12 @@ describe("updateGroupProcess metadata resolution", () => {
 	});
 
 	it("strips resolution suffixes from video session ids", async () => {
-		asMock(getListing).mockImplementation(async (path: any) => {
-			if (path === "wasabi/test") {
-				return [{ name: "2024", type: "dir", path: "wasabi/test/2024" }];
-			}
-			if (path === "wasabi/test/2024") {
-				return [
-					file(
-						"2024-05-05 Test Session_1920x1080.mp4",
-						"wasabi/test/2024/2024-05-05 Test Session_1920x1080.mp4",
-					),
-				];
-			}
-			return [];
-		});
+		mockYearListing("2024", [
+			file(
+				"2024-05-05 Test Session_1920x1080.mp4",
+				"wasabi/test/2024/2024-05-05 Test Session_1920x1080.mp4",
+			),
+		]);
 		asMock(fetchSessionMetadata).mockResolvedValue({
 			items: [],
 			tags: { "2024-05-05 Test Session": ["hd"] },
@@ -178,20 +174,12 @@ describe("updateGroupProcess metadata resolution", () => {
 	});
 
 	it("matches metadata keys with normalized punctuation and casing", async () => {
-		asMock(getListing).mockImplementation(async (path: any) => {
-			if (path === "wasabi/test") {
-				return [{ name: "2024", type: "dir", path: "wasabi/test/2024" }];
-			}
-			if (path === "wasabi/test/2024") {
-				return [
-					file(
-						"2024-05-05 Test Session.mp4",
-						"wasabi/test/2024/2024-05-05 Test Session.mp4",
-					),
-				];
-			}
-			return [];
-		});
+		mockYearListing("2024", [
+			file(
+				"2024-05-05 Test Session.mp4",
+				"wasabi/test/2024/2024-05-05 Test Session.mp4",
+			),
+		]);
 		asMock(fetchSessionMetadata).mockResolvedValue({
 			items: [],
 			tags: { "20240505testsession": ["normalized"] },
@@ -208,22 +196,14 @@ describe("updateGroupProcess metadata resolution", () => {
 	});
 
 	it("ignores year-level metadata files when grouping session files", async () => {
-		asMock(getListing).mockImplementation(async (path: any) => {
-			if (path === "wasabi/test") {
-				return [{ name: "2024", type: "dir", path: "wasabi/test/2024" }];
-			}
-			if (path === "wasabi/test/2024") {
-				return [
-					file("2024.tags", "wasabi/test/2024/2024.tags"),
-					file("2024.duration", "wasabi/test/2024/2024.duration"),
-					file(
-						"2024-05-05 Test Session.mp4",
-						"wasabi/test/2024/2024-05-05 Test Session.mp4",
-					),
-				];
-			}
-			return [];
-		});
+		mockYearListing("2024", [
+			file("2024.tags", "wasabi/test/2024/2024.tags"),
+			file("2024.duration", "wasabi/test/2024/2024.duration"),
+			file(
+				"2024-05-05 Test Session.mp4",
+				"wasabi/test/2024/2024-05-05 Test Session.mp4",
+			),
+		]);
 		asMock(fetchSessionMetadata).mockResolvedValue({
 			items: [],
 			tags: {},
@@ -326,26 +306,9 @@ describe("updateGroupProcess metadata resolution", () => {
 		const localYearPath = `/local/sync/test/${currentYear}.json`;
 		const metadataFingerprint = [null, null, null, null];
 
-		asMock(getListing).mockImplementation(async (path: any) => {
-			if (path === "wasabi/test") {
-				return [
-					{
-						name: currentYear,
-						type: "dir",
-						path: `wasabi/test/${currentYear}`,
-					},
-				];
-			}
-			if (path === `wasabi/test/${currentYear}`) {
-				return [
-					file(
-						`${sessionId}.mp4`,
-						`wasabi/test/${currentYear}/${sessionId}.mp4`,
-					),
-				];
-			}
-			return [];
-		});
+		mockYearListing(currentYear, [
+			file(`${sessionId}.mp4`, `wasabi/test/${currentYear}/${sessionId}.mp4`),
+		]);
 		asMock(storage.readFile).mockImplementation(async (path: any) => {
 			if (path.includes(`.group-update-cache/test/${currentYear}.json`)) {
 				return JSON.stringify({
@@ -391,26 +354,12 @@ describe("updateGroupProcess metadata resolution", () => {
 		const localYearPath = `/local/sync/test/${currentYear}.json`;
 		const metadataFingerprint = [null, null, null, null];
 
-		asMock(getListing).mockImplementation(async (path: any) => {
-			if (path === "wasabi/test") {
-				return [
-					{
-						name: currentYear,
-						type: "dir",
-						path: `wasabi/test/${currentYear}`,
-					},
-				];
-			}
-			if (path === `wasabi/test/${currentYear}`) {
-				return [
-					file(
-						`${sessionName}.mp4`,
-						`wasabi/test/${currentYear}/${sessionName}.mp4`,
-					),
-				];
-			}
-			return [];
-		});
+		mockYearListing(currentYear, [
+			file(
+				`${sessionName}.mp4`,
+				`wasabi/test/${currentYear}/${sessionName}.mp4`,
+			),
+		]);
 		asMock(storage.exists).mockImplementation(
 			async (path: any) => path === localYearPath,
 		);

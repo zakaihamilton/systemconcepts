@@ -10,7 +10,7 @@ import {
 } from "./metadata";
 import { fetchSessionMetadata } from "./sessionMetadataClient";
 import { updateGroupProcess } from "./updateGroup";
-import { file } from "./updateGroupTestSetup";
+import { file, mockYearListing } from "./updateGroupTestSetup";
 import { getListing, updateYearSync } from "./utils";
 
 describe("updateGroupProcess merged-to-split migration", () => {
@@ -45,20 +45,12 @@ describe("updateGroupProcess merged-to-split migration", () => {
 	});
 
 	it("migrates leftover years from a merged file when switching to split", async () => {
-		asMock(getListing).mockImplementation(async (path: any) => {
-			if (path === "wasabi/test") {
-				return [{ name: "2024", type: "dir", path: "wasabi/test/2024" }];
-			}
-			if (path === "wasabi/test/2024") {
-				return [
-					file(
-						"2024-05-05 Test Session.mp4",
-						"wasabi/test/2024/2024-05-05 Test Session.mp4",
-					),
-				];
-			}
-			return [];
-		});
+		mockYearListing("2024", [
+			file(
+				"2024-05-05 Test Session.mp4",
+				"wasabi/test/2024/2024-05-05 Test Session.mp4",
+			),
+		]);
 		asMock(storage.exists).mockImplementation(async (path: any) => {
 			return (
 				path.endsWith("/local/sync/test.json") ||
@@ -105,20 +97,12 @@ describe("updateGroupProcess merged-to-split migration", () => {
 	});
 
 	it("logs when migrating from merged file fails and still deletes local merged", async () => {
-		asMock(getListing).mockImplementation(async (path: any) => {
-			if (path === "wasabi/test") {
-				return [{ name: "2024", type: "dir", path: "wasabi/test/2024" }];
-			}
-			if (path === "wasabi/test/2024") {
-				return [
-					file(
-						"2024-05-05 Test Session.mp4",
-						"wasabi/test/2024/2024-05-05 Test Session.mp4",
-					),
-				];
-			}
-			return [];
-		});
+		mockYearListing("2024", [
+			file(
+				"2024-05-05 Test Session.mp4",
+				"wasabi/test/2024/2024-05-05 Test Session.mp4",
+			),
+		]);
 		asMock(storage.exists).mockImplementation(async (path: any) =>
 			path.endsWith("/local/sync/test.json"),
 		);
@@ -139,20 +123,12 @@ describe("updateGroupProcess merged-to-split migration", () => {
 	});
 
 	it("logs when remote merged file deletion fails after split migration", async () => {
-		asMock(getListing).mockImplementation(async (path: any) => {
-			if (path === "wasabi/test") {
-				return [{ name: "2024", type: "dir", path: "wasabi/test/2024" }];
-			}
-			if (path === "wasabi/test/2024") {
-				return [
-					file(
-						"2024-05-05 Test Session.mp4",
-						"wasabi/test/2024/2024-05-05 Test Session.mp4",
-					),
-				];
-			}
-			return [];
-		});
+		mockYearListing("2024", [
+			file(
+				"2024-05-05 Test Session.mp4",
+				"wasabi/test/2024/2024-05-05 Test Session.mp4",
+			),
+		]);
 		asMock(storage.exists).mockImplementation(async (path: any) => {
 			return (
 				path.endsWith("/local/sync/test.json") ||
@@ -180,20 +156,12 @@ describe("updateGroupProcess merged-to-split migration", () => {
 	});
 
 	it("migrates merged sessions grouped by inferred year when year field is missing", async () => {
-		asMock(getListing).mockImplementation(async (path: any) => {
-			if (path === "wasabi/test") {
-				return [{ name: "2024", type: "dir", path: "wasabi/test/2024" }];
-			}
-			if (path === "wasabi/test/2024") {
-				return [
-					file(
-						"2024-05-05 Test Session.mp4",
-						"wasabi/test/2024/2024-05-05 Test Session.mp4",
-					),
-				];
-			}
-			return [];
-		});
+		mockYearListing("2024", [
+			file(
+				"2024-05-05 Test Session.mp4",
+				"wasabi/test/2024/2024-05-05 Test Session.mp4",
+			),
+		]);
 		asMock(storage.exists).mockImplementation(async (path: any) =>
 			path.endsWith("/local/sync/test.json"),
 		);

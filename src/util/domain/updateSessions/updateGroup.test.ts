@@ -5,7 +5,11 @@ import { logger } from "@util/api/logger";
 import storage from "@util/storage/storage";
 import { fetchSessionMetadata } from "./sessionMetadataClient";
 import { updateGroupProcess } from "./updateGroup";
-import { file, setupUpdateGroupTest } from "./updateGroupTestSetup";
+import {
+	file,
+	mockYearListing,
+	setupUpdateGroupTest,
+} from "./updateGroupTestSetup";
 import { getListing, updateYearSync } from "./utils";
 
 describe("updateGroupProcess", () => {
@@ -59,26 +63,9 @@ describe("updateGroupProcess", () => {
 	it("resolves metadata by normalized session name when id key is missing", async () => {
 		const currentYear = String(new Date().getFullYear());
 		const sessionId = `${currentYear}-05-05 Grace Session`;
-		asMock(getListing).mockImplementation(async (path: any) => {
-			if (path === "wasabi/test") {
-				return [
-					{
-						name: currentYear,
-						type: "dir",
-						path: `wasabi/test/${currentYear}`,
-					},
-				];
-			}
-			if (path === `wasabi/test/${currentYear}`) {
-				return [
-					file(
-						`${sessionId}.mp4`,
-						`wasabi/test/${currentYear}/${sessionId}.mp4`,
-					),
-				];
-			}
-			return [];
-		});
+		mockYearListing(currentYear, [
+			file(`${sessionId}.mp4`, `wasabi/test/${currentYear}/${sessionId}.mp4`),
+		]);
 		asMock(storage.exists).mockResolvedValue(false);
 		asMock(storage.readFile).mockResolvedValue("");
 		asMock(updateYearSync).mockResolvedValue({
@@ -99,24 +86,16 @@ describe("updateGroupProcess", () => {
 	});
 
 	it("resolves metadata by exact session id and session name keys", async () => {
-		asMock(getListing).mockImplementation(async (path: any) => {
-			if (path === "wasabi/test") {
-				return [{ name: "2024", type: "dir", path: "wasabi/test/2024" }];
-			}
-			if (path === "wasabi/test/2024") {
-				return [
-					file(
-						"2024-05-05 Test Session.mp4",
-						"wasabi/test/2024/2024-05-05 Test Session.mp4",
-					),
-					file(
-						"2024-05-06 Name Key Session.mp4",
-						"wasabi/test/2024/2024-05-06 Name Key Session.mp4",
-					),
-				];
-			}
-			return [];
-		});
+		mockYearListing("2024", [
+			file(
+				"2024-05-05 Test Session.mp4",
+				"wasabi/test/2024/2024-05-05 Test Session.mp4",
+			),
+			file(
+				"2024-05-06 Name Key Session.mp4",
+				"wasabi/test/2024/2024-05-06 Name Key Session.mp4",
+			),
+		]);
 		asMock(fetchSessionMetadata).mockResolvedValue({
 			items: [],
 			tags: {

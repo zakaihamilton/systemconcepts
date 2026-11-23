@@ -9,7 +9,11 @@ import storage from "@util/storage/storage";
 import { getCombinedYearFingerprint } from "./fingerprints";
 import { fetchSessionMetadata } from "./sessionMetadataClient";
 import { updateGroupProcess } from "./updateGroup";
-import { file, setupUpdateGroupTest } from "./updateGroupTestSetup";
+import {
+	file,
+	mockYearListing,
+	setupUpdateGroupTest,
+} from "./updateGroupTestSetup";
 import { getListing } from "./utils";
 
 describe("updateGroupProcess persistence and migration", () => {
@@ -139,20 +143,12 @@ describe("updateGroupProcess persistence and migration", () => {
 			if (path.endsWith("/local/sync/test.json")) return "{bad";
 			return "";
 		});
-		asMock(getListing).mockImplementation(async (path: any) => {
-			if (path === "wasabi/test") {
-				return [{ name: "2024", type: "dir", path: "wasabi/test/2024" }];
-			}
-			if (path === "wasabi/test/2024") {
-				return [
-					file(
-						"2024-05-05 Test Session.mp4",
-						"wasabi/test/2024/2024-05-05 Test Session.mp4",
-					),
-				];
-			}
-			return [];
-		});
+		mockYearListing("2024", [
+			file(
+				"2024-05-05 Test Session.mp4",
+				"wasabi/test/2024/2024-05-05 Test Session.mp4",
+			),
+		]);
 
 		await updateGroupProcess("test", true, false, true, false);
 
@@ -170,20 +166,12 @@ describe("updateGroupProcess persistence and migration", () => {
 			if (path.endsWith("/local/sync/bundle.json")) return "{bad";
 			return "";
 		});
-		asMock(getListing).mockImplementation(async (path: any) => {
-			if (path === "wasabi/test") {
-				return [{ name: "2024", type: "dir", path: "wasabi/test/2024" }];
-			}
-			if (path === "wasabi/test/2024") {
-				return [
-					file(
-						"2024-05-05 Test Session.mp4",
-						"wasabi/test/2024/2024-05-05 Test Session.mp4",
-					),
-				];
-			}
-			return [];
-		});
+		mockYearListing("2024", [
+			file(
+				"2024-05-05 Test Session.mp4",
+				"wasabi/test/2024/2024-05-05 Test Session.mp4",
+			),
+		]);
 
 		await updateGroupProcess("test", true, false, false, true);
 
@@ -259,15 +247,7 @@ describe("updateGroupProcess persistence and migration", () => {
 			}
 			return "";
 		});
-		asMock(getListing).mockImplementation(async (path: any) => {
-			if (path === "wasabi/test") {
-				return [{ name: "2024", type: "dir", path: "wasabi/test/2024" }];
-			}
-			if (path === "wasabi/test/2024") {
-				return yearItems;
-			}
-			return [];
-		});
+		mockYearListing("2024", yearItems);
 
 		const secondRun = await updateGroupProcess(
 			"test",
@@ -341,15 +321,7 @@ describe("updateGroupProcess persistence and migration", () => {
 			if (path.endsWith(".md")) return "Summary from DigitalOcean";
 			return "";
 		});
-		asMock(getListing).mockImplementation(async (path: any) => {
-			if (path === "wasabi/test") {
-				return [{ name: "2024", type: "dir", path: "wasabi/test/2024" }];
-			}
-			if (path === "wasabi/test/2024") {
-				return yearItems;
-			}
-			return [];
-		});
+		mockYearListing("2024", yearItems);
 
 		await updateGroupProcess("test", true, false, true, false);
 
@@ -397,24 +369,16 @@ describe("updateGroupProcess persistence and migration", () => {
 			}
 			return "";
 		});
-		asMock(getListing).mockImplementation(async (path: any) => {
-			if (path === "wasabi/test") {
-				return [{ name: "2024", type: "dir", path: "wasabi/test/2024" }];
-			}
-			if (path === "wasabi/test/2024") {
-				return [
-					file(
-						"2024-05-05 Test Session.mp4",
-						"wasabi/test/2024/2024-05-05 Test Session.mp4",
-					),
-					file(
-						"2024-05-05 Test Session.jpg",
-						"wasabi/test/2024/2024-05-05 Test Session.jpg",
-					),
-				];
-			}
-			return [];
-		});
+		mockYearListing("2024", [
+			file(
+				"2024-05-05 Test Session.mp4",
+				"wasabi/test/2024/2024-05-05 Test Session.mp4",
+			),
+			file(
+				"2024-05-05 Test Session.jpg",
+				"wasabi/test/2024/2024-05-05 Test Session.jpg",
+			),
+		]);
 		asMock(fetchSessionMetadata).mockResolvedValue({
 			items: [],
 			tags: { "2024-05-05 Test Session": ["bundle"] },
@@ -514,20 +478,12 @@ describe("updateGroupProcess persistence and migration", () => {
 			}
 			return "";
 		});
-		asMock(getListing).mockImplementation(async (path: any) => {
-			if (path === "wasabi/test") {
-				return [{ name: "2024", type: "dir", path: "wasabi/test/2024" }];
-			}
-			if (path === "wasabi/test/2024") {
-				return [
-					file(
-						"2024-05-05 Test Session.mp4",
-						"wasabi/test/2024/2024-05-05 Test Session.mp4",
-					),
-				];
-			}
-			return [];
-		});
+		mockYearListing("2024", [
+			file(
+				"2024-05-05 Test Session.mp4",
+				"wasabi/test/2024/2024-05-05 Test Session.mp4",
+			),
+		]);
 
 		const result = await updateGroupProcess("test", true, true, false, true);
 
@@ -552,20 +508,12 @@ describe("updateGroupProcess persistence and migration", () => {
 			}
 			return "";
 		});
-		asMock(getListing).mockImplementation(async (path: any) => {
-			if (path === "wasabi/test") {
-				return [{ name: "2024", type: "dir", path: "wasabi/test/2024" }];
-			}
-			if (path === "wasabi/test/2024") {
-				return [
-					file(
-						"2024-05-05 Test Session.mp4",
-						"wasabi/test/2024/2024-05-05 Test Session.mp4",
-					),
-				];
-			}
-			return [];
-		});
+		mockYearListing("2024", [
+			file(
+				"2024-05-05 Test Session.mp4",
+				"wasabi/test/2024/2024-05-05 Test Session.mp4",
+			),
+		]);
 		asMock(fetchSessionMetadata).mockResolvedValue({
 			items: [],
 			tags: { "2024-05-05 Test Session": ["bundle"] },
@@ -592,20 +540,12 @@ describe("updateGroupProcess persistence and migration", () => {
 			}
 			return "";
 		});
-		asMock(getListing).mockImplementation(async (path: any) => {
-			if (path === "wasabi/test") {
-				return [{ name: "2024", type: "dir", path: "wasabi/test/2024" }];
-			}
-			if (path === "wasabi/test/2024") {
-				return [
-					file(
-						"2024-05-05 Test Session.mp4",
-						"wasabi/test/2024/2024-05-05 Test Session.mp4",
-					),
-				];
-			}
-			return [];
-		});
+		mockYearListing("2024", [
+			file(
+				"2024-05-05 Test Session.mp4",
+				"wasabi/test/2024/2024-05-05 Test Session.mp4",
+			),
+		]);
 		asMock(fetchSessionMetadata).mockResolvedValue({
 			items: [],
 			tags: { "2024-05-05 Test Session": ["merged"] },
@@ -632,20 +572,12 @@ describe("updateGroupProcess persistence and migration", () => {
 			}
 			return "";
 		});
-		asMock(getListing).mockImplementation(async (path: any) => {
-			if (path === "wasabi/test") {
-				return [{ name: "2024", type: "dir", path: "wasabi/test/2024" }];
-			}
-			if (path === "wasabi/test/2024") {
-				return [
-					file(
-						"2024-05-05 Test Session.mp4",
-						"wasabi/test/2024/2024-05-05 Test Session.mp4",
-					),
-				];
-			}
-			return [];
-		});
+		mockYearListing("2024", [
+			file(
+				"2024-05-05 Test Session.mp4",
+				"wasabi/test/2024/2024-05-05 Test Session.mp4",
+			),
+		]);
 
 		const sessions = await updateGroupProcess("test", true, false, false, true);
 
@@ -666,20 +598,12 @@ describe("updateGroupProcess persistence and migration", () => {
 			}
 			return "";
 		});
-		asMock(getListing).mockImplementation(async (path: any) => {
-			if (path === "wasabi/test") {
-				return [{ name: "2024", type: "dir", path: "wasabi/test/2024" }];
-			}
-			if (path === "wasabi/test/2024") {
-				return [
-					file(
-						"2024-05-05 Test Session.mp4",
-						"wasabi/test/2024/2024-05-05 Test Session.mp4",
-					),
-				];
-			}
-			return [];
-		});
+		mockYearListing("2024", [
+			file(
+				"2024-05-05 Test Session.mp4",
+				"wasabi/test/2024/2024-05-05 Test Session.mp4",
+			),
+		]);
 
 		await updateGroupProcess("test", true, false, true, false);
 

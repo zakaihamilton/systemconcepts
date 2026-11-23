@@ -1,4 +1,4 @@
-import { createSessionsTestHarness } from "../sessionsTestSetup";
+import "./sessionsTestSetup";
 import { waitFor } from "@testing-library/react";
 import { useGroups } from "@util/domain/groups";
 import { compactLegacySessionThumbnails } from "@util/domain/sessionCompaction";
@@ -9,18 +9,14 @@ function file(path: string, name?: string) {
 	return { path, name: name || path.split("/").pop(), type: "file" };
 }
 
-const {
-	GROUP_METADATA,
-	getSessionsState,
-	renderHarness,
-	resetSessionsTestState,
-} = createSessionsTestHarness(
-	useSessions,
-	SessionsStore,
-	useGroups,
-	compactLegacySessionThumbnails,
-	storage,
-);
+const { getSessionsState, renderHarness, resetSessionsTestState } =
+	createSessionsTestHarness(
+		useSessions,
+		SessionsStore,
+		useGroups,
+		compactLegacySessionThumbnails,
+		storage,
+	);
 
 describe("useSessions personal metadata", () => {
 	beforeEach(resetSessionsTestState);

@@ -60,6 +60,27 @@ export function file(name: any, path: any) {
 	return { id: path, name, type: "file" as const, path };
 }
 
+type TestListingItem = {
+	id?: string;
+	name?: string;
+	path?: string;
+	type?: string;
+	size?: number;
+	mtimeMs?: number;
+	stat?: Record<string, unknown>;
+	[key: string]: unknown;
+};
+
+export function mockYearListing(year: string, items: TestListingItem[]) {
+	asMock(getListing).mockImplementation(async (path: string) => {
+		if (path === "wasabi/test") {
+			return [{ name: year, type: "dir", path: `wasabi/test/${year}` }];
+		}
+		if (path === `wasabi/test/${year}`) return items;
+		return [];
+	});
+}
+
 export function setupUpdateGroupTest() {
 	jest.clearAllMocks();
 	UpdateSessionsStore.update((s) => {

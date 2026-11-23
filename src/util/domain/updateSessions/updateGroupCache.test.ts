@@ -14,7 +14,11 @@ import {
 } from "./metadata";
 import { fetchSessionMetadata } from "./sessionMetadataClient";
 import { updateGroupProcess } from "./updateGroup";
-import { file, setupUpdateGroupTest } from "./updateGroupTestSetup";
+import {
+	file,
+	mockYearListing,
+	setupUpdateGroupTest,
+} from "./updateGroupTestSetup";
 import { getListing, updateYearSync } from "./utils";
 
 describe("updateGroupProcess caching, incremental refresh, and targeted sync", () => {
@@ -24,26 +28,12 @@ describe("updateGroupProcess caching, incremental refresh, and targeted sync", (
 
 	it("uses cached metadata for non-forced updates without calling the aggregated endpoint", async () => {
 		const currentYear = String(new Date().getFullYear());
-		asMock(getListing).mockImplementation(async (path: any) => {
-			if (path === "wasabi/test") {
-				return [
-					{
-						name: currentYear,
-						type: "dir",
-						path: `wasabi/test/${currentYear}`,
-					},
-				];
-			}
-			if (path === `wasabi/test/${currentYear}`) {
-				return [
-					file(
-						`${currentYear}-05-05 Cached Session.mp4`,
-						`wasabi/test/${currentYear}/${currentYear}-05-05 Cached Session.mp4`,
-					),
-				];
-			}
-			return [];
-		});
+		mockYearListing(currentYear, [
+			file(
+				`${currentYear}-05-05 Cached Session.mp4`,
+				`wasabi/test/${currentYear}/${currentYear}-05-05 Cached Session.mp4`,
+			),
+		]);
 		const localYearPath = `/local/sync/test/${currentYear}.json`;
 		asMock(storage.exists).mockImplementation(
 			async (path: any) => path === localYearPath,
@@ -211,21 +201,7 @@ describe("updateGroupProcess caching, incremental refresh, and targeted sync", (
 		);
 		const localYearPath = `/local/sync/test/${currentYear}.json`;
 
-		asMock(getListing).mockImplementation(async (path: any) => {
-			if (path === "wasabi/test") {
-				return [
-					{
-						name: currentYear,
-						type: "dir",
-						path: `wasabi/test/${currentYear}`,
-					},
-				];
-			}
-			if (path === `wasabi/test/${currentYear}`) {
-				return yearItems;
-			}
-			return [];
-		});
+		mockYearListing(currentYear, yearItems);
 		asMock(storage.exists).mockImplementation(
 			async (path: any) => path === localYearPath,
 		);
@@ -488,21 +464,7 @@ describe("updateGroupProcess caching, incremental refresh, and targeted sync", (
 		);
 		const localYearPath = `/local/sync/test/${currentYear}.json`;
 
-		asMock(getListing).mockImplementation(async (path: any) => {
-			if (path === "wasabi/test") {
-				return [
-					{
-						name: currentYear,
-						type: "dir",
-						path: `wasabi/test/${currentYear}`,
-					},
-				];
-			}
-			if (path === `wasabi/test/${currentYear}`) {
-				return yearItems;
-			}
-			return [];
-		});
+		mockYearListing(currentYear, yearItems);
 		asMock(storage.exists).mockImplementation(
 			async (path: any) => path === localYearPath,
 		);
@@ -596,21 +558,7 @@ describe("updateGroupProcess caching, incremental refresh, and targeted sync", (
 			year: currentYear,
 		};
 
-		asMock(getListing).mockImplementation(async (path: any) => {
-			if (path === "wasabi/test") {
-				return [
-					{
-						name: currentYear,
-						type: "dir",
-						path: `wasabi/test/${currentYear}`,
-					},
-				];
-			}
-			if (path === `wasabi/test/${currentYear}`) {
-				return yearItems;
-			}
-			return [];
-		});
+		mockYearListing(currentYear, yearItems);
 		asMock(storage.exists).mockImplementation(async (path: any) =>
 			path.endsWith("/local/sync/test.json"),
 		);
@@ -672,21 +620,7 @@ describe("updateGroupProcess caching, incremental refresh, and targeted sync", (
 			metadataFingerprint,
 		);
 
-		asMock(getListing).mockImplementation(async (path: any) => {
-			if (path === "wasabi/test") {
-				return [
-					{
-						name: currentYear,
-						type: "dir",
-						path: `wasabi/test/${currentYear}`,
-					},
-				];
-			}
-			if (path === `wasabi/test/${currentYear}`) {
-				return yearItems;
-			}
-			return [];
-		});
+		mockYearListing(currentYear, yearItems);
 		asMock(storage.exists).mockImplementation(
 			async (path: any) => path === localYearPath,
 		);
@@ -732,26 +666,12 @@ describe("updateGroupProcess caching, incremental refresh, and targeted sync", (
 		const currentYear = String(new Date().getFullYear());
 		const localYearPath = `/local/sync/test/${currentYear}.json`;
 
-		asMock(getListing).mockImplementation(async (path: any) => {
-			if (path === "wasabi/test") {
-				return [
-					{
-						name: currentYear,
-						type: "dir",
-						path: `wasabi/test/${currentYear}`,
-					},
-				];
-			}
-			if (path === `wasabi/test/${currentYear}`) {
-				return [
-					file(
-						`${currentYear}-08-02 Fresh Session.mp4`,
-						`wasabi/test/${currentYear}/${currentYear}-08-02 Fresh Session.mp4`,
-					),
-				];
-			}
-			return [];
-		});
+		mockYearListing(currentYear, [
+			file(
+				`${currentYear}-08-02 Fresh Session.mp4`,
+				`wasabi/test/${currentYear}/${currentYear}-08-02 Fresh Session.mp4`,
+			),
+		]);
 		asMock(storage.exists).mockImplementation(
 			async (path: any) => path === localYearPath,
 		);
@@ -782,21 +702,7 @@ describe("updateGroupProcess caching, incremental refresh, and targeted sync", (
 		);
 		const localYearPath = `/local/sync/test/${currentYear}.json`;
 
-		asMock(getListing).mockImplementation(async (path: any) => {
-			if (path === "wasabi/test") {
-				return [
-					{
-						name: currentYear,
-						type: "dir",
-						path: `wasabi/test/${currentYear}`,
-					},
-				];
-			}
-			if (path === `wasabi/test/${currentYear}`) {
-				return yearItems;
-			}
-			return [];
-		});
+		mockYearListing(currentYear, yearItems);
 		asMock(storage.exists).mockImplementation(
 			async (path: any) => path === localYearPath,
 		);
