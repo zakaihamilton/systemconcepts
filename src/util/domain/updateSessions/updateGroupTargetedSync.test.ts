@@ -1,14 +1,7 @@
 import "./updateGroupTestSetup";
 import { addSyncLog } from "@sync/sync";
-import { SyncActiveStore, UpdateSessionsStore } from "@sync/syncState";
 import storage from "@util/storage/storage";
 import { getCombinedYearFingerprint } from "./fingerprints";
-import {
-	loadDurations,
-	loadSummaries,
-	loadTags,
-	loadTranscriptions,
-} from "./metadata";
 import { fetchSessionMetadata } from "./sessionMetadataClient";
 import { updateGroupProcess } from "./updateGroup";
 import {
@@ -18,37 +11,22 @@ import {
 	file,
 	mockYearCacheAndSessions,
 	mockYearListing,
+	setupUpdateGroupTest,
 	yearListingFiles,
 } from "./updateGroupTestSetup";
-import { getListing, updateYearSync } from "./utils";
+import { updateYearSync } from "./utils";
 
 describe("updateGroupProcess targeted and recent-days sync", () => {
 	beforeEach(() => {
-		jest.clearAllMocks();
-		UpdateSessionsStore.update((s) => {
-			s.status = [];
-		});
-		SyncActiveStore.update((s) => {
-			s.needsSessionReload = false;
-		});
-
-		asMock(storage.exists).mockResolvedValue(false);
-		asMock(storage.readFile).mockImplementation(async (path: any) => {
-			if (path.endsWith(".duration")) return "123";
-			if (path.endsWith(".md")) return "Summary from DigitalOcean";
-			if (path.endsWith(".tags")) return JSON.stringify(["ai", "sync"]);
-			return "";
-		});
-		asMock(loadTags).mockResolvedValue({});
-		asMock(loadDurations).mockResolvedValue({});
-		asMock(loadSummaries).mockResolvedValue({});
-		asMock(loadTranscriptions).mockResolvedValue({});
-		asMock(fetchSessionMetadata).mockResolvedValue(emptyYearMetadata());
-		asMock(getListing).mockResolvedValue([]);
-		asMock(updateYearSync).mockResolvedValue({
-			counter: 0,
-			newCount: 0,
-			newSessions: [],
+		setupUpdateGroupTest({
+			readFile: async (path: string) => {
+				if (path.endsWith(".duration")) return "123";
+				if (path.endsWith(".md")) return "Summary from DigitalOcean";
+				if (path.endsWith(".tags")) return JSON.stringify(["ai", "sync"]);
+				return "";
+			},
+			sessionMetadata: emptyYearMetadata(),
+			listing: async () => [],
 		});
 	});
 
