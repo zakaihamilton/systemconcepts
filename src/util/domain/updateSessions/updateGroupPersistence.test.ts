@@ -3,7 +3,6 @@ import { writeCompressedFile } from "@sync/bundle";
 import { getFileInfo } from "@sync/hash";
 import { updateManifestEntry } from "@sync/manifest";
 import { addSyncLog } from "@sync/sync";
-import { UpdateSessionsStore } from "@sync/syncState";
 import { logger } from "@util/api/logger";
 import storage from "@util/storage/storage";
 import { getCombinedYearFingerprint } from "./fingerprints";
@@ -12,6 +11,7 @@ import { updateGroupProcess } from "./updateGroup";
 import {
 	emptyYearMetadata,
 	file,
+	groupUpdateStatus,
 	mockListingResponses,
 	mockYearListing,
 	setupUpdateGroupTest,
@@ -338,9 +338,7 @@ describe("updateGroupProcess persistence and migration", () => {
 
 		await updateGroupProcess("test", true, false, false, true);
 
-		const status = UpdateSessionsStore.getRawState().status.find(
-			(item) => item.name === "test",
-		);
+		const status = groupUpdateStatus();
 		expect(status.addedCount).toBe(1);
 		expect(status.newSessions[0].metadata).toEqual({
 			hasTags: true,
@@ -383,9 +381,7 @@ describe("updateGroupProcess persistence and migration", () => {
 
 		await updateGroupProcess("test", true, false, true, false);
 
-		const status = UpdateSessionsStore.getRawState().status.find(
-			(item) => item.name === "test",
-		);
+		const status = groupUpdateStatus();
 		expect(status.addedCount).toBe(1);
 		expect(status.newSessions[0].metadata).toEqual({
 			hasTags: true,
@@ -433,9 +429,7 @@ describe("updateGroupProcess persistence and migration", () => {
 
 		await updateGroupProcess("test", true, false, false, true);
 
-		const status = UpdateSessionsStore.getRawState().status.find(
-			(item) => item.name === "test",
-		);
+		const status = groupUpdateStatus();
 		expect(status.newSessions[0].metadata.hasThumbnail).toBe(false);
 	});
 
@@ -451,9 +445,7 @@ describe("updateGroupProcess persistence and migration", () => {
 
 		await updateGroupProcess("test", true, false, true, false);
 
-		const status = UpdateSessionsStore.getRawState().status.find(
-			(item) => item.name === "test",
-		);
+		const status = groupUpdateStatus();
 		expect(status.newSessions[0].metadata.hasThumbnail).toBe(false);
 	});
 

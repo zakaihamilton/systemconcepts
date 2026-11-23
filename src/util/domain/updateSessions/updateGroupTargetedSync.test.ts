@@ -7,6 +7,7 @@ import {
 	cachedYearSession,
 	emptyYearMetadata,
 	file,
+	mockCachedYearListing,
 	mockUnchangedYearCache,
 	mockYearCacheAndSessions,
 	mockYearListing,
@@ -34,14 +35,11 @@ describe("updateGroupProcess targeted and recent-days sync", () => {
 		);
 		const recentId = recentSessionId();
 
-		mockYearListing(currentYear, [
-			file(
-				`${oldSession.id}.mp4`,
-				`wasabi/test/${currentYear}/${oldSession.id}.mp4`,
-			),
-			file(`${recentId}.mp4`, `wasabi/test/${currentYear}/${recentId}.mp4`),
-		]);
-		mockYearCacheAndSessions(currentYear, [oldSession]);
+		mockCachedYearListing(
+			currentYear,
+			[`${oldSession.id}.mp4`, `${recentId}.mp4`],
+			[oldSession],
+		);
 
 		asMock(fetchSessionMetadata).mockResolvedValue(
 			yearMetadata({
@@ -139,12 +137,9 @@ describe("updateGroupProcess targeted and recent-days sync", () => {
 		const recentId = recentSessionId();
 		const localYearPath = `/local/sync/test/${currentYear}.json`;
 
-		mockYearListing(
+		mockCachedYearListing(
 			currentYear,
-			yearListingFiles(currentYear, [`${oldId}.mp4`, `${recentId}.mp4`]),
-		);
-		mockYearCacheAndSessions(
-			currentYear,
+			[`${oldId}.mp4`, `${recentId}.mp4`],
 			[
 				{
 					name: oldId,

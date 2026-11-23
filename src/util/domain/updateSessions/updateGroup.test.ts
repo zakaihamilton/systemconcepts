@@ -1,12 +1,13 @@
 import "./updateGroupTestSetup";
 import { addSyncLog } from "@sync/sync";
-import { SyncActiveStore, UpdateSessionsStore } from "@sync/syncState";
+import { SyncActiveStore } from "@sync/syncState";
 import { logger } from "@util/api/logger";
 import storage from "@util/storage/storage";
 import { fetchSessionMetadata } from "./sessionMetadataClient";
 import { updateGroupProcess } from "./updateGroup";
 import {
 	file,
+	groupUpdateStatus,
 	mockListingResponses,
 	mockYearListing,
 	setupUpdateGroupTest,
@@ -209,9 +210,7 @@ describe("updateGroupProcess", () => {
 
 		await updateGroupProcess("test", true, false);
 
-		const status = UpdateSessionsStore.getRawState().status.find(
-			(item) => item.name === "test",
-		);
+		const status = groupUpdateStatus();
 		expect(status.addedCount).toBe(1);
 		expect(status.newSessions[0].metadata).toEqual({
 			hasTags: true,
@@ -255,9 +254,7 @@ describe("updateGroupProcess", () => {
 			updateGroupProcess("test", true, false, false, true),
 		).resolves.toBeUndefined();
 
-		const status = UpdateSessionsStore.getRawState().status.find(
-			(item) => item.name === "test",
-		);
+		const status = groupUpdateStatus();
 		expect(status.errors).toEqual(
 			expect.arrayContaining(["year failure without message"]),
 		);
@@ -270,9 +267,7 @@ describe("updateGroupProcess", () => {
 
 		await expect(updateGroupProcess("test", true)).resolves.toBeUndefined();
 
-		const status = UpdateSessionsStore.getRawState().status.find(
-			(item) => item.name === "test",
-		);
+		const status = groupUpdateStatus();
 		expect(status.errors).toEqual(
 			expect.arrayContaining(["listing failure without message"]),
 		);
@@ -290,9 +285,7 @@ describe("updateGroupProcess", () => {
 
 		await updateGroupProcess("test", true, false);
 
-		const status = UpdateSessionsStore.getRawState().status.find(
-			(item) => item.name === "test",
-		);
+		const status = groupUpdateStatus();
 		expect(status.progress).toBe(1);
 		expect(status.year).toBeNull();
 		expect(addSyncLog).toHaveBeenCalledWith(

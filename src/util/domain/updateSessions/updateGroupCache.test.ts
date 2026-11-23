@@ -30,6 +30,13 @@ import {
 } from "./updateGroupTestSetup";
 import { updateYearSync } from "./utils";
 
+function overviewSessionIds(year: string, newSessionDateAndTitle: string) {
+	return {
+		existingId: `${year}-07-17 Overview - Kabbalah & Suffering`,
+		newId: `${year}-${newSessionDateAndTitle}`,
+	};
+}
+
 function setupUnchangedYearCache(
 	sessionTitle: string,
 	location: "year" | "bundle",
@@ -108,8 +115,10 @@ describe("updateGroupProcess caching, incremental refresh, and targeted sync", (
 
 	it("does not skip year when fingerprint matches but local sessions miss listing media", async () => {
 		const currentYear = String(new Date().getFullYear());
-		const existingId = `${currentYear}-07-17 Overview - Kabbalah & Suffering`;
-		const newId = `${currentYear}-07-20 Overview - The Grip & Shells`;
+		const { existingId, newId } = overviewSessionIds(
+			currentYear,
+			"07-20 Overview - The Grip & Shells",
+		);
 		const yearItems = yearListingFiles(currentYear, [
 			`${existingId}.mp4`,
 			`${newId}.mp4`,
@@ -147,8 +156,10 @@ describe("updateGroupProcess caching, incremental refresh, and targeted sync", (
 
 	it("only rematerializes changed sessions when year fingerprint changes", async () => {
 		const currentYear = String(new Date().getFullYear());
-		const existingId = `${currentYear}-07-17 Overview - Kabbalah & Suffering`;
-		const newId = `${currentYear}-07-23 Conclusion`;
+		const { existingId, newId } = overviewSessionIds(
+			currentYear,
+			"07-23 Conclusion",
+		);
 		const yearItems = [
 			{
 				id: `wasabi/test/${currentYear}/${existingId}.mp4`,

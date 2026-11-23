@@ -153,6 +153,12 @@ export function mockListingResponses(
 	});
 }
 
+export function groupUpdateStatus() {
+	return UpdateSessionsStore.getRawState().status.find(
+		(item) => item.name === "test",
+	);
+}
+
 export function mockYearListing(
 	year: string,
 	items: TestListingItem[],
@@ -204,6 +210,16 @@ export function mockYearCacheAndSessions(
 	return localPath;
 }
 
+export function mockCachedYearListing(
+	year: string,
+	filenames: string[],
+	sessions: unknown[],
+	options: Pick<YearCacheFixtureOptions, "localPath"> = {},
+) {
+	mockYearListing(year, yearListingFiles(year, filenames));
+	mockYearCacheAndSessions(year, sessions, options);
+}
+
 type YearMetadata = Awaited<ReturnType<typeof fetchSessionMetadata>>;
 
 export function yearMetadata(
@@ -232,26 +248,6 @@ export function sessionMetadataFiles(
 
 export function emptyYearMetadata() {
 	return yearMetadata();
-}
-
-export function mockCachedYearSession(
-	year: string,
-	id: string,
-	fingerprint: string,
-	metadataFingerprint: unknown,
-	sessionOverrides: Record<string, unknown> = {},
-) {
-	return mockYearCacheAndSessions(
-		year,
-		[cachedYearSession(id, year, sessionOverrides)],
-		{
-			cache: {
-				fingerprint,
-				metadataFingerprint: JSON.stringify(metadataFingerprint),
-				metadata: emptyYearMetadata(),
-			},
-		},
-	);
 }
 
 type UpdateGroupTestSetupOptions = {
