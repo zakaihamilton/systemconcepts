@@ -60,7 +60,8 @@ describe("Account View", () => {
 	const fillLoginCredentials = async (
 		user: ReturnType<typeof userEvent.setup>,
 	) => {
-		await fillLoginCredentials(user);
+		await user.type(screen.getByLabelText("ID"), "person@example.com");
+		await user.type(screen.getByLabelText("Password"), "password");
 	};
 
 	it("renders sign in form when not signed in", async () => {
