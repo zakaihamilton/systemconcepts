@@ -10,6 +10,7 @@ import { getCombinedYearFingerprint } from "./fingerprints";
 import { fetchSessionMetadata } from "./sessionMetadataClient";
 import { updateGroupProcess } from "./updateGroup";
 import {
+	emptyYearMetadata,
 	file,
 	mockYearListing,
 	setupUpdateGroupTest,
@@ -236,13 +237,7 @@ describe("updateGroupProcess persistence and migration", () => {
 				return JSON.stringify({
 					fingerprint: yearFingerprint,
 					metadataFingerprint: JSON.stringify(metadataFingerprint),
-					metadata: {
-						items: [],
-						tags: {},
-						durations: {},
-						summaries: {},
-						transcriptions: {},
-					},
+					metadata: emptyYearMetadata(),
 				});
 			}
 			return "";
@@ -308,13 +303,7 @@ describe("updateGroupProcess persistence and migration", () => {
 				return JSON.stringify({
 					fingerprint: yearFingerprint,
 					metadataFingerprint: JSON.stringify(metadataFingerprint),
-					metadata: {
-						items: [],
-						tags: {},
-						durations: {},
-						summaries: {},
-						transcriptions: {},
-					},
+					metadata: emptyYearMetadata(),
 				});
 			}
 			if (path.endsWith(".duration")) return "123";

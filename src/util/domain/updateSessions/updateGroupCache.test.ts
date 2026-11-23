@@ -15,6 +15,7 @@ import {
 import { fetchSessionMetadata } from "./sessionMetadataClient";
 import { updateGroupProcess } from "./updateGroup";
 import {
+	emptyYearMetadata,
 	file,
 	mockYearListing,
 	setupUpdateGroupTest,
@@ -118,13 +119,7 @@ describe("updateGroupProcess caching, incremental refresh, and targeted sync", (
 				return JSON.stringify({
 					fingerprint: yearFingerprint,
 					metadataFingerprint: JSON.stringify(metadataFingerprint),
-					metadata: {
-						items: [],
-						tags: {},
-						durations: {},
-						summaries: {},
-						transcriptions: {},
-					},
+					metadata: emptyYearMetadata(),
 				});
 			}
 			if (path === localYearPath) {
@@ -220,13 +215,7 @@ describe("updateGroupProcess caching, incremental refresh, and targeted sync", (
 							},
 						]),
 					},
-					metadata: {
-						items: [],
-						tags: {},
-						durations: {},
-						summaries: {},
-						transcriptions: {},
-					},
+					metadata: emptyYearMetadata(),
 				});
 			}
 			if (path === localYearPath) {
@@ -473,13 +462,7 @@ describe("updateGroupProcess caching, incremental refresh, and targeted sync", (
 				return JSON.stringify({
 					fingerprint: yearFingerprint,
 					metadataFingerprint: JSON.stringify(metadataFingerprint),
-					metadata: {
-						items: [],
-						tags: {},
-						durations: {},
-						summaries: {},
-						transcriptions: {},
-					},
+					metadata: emptyYearMetadata(),
 				});
 			}
 			if (path === localYearPath) {
@@ -567,13 +550,7 @@ describe("updateGroupProcess caching, incremental refresh, and targeted sync", (
 				return JSON.stringify({
 					fingerprint: yearFingerprint,
 					metadataFingerprint: JSON.stringify(metadataFingerprint),
-					metadata: {
-						items: [],
-						tags: {},
-						durations: {},
-						summaries: {},
-						transcriptions: {},
-					},
+					metadata: emptyYearMetadata(),
 				});
 			}
 			if (path.endsWith("/local/sync/test.json")) {
@@ -629,13 +606,7 @@ describe("updateGroupProcess caching, incremental refresh, and targeted sync", (
 				return JSON.stringify({
 					fingerprint: yearFingerprint,
 					metadataFingerprint: JSON.stringify(metadataFingerprint),
-					metadata: {
-						items: [],
-						tags: {},
-						durations: {},
-						summaries: {},
-						transcriptions: {},
-					},
+					metadata: emptyYearMetadata(),
 				});
 			}
 			if (path === localYearPath) {
@@ -711,13 +682,7 @@ describe("updateGroupProcess caching, incremental refresh, and targeted sync", (
 				return JSON.stringify({
 					fingerprint: yearFingerprint,
 					metadataFingerprint: JSON.stringify(metadataFingerprint),
-					metadata: {
-						items: [],
-						tags: {},
-						durations: {},
-						summaries: {},
-						transcriptions: {},
-					},
+					metadata: emptyYearMetadata(),
 				});
 			}
 			if (path === localYearPath) {

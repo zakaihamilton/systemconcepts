@@ -343,13 +343,7 @@ describe("updateGroupProcess targeted and recent-days sync", () => {
 				return JSON.stringify({
 					fingerprint: yearFingerprint,
 					metadataFingerprint: JSON.stringify(metadataFingerprint),
-					metadata: {
-						items: [],
-						tags: {},
-						durations: {},
-						summaries: {},
-						transcriptions: {},
-					},
+					metadata: emptyYearMetadata(),
 				});
 			}
 			if (path.endsWith("/local/sync/bundle.json")) {
@@ -388,13 +382,7 @@ describe("updateGroupProcess targeted and recent-days sync", () => {
 				return JSON.stringify({
 					fingerprint: yearFingerprint,
 					metadataFingerprint: JSON.stringify(metadataFingerprint),
-					metadata: {
-						items: [],
-						tags: {},
-						durations: {},
-						summaries: {},
-						transcriptions: {},
-					},
+					metadata: emptyYearMetadata(),
 				});
 			}
 			if (path.endsWith("/local/sync/bundle.json")) {

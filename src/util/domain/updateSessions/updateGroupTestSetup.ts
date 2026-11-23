@@ -81,6 +81,16 @@ export function mockYearListing(year: string, items: TestListingItem[]) {
 	});
 }
 
+export function emptyYearMetadata() {
+	return {
+		items: [],
+		tags: {},
+		durations: {},
+		summaries: {},
+		transcriptions: {},
+	};
+}
+
 export function setupUpdateGroupTest() {
 	jest.clearAllMocks();
 	UpdateSessionsStore.update((s) => {
