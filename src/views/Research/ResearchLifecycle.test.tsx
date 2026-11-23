@@ -1,4 +1,5 @@
 import "./researchTestSetup";
+import "./researchMinimalTestSetup";
 import { ContentSize } from "@components/Page/Content";
 import {
 	act,
@@ -18,23 +19,6 @@ import {
 } from "./researchTestSetup";
 
 let mockResearchState: any;
-
-jest.mock("@components/Virtualized/VariableSizeList", () => {
-	const React = require("react");
-	return React.forwardRef(function MockList(_props: any, ref: any) {
-		React.useImperativeHandle(ref, () => ({
-			scrollToItem: jest.fn(),
-			resetAfterIndex: jest.fn(),
-		}));
-		return <div data-testid="virtual-list" />;
-	});
-});
-jest.mock("./PageIndicator", () => () => null);
-jest.mock("./ResultsOutline", () => () => null);
-jest.mock("./SearchResultItem", () => () => (
-	<div data-testid="search-result-item" />
-));
-jest.mock("@views/Library/Article/JumpDialog", () => () => null);
 
 describe("Research View Lifecycle and Search Progress", () => {
 	const mockSize = { width: 800, height: 600, emPixels: 16 };
