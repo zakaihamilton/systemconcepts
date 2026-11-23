@@ -7,6 +7,7 @@ import { SessionsStore, useSessions } from "./sessions";
 import {
 	createSessionsTestHarness,
 	mockSessionsStorageFiles,
+	renderAndWaitForSessionCount,
 	sessionFixture,
 } from "./sessionsTestSetup";
 
@@ -56,12 +57,7 @@ describe("useSessions", () => {
 			},
 		);
 
-		renderHarness();
-
-		await waitFor(() => {
-			const [items] = getSessionsState();
-			expect(items).toHaveLength(1);
-		});
+		await renderAndWaitForSessionCount(renderHarness, getSessionsState, 1);
 
 		const [items] = getSessionsState();
 		expect(items[0].id).toBe("2024-05-05 Test Session");
@@ -91,12 +87,7 @@ describe("useSessions", () => {
 			},
 		);
 
-		renderHarness();
-
-		await waitFor(() => {
-			const [items] = getSessionsState();
-			expect(items).toHaveLength(1);
-		});
+		await renderAndWaitForSessionCount(renderHarness, getSessionsState, 1);
 
 		expect(getSessionsState()[0][0].id).toBe("2024-01-01 Merged Session");
 	});
@@ -124,12 +115,7 @@ describe("useSessions", () => {
 			},
 		);
 
-		renderHarness();
-
-		await waitFor(() => {
-			const [items] = getSessionsState();
-			expect(items).toHaveLength(1);
-		});
+		await renderAndWaitForSessionCount(renderHarness, getSessionsState, 1);
 
 		expect(getSessionsState()[0][0].group).toBe("bundledgroup");
 		expect(storage.getListing).not.toHaveBeenCalled();
@@ -169,12 +155,7 @@ describe("useSessions", () => {
 			return "";
 		});
 
-		renderHarness();
-
-		await waitFor(() => {
-			const [items] = getSessionsState();
-			expect(items).toHaveLength(1);
-		});
+		await renderAndWaitForSessionCount(renderHarness, getSessionsState, 1);
 
 		expect(getSessionsState()[0][0].id).toBe("2024-03-03 Listing Session");
 	});
@@ -187,12 +168,7 @@ describe("useSessions", () => {
 			"/local/sync/groups.json": JSON.stringify({ groups: [] }),
 		});
 
-		renderHarness();
-
-		await waitFor(() => {
-			const [items] = getSessionsState();
-			expect(items).toEqual([]);
-		});
+		await renderAndWaitForSessionCount(renderHarness, getSessionsState, 0);
 		const { logger } = require("@util/api/logger");
 		expect(logger.warn).toHaveBeenCalledWith(
 			expect.stringContaining("Legacy thumbnail compaction failed"),
@@ -212,12 +188,7 @@ describe("useSessions", () => {
 			return "";
 		});
 
-		renderHarness();
-
-		await waitFor(() => {
-			const [items] = getSessionsState();
-			expect(items).toEqual([]);
-		});
+		await renderAndWaitForSessionCount(renderHarness, getSessionsState, 0);
 		const { logger } = require("@util/api/logger");
 		expect(logger.error).toHaveBeenCalled();
 	});
@@ -225,12 +196,7 @@ describe("useSessions", () => {
 	it("returns an empty groups array when groups.json does not exist", async () => {
 		asMock(storage.exists).mockResolvedValue(false);
 
-		renderHarness();
-
-		await waitFor(() => {
-			const [items] = getSessionsState();
-			expect(items).toEqual([]);
-		});
+		await renderAndWaitForSessionCount(renderHarness, getSessionsState, 0);
 		const [, , groupMetadata] = getSessionsState();
 		expect(groupMetadata).toEqual(GROUP_METADATA);
 	});
@@ -307,12 +273,7 @@ describe("useSessions", () => {
 			return "";
 		});
 
-		renderHarness();
-
-		await waitFor(() => {
-			const [items] = getSessionsState();
-			expect(items).toEqual([]);
-		});
+		await renderAndWaitForSessionCount(renderHarness, getSessionsState, 0);
 		const { logger } = require("@util/api/logger");
 		expect(logger.error).toHaveBeenCalledWith(
 			expect.stringContaining("Error reading bundle.json"),
@@ -364,12 +325,7 @@ describe("useSessions", () => {
 			return "";
 		});
 
-		renderHarness();
-
-		await waitFor(() => {
-			const [items] = getSessionsState();
-			expect(items).toEqual([]);
-		});
+		await renderAndWaitForSessionCount(renderHarness, getSessionsState, 0);
 	});
 
 	it("logs and continues when a year file read throws", async () => {
@@ -393,12 +349,7 @@ describe("useSessions", () => {
 			return "";
 		});
 
-		renderHarness();
-
-		await waitFor(() => {
-			const [items] = getSessionsState();
-			expect(items).toEqual([]);
-		});
+		await renderAndWaitForSessionCount(renderHarness, getSessionsState, 0);
 		const { logger } = require("@util/api/logger");
 		expect(logger.error).toHaveBeenCalled();
 	});

@@ -1,4 +1,4 @@
-import { render } from "@testing-library/react";
+import { render, waitFor } from "@testing-library/react";
 
 jest.mock("@components/Toolbar", () => ({
 	registerToolbar: jest.fn(),
@@ -74,6 +74,19 @@ export function mockSessionsStorageFiles(
 	asMock(storage.readFile).mockImplementation(
 		async (path: string) => fileContents[path] ?? "",
 	);
+}
+
+export function renderAndWaitForSessionCount(
+	renderHarness: () => unknown,
+	getSessionsState: () => unknown,
+	expectedCount: number,
+) {
+	renderHarness();
+	return waitFor(() => {
+		const state = getSessionsState();
+		const sessions = Array.isArray(state) ? state[0] : undefined;
+		expect(sessions).toHaveLength(expectedCount);
+	});
 }
 
 export function createSessionsTestHarness(

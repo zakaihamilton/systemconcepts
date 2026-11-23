@@ -7,6 +7,7 @@ import { SessionsStore, useSessions } from "../sessions";
 import {
 	createSessionsTestHarness,
 	mockSessionsStorageFiles,
+	renderAndWaitForSessionCount,
 	sessionFixture,
 } from "../sessionsTestSetup";
 
@@ -63,12 +64,7 @@ describe("useSessions personal metadata", () => {
 			file("local/personal/american/2024.json", "2024.json"),
 		]);
 
-		renderHarness();
-
-		await waitFor(() => {
-			const [items] = getSessionsState();
-			expect(items).toHaveLength(1);
-		});
+		await renderAndWaitForSessionCount(renderHarness, getSessionsState, 1);
 
 		expect(getSessionsState()[0][0].position).toBe(42);
 	});
@@ -86,12 +82,7 @@ describe("useSessions personal metadata", () => {
 			file("local/personal/broken.json", "broken.json"),
 		]);
 
-		renderHarness();
-
-		await waitFor(() => {
-			const [items] = getSessionsState();
-			expect(items).toEqual([]);
-		});
+		await renderAndWaitForSessionCount(renderHarness, getSessionsState, 0);
 	});
 
 	it("loads personal metadata from merged group files and bundle.json", async () => {
@@ -162,12 +153,7 @@ describe("useSessions personal metadata", () => {
 			file("local/personal/unknown/deep/nested.json", "nested.json"),
 		]);
 
-		renderHarness();
-
-		await waitFor(() => {
-			const [items] = getSessionsState();
-			expect(items).toHaveLength(2);
-		});
+		await renderAndWaitForSessionCount(renderHarness, getSessionsState, 2);
 		const [items] = getSessionsState();
 		const merged = items.find((item: any) => item.group === "american");
 		const bundled = items.find((item: any) => item.group === "bundledgroup");
@@ -189,12 +175,7 @@ describe("useSessions personal metadata", () => {
 			new Error("personal list fail"),
 		);
 
-		renderHarness();
-
-		await waitFor(() => {
-			const [items] = getSessionsState();
-			expect(items).toEqual([]);
-		});
+		await renderAndWaitForSessionCount(renderHarness, getSessionsState, 0);
 		const { logger } = require("@util/api/logger");
 		expect(logger.error).toHaveBeenCalledWith(
 			expect.stringContaining("Error loading personal metadata"),
