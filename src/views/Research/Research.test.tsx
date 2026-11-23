@@ -8,7 +8,9 @@ import Cookies from "js-cookie";
 import Research from "./";
 import { mockResearchListFactory } from "./researchNavigationTestSetup";
 import {
+	createOutlineResearchResults,
 	createResearchTranslations,
+	createSourceFilteredResearchResults,
 	mockResearchIndex,
 	mockResearchTags,
 	setupResearchViewTest,
@@ -35,6 +37,16 @@ describe("Research View", () => {
 	});
 
 	const renderResearch = () => renderResearchView(Research, mockSize);
+
+	const openSearchSuggestions = () => {
+		mockResearchState.hasSearched = false;
+		const view = renderResearch();
+		const searchInput = screen.getByPlaceholderText("Search...");
+		fireEvent.focus(searchInput);
+		fireEvent.change(searchInput, { target: { value: "grace" } });
+		rerenderResearchView(view, Research, mockSize);
+		return { view, searchInput };
+	};
 
 	it("renders search field and virtual list", () => {
 		const { getByTestId } = renderResearch();
@@ -67,10 +79,7 @@ describe("Research View", () => {
 	});
 
 	it("opens a results outline from the article number indicator", async () => {
-		mockResearchState.results = [
-			{ docId: "1", tag: { title: "Grace" }, matches: [{ index: 0 }] },
-			{ docId: "2", tag: { title: "Hope" }, matches: [{ index: 1 }] },
-		];
+		mockResearchState.results = createOutlineResearchResults();
 		renderResearch();
 
 		const indicator = await screen.findByRole("button", {
@@ -160,12 +169,7 @@ describe("Research View", () => {
 	});
 
 	it("shows title suggestions after entering a query", () => {
-		mockResearchState.hasSearched = false;
-		const view = renderResearch();
-		const searchInput = screen.getByPlaceholderText("Search...");
-		fireEvent.focus(searchInput);
-		fireEvent.change(searchInput, { target: { value: "grace" } });
-		rerenderResearchView(view, Research, mockSize);
+		const { searchInput } = openSearchSuggestions();
 		expect(screen.getByRole("listbox")).toHaveTextContent("Grace in practice");
 		expect(searchInput).toHaveAttribute("role", "combobox");
 		expect(searchInput).toHaveAttribute(
@@ -182,12 +186,7 @@ describe("Research View", () => {
 	});
 
 	it("closes suggestions when searching with Enter", () => {
-		mockResearchState.hasSearched = false;
-		const view = renderResearch();
-		const searchInput = screen.getByPlaceholderText("Search...");
-		fireEvent.focus(searchInput);
-		fireEvent.change(searchInput, { target: { value: "grace" } });
-		rerenderResearchView(view, Research, mockSize);
+		const { view, searchInput } = openSearchSuggestions();
 		expect(screen.getByRole("listbox")).toBeInTheDocument();
 
 		fireEvent.keyDown(searchInput, { key: "Enter" });
@@ -196,12 +195,7 @@ describe("Research View", () => {
 	});
 
 	it("closes suggestions when clicking outside the search field", () => {
-		mockResearchState.hasSearched = false;
-		const view = renderResearch();
-		const searchInput = screen.getByPlaceholderText("Search...");
-		fireEvent.focus(searchInput);
-		fireEvent.change(searchInput, { target: { value: "grace" } });
-		rerenderResearchView(view, Research, mockSize);
+		const { view } = openSearchSuggestions();
 		expect(screen.getByRole("listbox")).toBeInTheDocument();
 
 		fireEvent.mouseDown(screen.getByRole("button", { name: "Filters" }));
@@ -210,12 +204,7 @@ describe("Research View", () => {
 	});
 
 	it("keeps suggestions open when interacting with a suggestion", () => {
-		mockResearchState.hasSearched = false;
-		const view = renderResearch();
-		const searchInput = screen.getByPlaceholderText("Search...");
-		fireEvent.focus(searchInput);
-		fireEvent.change(searchInput, { target: { value: "grace" } });
-		rerenderResearchView(view, Research, mockSize);
+		openSearchSuggestions();
 		const suggestion = screen.getByRole("option", {
 			name: /Grace in practice/,
 		});
@@ -393,12 +382,7 @@ describe("Research View", () => {
 	});
 
 	it("navigates suggestions with ArrowUp and Escape", () => {
-		mockResearchState.hasSearched = false;
-		const view = renderResearch();
-		const searchInput = screen.getByPlaceholderText("Search...");
-		fireEvent.focus(searchInput);
-		fireEvent.change(searchInput, { target: { value: "grace" } });
-		rerenderResearchView(view, Research, mockSize);
+		const { view, searchInput } = openSearchSuggestions();
 		fireEvent.keyDown(searchInput, { key: "ArrowUp" });
 		expect(
 			screen.getByRole("option", { name: /Grace in practice/ }),
@@ -409,20 +393,7 @@ describe("Research View", () => {
 	});
 
 	it("filters results by Sessions source tab", () => {
-		mockResearchState.results = [
-			{
-				docId: "1",
-				tag: { title: "Article" },
-				matches: [{ index: 0 }],
-				isSession: false,
-			},
-			{
-				docId: "2",
-				tag: { title: "Session" },
-				matches: [{ index: 0 }],
-				isSession: true,
-			},
-		];
+		mockResearchState.results = createSourceFilteredResearchResults();
 		mockResearchState.source = "sessions";
 		renderResearch();
 		expect(screen.getByTestId("virtual-list")).toBeInTheDocument();
@@ -430,30 +401,14 @@ describe("Research View", () => {
 	});
 
 	it("filters results by Articles source tab", () => {
-		mockResearchState.results = [
-			{
-				docId: "1",
-				tag: { title: "Article" },
-				matches: [{ index: 0 }],
-				isSession: false,
-			},
-			{
-				docId: "2",
-				tag: { title: "Session" },
-				matches: [{ index: 0 }],
-				isSession: true,
-			},
-		];
+		mockResearchState.results = createSourceFilteredResearchResults();
 		mockResearchState.source = "articles";
 		renderResearch();
 		expect(screen.getByText(/1 result/i)).toBeInTheDocument();
 	});
 
 	it("selects a results outline item", async () => {
-		mockResearchState.results = [
-			{ docId: "1", tag: { title: "Grace" }, matches: [{ index: 0 }] },
-			{ docId: "2", tag: { title: "Hope" }, matches: [{ index: 1 }] },
-		];
+		mockResearchState.results = createOutlineResearchResults();
 		renderResearch();
 		const indicator = await screen.findByRole("button", {
 			name: /Article 1 \/ 1/,
