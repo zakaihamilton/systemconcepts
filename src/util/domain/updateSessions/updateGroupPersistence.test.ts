@@ -12,6 +12,7 @@ import { updateGroupProcess } from "./updateGroup";
 import {
 	emptyYearMetadata,
 	file,
+	mockListingResponses,
 	mockYearListing,
 	setupUpdateGroupTest,
 } from "./updateGroupTestSetup";
@@ -350,23 +351,18 @@ describe("updateGroupProcess persistence and migration", () => {
 
 	it("records merged new session metadata when sessions are added", async () => {
 		mockStoredGroupSessions("test.json", [], readMetadataFixture);
-		asMock(getListing).mockImplementation(async (path: any) => {
-			if (path === "wasabi/test") {
-				return [{ name: "2024", type: "dir", path: "wasabi/test/2024" }];
-			}
-			if (path === "wasabi/test/2024") {
-				return [
-					file(
-						"2024-05-05 Test Session.mp4",
-						"wasabi/test/2024/2024-05-05 Test Session.mp4",
-					),
-					file(
-						"2024-05-05 Test Session.png",
-						"/aws/sessions/test/2024/2024-05-05 Test Session.png",
-					),
-				];
-			}
-			return [];
+		mockListingResponses({
+			"wasabi/test": [{ name: "2024", type: "dir", path: "wasabi/test/2024" }],
+			"wasabi/test/2024": [
+				file(
+					"2024-05-05 Test Session.mp4",
+					"wasabi/test/2024/2024-05-05 Test Session.mp4",
+				),
+				file(
+					"2024-05-05 Test Session.png",
+					"/aws/sessions/test/2024/2024-05-05 Test Session.png",
+				),
+			],
 		});
 		asMock(fetchSessionMetadata).mockResolvedValue({
 			items: [
