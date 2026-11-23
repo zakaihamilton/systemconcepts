@@ -1,4 +1,5 @@
 import { MainStore } from "@components/Main";
+import { fireEvent, screen } from "@testing-library/react";
 import { useTranslations } from "@util/domain/translations";
 import Cookies from "js-cookie";
 
@@ -15,6 +16,10 @@ export function setupAuthViewTest({
 	asMock(useTranslations).mockReturnValue(translations);
 	asMock(MainStore.useState).mockReturnValue({ direction: "ltr" });
 	asMock(Cookies.get).mockReturnValue(cookieId);
+}
+
+export function changeAuthInput(testId: string, value: string) {
+	fireEvent.change(screen.getByTestId(testId), { target: { value } });
 }
 
 export function mockSignedInCookies() {
