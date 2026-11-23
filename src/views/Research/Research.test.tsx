@@ -1,13 +1,14 @@
 import "./researchTestSetup";
 import "./researchNavigationTestSetup";
 import { ContentSize } from "@components/Page/Content";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { useDeviceType } from "@util/browser/styles";
 import { useSessions } from "@util/domain/sessions";
 import { useTranslations } from "@util/domain/translations";
 import Cookies from "js-cookie";
 import Research from "./";
 import { setupResearchViewTest } from "./researchTestSetup";
+import { renderResearchView } from "./researchViewTestUtils";
 
 let mockResearchState: any;
 let mockLibraryState: any;
@@ -33,12 +34,7 @@ describe("Research View", () => {
 		mockLibraryState = state.libraryState;
 	});
 
-	const renderResearch = () =>
-		render(
-			<ContentSize.Provider value={mockSize}>
-				<Research />
-			</ContentSize.Provider>,
-		);
+	const renderResearch = () => renderResearchView(Research, mockSize);
 
 	it("renders search field and virtual list", () => {
 		const { getByTestId } = renderResearch();

@@ -1,17 +1,12 @@
 import "./researchTestSetup";
 import "./researchMinimalTestSetup";
 import { ContentSize } from "@components/Page/Content";
-import {
-	act,
-	fireEvent,
-	render,
-	screen,
-	waitFor,
-} from "@testing-library/react";
+import { act, fireEvent, screen, waitFor } from "@testing-library/react";
 import { useTranslations } from "@util/domain/translations";
 import Cookies from "js-cookie";
 import Research from "./";
 import { setupResearchViewTest } from "./researchTestSetup";
+import { renderResearchView } from "./researchViewTestUtils";
 
 let mockResearchState: any;
 
@@ -24,12 +19,7 @@ describe("Research View Suggestions and Filter Interactions", () => {
 		}).researchState;
 	});
 
-	const renderResearch = () =>
-		render(
-			<ContentSize.Provider value={mockSize}>
-				<Research />
-			</ContentSize.Provider>,
-		);
+	const renderResearch = () => renderResearchView(Research, mockSize);
 
 	describe("suggestions and filter chips", () => {
 		it("adds a filter from a suggestion without duplicating", async () => {

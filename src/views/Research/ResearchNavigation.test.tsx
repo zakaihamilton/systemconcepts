@@ -1,19 +1,14 @@
 import "./researchTestSetup";
 import "./researchNavigationTestSetup";
 import { ContentSize } from "@components/Page/Content";
-import {
-	act,
-	fireEvent,
-	render,
-	screen,
-	waitFor,
-} from "@testing-library/react";
+import { act, fireEvent, screen, waitFor } from "@testing-library/react";
 import { useDeviceType } from "@util/browser/styles";
 import { useTranslations } from "@util/domain/translations";
 import { setHash, setPath, usePathItems } from "@util/domain/views";
 import Cookies from "js-cookie";
 import Research from "./";
 import { setupResearchViewTest } from "./researchTestSetup";
+import { renderResearchView } from "./researchViewTestUtils";
 
 let mockResearchState: any;
 let mockLibraryState: any;
@@ -46,12 +41,7 @@ describe("Research View Toolbar, Print, and Navigation", () => {
 		mockLibraryState = state.libraryState;
 	});
 
-	const renderResearch = () =>
-		render(
-			<ContentSize.Provider value={mockSize}>
-				<Research />
-			</ContentSize.Provider>,
-		);
+	const renderResearch = () => renderResearchView(Research, mockSize);
 
 	describe("toolbar, jump, and print", () => {
 		beforeEach(() => {

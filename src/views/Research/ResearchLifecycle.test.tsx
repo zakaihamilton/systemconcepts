@@ -1,13 +1,7 @@
 import "./researchTestSetup";
 import "./researchMinimalTestSetup";
 import { ContentSize } from "@components/Page/Content";
-import {
-	act,
-	fireEvent,
-	render,
-	screen,
-	waitFor,
-} from "@testing-library/react";
+import { act, fireEvent, screen, waitFor } from "@testing-library/react";
 import { useSessions } from "@util/domain/sessions";
 import { useTranslations } from "@util/domain/translations";
 import Cookies from "js-cookie";
@@ -16,6 +10,7 @@ import {
 	setResearchTestLibraryUpdateCounter,
 	setupResearchViewTest,
 } from "./researchTestSetup";
+import { renderResearchView } from "./researchViewTestUtils";
 
 let mockResearchState: any;
 
@@ -28,12 +23,7 @@ describe("Research View Lifecycle and Search Progress", () => {
 		}).researchState;
 	});
 
-	const renderResearch = () =>
-		render(
-			<ContentSize.Provider value={mockSize}>
-				<Research />
-			</ContentSize.Provider>,
-		);
+	const renderResearch = () => renderResearchView(Research, mockSize);
 
 	describe("index lifecycle and sync", () => {
 		it("auto-builds the index when no index files exist", async () => {
