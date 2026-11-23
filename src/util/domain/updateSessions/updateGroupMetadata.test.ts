@@ -15,8 +15,10 @@ import {
 	mockListingResponses,
 	mockYearCacheAndSessions,
 	mockYearListing,
+	sessionMetadataFiles,
 	setupUpdateGroupTest,
 	yearListingFiles,
+	yearMetadata,
 } from "./updateGroupTestSetup";
 import { updateYearSync } from "./utils";
 
@@ -74,30 +76,16 @@ describe("updateGroupProcess metadata resolution", () => {
 	});
 
 	it("falls back to per-file tags/duration/summary when zip metadata is empty", async () => {
-		asMock(fetchSessionMetadata).mockResolvedValue({
-			items: [
-				file(
-					"2024-05-05 Test Session.tags",
-					"/aws/sessions/test/2024/2024-05-05 Test Session.tags",
-				),
-				file(
-					"2024-05-05 Test Session.duration",
-					"/aws/sessions/test/2024/2024-05-05 Test Session.duration",
-				),
-				file(
-					"2024-05-05 Test Session.md",
-					"/aws/sessions/test/2024/2024-05-05 Test Session.md",
-				),
-				file(
-					"2024-05-05 Test Session.txt",
-					"/aws/sessions/test/2024/2024-05-05 Test Session.txt",
-				),
-			],
-			tags: {},
-			durations: {},
-			summaries: {},
-			transcriptions: {},
-		});
+		asMock(fetchSessionMetadata).mockResolvedValue(
+			yearMetadata({
+				items: sessionMetadataFiles("2024", "2024-05-05 Test Session", [
+					"tags",
+					"duration",
+					"md",
+					"txt",
+				]),
+			}),
+		);
 		asMock(storage.readFile).mockImplementation(async (path: any) => {
 			if (path.endsWith(".tags"))
 				return JSON.stringify({ tags: ["from-file"] });
@@ -117,26 +105,15 @@ describe("updateGroupProcess metadata resolution", () => {
 	});
 
 	it("warns when per-file metadata reads fail", async () => {
-		asMock(fetchSessionMetadata).mockResolvedValue({
-			items: [
-				file(
-					"2024-05-05 Test Session.tags",
-					"/aws/sessions/test/2024/2024-05-05 Test Session.tags",
-				),
-				file(
-					"2024-05-05 Test Session.duration",
-					"/aws/sessions/test/2024/2024-05-05 Test Session.duration",
-				),
-				file(
-					"2024-05-05 Test Session.md",
-					"/aws/sessions/test/2024/2024-05-05 Test Session.md",
-				),
-			],
-			tags: {},
-			durations: {},
-			summaries: {},
-			transcriptions: {},
-		});
+		asMock(fetchSessionMetadata).mockResolvedValue(
+			yearMetadata({
+				items: sessionMetadataFiles("2024", "2024-05-05 Test Session", [
+					"tags",
+					"duration",
+					"md",
+				]),
+			}),
+		);
 		asMock(storage.readFile).mockRejectedValue(new Error("meta read fail"));
 
 		await updateGroupProcess("test", true, true);
@@ -162,13 +139,11 @@ describe("updateGroupProcess metadata resolution", () => {
 				"wasabi/test/2024/2024-05-05 Test Session_1920x1080.mp4",
 			),
 		]);
-		asMock(fetchSessionMetadata).mockResolvedValue({
-			items: [],
-			tags: { "2024-05-05 Test Session": ["hd"] },
-			durations: {},
-			summaries: {},
-			transcriptions: {},
-		});
+		asMock(fetchSessionMetadata).mockResolvedValue(
+			yearMetadata({
+				tags: { "2024-05-05 Test Session": ["hd"] },
+			}),
+		);
 
 		await updateGroupProcess("test", true, false);
 
@@ -184,13 +159,12 @@ describe("updateGroupProcess metadata resolution", () => {
 				"wasabi/test/2024/2024-05-05 Test Session.mp4",
 			),
 		]);
-		asMock(fetchSessionMetadata).mockResolvedValue({
-			items: [],
-			tags: { "20240505testsession": ["normalized"] },
-			durations: { "2024-05-05 test session": 88 },
-			summaries: {},
-			transcriptions: {},
-		});
+		asMock(fetchSessionMetadata).mockResolvedValue(
+			yearMetadata({
+				tags: { "20240505testsession": ["normalized"] },
+				durations: { "2024-05-05 test session": 88 },
+			}),
+		);
 
 		await updateGroupProcess("test", true, false);
 
@@ -208,13 +182,7 @@ describe("updateGroupProcess metadata resolution", () => {
 				"wasabi/test/2024/2024-05-05 Test Session.mp4",
 			),
 		]);
-		asMock(fetchSessionMetadata).mockResolvedValue({
-			items: [],
-			tags: {},
-			durations: {},
-			summaries: {},
-			transcriptions: {},
-		});
+		asMock(fetchSessionMetadata).mockResolvedValue(yearMetadata());
 
 		await updateGroupProcess("test", true, false);
 
@@ -267,18 +235,13 @@ describe("updateGroupProcess metadata resolution", () => {
 	});
 
 	it("reads tags files that contain a raw JSON array", async () => {
-		asMock(fetchSessionMetadata).mockResolvedValue({
-			items: [
-				file(
-					"2024-05-05 Test Session.tags",
-					"/aws/sessions/test/2024/2024-05-05 Test Session.tags",
-				),
-			],
-			tags: {},
-			durations: {},
-			summaries: {},
-			transcriptions: {},
-		});
+		asMock(fetchSessionMetadata).mockResolvedValue(
+			yearMetadata({
+				items: sessionMetadataFiles("2024", "2024-05-05 Test Session", [
+					"tags",
+				]),
+			}),
+		);
 		asMock(storage.readFile).mockImplementation(async (path: any) => {
 			if (path.endsWith(".tags")) return JSON.stringify(["raw-array-tag"]);
 			return "";
