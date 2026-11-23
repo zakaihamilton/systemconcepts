@@ -10,6 +10,7 @@ import {
 } from "@testing-library/react";
 import { useSessions } from "@util/domain/sessions";
 import { useTranslations } from "@util/domain/translations";
+import Cookies from "js-cookie";
 import Research from "./";
 import {
 	setResearchTestLibraryUpdateCounter,
@@ -22,7 +23,9 @@ describe("Research View Lifecycle and Search Progress", () => {
 	const mockSize = { width: 800, height: 600, emPixels: 16 };
 
 	beforeEach(() => {
-		mockResearchState = setupResearchViewTest().researchState;
+		mockResearchState = setupResearchViewTest({
+			cookies: Cookies,
+		}).researchState;
 	});
 
 	const renderResearch = () =>

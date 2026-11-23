@@ -5,6 +5,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { useDeviceType } from "@util/browser/styles";
 import { useSessions } from "@util/domain/sessions";
 import { useTranslations } from "@util/domain/translations";
+import Cookies from "js-cookie";
 import Research from "./";
 import { setupResearchViewTest } from "./researchTestSetup";
 
@@ -27,7 +28,7 @@ describe("Research View", () => {
 	const mockSize = { width: 800, height: 600, emPixels: 16 };
 
 	beforeEach(() => {
-		const state = setupResearchViewTest();
+		const state = setupResearchViewTest({ cookies: Cookies });
 		mockResearchState = state.researchState;
 		mockLibraryState = state.libraryState;
 	});

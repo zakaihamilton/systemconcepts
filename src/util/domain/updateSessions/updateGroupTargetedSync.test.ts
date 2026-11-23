@@ -11,7 +11,11 @@ import {
 } from "./metadata";
 import { fetchSessionMetadata } from "./sessionMetadataClient";
 import { updateGroupProcess } from "./updateGroup";
-import { file, mockYearListing } from "./updateGroupTestSetup";
+import {
+	emptyYearMetadata,
+	file,
+	mockYearListing,
+} from "./updateGroupTestSetup";
 import { getListing, updateYearSync } from "./utils";
 
 describe("updateGroupProcess targeted and recent-days sync", () => {

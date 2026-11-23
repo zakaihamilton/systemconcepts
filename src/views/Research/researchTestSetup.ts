@@ -1,4 +1,5 @@
 type ResearchSetupOptions = {
+	cookies: typeof import("js-cookie").default;
 	resetAdditionalState?: () => void;
 };
 
@@ -129,7 +130,6 @@ export function setupResearchViewTest(options: ResearchSetupOptions = {}) {
 	const { useDeviceType } = jest.requireMock("@util/browser/styles");
 	const { useSessions } = jest.requireMock("@util/domain/sessions");
 	const { useTranslations } = jest.requireMock("@util/domain/translations");
-	const Cookies = jest.requireMock("js-cookie").default;
 	jest.clearAllMocks();
 	options.resetAdditionalState?.();
 	const { runResearchSearch } = require("./runResearchSearch");
@@ -153,6 +153,6 @@ export function setupResearchViewTest(options: ResearchSetupOptions = {}) {
 		[],
 	]);
 	asMock(useDeviceType).mockReturnValue("desktop");
-	asMock(Cookies.get).mockReturnValue("admin");
+	asMock(options.cookies.get).mockReturnValue("admin");
 	return { researchState, libraryState };
 }

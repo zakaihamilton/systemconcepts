@@ -9,6 +9,7 @@ import {
 	waitFor,
 } from "@testing-library/react";
 import { useTranslations } from "@util/domain/translations";
+import Cookies from "js-cookie";
 import Research from "./";
 import { setupResearchViewTest } from "./researchTestSetup";
 
@@ -18,7 +19,9 @@ describe("Research View Suggestions and Filter Interactions", () => {
 	const mockSize = { width: 800, height: 600, emPixels: 16 };
 
 	beforeEach(() => {
-		mockResearchState = setupResearchViewTest().researchState;
+		mockResearchState = setupResearchViewTest({
+			cookies: Cookies,
+		}).researchState;
 	});
 
 	const renderResearch = () =>

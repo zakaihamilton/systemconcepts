@@ -36,6 +36,7 @@ describe("Research View Toolbar, Print, and Navigation", () => {
 
 	beforeEach(() => {
 		const state = setupResearchViewTest({
+			cookies: Cookies,
 			resetAdditionalState: () => {
 				latestListProps = null;
 			},
