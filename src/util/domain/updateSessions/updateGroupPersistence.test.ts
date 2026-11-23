@@ -1,4 +1,3 @@
-import { file, setupUpdateGroupTest } from "./updateGroupTestSetup";
 import { writeCompressedFile } from "@sync/bundle";
 import { getFileInfo } from "@sync/hash";
 import { updateManifestEntry } from "@sync/manifest";
@@ -7,9 +6,9 @@ import { UpdateSessionsStore } from "@sync/syncState";
 import { logger } from "@util/api/logger";
 import storage from "@util/storage/storage";
 import { getCombinedYearFingerprint } from "./fingerprints";
-
 import { fetchSessionMetadata } from "./sessionMetadataClient";
 import { updateGroupProcess } from "./updateGroup";
+import { file, setupUpdateGroupTest } from "./updateGroupTestSetup";
 import { getListing } from "./utils";
 
 describe("updateGroupProcess persistence and migration", () => {

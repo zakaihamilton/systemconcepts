@@ -13,6 +13,53 @@ import { updateGroupProcess } from "./updateGroup";
 import { file } from "./updateGroupTestSetup";
 import { getListing, updateYearSync } from "./utils";
 
+jest.mock("@sync/bundle", () => ({
+	writeCompressedFile: jest.fn(),
+}));
+jest.mock("@sync/hash", () => ({
+	getFileInfo: jest.fn(),
+}));
+jest.mock("@sync/manifest", () => ({
+	updateManifestEntry: jest.fn(),
+}));
+jest.mock("@sync/sync", () => ({
+	addSyncLog: jest.fn(),
+}));
+jest.mock("@util/api/logger", () => ({
+	logger: {
+		debug: jest.fn(),
+		error: jest.fn(),
+		info: jest.fn(),
+		warn: jest.fn(),
+	},
+}));
+jest.mock("@util/storage/storage", () => ({
+	createFolderPath: jest.fn(),
+	deleteFile: jest.fn(),
+	exists: jest.fn(),
+	readFile: jest.fn(),
+	writeFile: jest.fn(),
+}));
+jest.mock("./cleanup", () => ({
+	cleanupBundledGroup: jest.fn(),
+	cleanupMergedGroup: jest.fn(),
+}));
+jest.mock("./metadata", () => ({
+	loadDurations: jest.fn(),
+	loadSummaries: jest.fn(),
+	loadTags: jest.fn(),
+	loadTranscriptions: jest.fn(),
+}));
+jest.mock("./sessionMetadataClient", () => ({
+	fetchSessionMetadata: jest.fn(),
+}));
+jest.mock("./utils", () => ({
+	getListing: jest.fn(),
+	updateBundleFile: jest.fn(),
+	updateYearSync: jest.fn(),
+	yieldToMain: jest.fn(() => Promise.resolve()),
+}));
+
 describe("updateGroupProcess targeted and recent-days sync", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
