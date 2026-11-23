@@ -11,6 +11,7 @@ import {
 	loadTags,
 	loadTranscriptions,
 } from "./metadata";
+import { file } from "./updateGroupTestSetup";
 import { fetchSessionMetadata } from "./sessionMetadataClient";
 import { updateGroupProcess } from "./updateGroup";
 import { getListing, updateYearSync } from "./utils";
@@ -62,9 +63,6 @@ jest.mock("./utils", () => ({
 	yieldToMain: jest.fn(() => Promise.resolve()),
 }));
 
-function file(name: any, path: any) {
-	return { id: path, name, type: "file" as const, path };
-}
 
 describe("updateGroupProcess targeted and recent-days sync", () => {
 	beforeEach(() => {
