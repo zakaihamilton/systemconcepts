@@ -14,10 +14,10 @@ export function setupUpdateGroupTest() {
 	const { fetchSessionMetadata } = require("./sessionMetadataClient");
 	const { getListing, updateYearSync } = require("./utils");
 	jest.clearAllMocks();
-	UpdateSessionsStore.update((s) => {
+	UpdateSessionsStore.update((s: any) => {
 		s.status = [];
 	});
-	SyncActiveStore.update((s) => {
+	SyncActiveStore.update((s: any) => {
 		s.needsSessionReload = false;
 	});
 
