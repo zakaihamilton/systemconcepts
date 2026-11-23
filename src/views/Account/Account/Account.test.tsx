@@ -8,6 +8,7 @@ import { useTranslations } from "@util/domain/translations";
 import { setHash, setPath } from "@util/domain/views";
 import storage from "@util/storage/storage";
 import Cookies from "js-cookie";
+import { mockSignedInCookies, setupAuthViewTest } from "../../authTestSetup";
 import Account from "./index";
 
 jest.mock("js-cookie");
@@ -52,10 +53,7 @@ describe("Account View", () => {
 	};
 
 	beforeEach(() => {
-		jest.clearAllMocks();
-		asMock(useTranslations).mockReturnValue(mockTranslations);
-		asMock(MainStore.useState).mockReturnValue({ direction: "ltr" });
-		asMock(Cookies.get).mockReturnValue(null);
+		setupAuthViewTest({ translations: mockTranslations, cookieId: null });
 		Cookies.set = jest.fn();
 		asMock(fetchJSON).mockResolvedValue([]);
 	});
@@ -68,11 +66,7 @@ describe("Account View", () => {
 	});
 
 	it("renders signed in state when cookies are present", async () => {
-		asMock(Cookies.get).mockImplementation((key: any) => {
-			if (key === "id") return "testuser";
-			if (key === "hash") return "testhash";
-			return null;
-		});
+		mockSignedInCookies();
 
 		render(<Account />);
 		expect(await screen.findByText("Signed In")).toBeInTheDocument();
@@ -121,11 +115,7 @@ describe("Account View", () => {
 	});
 
 	it("signs out and clears cookies", async () => {
-		asMock(Cookies.get).mockImplementation((key: any) => {
-			if (key === "id") return "testuser";
-			if (key === "hash") return "testhash";
-			return null;
-		});
+		mockSignedInCookies();
 		asMock(fetchJSON).mockResolvedValue([]);
 		render(<Account />);
 		expect(await screen.findByText("Signed In")).toBeInTheDocument();
@@ -167,11 +157,7 @@ describe("Account View", () => {
 	});
 
 	it("clears session store and bundle cache on sign out", async () => {
-		asMock(Cookies.get).mockImplementation((key: any) => {
-			if (key === "id") return "testuser";
-			if (key === "hash") return "testhash";
-			return null;
-		});
+		mockSignedInCookies();
 		asMock(fetchJSON).mockResolvedValue([]);
 
 		render(<Account />);
