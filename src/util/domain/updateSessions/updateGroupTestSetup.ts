@@ -333,7 +333,7 @@ type YearFingerprintItem = Parameters<
 
 export function mockUnchangedYearCache(
 	year: string,
-	yearItems: YearFingerprintItem[],
+	yearItems: Array<TestListingItem & YearFingerprintItem>,
 	sessions: unknown[],
 	options: Omit<YearCacheFixtureOptions, "cache"> = {},
 ) {
