@@ -21,12 +21,13 @@ import {
 	fingerprintMetadataFiles,
 	metadataListingFiles,
 	mockCachedYearSession,
+	mockListingResponses,
 	mockYearCacheAndSessions,
 	mockYearListing,
 	setupUpdateGroupTest,
 	yearListingFiles,
 } from "./updateGroupTestSetup";
-import { getListing, updateYearSync } from "./utils";
+import { updateYearSync } from "./utils";
 
 function setupUnchangedYearCache(
 	sessionTitle: string,
@@ -339,22 +340,15 @@ describe("updateGroupProcess caching, incremental refresh, and targeted sync", (
 	});
 
 	it("fetches remote metadata when metadata fingerprint changes", async () => {
-		asMock(getListing).mockImplementation(async (path: any) => {
-			if (path === "wasabi/test") {
-				return [{ name: "2024", type: "dir", path: "wasabi/test/2024" }];
-			}
-			if (path === "wasabi/test/2024") {
-				return [
-					file(
-						"2024-05-05 Test Session.mp4",
-						"wasabi/test/2024/2024-05-05 Test Session.mp4",
-					),
-				];
-			}
-			if (path === "/aws/sessions/test") {
-				return [{ name: "2024.tags", size: 200, mtimeMs: 2 }];
-			}
-			return [];
+		mockListingResponses({
+			"wasabi/test": [{ name: "2024", type: "dir", path: "wasabi/test/2024" }],
+			"wasabi/test/2024": [
+				file(
+					"2024-05-05 Test Session.mp4",
+					"wasabi/test/2024/2024-05-05 Test Session.mp4",
+				),
+			],
+			"/aws/sessions/test": [{ name: "2024.tags", size: 200, mtimeMs: 2 }],
 		});
 
 		asMock(storage.readFile).mockImplementation(async (path: any) => {
