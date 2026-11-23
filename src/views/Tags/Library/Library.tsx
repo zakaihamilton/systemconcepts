@@ -29,7 +29,7 @@ import {
 
 registerToolbar("LibraryTags", 110);
 
-export const LibraryTagsStore = createStore({
+const LibraryTagsStore = createStore({
 	order: "asc",
 	offset: 0,
 	orderBy: "count",

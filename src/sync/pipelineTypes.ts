@@ -4,7 +4,7 @@ import type { Manifest, SyncConfig } from "./types";
 
 export type LocalFile = { path: string; fullPath: string };
 
-export type ManifestResult = {
+type ManifestResult = {
 	manifest: Manifest;
 	hasChanges: boolean;
 	complete?: boolean;

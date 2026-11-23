@@ -37,9 +37,6 @@ importers:
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
-      js-base64:
-        specifier: ^3.7.8
-        version: 3.7.8
       js-cookie:
         specifier: ^3.0.7
         version: 3.0.7
@@ -3383,9 +3380,6 @@ packages:
   jiti@2.7.0:
     resolution: {integrity: sha512-AC/7JofJvZGrrneWNaEnJeOLUx+JlGt7tNa0wZiRPT4MY1wmfKjt2+6O2p2uz2+skll8OZZmJMNqeke7kKbNgQ==}
     hasBin: true
-
-  js-base64@3.7.8:
-    resolution: {integrity: sha512-hNngCeKxIUQiEUN3GPJOkz4wF/YvdUdbNL9hsBcMQTkKzboD7T/q3OYOuuPZLUE6dBxSGpwhk5mwuDud7JVAow==}
 
   js-cookie@3.0.7:
     resolution: {integrity: sha512-z/wZZgDrkNV1eA0ULjM/F9/50Ya8fbzgKneSpoPsXSGd0KnpdtHfOZWK+GcwLk+EZbS4F9RBhU+K2RgzuDaItw==}
@@ -8435,8 +8429,6 @@ snapshots:
       - ts-node
 
   jiti@2.7.0: {}
-
-  js-base64@3.7.8: {}
 
   js-cookie@3.0.7: {}
 

@@ -7,7 +7,7 @@ export interface ResolvedLibraryRoute {
 	parentIds: string[];
 }
 
-export function getTagHierarchy(tag: any): string[] {
+function getTagHierarchy(tag: any): string[] {
 	const hierarchy = LibraryTagKeys.map((key) => tag[key])
 		.map((v) => (v ? String(v).trim() : null))
 		.filter(Boolean) as string[];

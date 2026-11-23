@@ -1,7 +1,7 @@
 export const DATABASE_NAME = "systemconcepts-local-files";
-export const DATABASE_VERSION = 2;
-export const FILE_STORE = "files";
-export const METADATA_STORE = "metadata";
+const DATABASE_VERSION = 2;
+const FILE_STORE = "files";
+const METADATA_STORE = "metadata";
 export const LEGACY_DATABASE_NAME = "systemconcepts-fs";
 export const LEGACY_ACTIVE_DATABASE_KEY = "local_active_database";
 
