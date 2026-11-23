@@ -8,10 +8,7 @@ import {
 	screen,
 	waitFor,
 } from "@testing-library/react";
-import { useDeviceType } from "@util/browser/styles";
-import { useSessions } from "@util/domain/sessions";
 import { useTranslations } from "@util/domain/translations";
-import Cookies from "js-cookie";
 import Research from "./";
 import { setupResearchViewTest } from "./researchTestSetup";
 
@@ -21,16 +18,7 @@ describe("Research View Suggestions and Filter Interactions", () => {
 	const mockSize = { width: 800, height: 600, emPixels: 16 };
 
 	beforeEach(() => {
-		setupResearchViewTest({
-			setResearchState: (state) => {
-				mockResearchState = state;
-			},
-			setLibraryState: () => {},
-			useTranslations,
-			useSessions,
-			useDeviceType,
-			cookies: Cookies,
-		});
+		mockResearchState = setupResearchViewTest().researchState;
 	});
 
 	const renderResearch = () =>

@@ -1,11 +1,5 @@
 type ResearchSetupOptions = {
-	setResearchState(state: unknown): void;
-	setLibraryState(state: unknown): void;
 	resetAdditionalState?: () => void;
-	useTranslations: typeof import("@util/domain/translations").useTranslations;
-	useSessions: typeof import("@util/domain/sessions").useSessions;
-	useDeviceType: typeof import("@util/browser/styles").useDeviceType;
-	cookies: typeof import("js-cookie").default;
 };
 
 const mockResearchTestState: {
@@ -131,7 +125,11 @@ function createResearchTranslations() {
 	};
 }
 
-export function setupResearchViewTest(options: ResearchSetupOptions) {
+export function setupResearchViewTest(options: ResearchSetupOptions = {}) {
+	const { useDeviceType } = jest.requireMock("@util/browser/styles");
+	const { useSessions } = jest.requireMock("@util/domain/sessions");
+	const { useTranslations } = jest.requireMock("@util/domain/translations");
+	const Cookies = jest.requireMock("js-cookie").default;
 	jest.clearAllMocks();
 	options.resetAdditionalState?.();
 	const { runResearchSearch } = require("./runResearchSearch");
@@ -148,14 +146,13 @@ export function setupResearchViewTest(options: ResearchSetupOptions) {
 	mockResearchTestState.researchState = researchState;
 	mockResearchTestState.libraryState = libraryState;
 	mockResearchTestState.libraryUpdateCounter = 0;
-	options.setResearchState(researchState);
-	options.setLibraryState(libraryState);
-	asMock(options.useTranslations).mockReturnValue(createResearchTranslations());
-	asMock(options.useSessions).mockReturnValue([
+	asMock(useTranslations).mockReturnValue(createResearchTranslations());
+	asMock(useSessions).mockReturnValue([
 		[{ name: "Grace in practice", group: "ai", year: "2024" }],
 		false,
 		[],
 	]);
-	asMock(options.useDeviceType).mockReturnValue("desktop");
-	asMock(options.cookies.get).mockReturnValue("admin");
+	asMock(useDeviceType).mockReturnValue("desktop");
+	asMock(Cookies.get).mockReturnValue("admin");
+	return { researchState, libraryState };
 }

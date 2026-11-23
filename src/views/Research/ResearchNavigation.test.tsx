@@ -8,8 +8,6 @@ import {
 	screen,
 	waitFor,
 } from "@testing-library/react";
-import { useDeviceType } from "@util/browser/styles";
-import { useSessions } from "@util/domain/sessions";
 import { useTranslations } from "@util/domain/translations";
 import { setHash, setPath, usePathItems } from "@util/domain/views";
 import Cookies from "js-cookie";
@@ -37,21 +35,13 @@ describe("Research View Toolbar, Print, and Navigation", () => {
 	const mockSize = { width: 800, height: 600, emPixels: 16 };
 
 	beforeEach(() => {
-		setupResearchViewTest({
-			setResearchState: (state) => {
-				mockResearchState = state;
-			},
-			setLibraryState: (state) => {
-				mockLibraryState = state;
-			},
+		const state = setupResearchViewTest({
 			resetAdditionalState: () => {
 				latestListProps = null;
 			},
-			useTranslations,
-			useSessions,
-			useDeviceType,
-			cookies: Cookies,
 		});
+		mockResearchState = state.researchState;
+		mockLibraryState = state.libraryState;
 	});
 
 	const renderResearch = () =>
