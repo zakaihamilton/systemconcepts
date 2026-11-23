@@ -57,6 +57,12 @@ describe("Account View", () => {
 		asMock(fetchJSON).mockResolvedValue([]);
 	});
 
+	const fillLoginCredentials = async (
+		user: ReturnType<typeof userEvent.setup>,
+	) => {
+		await fillLoginCredentials(user);
+	};
+
 	it("renders sign in form when not signed in", async () => {
 		render(<Account />);
 		expect(screen.getAllByText("Sign In").length).toBeGreaterThan(0);
@@ -76,8 +82,7 @@ describe("Account View", () => {
 		asMock(fetchJSON).mockResolvedValue({ role: "visitor" });
 		render(<Account />);
 
-		await user.type(screen.getByLabelText("ID"), "person@example.com");
-		await user.type(screen.getByLabelText("Password"), "password");
+		await fillLoginCredentials(user);
 		await user.click(screen.getByLabelText("Remember me"));
 		await user.click(screen.getByRole("button", { name: "Sign In" }));
 
@@ -105,8 +110,7 @@ describe("Account View", () => {
 		const user = userEvent.setup();
 		asMock(fetchJSON).mockResolvedValue({ err: "bad credentials" });
 		render(<Account />);
-		await user.type(screen.getByLabelText("ID"), "person@example.com");
-		await user.type(screen.getByLabelText("Password"), "password");
+		await fillLoginCredentials(user);
 		await user.click(screen.getByRole("button", { name: "Sign In" }));
 		await waitFor(() => {
 			expect(screen.getByText(/bad credentials/i)).toBeInTheDocument();
@@ -135,8 +139,7 @@ describe("Account View", () => {
 		const user = userEvent.setup();
 		asMock(fetchJSON).mockResolvedValue({ role: "user" });
 		render(<Account />);
-		await user.type(screen.getByLabelText("ID"), "person@example.com");
-		await user.type(screen.getByLabelText("Password"), "password");
+		await fillLoginCredentials(user);
 		await user.click(screen.getByRole("button", { name: "Sign In" }));
 		await waitFor(() => {
 			expect(setPath).toHaveBeenCalled();
@@ -147,8 +150,7 @@ describe("Account View", () => {
 		const user = userEvent.setup();
 		asMock(fetchJSON).mockResolvedValue({ role: "user" });
 		render(<Account redirect="sessions" />);
-		await user.type(screen.getByLabelText("ID"), "person@example.com");
-		await user.type(screen.getByLabelText("Password"), "password");
+		await fillLoginCredentials(user);
 		await user.click(screen.getByRole("button", { name: "Sign In" }));
 		await waitFor(() => {
 			expect(setHash).toHaveBeenCalledWith("sessions");
