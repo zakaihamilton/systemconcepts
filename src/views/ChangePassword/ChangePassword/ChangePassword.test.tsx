@@ -3,7 +3,11 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { fetchJSON } from "@util/api/fetch";
 import { setHash, setPath } from "@util/domain/views";
 import Cookies from "js-cookie";
-import { changeAuthInput, setupAuthViewTest } from "../../authTestSetup";
+import {
+	changeAuthInput,
+	expectLoginPostRequest,
+	setupAuthViewTest,
+} from "../../authTestSetup";
 import ChangePassword from "./index";
 
 jest.mock("@util/domain/translations");
@@ -16,6 +20,11 @@ jest.mock("@components/Main", () => ({
 	},
 }));
 jest.mock("js-cookie");
+
+const enterValidPasswordChange = () => {
+	changeAuthInput("input-oldpassword", "oldpassword123");
+	changeAuthInput("input-newpassword", "newpassword123");
+};
 jest.mock("@util/api/fetch");
 jest.mock("@util/domain/views");
 jest.mock(
@@ -78,18 +87,12 @@ describe("ChangePassword View", () => {
 		asMock(fetchJSON).mockResolvedValue({ hash: "newhash" });
 		render(<ChangePassword />);
 
-		changeAuthInput("input-oldpassword", "oldpassword123");
-		changeAuthInput("input-newpassword", "newpassword123");
+		enterValidPasswordChange();
 
 		fireEvent.click(screen.getByRole("button", { name: "Change Password" }));
 
 		await waitFor(() => {
-			expect(fetchJSON).toHaveBeenCalledWith(
-				"/api/login",
-				expect.objectContaining({
-					method: "POST",
-				}),
-			);
+			expectLoginPostRequest();
 		});
 	});
 
@@ -110,8 +113,7 @@ describe("ChangePassword View", () => {
 	it("submits on Enter and navigates home on success", async () => {
 		asMock(fetchJSON).mockResolvedValue({});
 		render(<ChangePassword />);
-		changeAuthInput("input-oldpassword", "oldpassword123");
-		changeAuthInput("input-newpassword", "newpassword123");
+		enterValidPasswordChange();
 		fireEvent.keyDown(screen.getByTestId("input-newpassword"), {
 			keyCode: 13,
 		});
@@ -124,8 +126,7 @@ describe("ChangePassword View", () => {
 	it("shows translated errors from the API response", async () => {
 		asMock(fetchJSON).mockResolvedValue({ err: "ACCESS_DENIED" });
 		render(<ChangePassword />);
-		changeAuthInput("input-oldpassword", "oldpassword123");
-		changeAuthInput("input-newpassword", "newpassword123");
+		enterValidPasswordChange();
 		fireEvent.click(screen.getByRole("button", { name: "Change Password" }));
 		await waitFor(() => {
 			expect(screen.getByText("Access denied")).toBeInTheDocument();
@@ -135,8 +136,7 @@ describe("ChangePassword View", () => {
 	it("shows a fallback error when the request rejects", async () => {
 		asMock(fetchJSON).mockRejectedValue("NETWORK_ERROR");
 		render(<ChangePassword />);
-		changeAuthInput("input-oldpassword", "oldpassword123");
-		changeAuthInput("input-newpassword", "newpassword123");
+		enterValidPasswordChange();
 		fireEvent.click(screen.getByRole("button", { name: "Change Password" }));
 		await waitFor(() => {
 			expect(screen.getByText("NETWORK_ERROR")).toBeInTheDocument();
