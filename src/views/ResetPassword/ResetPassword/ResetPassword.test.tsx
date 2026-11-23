@@ -4,6 +4,7 @@ import { fetchJSON } from "@util/api/fetch";
 import { useTranslations } from "@util/domain/translations";
 import { setHash, setPath } from "@util/domain/views";
 import Cookies from "js-cookie";
+import { setupAuthViewTest } from "../../authTestSetup";
 import ResetPassword from "./index";
 
 jest.mock("@util/domain/translations");
@@ -64,10 +65,7 @@ describe("ResetPassword View", () => {
 	};
 
 	beforeEach(() => {
-		jest.clearAllMocks();
-		asMock(useTranslations).mockReturnValue(mockTranslations);
-		asMock(MainStore.useState).mockReturnValue({ direction: "ltr" });
-		asMock(Cookies.get).mockReturnValue(null);
+		setupAuthViewTest({ translations: mockTranslations, cookieId: null });
 	});
 
 	it("renders reset password form when no code is provided", () => {
