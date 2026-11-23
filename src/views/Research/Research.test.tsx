@@ -1,3 +1,4 @@
+import "./researchTestSetup";
 import { ContentSize } from "@components/Page/Content";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { useDeviceType } from "@util/browser/styles";
@@ -9,53 +10,9 @@ import { setupResearchViewTest } from "./researchTestSetup";
 
 let mockResearchState: any;
 let mockLibraryState: any;
-let mockLibraryUpdateCounter = 0;
 const mockListScrollToItem = jest.fn();
 const mockListResetAfterIndex = jest.fn();
 
-jest.mock("@util/domain/translations");
-jest.mock("@views/ResearchStore/ResearchStore", () => ({
-	ResearchStore: {
-		useState: jest.fn(() => mockResearchState),
-		update: jest.fn((updater) => updater(mockResearchState)),
-	},
-}));
-jest.mock("@util/domain/sessions");
-jest.mock("@util/data/searchIndexBinary", () => ({
-	decodeBinaryIndex: jest.fn(),
-}));
-jest.mock("@util/domain/loadParagraphs", () => ({
-	loadParagraphsForFile: jest.fn(),
-}));
-jest.mock("@views/Library/Store", () => ({
-	LibraryStore: {
-		getRawState: jest.fn(() => mockLibraryState),
-		update: jest.fn((updater) => updater(mockLibraryState)),
-	},
-}));
-jest.mock("@sync/syncState", () => ({
-	SyncActiveStore: {
-		useState: jest.fn((selector) =>
-			selector
-				? selector({ libraryUpdateCounter: mockLibraryUpdateCounter })
-				: mockLibraryUpdateCounter,
-		),
-	},
-}));
-jest.mock("@util/browser/styles");
-jest.mock("@util/storage/storage", () => ({
-	exists: jest.fn().mockResolvedValue(false),
-	readFile: jest.fn().mockResolvedValue(""),
-	deleteFile: jest.fn().mockResolvedValue(undefined),
-}));
-jest.mock("@util/domain/views", () => ({
-	setHash: jest.fn(),
-	setPath: jest.fn(),
-	usePathItems: jest.fn().mockReturnValue([]),
-}));
-jest.mock("./runResearchSearch", () => ({
-	runResearchSearch: jest.fn(),
-}));
 jest.mock("@components/Virtualized/VariableSizeList", () => {
 	const React = require("react");
 	return React.forwardRef(function MockList(_props: any, ref: any) {
@@ -99,11 +56,6 @@ jest.mock(
 jest.mock("./SearchResultItem", () => () => (
 	<div data-testid="search-result-item" />
 ));
-jest.mock("@components/Toolbar", () => ({
-	registerToolbar: jest.fn(),
-	useToolbar: jest.fn(),
-}));
-jest.mock("@views/Library/Article", () => () => <div data-testid="article" />);
 jest.mock(
 	"@views/Library/Article/JumpDialog",
 	() => (props: any) =>
@@ -118,10 +70,6 @@ jest.mock(
 			</div>
 		) : null,
 );
-jest.mock("js-cookie");
-jest.mock("@util/api/logger", () => ({
-	logger: { error: jest.fn(), debug: jest.fn(), warn: jest.fn() },
-}));
 
 describe("Research View", () => {
 	const mockSize = { width: 800, height: 600, emPixels: 16 };
@@ -133,9 +81,6 @@ describe("Research View", () => {
 			},
 			setLibraryState: (state) => {
 				mockLibraryState = state;
-			},
-			resetAdditionalState: () => {
-				mockLibraryUpdateCounter = 0;
 			},
 			useTranslations,
 			useSessions,

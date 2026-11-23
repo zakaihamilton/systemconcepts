@@ -8,6 +8,80 @@ type ResearchSetupOptions = {
 	cookies: typeof import("js-cookie").default;
 };
 
+const mockResearchTestState: {
+	researchState: any;
+	libraryState: any;
+	libraryUpdateCounter: number;
+} = {
+	researchState: undefined,
+	libraryState: undefined,
+	libraryUpdateCounter: 0,
+};
+
+jest.mock("@util/domain/translations");
+jest.mock("@views/ResearchStore/ResearchStore", () => ({
+	ResearchStore: {
+		useState: jest.fn(() => mockResearchTestState.researchState),
+		update: jest.fn((updater) => updater(mockResearchTestState.researchState)),
+	},
+}));
+jest.mock("@util/domain/sessions");
+jest.mock("@util/data/searchIndexBinary", () => ({
+	decodeBinaryIndex: jest.fn(),
+}));
+jest.mock("@util/domain/loadParagraphs", () => ({
+	loadParagraphsForFile: jest.fn(),
+}));
+jest.mock("@views/Library/Store", () => ({
+	LibraryStore: {
+		getRawState: jest.fn(() => mockResearchTestState.libraryState),
+		update: jest.fn((updates) => updates(mockResearchTestState.libraryState)),
+	},
+}));
+jest.mock("@sync/syncState", () => ({
+	SyncActiveStore: {
+		useState: jest.fn((selector) => {
+			const state = {
+				libraryUpdateCounter: mockResearchTestState.libraryUpdateCounter,
+			};
+			return selector
+				? selector(state)
+				: mockResearchTestState.libraryUpdateCounter;
+		}),
+	},
+}));
+jest.mock("@util/browser/styles");
+jest.mock("@util/storage/storage", () => ({
+	exists: jest.fn().mockResolvedValue(false),
+	readFile: jest.fn().mockResolvedValue(""),
+	deleteFile: jest.fn().mockResolvedValue(undefined),
+}));
+jest.mock("@util/domain/views", () => ({
+	setHash: jest.fn(),
+	setPath: jest.fn(),
+	usePathItems: jest.fn().mockReturnValue([]),
+}));
+jest.mock("./runResearchSearch", () => ({
+	runResearchSearch: jest.fn(),
+}));
+jest.mock("@components/Toolbar", () => ({
+	registerToolbar: jest.fn(),
+	useToolbar: jest.fn(),
+}));
+jest.mock(
+	"@views/Library/Article",
+	() => () =>
+		require("react").createElement("div", { "data-testid": "article" }),
+);
+jest.mock("js-cookie");
+jest.mock("@util/api/logger", () => ({
+	logger: { error: jest.fn(), debug: jest.fn(), warn: jest.fn() },
+}));
+
+export function setResearchTestLibraryUpdateCounter(value: number) {
+	mockResearchTestState.libraryUpdateCounter = value;
+}
+
 function createResearchState() {
 	return {
 		query: "",
@@ -69,8 +143,13 @@ export function setupResearchViewTest(options: ResearchSetupOptions) {
 		disconnect: jest.fn(),
 		unobserve: jest.fn(),
 	}));
-	options.setResearchState(createResearchState());
-	options.setLibraryState({ tags: [] });
+	const researchState = createResearchState();
+	const libraryState = { tags: [] };
+	mockResearchTestState.researchState = researchState;
+	mockResearchTestState.libraryState = libraryState;
+	mockResearchTestState.libraryUpdateCounter = 0;
+	options.setResearchState(researchState);
+	options.setLibraryState(libraryState);
 	asMock(options.useTranslations).mockReturnValue(createResearchTranslations());
 	asMock(options.useSessions).mockReturnValue([
 		[{ name: "Grace in practice", group: "ai", year: "2024" }],
