@@ -111,19 +111,29 @@ type TestListingItem = {
 	[key: string]: unknown;
 };
 
+type ListingResponse = TestListingItem[] | null | Error;
+
+export function mockListingResponses(
+	responses: Record<string, ListingResponse>,
+) {
+	asMock(getListing).mockImplementation(async (path: string) => {
+		const response = responses[path];
+		if (response instanceof Error) throw response;
+		return response ?? [];
+	});
+}
+
 export function mockYearListing(
 	year: string,
 	items: TestListingItem[],
 	metadataItems?: TestListingItem[],
 ) {
-	asMock(getListing).mockImplementation(async (path: string) => {
-		if (path === "wasabi/test") {
-			return [{ name: year, type: "dir", path: `wasabi/test/${year}` }];
-		}
-		if (path === `wasabi/test/${year}`) return items;
-		if (path === "/aws/sessions/test" && metadataItems) return metadataItems;
-		return [];
-	});
+	const responses: Record<string, ListingResponse> = {
+		"wasabi/test": [{ name: year, type: "dir", path: `wasabi/test/${year}` }],
+		[`wasabi/test/${year}`]: items,
+	};
+	if (metadataItems) responses["/aws/sessions/test"] = metadataItems;
+	mockListingResponses(responses);
 }
 
 export function cachedYearSession(
