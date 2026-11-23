@@ -4,6 +4,7 @@ import { fetchJSON } from "@util/api/fetch";
 import { useTranslations } from "@util/domain/translations";
 import { setHash, setPath } from "@util/domain/views";
 import Cookies from "js-cookie";
+import { changeAuthInput } from "../../authTestSetup";
 import SignUp from "./index";
 
 jest.mock("@util/domain/translations");
@@ -88,21 +89,11 @@ describe("SignUp View", () => {
 		asMock(fetchJSON).mockResolvedValue({ hash: "newhash" });
 		render(<SignUp />);
 
-		fireEvent.change(screen.getByTestId("input-username"), {
-			target: { value: "testuser" },
-		});
-		fireEvent.change(screen.getByTestId("input-fname"), {
-			target: { value: "Test" },
-		});
-		fireEvent.change(screen.getByTestId("input-lname"), {
-			target: { value: "User" },
-		});
-		fireEvent.change(screen.getByTestId("input-email"), {
-			target: { value: "test@example.com" },
-		});
-		fireEvent.change(screen.getByTestId("input-password"), {
-			target: { value: "password123" },
-		});
+		changeAuthInput("input-username", "testuser");
+		changeAuthInput("input-fname", "Test");
+		changeAuthInput("input-lname", "User");
+		changeAuthInput("input-email", "test@example.com");
+		changeAuthInput("input-password", "password123");
 
 		fireEvent.click(screen.getByRole("button", { name: /Sign Up/i }));
 
@@ -124,21 +115,11 @@ describe("SignUp View", () => {
 
 	it("blocks submit for invalid email, id, and password", () => {
 		render(<SignUp />);
-		fireEvent.change(screen.getByTestId("input-username"), {
-			target: { value: "bad id!" },
-		});
-		fireEvent.change(screen.getByTestId("input-fname"), {
-			target: { value: "Test" },
-		});
-		fireEvent.change(screen.getByTestId("input-lname"), {
-			target: { value: "User" },
-		});
-		fireEvent.change(screen.getByTestId("input-email"), {
-			target: { value: "not-an-email" },
-		});
-		fireEvent.change(screen.getByTestId("input-password"), {
-			target: { value: "short" },
-		});
+		changeAuthInput("input-username", "bad id!");
+		changeAuthInput("input-fname", "Test");
+		changeAuthInput("input-lname", "User");
+		changeAuthInput("input-email", "not-an-email");
+		changeAuthInput("input-password", "short");
 		fireEvent.click(screen.getByRole("button", { name: /Sign Up/i }));
 		expect(fetchJSON).not.toHaveBeenCalled();
 	});
@@ -146,21 +127,11 @@ describe("SignUp View", () => {
 	it("navigates home after a successful registration", async () => {
 		asMock(fetchJSON).mockResolvedValue({});
 		render(<SignUp />);
-		fireEvent.change(screen.getByTestId("input-username"), {
-			target: { value: "testuser" },
-		});
-		fireEvent.change(screen.getByTestId("input-fname"), {
-			target: { value: "Test" },
-		});
-		fireEvent.change(screen.getByTestId("input-lname"), {
-			target: { value: "User" },
-		});
-		fireEvent.change(screen.getByTestId("input-email"), {
-			target: { value: "test@example.com" },
-		});
-		fireEvent.change(screen.getByTestId("input-password"), {
-			target: { value: "password123" },
-		});
+		changeAuthInput("input-username", "testuser");
+		changeAuthInput("input-fname", "Test");
+		changeAuthInput("input-lname", "User");
+		changeAuthInput("input-email", "test@example.com");
+		changeAuthInput("input-password", "password123");
 		fireEvent.submit(
 			screen.getByRole("button", { name: /Sign Up/i }).closest("form"),
 		);
@@ -172,21 +143,11 @@ describe("SignUp View", () => {
 	it("clears cookies and shows translated errors on failure", async () => {
 		asMock(fetchJSON).mockResolvedValue({ err: "ACCESS_DENIED" });
 		render(<SignUp />);
-		fireEvent.change(screen.getByTestId("input-username"), {
-			target: { value: "testuser" },
-		});
-		fireEvent.change(screen.getByTestId("input-fname"), {
-			target: { value: "Test" },
-		});
-		fireEvent.change(screen.getByTestId("input-lname"), {
-			target: { value: "User" },
-		});
-		fireEvent.change(screen.getByTestId("input-email"), {
-			target: { value: "test@example.com" },
-		});
-		fireEvent.change(screen.getByTestId("input-password"), {
-			target: { value: "password123" },
-		});
+		changeAuthInput("input-username", "testuser");
+		changeAuthInput("input-fname", "Test");
+		changeAuthInput("input-lname", "User");
+		changeAuthInput("input-email", "test@example.com");
+		changeAuthInput("input-password", "password123");
 		fireEvent.click(screen.getByRole("button", { name: /Sign Up/i }));
 		await waitFor(() => {
 			expect(Cookies.set).toHaveBeenCalledWith("id", "");
@@ -207,21 +168,11 @@ describe("SignUp View", () => {
 		fireEvent.click(screen.getByRole("button", { name: /Sign Up/i }));
 		expect(fetchJSON).not.toHaveBeenCalled();
 
-		fireEvent.change(screen.getByTestId("input-username"), {
-			target: { value: "valid-user" },
-		});
-		fireEvent.change(screen.getByTestId("input-fname"), {
-			target: { value: "Test" },
-		});
-		fireEvent.change(screen.getByTestId("input-lname"), {
-			target: { value: "User" },
-		});
-		fireEvent.change(screen.getByTestId("input-email"), {
-			target: { value: "test@example.com" },
-		});
-		fireEvent.change(screen.getByTestId("input-password"), {
-			target: { value: "x".repeat(73) },
-		});
+		changeAuthInput("input-username", "valid-user");
+		changeAuthInput("input-fname", "Test");
+		changeAuthInput("input-lname", "User");
+		changeAuthInput("input-email", "test@example.com");
+		changeAuthInput("input-password", "x".repeat(73));
 		fireEvent.click(screen.getByRole("button", { name: /Sign Up/i }));
 		expect(fetchJSON).not.toHaveBeenCalled();
 	});
