@@ -1,8 +1,9 @@
-import { render, waitFor } from "@testing-library/react";
+import { waitFor } from "@testing-library/react";
 import { useGroups } from "@util/domain/groups";
 import { compactLegacySessionThumbnails } from "@util/domain/sessionCompaction";
 import storage from "@util/storage/storage";
 import { SessionsStore, useSessions } from "../sessions";
+import { createSessionsTestHarness } from "../sessionsTestSetup";
 
 jest.mock("@components/Toolbar", () => ({
 	registerToolbar: jest.fn(),
@@ -58,47 +59,21 @@ function file(path: string, name?: string) {
 	return { path, name: name || path.split("/").pop(), type: "file" };
 }
 
-let latestValue: any;
-
-function Harness({ depends = [], options = {} }) {
-	latestValue = useSessions(depends, options);
-	return null;
-}
-
-function renderHarness(props: any = {}) {
-	return render(<Harness {...props} />);
-}
-
-function getSessionsState() {
-	return latestValue;
-}
-
-const GROUP_METADATA = [{ name: "american", color: "#fff" }];
+const {
+	GROUP_METADATA,
+	getSessionsState,
+	renderHarness,
+	resetSessionsTestState,
+} = createSessionsTestHarness(
+	useSessions,
+	SessionsStore,
+	useGroups,
+	compactLegacySessionThumbnails,
+	storage,
+);
 
 describe("useSessions personal metadata", () => {
-	beforeEach(() => {
-		jest.clearAllMocks();
-		latestValue = null;
-		SessionsStore.update((s) => {
-			s.sessions = null;
-			s.groups = [];
-			s.groupFilter = [];
-			s.typeFilter = [];
-			s.yearFilter = [];
-			s.busy = false;
-			s.counter = 0;
-			s.syncCounter = 0;
-			s.groupsHash = "";
-			s.showFilterDialog = false;
-			s.filterBarManuallyEnabled = false;
-		});
-		asMock(useGroups).mockReturnValue([GROUP_METADATA, false, jest.fn()]);
-		asMock(compactLegacySessionThumbnails).mockResolvedValue(undefined);
-		asMock(storage.exists).mockResolvedValue(false);
-		asMock(storage.readFile).mockResolvedValue("");
-		asMock(storage.getListing).mockResolvedValue([]);
-		asMock(storage.getRecursiveList).mockResolvedValue([]);
-	});
+	beforeEach(resetSessionsTestState);
 
 	it("merges personal metadata (position/duration) for split group sessions", async () => {
 		asMock(storage.exists).mockImplementation(async (path: any) => {
