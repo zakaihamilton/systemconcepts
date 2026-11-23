@@ -7,6 +7,7 @@ import { fetchSessionMetadata } from "./sessionMetadataClient";
 import { updateGroupProcess } from "./updateGroup";
 import {
 	file,
+	mockListingResponses,
 	mockYearListing,
 	setupUpdateGroupTest,
 } from "./updateGroupTestSetup";
@@ -124,22 +125,15 @@ describe("updateGroupProcess", () => {
 	});
 
 	it("processes digital-ocean-only image sessions without wasabi media", async () => {
-		asMock(getListing).mockImplementation(async (path: any) => {
-			if (path === "wasabi/test") {
-				return [{ name: "2024", type: "dir", path: "wasabi/test/2024" }];
-			}
-			if (path === "wasabi/test/2024") {
-				return [];
-			}
-			if (path === "/aws/sessions/test/2024") {
-				return [
-					file(
-						"2024-05-07 Orphan Cover.png",
-						"/aws/sessions/test/2024/2024-05-07 Orphan Cover.png",
-					),
-				];
-			}
-			return [];
+		mockListingResponses({
+			"wasabi/test": [{ name: "2024", type: "dir", path: "wasabi/test/2024" }],
+			"wasabi/test/2024": [],
+			"/aws/sessions/test/2024": [
+				file(
+					"2024-05-07 Orphan Cover.png",
+					"/aws/sessions/test/2024/2024-05-07 Orphan Cover.png",
+				),
+			],
 		});
 		asMock(fetchSessionMetadata).mockResolvedValue({
 			items: [
@@ -231,22 +225,15 @@ describe("updateGroupProcess", () => {
 	});
 
 	it("continues when group metadata listing returns null", async () => {
-		asMock(getListing).mockImplementation(async (path: any) => {
-			if (path === "/aws/sessions/test") {
-				return null;
-			}
-			if (path === "wasabi/test") {
-				return [{ name: "2024", type: "dir", path: "wasabi/test/2024" }];
-			}
-			if (path === "wasabi/test/2024") {
-				return [
-					file(
-						"2024-05-05 Test Session.mp4",
-						"wasabi/test/2024/2024-05-05 Test Session.mp4",
-					),
-				];
-			}
-			return [];
+		mockListingResponses({
+			"/aws/sessions/test": null,
+			"wasabi/test": [{ name: "2024", type: "dir", path: "wasabi/test/2024" }],
+			"wasabi/test/2024": [
+				file(
+					"2024-05-05 Test Session.mp4",
+					"wasabi/test/2024/2024-05-05 Test Session.mp4",
+				),
+			],
 		});
 
 		await updateGroupProcess("test", true, false);
