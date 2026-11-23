@@ -4,7 +4,7 @@ export const mockResearchListState = {
 	latestProps: null as any,
 };
 
-jest.mock("@components/Virtualized/VariableSizeList", () => {
+export function mockResearchListFactory() {
 	const React = require("react");
 	return React.forwardRef(function MockList(props: any, ref: any) {
 		mockResearchListState.latestProps = props;
@@ -14,7 +14,7 @@ jest.mock("@components/Virtualized/VariableSizeList", () => {
 		}));
 		return <div data-testid="virtual-list" />;
 	});
-});
+}
 
 jest.mock(
 	"./PageIndicator",

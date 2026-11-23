@@ -1,4 +1,5 @@
 import "./researchTestSetup";
+import "./researchNavigationTestSetup";
 import { ContentSize } from "@components/Page/Content";
 import { act, fireEvent, screen, waitFor } from "@testing-library/react";
 import { useDeviceType } from "@util/browser/styles";
@@ -6,9 +7,16 @@ import { useTranslations } from "@util/domain/translations";
 import { setHash, setPath, usePathItems } from "@util/domain/views";
 import Cookies from "js-cookie";
 import { setupResearchViewTest } from "./researchTestSetup";
-import { mockResearchListState } from "./researchNavigationTestSetup";
+import {
+	mockResearchListFactory,
+	mockResearchListState,
+} from "./researchNavigationTestSetup";
 import Research from "./";
 import { renderResearchView } from "./researchViewTestUtils";
+
+jest.mock("@components/Virtualized/VariableSizeList", () =>
+	mockResearchListFactory(),
+);
 
 let mockResearchState: any;
 let mockLibraryState: any;
@@ -100,7 +108,10 @@ describe("Research View Toolbar, Print, and Navigation", () => {
 				</ContentSize.Provider>,
 			);
 			fireEvent.click(screen.getByRole("button", { name: "jump-page" }));
-			expect(mockResearchListState.scrollToItem).toHaveBeenCalledWith(1, "start");
+			expect(mockResearchListState.scrollToItem).toHaveBeenCalledWith(
+				1,
+				"start",
+			);
 			getToolbarItems()
 				.find((item: any) => item.id === "jump")
 				.onClick();
@@ -239,11 +250,15 @@ describe("Research View Toolbar, Print, and Navigation", () => {
 			mockResearchState.results = results;
 			renderResearch();
 			await act(async () => {
-				mockResearchListState.latestProps.onItemsRendered({ visibleStartIndex: 0 });
+				mockResearchListState.latestProps.onItemsRendered({
+					visibleStartIndex: 0,
+				});
 				await Promise.resolve();
 			});
 			act(() => {
-				mockResearchListState.latestProps.onItemsRendered({ visibleStartIndex: 1 });
+				mockResearchListState.latestProps.onItemsRendered({
+					visibleStartIndex: 1,
+				});
 			});
 			await waitFor(() => {
 				expect(setPath).toHaveBeenCalledWith("research:2");
@@ -255,7 +270,10 @@ describe("Research View Toolbar, Print, and Navigation", () => {
 			asMock(usePathItems).mockReturnValue(["research:2"]);
 			renderResearch();
 			await waitFor(() => {
-				expect(mockResearchListState.scrollToItem).toHaveBeenCalledWith(1, "start");
+				expect(mockResearchListState.scrollToItem).toHaveBeenCalledWith(
+					1,
+					"start",
+				);
 			});
 		});
 
@@ -264,7 +282,9 @@ describe("Research View Toolbar, Print, and Navigation", () => {
 			asMock(usePathItems).mockReturnValue(["research:1"]);
 			renderResearch();
 			await act(async () => {
-				mockResearchListState.latestProps.onItemsRendered({ visibleStartIndex: 0 });
+				mockResearchListState.latestProps.onItemsRendered({
+					visibleStartIndex: 0,
+				});
 				await Promise.resolve();
 			});
 			asMock(mockResearchListState.scrollToItem).mockClear();
@@ -284,7 +304,10 @@ describe("Research View Toolbar, Print, and Navigation", () => {
 			});
 			fireEvent.click(indicator);
 			fireEvent.click(screen.getByRole("menuitem", { name: "Hope" }));
-			expect(mockResearchListState.scrollToItem).toHaveBeenCalledWith(1, "start");
+			expect(mockResearchListState.scrollToItem).toHaveBeenCalledWith(
+				1,
+				"start",
+			);
 			act(() => {
 				jest.advanceTimersByTime(1000);
 			});
@@ -308,7 +331,9 @@ describe("Research View Toolbar, Print, and Navigation", () => {
 		it("measures row heights and scrolls back to top", async () => {
 			mockResearchState.results = results;
 			renderResearch();
-			expect(mockResearchListState.latestProps.itemSize(0)).toBeGreaterThan(400);
+			expect(mockResearchListState.latestProps.itemSize(0)).toBeGreaterThan(
+				400,
+			);
 			act(() => {
 				mockResearchListState.latestProps.itemData.setRowHeight(0, 100);
 				mockResearchListState.latestProps.itemData.setRowHeight(0, 200);
@@ -318,13 +343,18 @@ describe("Research View Toolbar, Print, and Navigation", () => {
 			});
 			expect(mockResearchListState.resetAfterIndex).toHaveBeenCalled();
 			act(() => {
-				mockResearchListState.latestProps.onItemsRendered({ visibleStartIndex: 2 });
+				mockResearchListState.latestProps.onItemsRendered({
+					visibleStartIndex: 2,
+				});
 			});
 			const scrollTop = await screen.findByRole("button", {
 				name: "scroll back to top",
 			});
 			fireEvent.click(scrollTop);
-			expect(mockResearchListState.scrollToItem).toHaveBeenCalledWith(0, "start");
+			expect(mockResearchListState.scrollToItem).toHaveBeenCalledWith(
+				0,
+				"start",
+			);
 		});
 
 		it("uses cached row height in getItemSize", () => {
@@ -345,8 +375,12 @@ describe("Research View Toolbar, Print, and Navigation", () => {
 			];
 			renderResearch();
 			await act(async () => {
-				mockResearchListState.latestProps.onItemsRendered({ visibleStartIndex: 0 });
-				mockResearchListState.latestProps.onItemsRendered({ visibleStartIndex: 0 });
+				mockResearchListState.latestProps.onItemsRendered({
+					visibleStartIndex: 0,
+				});
+				mockResearchListState.latestProps.onItemsRendered({
+					visibleStartIndex: 0,
+				});
 				await Promise.resolve();
 			});
 		});
@@ -357,7 +391,9 @@ describe("Research View Toolbar, Print, and Navigation", () => {
 			];
 			renderResearch();
 			await act(async () => {
-				mockResearchListState.latestProps.onItemsRendered({ visibleStartIndex: 2 });
+				mockResearchListState.latestProps.onItemsRendered({
+					visibleStartIndex: 2,
+				});
 				jest.advanceTimersByTime(1600);
 				await Promise.resolve();
 			});
@@ -368,7 +404,9 @@ describe("Research View Toolbar, Print, and Navigation", () => {
 			mockResearchState.results = results;
 			renderResearch();
 			act(() => {
-				mockResearchListState.latestProps.onItemsRendered({ visibleStartIndex: 1 });
+				mockResearchListState.latestProps.onItemsRendered({
+					visibleStartIndex: 1,
+				});
 			});
 			expect(
 				screen.queryByPlaceholderText("Search..."),
@@ -436,7 +474,10 @@ describe("Research View Toolbar, Print, and Navigation", () => {
 		it("navigates to library id without paragraph suffix", async () => {
 			renderResearch();
 			await act(async () => {
-				mockResearchListState.latestProps.itemData.gotoArticle({ _id: "article-1", title: "A" });
+				mockResearchListState.latestProps.itemData.gotoArticle({
+					_id: "article-1",
+					title: "A",
+				});
 			});
 			expect(setPath).toHaveBeenCalledWith("library", "id", "article-1");
 		});

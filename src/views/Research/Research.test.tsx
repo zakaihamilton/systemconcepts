@@ -1,4 +1,5 @@
 import "./researchTestSetup";
+import "./researchNavigationTestSetup";
 import { ContentSize } from "@components/Page/Content";
 import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { useDeviceType } from "@util/browser/styles";
@@ -9,9 +10,16 @@ import {
 	createResearchTranslations,
 	setupResearchViewTest,
 } from "./researchTestSetup";
-import { mockResearchListState } from "./researchNavigationTestSetup";
+import {
+	mockResearchListFactory,
+	mockResearchListState,
+} from "./researchNavigationTestSetup";
 import Research from "./";
 import { renderResearchView } from "./researchViewTestUtils";
+
+jest.mock("@components/Virtualized/VariableSizeList", () =>
+	mockResearchListFactory(),
+);
 
 let mockResearchState: any;
 let mockLibraryState: any;
