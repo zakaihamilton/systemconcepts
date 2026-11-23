@@ -43,8 +43,7 @@ export function listObjectsV2ToItems(
 		if (!name) return;
 
 		const contentType = (content as ListObjectContentWithType).ContentType;
-		const type =
-			contentType === "application/x-directory" ? "dir" : "file";
+		const type = contentType === "application/x-directory" ? "dir" : "file";
 		items.push({
 			name,
 			stat: {

@@ -1,3 +1,5 @@
+// biome-ignore assist/source/organizeImports: Jest mock factories need this module before aliased imports.
+import { updateGroupMockFactories as mockUpdateGroupMockFactories } from "./updateGroupMockFactories";
 import { writeCompressedFile } from "@sync/bundle";
 import { getFileInfo } from "@sync/hash";
 import { addSyncLog } from "@sync/logs";
@@ -22,13 +24,10 @@ jest.mock("@sync/manifest", () => mockUtilsFactory("utilsManifest"));
 jest.mock("@sync/mutex", () => ({
 	lockMutex: jest.fn(async () => jest.fn()),
 }));
-type UpdateGroupMockFactoryName =
-	keyof typeof import("./updateGroupMockFactories").updateGroupMockFactories;
+type UpdateGroupMockFactoryName = keyof typeof mockUpdateGroupMockFactories;
 
 function mockUtilsFactory(name: UpdateGroupMockFactoryName) {
-	return (
-		require("./updateGroupMockFactories") as typeof import("./updateGroupMockFactories")
-	).updateGroupMockFactories[name]();
+	return mockUpdateGroupMockFactories[name]();
 }
 
 jest.mock("@util/api/logger", () => mockUtilsFactory("utilsLogger"));

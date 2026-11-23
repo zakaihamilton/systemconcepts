@@ -1,3 +1,5 @@
+// biome-ignore assist/source/organizeImports: Jest mock factories need this module before aliased imports.
+import { updateGroupMockFactories as mockUpdateGroupMockFactories } from "./updateGroupMockFactories";
 import { SyncActiveStore, UpdateSessionsStore } from "@sync/syncState";
 import storage from "@util/storage/storage";
 import { getCombinedYearFingerprint } from "./fingerprints";
@@ -10,33 +12,15 @@ import {
 import { fetchSessionMetadata } from "./sessionMetadataClient";
 import * as updateSessionUtils from "./utils";
 
-jest.mock("@sync/bundle", () =>
-	(
-		require("./updateGroupMockFactories") as typeof import("./updateGroupMockFactories")
-	).updateGroupMockFactories.groupBundle(),
-);
-jest.mock("@sync/hash", () =>
-	(
-		require("./updateGroupMockFactories") as typeof import("./updateGroupMockFactories")
-	).updateGroupMockFactories.groupHash(),
-);
-jest.mock("@sync/manifest", () =>
-	(
-		require("./updateGroupMockFactories") as typeof import("./updateGroupMockFactories")
-	).updateGroupMockFactories.groupManifest(),
-);
+jest.mock("@sync/bundle", () => mockUpdateGroupMockFactories.groupBundle());
+jest.mock("@sync/hash", () => mockUpdateGroupMockFactories.groupHash());
+jest.mock("@sync/manifest", () => mockUpdateGroupMockFactories.groupManifest());
 jest.mock("@sync/sync", () => ({
 	addSyncLog: jest.fn(),
 }));
-jest.mock("@util/api/logger", () =>
-	(
-		require("./updateGroupMockFactories") as typeof import("./updateGroupMockFactories")
-	).updateGroupMockFactories.groupLogger(),
-);
+jest.mock("@util/api/logger", () => mockUpdateGroupMockFactories.groupLogger());
 jest.mock("@util/storage/storage", () =>
-	(
-		require("./updateGroupMockFactories") as typeof import("./updateGroupMockFactories")
-	).updateGroupMockFactories.groupStorage(),
+	mockUpdateGroupMockFactories.groupStorage(),
 );
 jest.mock("./cleanup", () => ({
 	cleanupBundledGroup: jest.fn(),
