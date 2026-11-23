@@ -1,3 +1,4 @@
+import "../sessionsTestSetup";
 import { waitFor } from "@testing-library/react";
 import { useGroups } from "@util/domain/groups";
 import { compactLegacySessionThumbnails } from "@util/domain/sessionCompaction";

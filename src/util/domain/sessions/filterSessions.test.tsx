@@ -1,22 +1,19 @@
-import { createSessionsTestHarness } from "../sessionsTestSetup";
+import "../sessionsTestSetup";
 import { act, waitFor } from "@testing-library/react";
 import { useGroups } from "@util/domain/groups";
 import { compactLegacySessionThumbnails } from "@util/domain/sessionCompaction";
 import storage from "@util/storage/storage";
 import { SessionsStore, useSessions } from "../sessions";
+import { createSessionsTestHarness } from "../sessionsTestSetup";
 
-const {
-	GROUP_METADATA,
-	getSessionsState,
-	renderHarness,
-	resetSessionsTestState,
-} = createSessionsTestHarness(
-	useSessions,
-	SessionsStore,
-	useGroups,
-	compactLegacySessionThumbnails,
-	storage,
-);
+const { getSessionsState, renderHarness, resetSessionsTestState } =
+	createSessionsTestHarness(
+		useSessions,
+		SessionsStore,
+		useGroups,
+		compactLegacySessionThumbnails,
+		storage,
+	);
 
 const SESSIONS = [
 	{

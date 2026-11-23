@@ -325,11 +325,10 @@ describe("Research View", () => {
 		const { decodeBinaryIndex } = require("@util/data/searchIndexBinary");
 		const { loadParagraphsForFile } = require("@util/domain/loadParagraphs");
 		const storage = require("@util/storage/storage");
-		mockResearchState = {
-			...mockResearchState,
+		Object.assign(mockResearchState, {
 			filterTags: [{ type: "topic", label: "Grace" }],
 			hasSearched: false,
-		};
+		});
 		mockLibraryState.tags = [
 			{ _id: "article-1", title: "Grace", topic: "Grace" },
 		];
@@ -367,12 +366,11 @@ describe("Research View", () => {
 		const { loadParagraphsForFile } = require("@util/domain/loadParagraphs");
 		const storage = require("@util/storage/storage");
 		const sessionId = "session|american|2026|2026-01-01|Grace study";
-		mockResearchState = {
-			...mockResearchState,
+		Object.assign(mockResearchState, {
 			query: "grace",
 			hasSearched: false,
 			results: [],
-		};
+		});
 		asMock(useSessions).mockReturnValue([
 			[
 				{
