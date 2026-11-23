@@ -23,6 +23,7 @@ import {
 	metadataListingFiles,
 	mockListingResponses,
 	mockUnchangedYearCache,
+	mockUnchangedYearCacheWithSession,
 	mockYearCacheAndSessions,
 	mockYearListing,
 	setupUpdateGroupTest,
@@ -138,9 +139,7 @@ describe("updateGroupProcess caching, incremental refresh, and targeted sync", (
 			newId,
 			yearItems,
 		} = overviewSessionFixture("07-20 Overview - The Grip & Shells");
-		mockUnchangedYearCache(currentYear, yearItems, [
-			cachedYearSession(existingId, currentYear),
-		]);
+		mockUnchangedYearCacheWithSession(currentYear, yearItems, existingId);
 
 		asMock(fetchSessionMetadata).mockResolvedValue(emptyYearMetadata());
 		asMock(updateYearSync).mockResolvedValue({
@@ -428,9 +427,7 @@ describe("updateGroupProcess caching, incremental refresh, and targeted sync", (
 			file(`${sessionId}.txt`, `wasabi/test/${currentYear}/${sessionId}.txt`),
 			file(`${sessionId}.mp4`, `wasabi/test/${currentYear}/${sessionId}.mp4`),
 		];
-		mockUnchangedYearCache(currentYear, yearItems, [
-			cachedYearSession(sessionId, currentYear),
-		]);
+		mockUnchangedYearCacheWithSession(currentYear, yearItems, sessionId);
 
 		await updateGroupProcess("test", false, false);
 

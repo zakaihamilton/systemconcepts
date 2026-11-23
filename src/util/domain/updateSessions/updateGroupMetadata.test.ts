@@ -10,6 +10,7 @@ import {
 import { fetchSessionMetadata } from "./sessionMetadataClient";
 import { updateGroupProcess } from "./updateGroup";
 import {
+	cachedYearSession,
 	expectSessionField,
 	file,
 	mockListingResponses,
@@ -256,16 +257,12 @@ describe("updateGroupProcess metadata resolution", () => {
 		const currentYear = String(new Date().getFullYear());
 		const sessionId = `${currentYear}-08-01 Cached Metadata Session`;
 		mockStaleLocalYearCache(currentYear, sessionId, [
-			{
-				id: sessionId,
-				name: sessionId,
-				group: "test",
-				year: currentYear,
+			cachedYearSession(sessionId, currentYear, {
 				tags: ["local-meta"],
 				duration: 444,
 				summaryText: "From local year file",
 				transcription: true,
-			},
+			}),
 		]);
 
 		await updateGroupProcess("test", false, false);

@@ -8,7 +8,7 @@ import {
 	loadTranscriptions,
 } from "./metadata";
 import { fetchSessionMetadata } from "./sessionMetadataClient";
-import { getListing, updateYearSync } from "./utils";
+import * as updateSessionUtils from "./utils";
 
 jest.mock("@sync/bundle", () => ({
 	writeCompressedFile: jest.fn(),
@@ -146,11 +146,13 @@ type ListingResponse = TestListingItem[] | null | Error;
 export function mockListingResponses(
 	responses: Record<string, ListingResponse>,
 ) {
-	asMock(getListing).mockImplementation(async (path: string) => {
-		const response = responses[path];
-		if (response instanceof Error) throw response;
-		return response ?? [];
-	});
+	asMock(updateSessionUtils.getListing).mockImplementation(
+		async (path: string) => {
+			const response = responses[path];
+			if (response instanceof Error) throw response;
+			return response ?? [];
+		},
+	);
 }
 
 export function groupUpdateStatus() {
@@ -288,7 +290,7 @@ export function emptyYearMetadata() {
 type UpdateGroupTestSetupOptions = {
 	readFile?: typeof storage.readFile;
 	sessionMetadata?: Awaited<ReturnType<typeof fetchSessionMetadata>>;
-	listing?: typeof getListing;
+	listing?: typeof updateSessionUtils.getListing;
 };
 
 export function setupUpdateGroupTest(
@@ -326,7 +328,7 @@ export function setupUpdateGroupTest(
 		},
 	);
 
-	asMock(getListing).mockImplementation(
+	asMock(updateSessionUtils.getListing).mockImplementation(
 		options.listing ??
 			(async (path: string) => {
 				if (path === "wasabi/test") {
@@ -351,7 +353,7 @@ export function setupUpdateGroupTest(
 			}),
 	);
 
-	asMock(updateYearSync).mockResolvedValue({
+	asMock(updateSessionUtils.updateYearSync).mockResolvedValue({
 		counter: 0,
 		newCount: 0,
 		newSessions: [],
@@ -383,6 +385,20 @@ export function mockUnchangedYearCache(
 		},
 	});
 	return { fingerprint, metadataFingerprint };
+}
+
+export function mockUnchangedYearCacheWithSession(
+	year: string,
+	yearItems: Array<TestListingItem & YearFingerprintItem>,
+	sessionId: string,
+	options: Omit<YearCacheFixtureOptions, "cache"> = {},
+) {
+	mockUnchangedYearCache(
+		year,
+		yearItems,
+		[cachedYearSession(sessionId, year)],
+		options,
+	);
 }
 
 export function recentSessionId() {
