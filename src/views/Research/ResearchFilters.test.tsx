@@ -9,7 +9,7 @@ import {
 	createResearchScenarioTranslations,
 	mockResearchIndex,
 	mockResearchTags,
-	setupResearchViewTest,
+	setupResearchTestState,
 } from "./researchTestSetup";
 import { renderResearchView } from "./researchViewTestUtils";
 
@@ -19,9 +19,7 @@ describe("Research View Suggestions and Filter Interactions", () => {
 	const mockSize = { width: 800, height: 600, emPixels: 16 };
 
 	beforeEach(() => {
-		mockResearchState = setupResearchViewTest({
-			cookies: Cookies,
-		}).researchState;
+		mockResearchState = setupResearchTestState({ cookies: Cookies });
 	});
 
 	const renderResearch = () => renderResearchView(Research, mockSize);
