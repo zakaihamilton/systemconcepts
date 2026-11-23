@@ -56,9 +56,7 @@ export function createSessionsTestHarness(
 	useSessions: typeof import("./sessions").useSessions,
 	SessionsStore: typeof import("./sessions").SessionsStore,
 	useGroups: typeof import("@util/domain/groups").useGroups,
-	compactLegacySessionThumbnails: typeof import(
-		"@util/domain/sessionCompaction"
-	).compactLegacySessionThumbnails,
+	compactLegacySessionThumbnails: typeof import("@util/domain/sessionCompaction").compactLegacySessionThumbnails,
 	storage: typeof import("@util/storage/storage").default,
 ) {
 	let latestValue: any;

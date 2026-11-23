@@ -1,5 +1,3 @@
-import { file } from "./updateGroupTestSetup";
-
 import { addSyncLog } from "@sync/sync";
 import { SyncActiveStore, UpdateSessionsStore } from "@sync/syncState";
 import storage from "@util/storage/storage";
@@ -12,6 +10,7 @@ import {
 } from "./metadata";
 import { fetchSessionMetadata } from "./sessionMetadataClient";
 import { updateGroupProcess } from "./updateGroup";
+import { file } from "./updateGroupTestSetup";
 import { getListing, updateYearSync } from "./utils";
 
 describe("updateGroupProcess targeted and recent-days sync", () => {
