@@ -1,7 +1,6 @@
-import { file, setupUpdateGroupTest } from "./updateGroupTestSetup";
+import "./updateGroupTestSetup";
 import { writeCompressedFile } from "@sync/bundle";
 import { getFileInfo } from "@sync/hash";
-
 import { addSyncLog } from "@sync/sync";
 import { UpdateSessionsStore } from "@sync/syncState";
 import { logger } from "@util/api/logger";
@@ -15,11 +14,8 @@ import {
 } from "./metadata";
 import { fetchSessionMetadata } from "./sessionMetadataClient";
 import { updateGroupProcess } from "./updateGroup";
+import { file, setupUpdateGroupTest } from "./updateGroupTestSetup";
 import { getListing, updateYearSync } from "./utils";
-
-jest.mock("@util/storage/storage", () =>
-	require("./updateGroupMockFactories").storageMockFactory(),
-);
 
 describe("updateGroupProcess caching, incremental refresh, and targeted sync", () => {
 	beforeEach(() => {

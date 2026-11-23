@@ -1,16 +1,12 @@
-import { file, setupUpdateGroupTest } from "./updateGroupTestSetup";
+import "./updateGroupTestSetup";
 import { addSyncLog } from "@sync/sync";
 import { SyncActiveStore, UpdateSessionsStore } from "@sync/syncState";
 import { logger } from "@util/api/logger";
 import storage from "@util/storage/storage";
-
 import { fetchSessionMetadata } from "./sessionMetadataClient";
 import { updateGroupProcess } from "./updateGroup";
+import { file, setupUpdateGroupTest } from "./updateGroupTestSetup";
 import { getListing, updateYearSync } from "./utils";
-
-jest.mock("@util/storage/storage", () =>
-	require("./updateGroupMockFactories").storageMockFactory(),
-);
 
 describe("updateGroupProcess", () => {
 	beforeEach(() => {

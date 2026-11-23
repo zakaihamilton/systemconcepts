@@ -29,9 +29,13 @@ jest.mock("@util/api/logger", () => ({
 		warn: jest.fn(),
 	},
 }));
-jest.mock("@util/storage/storage", () =>
-	require("./updateGroupMockFactories").storageMockFactory(),
-);
+jest.mock("@util/storage/storage", () => ({
+	createFolderPath: jest.fn(),
+	deleteFile: jest.fn(),
+	exists: jest.fn(),
+	readFile: jest.fn(),
+	writeFile: jest.fn(),
+}));
 jest.mock("./cleanup", () => ({
 	cleanupBundledGroup: jest.fn(),
 	cleanupMergedGroup: jest.fn(),

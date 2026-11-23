@@ -1,3 +1,4 @@
+import "./updateGroupTestSetup";
 import { writeCompressedFile } from "@sync/bundle";
 import { getFileInfo } from "@sync/hash";
 import { updateManifestEntry } from "@sync/manifest";
@@ -10,10 +11,6 @@ import { fetchSessionMetadata } from "./sessionMetadataClient";
 import { updateGroupProcess } from "./updateGroup";
 import { file, setupUpdateGroupTest } from "./updateGroupTestSetup";
 import { getListing } from "./utils";
-
-jest.mock("@util/storage/storage", () =>
-	require("./updateGroupMockFactories").storageMockFactory(),
-);
 
 describe("updateGroupProcess persistence and migration", () => {
 	beforeEach(() => {

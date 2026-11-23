@@ -1,5 +1,4 @@
-import { file, setupUpdateGroupTest } from "./updateGroupTestSetup";
-
+import "./updateGroupTestSetup";
 import { logger } from "@util/api/logger";
 import storage from "@util/storage/storage";
 import {
@@ -10,11 +9,8 @@ import {
 } from "./metadata";
 import { fetchSessionMetadata } from "./sessionMetadataClient";
 import { updateGroupProcess } from "./updateGroup";
+import { file, setupUpdateGroupTest } from "./updateGroupTestSetup";
 import { getListing, updateYearSync } from "./utils";
-
-jest.mock("@util/storage/storage", () =>
-	require("./updateGroupMockFactories").storageMockFactory(),
-);
 
 describe("updateGroupProcess metadata resolution", () => {
 	beforeEach(() => {
