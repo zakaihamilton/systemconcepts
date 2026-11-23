@@ -1,3 +1,4 @@
+import "./researchTestSetup";
 import { ContentSize } from "@components/Page/Content";
 import { act, fireEvent, screen, waitFor } from "@testing-library/react";
 import { useDeviceType } from "@util/browser/styles";
