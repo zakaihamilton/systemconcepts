@@ -12,3 +12,15 @@ export function renderResearchView(
 		</ContentSize.Provider>,
 	);
 }
+
+export function rerenderResearchView(
+	view: ReturnType<typeof renderResearchView>,
+	Component: ComponentType,
+	size: { width: number; height: number; emPixels: number },
+) {
+	view.rerender(
+		<ContentSize.Provider value={size}>
+			<Component />
+		</ContentSize.Provider>,
+	);
+}

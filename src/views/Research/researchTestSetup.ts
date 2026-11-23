@@ -129,6 +129,26 @@ export function createResearchTranslations(
 	};
 }
 
+const RESEARCH_SCENARIO_TRANSLATIONS = {
+	RESEARCH: "Research",
+	SESSIONS: "Sessions",
+	ARTICLES: "Articles",
+	SUMMARIES: "Summaries",
+	SEARCH: "Search",
+	SEARCH_ARTICLES: "Search...",
+	ALL: "All",
+	FILTERS: "Filters",
+	HIDE_SEARCH: "Hide Search",
+	RESEARCH_HELP: "Search your library",
+	SEARCH_HINT: "Use quotes",
+};
+
+export function createResearchScenarioTranslations(
+	overrides: Record<string, string> = {},
+) {
+	return { ...RESEARCH_SCENARIO_TRANSLATIONS, ...overrides };
+}
+
 export function setupResearchViewTest(options: ResearchSetupOptions) {
 	const { useDeviceType } = jest.requireMock("@util/browser/styles");
 	const { useSessions } = jest.requireMock("@util/domain/sessions");

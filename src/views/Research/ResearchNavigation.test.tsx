@@ -1,6 +1,5 @@
 import "./researchTestSetup";
 import "./researchNavigationTestSetup";
-import { ContentSize } from "@components/Page/Content";
 import { act, fireEvent, screen, waitFor } from "@testing-library/react";
 import { useDeviceType } from "@util/browser/styles";
 import { useTranslations } from "@util/domain/translations";
@@ -12,7 +11,10 @@ import {
 	mockResearchListState,
 } from "./researchNavigationTestSetup";
 import { setupResearchViewTest } from "./researchTestSetup";
-import { renderResearchView } from "./researchViewTestUtils";
+import {
+	renderResearchView,
+	rerenderResearchView,
+} from "./researchViewTestUtils";
 
 jest.mock("@components/Virtualized/VariableSizeList", () =>
 	mockResearchListFactory(),
@@ -70,11 +72,7 @@ describe("Research View Toolbar, Print, and Navigation", () => {
 			items.find((item: any) => item.id === "rebuildIndex").onClick();
 			expect(mockResearchState.indexing).toBe(true);
 			items.find((item: any) => item.id === "jump").onClick();
-			view.rerender(
-				<ContentSize.Provider value={mockSize}>
-					<Research />
-				</ContentSize.Provider>,
-			);
+			rerenderResearchView(view, Research, mockSize);
 			expect(screen.getByTestId("jump-dialog")).toBeInTheDocument();
 		});
 
@@ -102,11 +100,7 @@ describe("Research View Toolbar, Print, and Navigation", () => {
 			const view = renderResearch();
 			const items = getToolbarItems();
 			items.find((item: any) => item.id === "jump").onClick();
-			view.rerender(
-				<ContentSize.Provider value={mockSize}>
-					<Research />
-				</ContentSize.Provider>,
-			);
+			rerenderResearchView(view, Research, mockSize);
 			fireEvent.click(screen.getByRole("button", { name: "jump-page" }));
 			expect(mockResearchListState.scrollToItem).toHaveBeenCalledWith(
 				1,
@@ -115,11 +109,7 @@ describe("Research View Toolbar, Print, and Navigation", () => {
 			getToolbarItems()
 				.find((item: any) => item.id === "jump")
 				.onClick();
-			view.rerender(
-				<ContentSize.Provider value={mockSize}>
-					<Research />
-				</ContentSize.Provider>,
-			);
+			rerenderResearchView(view, Research, mockSize);
 			fireEvent.click(screen.getByRole("button", { name: "jump-match" }));
 			expect(mockLibraryState.scrollToParagraph).toBe(1);
 		});
@@ -132,11 +122,7 @@ describe("Research View Toolbar, Print, and Navigation", () => {
 			getToolbarItems()
 				.find((item: any) => item.id === "jump")
 				.onClick();
-			view.rerender(
-				<ContentSize.Provider value={mockSize}>
-					<Research />
-				</ContentSize.Provider>,
-			);
+			rerenderResearchView(view, Research, mockSize);
 			asMock(mockResearchListState.scrollToItem).mockClear();
 			fireEvent.click(screen.getByRole("button", { name: "jump-page" }));
 			expect(mockResearchListState.scrollToItem).not.toHaveBeenCalled();
@@ -221,11 +207,7 @@ describe("Research View Toolbar, Print, and Navigation", () => {
 			getToolbarItems()
 				.find((item: any) => item.id === "toggleSearch")
 				.onClick();
-			view.rerender(
-				<ContentSize.Provider value={mockSize}>
-					<Research />
-				</ContentSize.Provider>,
-			);
+			rerenderResearchView(view, Research, mockSize);
 			expect(
 				screen.queryByPlaceholderText("Search..."),
 			).not.toBeInTheDocument();

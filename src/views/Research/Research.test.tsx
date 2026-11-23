@@ -1,6 +1,5 @@
 import "./researchTestSetup";
 import "./researchNavigationTestSetup";
-import { ContentSize } from "@components/Page/Content";
 import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { useDeviceType } from "@util/browser/styles";
 import { useSessions } from "@util/domain/sessions";
@@ -12,7 +11,10 @@ import {
 	createResearchTranslations,
 	setupResearchViewTest,
 } from "./researchTestSetup";
-import { renderResearchView } from "./researchViewTestUtils";
+import {
+	renderResearchView,
+	rerenderResearchView,
+} from "./researchViewTestUtils";
 
 jest.mock("@components/Virtualized/VariableSizeList", () =>
 	mockResearchListFactory(),
@@ -173,11 +175,7 @@ describe("Research View", () => {
 		const searchInput = screen.getByPlaceholderText("Search...");
 		fireEvent.focus(searchInput);
 		fireEvent.change(searchInput, { target: { value: "grace" } });
-		view.rerender(
-			<ContentSize.Provider value={mockSize}>
-				<Research />
-			</ContentSize.Provider>,
-		);
+		rerenderResearchView(view, Research, mockSize);
 		expect(screen.getByRole("listbox")).toHaveTextContent("Grace in practice");
 		expect(searchInput).toHaveAttribute("role", "combobox");
 		expect(searchInput).toHaveAttribute(
@@ -199,19 +197,11 @@ describe("Research View", () => {
 		const searchInput = screen.getByPlaceholderText("Search...");
 		fireEvent.focus(searchInput);
 		fireEvent.change(searchInput, { target: { value: "grace" } });
-		view.rerender(
-			<ContentSize.Provider value={mockSize}>
-				<Research />
-			</ContentSize.Provider>,
-		);
+		rerenderResearchView(view, Research, mockSize);
 		expect(screen.getByRole("listbox")).toBeInTheDocument();
 
 		fireEvent.keyDown(searchInput, { key: "Enter" });
-		view.rerender(
-			<ContentSize.Provider value={mockSize}>
-				<Research />
-			</ContentSize.Provider>,
-		);
+		rerenderResearchView(view, Research, mockSize);
 		expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
 	});
 
@@ -221,19 +211,11 @@ describe("Research View", () => {
 		const searchInput = screen.getByPlaceholderText("Search...");
 		fireEvent.focus(searchInput);
 		fireEvent.change(searchInput, { target: { value: "grace" } });
-		view.rerender(
-			<ContentSize.Provider value={mockSize}>
-				<Research />
-			</ContentSize.Provider>,
-		);
+		rerenderResearchView(view, Research, mockSize);
 		expect(screen.getByRole("listbox")).toBeInTheDocument();
 
 		fireEvent.mouseDown(screen.getByRole("button", { name: "Filters" }));
-		view.rerender(
-			<ContentSize.Provider value={mockSize}>
-				<Research />
-			</ContentSize.Provider>,
-		);
+		rerenderResearchView(view, Research, mockSize);
 		expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
 	});
 
@@ -243,11 +225,7 @@ describe("Research View", () => {
 		const searchInput = screen.getByPlaceholderText("Search...");
 		fireEvent.focus(searchInput);
 		fireEvent.change(searchInput, { target: { value: "grace" } });
-		view.rerender(
-			<ContentSize.Provider value={mockSize}>
-				<Research />
-			</ContentSize.Provider>,
-		);
+		rerenderResearchView(view, Research, mockSize);
 		const suggestion = screen.getByRole("option", {
 			name: /Grace in practice/,
 		});
@@ -444,21 +422,13 @@ describe("Research View", () => {
 		const searchInput = screen.getByPlaceholderText("Search...");
 		fireEvent.focus(searchInput);
 		fireEvent.change(searchInput, { target: { value: "grace" } });
-		view.rerender(
-			<ContentSize.Provider value={mockSize}>
-				<Research />
-			</ContentSize.Provider>,
-		);
+		rerenderResearchView(view, Research, mockSize);
 		fireEvent.keyDown(searchInput, { key: "ArrowUp" });
 		expect(
 			screen.getByRole("option", { name: /Grace in practice/ }),
 		).toHaveAttribute("aria-selected", "true");
 		fireEvent.keyDown(searchInput, { key: "Escape" });
-		view.rerender(
-			<ContentSize.Provider value={mockSize}>
-				<Research />
-			</ContentSize.Provider>,
-		);
+		rerenderResearchView(view, Research, mockSize);
 		expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
 	});
 

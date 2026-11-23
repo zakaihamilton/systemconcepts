@@ -5,7 +5,10 @@ import { act, fireEvent, screen, waitFor } from "@testing-library/react";
 import { useTranslations } from "@util/domain/translations";
 import Cookies from "js-cookie";
 import Research from "./";
-import { setupResearchViewTest } from "./researchTestSetup";
+import {
+	createResearchScenarioTranslations,
+	setupResearchViewTest,
+} from "./researchTestSetup";
 import { renderResearchView } from "./researchViewTestUtils";
 
 let mockResearchState: any;
@@ -67,21 +70,12 @@ describe("Research View Suggestions and Filter Interactions", () => {
 				{ type: "topic", label: "Grace" },
 				{ type: "topic", label: "Hope" },
 			];
-			asMock(useTranslations).mockReturnValue({
-				RESEARCH: "Research",
-				SESSIONS: "Sessions",
-				ARTICLES: "Articles",
-				SUMMARIES: "Summaries",
-				SEARCH: "Search",
-				SEARCH_ARTICLES: "Search...",
-				ALL: "All",
-				FILTERS: "Filters",
-				CLEAR_ALL: "Clear all",
-				HIDE_SEARCH: "Hide Search",
-				RESEARCH_HELP: "Search your library",
-				SEARCH_HINT: "Use quotes",
-				TOPIC: "Topic",
-			});
+			asMock(useTranslations).mockReturnValue(
+				createResearchScenarioTranslations({
+					CLEAR_ALL: "Clear all",
+					TOPIC: "Topic",
+				}),
+			);
 			renderResearch();
 			const clearButtons = screen.getAllByRole("button", { name: "Clear all" });
 			fireEvent.click(clearButtons[0]);
@@ -155,23 +149,14 @@ describe("Research View Suggestions and Filter Interactions", () => {
 					isSession: false,
 				},
 			];
-			asMock(useTranslations).mockReturnValue({
-				RESEARCH: "Research",
-				SESSIONS: "Sessions",
-				ARTICLES: "Articles",
-				SUMMARIES: "Summaries",
-				SEARCH: "Search",
-				SEARCH_ARTICLES: "Search...",
-				ALL: "All",
-				FILTERS: "Filters",
-				HIDE_SEARCH: "Hide Search",
-				RESEARCH_HELP: "Search your library",
-				SEARCH_HINT: "Use quotes",
-				RESULT: "result",
-				RESULTS: "results",
-				MATCH: "matches",
-				ARTICLE: "Article",
-			});
+			asMock(useTranslations).mockReturnValue(
+				createResearchScenarioTranslations({
+					RESULT: "result",
+					RESULTS: "results",
+					MATCH: "matches",
+					ARTICLE: "Article",
+				}),
+			);
 			renderResearch();
 			expect(screen.getByText(/1 result · 1 matches/)).toBeInTheDocument();
 		});

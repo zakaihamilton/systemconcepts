@@ -1,16 +1,19 @@
 import "./researchTestSetup";
 import "./researchMinimalTestSetup";
-import { ContentSize } from "@components/Page/Content";
 import { act, fireEvent, screen, waitFor } from "@testing-library/react";
 import { useSessions } from "@util/domain/sessions";
 import { useTranslations } from "@util/domain/translations";
 import Cookies from "js-cookie";
 import Research from "./";
 import {
+	createResearchScenarioTranslations,
 	setResearchTestLibraryUpdateCounter,
 	setupResearchViewTest,
 } from "./researchTestSetup";
-import { renderResearchView } from "./researchViewTestUtils";
+import {
+	renderResearchView,
+	rerenderResearchView,
+} from "./researchViewTestUtils";
 
 let mockResearchState: any;
 
@@ -81,11 +84,7 @@ describe("Research View Lifecycle and Search Progress", () => {
 			});
 			const initialReads = asMock(storage.readFile).mock.calls.length;
 			setResearchTestLibraryUpdateCounter(1);
-			view.rerender(
-				<ContentSize.Provider value={mockSize}>
-					<Research />
-				</ContentSize.Provider>,
-			);
+			rerenderResearchView(view, Research, mockSize);
 			await waitFor(() => {
 				expect(asMock(storage.readFile).mock.calls.length).toBeGreaterThan(
 					initialReads,
@@ -252,20 +251,9 @@ describe("Research View Lifecycle and Search Progress", () => {
 						);
 					}),
 			);
-			asMock(useTranslations).mockReturnValue({
-				RESEARCH: "Research",
-				SESSIONS: "Sessions",
-				ARTICLES: "Articles",
-				SUMMARIES: "Summaries",
-				SEARCHING: "Searching...",
-				SEARCH: "Search",
-				SEARCH_ARTICLES: "Search...",
-				ALL: "All",
-				FILTERS: "Filters",
-				HIDE_SEARCH: "Hide Search",
-				RESEARCH_HELP: "Search your library",
-				SEARCH_HINT: "Use quotes",
-			});
+			asMock(useTranslations).mockReturnValue(
+				createResearchScenarioTranslations({ SEARCHING: "Searching..." }),
+			);
 			renderResearch();
 			await act(async () => {
 				await Promise.resolve();
@@ -301,11 +289,7 @@ describe("Research View Lifecycle and Search Progress", () => {
 				jest.runOnlyPendingTimers();
 				await Promise.resolve();
 			});
-			view.rerender(
-				<ContentSize.Provider value={mockSize}>
-					<Research />
-				</ContentSize.Provider>,
-			);
+			rerenderResearchView(view, Research, mockSize);
 			expect(mockResearchState.results[0].docId).toBe("keep");
 		});
 
@@ -349,11 +333,7 @@ describe("Research View Lifecycle and Search Progress", () => {
 					{ name: "Hope study", group: "ai", year: "2026", date: "2026-01-02" },
 				],
 			]);
-			view.rerender(
-				<ContentSize.Provider value={mockSize}>
-					<Research />
-				</ContentSize.Provider>,
-			);
+			rerenderResearchView(view, Research, mockSize);
 			await act(async () => {
 				jest.runOnlyPendingTimers();
 				await Promise.resolve();
@@ -382,24 +362,15 @@ describe("Research View Lifecycle and Search Progress", () => {
 					};
 				},
 			);
-			asMock(useTranslations).mockReturnValue({
-				RESEARCH: "Research",
-				SESSIONS: "Sessions",
-				ARTICLES: "Articles",
-				SUMMARIES: "Summaries",
-				SEARCHING: "Searching...",
-				SEARCH: "Search",
-				SEARCH_ARTICLES: "Search...",
-				ALL: "All",
-				FILTERS: "Filters",
-				HIDE_SEARCH: "Hide Search",
-				RESEARCH_HELP: "Search your library",
-				SEARCH_HINT: "Use quotes",
-				RESULT: "result",
-				RESULTS: "results",
-				MATCH: "matches",
-				ARTICLE: "Article",
-			});
+			asMock(useTranslations).mockReturnValue(
+				createResearchScenarioTranslations({
+					SEARCHING: "Searching...",
+					RESULT: "result",
+					RESULTS: "results",
+					MATCH: "matches",
+					ARTICLE: "Article",
+				}),
+			);
 			renderResearch();
 			await act(async () => {
 				await Promise.resolve();
@@ -426,20 +397,9 @@ describe("Research View Lifecycle and Search Progress", () => {
 				highlight: [],
 				cancelled: false,
 			});
-			asMock(useTranslations).mockReturnValue({
-				RESEARCH: "Research",
-				SESSIONS: "Sessions",
-				ARTICLES: "Articles",
-				SUMMARIES: "Summaries",
-				SEARCHING: "Searching...",
-				SEARCH: "Search",
-				SEARCH_ARTICLES: "Search...",
-				ALL: "All",
-				FILTERS: "Filters",
-				HIDE_SEARCH: "Hide Search",
-				RESEARCH_HELP: "Search your library",
-				SEARCH_HINT: "Use quotes",
-			});
+			asMock(useTranslations).mockReturnValue(
+				createResearchScenarioTranslations({ SEARCHING: "Searching..." }),
+			);
 			const view = renderResearch();
 			await act(async () => {
 				await Promise.resolve();
@@ -454,11 +414,7 @@ describe("Research View Lifecycle and Search Progress", () => {
 				jest.advanceTimersByTime(600);
 				await Promise.resolve();
 			});
-			view.rerender(
-				<ContentSize.Provider value={mockSize}>
-					<Research />
-				</ContentSize.Provider>,
-			);
+			rerenderResearchView(view, Research, mockSize);
 			expect(screen.queryByText("Searching...")).not.toBeInTheDocument();
 		});
 	});
