@@ -14,7 +14,7 @@ jest.mock("@util/api/logger", () => ({
 
 let localStorage: any;
 let clear: any;
-let resetLocalFileSystem: any;
+let resetLocalFileSystem: typeof import("@storage/local").resetLocalFileSystem;
 const originalProcessBrowser = process.browser;
 
 function openDatabase(name: string): Promise<IDBDatabase> {
@@ -33,10 +33,10 @@ function readRecord(store: any, path: string): Promise<any> {
 	});
 }
 
-beforeAll(() => {
+beforeAll(async () => {
 	Reflect.set(process, "browser", true);
 	jest.resetModules();
-	const mod = require("@storage/local");
+	const mod = await import("@storage/local");
 	localStorage = mod.default;
 	clear = mod.clear;
 	resetLocalFileSystem = mod.resetLocalFileSystem;

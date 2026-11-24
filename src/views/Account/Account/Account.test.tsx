@@ -4,10 +4,10 @@ import { UpdateSessionsStore } from "@sync/syncState";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { fetchJSON } from "@util/api/fetch";
-import { useTranslations } from "@util/domain/translations";
 import { setHash, setPath } from "@util/domain/views";
 import storage from "@util/storage/storage";
 import Cookies from "js-cookie";
+import { mockSignedInCookies, setupAuthViewTest } from "../../authTestSetup";
 import Account from "./index";
 
 jest.mock("js-cookie");
@@ -52,13 +52,17 @@ describe("Account View", () => {
 	};
 
 	beforeEach(() => {
-		jest.clearAllMocks();
-		asMock(useTranslations).mockReturnValue(mockTranslations);
-		asMock(MainStore.useState).mockReturnValue({ direction: "ltr" });
-		asMock(Cookies.get).mockReturnValue(null);
+		setupAuthViewTest({ translations: mockTranslations, cookieId: null });
 		Cookies.set = jest.fn();
 		asMock(fetchJSON).mockResolvedValue([]);
 	});
+
+	const fillLoginCredentials = async (
+		user: ReturnType<typeof userEvent.setup>,
+	) => {
+		await user.type(screen.getByLabelText("ID"), "person@example.com");
+		await user.type(screen.getByLabelText("Password"), "password");
+	};
 
 	it("renders sign in form when not signed in", async () => {
 		render(<Account />);
@@ -68,11 +72,7 @@ describe("Account View", () => {
 	});
 
 	it("renders signed in state when cookies are present", async () => {
-		asMock(Cookies.get).mockImplementation((key: any) => {
-			if (key === "id") return "testuser";
-			if (key === "hash") return "testhash";
-			return null;
-		});
+		mockSignedInCookies();
 
 		render(<Account />);
 		expect(await screen.findByText("Signed In")).toBeInTheDocument();
@@ -83,8 +83,7 @@ describe("Account View", () => {
 		asMock(fetchJSON).mockResolvedValue({ role: "visitor" });
 		render(<Account />);
 
-		await user.type(screen.getByLabelText("ID"), "person@example.com");
-		await user.type(screen.getByLabelText("Password"), "password");
+		await fillLoginCredentials(user);
 		await user.click(screen.getByLabelText("Remember me"));
 		await user.click(screen.getByRole("button", { name: "Sign In" }));
 
@@ -112,8 +111,7 @@ describe("Account View", () => {
 		const user = userEvent.setup();
 		asMock(fetchJSON).mockResolvedValue({ err: "bad credentials" });
 		render(<Account />);
-		await user.type(screen.getByLabelText("ID"), "person@example.com");
-		await user.type(screen.getByLabelText("Password"), "password");
+		await fillLoginCredentials(user);
 		await user.click(screen.getByRole("button", { name: "Sign In" }));
 		await waitFor(() => {
 			expect(screen.getByText(/bad credentials/i)).toBeInTheDocument();
@@ -121,11 +119,7 @@ describe("Account View", () => {
 	});
 
 	it("signs out and clears cookies", async () => {
-		asMock(Cookies.get).mockImplementation((key: any) => {
-			if (key === "id") return "testuser";
-			if (key === "hash") return "testhash";
-			return null;
-		});
+		mockSignedInCookies();
 		asMock(fetchJSON).mockResolvedValue([]);
 		render(<Account />);
 		expect(await screen.findByText("Signed In")).toBeInTheDocument();
@@ -146,8 +140,7 @@ describe("Account View", () => {
 		const user = userEvent.setup();
 		asMock(fetchJSON).mockResolvedValue({ role: "user" });
 		render(<Account />);
-		await user.type(screen.getByLabelText("ID"), "person@example.com");
-		await user.type(screen.getByLabelText("Password"), "password");
+		await fillLoginCredentials(user);
 		await user.click(screen.getByRole("button", { name: "Sign In" }));
 		await waitFor(() => {
 			expect(setPath).toHaveBeenCalled();
@@ -158,8 +151,7 @@ describe("Account View", () => {
 		const user = userEvent.setup();
 		asMock(fetchJSON).mockResolvedValue({ role: "user" });
 		render(<Account redirect="sessions" />);
-		await user.type(screen.getByLabelText("ID"), "person@example.com");
-		await user.type(screen.getByLabelText("Password"), "password");
+		await fillLoginCredentials(user);
 		await user.click(screen.getByRole("button", { name: "Sign In" }));
 		await waitFor(() => {
 			expect(setHash).toHaveBeenCalledWith("sessions");
@@ -167,11 +159,7 @@ describe("Account View", () => {
 	});
 
 	it("clears session store and bundle cache on sign out", async () => {
-		asMock(Cookies.get).mockImplementation((key: any) => {
-			if (key === "id") return "testuser";
-			if (key === "hash") return "testhash";
-			return null;
-		});
+		mockSignedInCookies();
 		asMock(fetchJSON).mockResolvedValue([]);
 
 		render(<Account />);

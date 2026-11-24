@@ -1,23 +1,17 @@
 import { ContentSize } from "@components/Page/Content";
-import { registerToolbar, useToolbar } from "@components/Toolbar";
+import { registerToolbar } from "@components/Toolbar";
 import FixedSizeList from "@components/Virtualized/FixedSizeList";
-import Input from "@components/Widgets/Input";
-import TodayIcon from "@icons/svg/Today.svg";
 import { useDeviceType } from "@util/browser/styles";
-import { useDateFormatter } from "@util/data/locale";
-import { addPath } from "@util/domain/views";
-import {
-	useCallback,
-	useContext,
-	useEffect,
-	useMemo,
-	useRef,
-	useState,
-} from "react";
+import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import TrackRow from "./Row";
 import styles from "./TracksView.module.css";
+import { useTracksDateToolbar } from "./useTracksDateToolbar";
+import { useTracksKeyboardNav } from "./useTracksKeyboardNav";
 
 registerToolbar("TracksView");
+
+const CARD_WIDTH = 260;
+const ROW_HEIGHT = 210;
 
 export default function TracksView({
 	sessions = [],
@@ -26,22 +20,13 @@ export default function TracksView({
 	playingSession,
 }: any) {
 	const isMobile = useDeviceType() !== "desktop";
-	const [focusedSessionId, setFocusedSessionId] = useState<any>(null);
 	const listRef = useRef<any>(null);
 	const outerRef = useRef<any>(null);
 	const pageSize = useContext(ContentSize);
-	const [selectedYear, setSelectedYear] = useState("");
-	const [selectedMonth, setSelectedMonth] = useState("");
-	const dateFormatter = useDateFormatter({ month: "long" });
-
-	// Dimensions
-	// Card width target: ~320px
-	const CARD_WIDTH = 260;
-	const ROW_HEIGHT = 210; // Header + Card Height + Padding
 
 	// Group sessions by month (year-month)
 	const groupedSessions = useMemo(() => {
-		const groups: Record<string, any> = {};
+		const groups: Record<string, any[]> = {};
 		sessions.forEach((session: any) => {
 			if (!session.date) {
 				return;
@@ -72,323 +57,19 @@ export default function TracksView({
 			}));
 	}, [sessions]);
 
-	// Extract available years/months
-	const dateOptions = useMemo(() => {
-		const years = new Set<any>();
-		const monthsByYear: Record<string, any> = {}; // { 2023: Set(01, 02) }
+	const { focusedSessionId, handleSessionClick } = useTracksKeyboardNav({
+		sessions,
+		groupedSessions,
+		outerRef,
+		rowHeight: ROW_HEIGHT,
+	});
 
-		groupedSessions.forEach((group) => {
-			const [y, m] = group.yearMonth.split("-");
-			years.add(y);
-
-			if (!monthsByYear[y]) monthsByYear[y] = new Set<any>();
-			monthsByYear[y].add(m);
-		});
-
-		return {
-			years: Array.from(years).sort((a, b) => b.localeCompare(a)),
-			monthsByYear,
-		};
-	}, [groupedSessions]);
-
-	// Sync footer with scrolling
-	const onItemsRendered = useCallback(
-		({ visibleStartIndex }: any) => {
-			if (
-				visibleStartIndex >= 0 &&
-				visibleStartIndex < groupedSessions.length
-			) {
-				const yearMonth = groupedSessions[visibleStartIndex].yearMonth;
-				const [y, m] = yearMonth.split("-");
-
-				// Only update if changed to prevent unnecessary renders/loops
-				setSelectedYear((prev) => (prev !== y ? y : prev));
-				setSelectedMonth((prev) => (prev !== m ? m : prev));
-			}
-		},
-		[groupedSessions],
-	);
-
-	// Helper to find current indices
-	const findIndices = useCallback(
-		(id: any) => {
-			for (let i = 0; i < groupedSessions.length; i++) {
-				const row = groupedSessions[i];
-				const sessionIndex = row.sessions.findIndex((s: any) => s.id === id);
-				if (sessionIndex !== -1) {
-					return { rowIndex: i, sessionIndex };
-				}
-			}
-			return null;
-		},
-		[groupedSessions],
-	);
-
-	// Navigation Logic
-	useEffect(() => {
-		const handleKeyDown = (e: any) => {
-			if (e.repeat) return;
-			if (!sessions.length) return;
-
-			// If no focus, focus first item on any arrow key
-			if (!focusedSessionId) {
-				if (
-					["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)
-				) {
-					e.preventDefault();
-					if (groupedSessions[0]?.sessions[0]) {
-						setFocusedSessionId(groupedSessions[0].sessions[0].id);
-					}
-				}
-				return;
-			}
-
-			const current = findIndices(focusedSessionId);
-			if (!current) return;
-
-			const { rowIndex, sessionIndex } = current;
-			let nextRowIndex = rowIndex;
-			let nextSessionIndex = sessionIndex;
-
-			switch (e.key) {
-				case "ArrowRight":
-					if (sessionIndex < groupedSessions[rowIndex].sessions.length - 1) {
-						nextSessionIndex++;
-					} else {
-						e.preventDefault();
-						return; // Stop at end of row
-					}
-					break;
-				case "ArrowLeft":
-					if (sessionIndex > 0) {
-						nextSessionIndex--;
-					} else {
-						e.preventDefault();
-						return; // Stop at start of row
-					}
-					break;
-				case "ArrowDown":
-					if (rowIndex < groupedSessions.length - 1) {
-						nextRowIndex++;
-						// Try to maintain relative horizontal position, or clamp
-						const nextRowLen = groupedSessions[nextRowIndex].sessions.length;
-						nextSessionIndex = Math.min(sessionIndex, nextRowLen - 1);
-					}
-					break;
-				case "ArrowUp":
-					if (rowIndex > 0) {
-						nextRowIndex--;
-						// Try to maintain relative horizontal position, or clamp
-						const pendingNextRowLen =
-							groupedSessions[nextRowIndex].sessions.length;
-						nextSessionIndex = Math.min(sessionIndex, pendingNextRowLen - 1);
-					}
-					break;
-				case "Enter": {
-					e.preventDefault();
-					const session = groupedSessions[rowIndex].sessions[sessionIndex];
-					const itemPath = `session?group=${session.group}&year=${session.year}&date=${session.date}&name=${encodeURIComponent(session.name)}`;
-					addPath(itemPath);
-					return;
-				}
-				default:
-					return;
-			}
-
-			if (nextRowIndex !== rowIndex || nextSessionIndex !== sessionIndex) {
-				e.preventDefault();
-				const nextSession =
-					groupedSessions[nextRowIndex].sessions[nextSessionIndex];
-				if (nextSession) {
-					setFocusedSessionId(nextSession.id);
-					// Scroll vertical list if changing rows
-					if (nextRowIndex !== rowIndex && outerRef.current) {
-						const itemTop = nextRowIndex * ROW_HEIGHT;
-						const itemBottom = itemTop + ROW_HEIGHT;
-						const scrollTop = outerRef.current.scrollTop;
-						const clientHeight = outerRef.current.clientHeight;
-
-						if (itemTop < scrollTop) {
-							outerRef.current.scrollTo({ top: itemTop, behavior: "smooth" });
-						} else if (itemBottom > scrollTop + clientHeight) {
-							outerRef.current.scrollTo({
-								top: itemBottom - clientHeight,
-								behavior: "smooth",
-							});
-						}
-					}
-				}
-			}
-		};
-
-		window.addEventListener("keydown", handleKeyDown);
-		return () => window.removeEventListener("keydown", handleKeyDown);
-	}, [focusedSessionId, groupedSessions, sessions.length, findIndices]);
-
-	const handleSessionClick = useCallback((session: any) => {
-		setFocusedSessionId(session.id);
-		const itemPath = `session?group=${session.group}&year=${session.year}&date=${session.date}&name=${encodeURIComponent(session.name)}`;
-		addPath(itemPath);
-	}, []);
-
-	const scrollToDate = useCallback(
-		(year: any, month: any) => {
-			let prefix = `${year}`;
-			if (month) prefix += `-${month}`;
-
-			const index = groupedSessions.findIndex((g) =>
-				g.yearMonth.startsWith(prefix),
-			);
-			if (index !== -1 && listRef.current) {
-				listRef.current.scrollToItem(index, "start");
-			}
-		},
-		[groupedSessions],
-	);
-
-	const gotoToday = useCallback(() => {
-		if (listRef.current) {
-			listRef.current.scrollToItem(0, "start");
-		}
-	}, []);
-
-	// State handlers for Input widget
-	const yearState = useMemo(
-		() => [
-			selectedYear,
-			(year: any) => {
-				setSelectedYear(year);
-				setSelectedMonth("");
-				scrollToDate(year, "");
-			},
-		],
-		[selectedYear, scrollToDate],
-	);
-
-	const monthState = useMemo(
-		() => [
-			selectedMonth,
-			(month: any) => {
-				setSelectedMonth(month);
-				if (selectedYear) {
-					scrollToDate(selectedYear, month);
-				}
-			},
-		],
-		[selectedMonth, selectedYear, scrollToDate],
-	);
-
-	// Automatically select the newest year available on init if not set
-	useEffect(() => {
-		// Only run if NO year is selected, to avoid overwriting scroll sync
-		if (selectedYear === "" && dateOptions.years.length > 0) {
-			const firstGroup = groupedSessions[0];
-			if (firstGroup) {
-				const [y, m] = firstGroup.yearMonth.split("-");
-				setTimeout(() => {
-					setSelectedYear(y);
-					setSelectedMonth(m);
-				}, 0);
-			}
-		}
-	}, [dateOptions.years, selectedYear, groupedSessions]);
-
-	const yearItems = useMemo(
-		() => dateOptions.years.map((y) => ({ id: y, name: y })),
-		[dateOptions.years],
-	);
-
-	const availableMonths = useMemo(() => {
-		if (!selectedYear || !dateOptions.monthsByYear[selectedYear]) return [];
-		return Array.from(dateOptions.monthsByYear[selectedYear] as Set<string>)
-			.sort((a, b) => b.localeCompare(a))
-			.map((m) => {
-				const date = new Date(parseInt(selectedYear), parseInt(m) - 1, 1);
-				return { id: m, name: dateFormatter.format(date) };
-			});
-	}, [selectedYear, dateOptions, dateFormatter]);
-
-	const monthItems = useMemo(() => [...availableMonths], [availableMonths]);
-
-	const yearWidget = useMemo(
-		() => (
-			<Input
-				select={true}
-				label={translations.YEAR}
-				helperText=""
-				fullWidth={false}
-				style={{ minWidth: "6em" }}
-				items={yearItems}
-				state={yearState}
-			/>
-		),
-		[translations, yearItems, yearState],
-	);
-	const monthWidget = useMemo(
-		() => (
-			<Input
-				select={true}
-				label={translations.MONTH}
-				helperText=""
-				fullWidth={false}
-				style={{ minWidth: "8em" }}
-				items={monthItems}
-				state={monthState}
-				disabled={!selectedYear}
-			/>
-		),
-		[translations, monthItems, monthState, selectedYear],
-	);
-
-	// Disable Today button when already at the top of the list
-	const [isAtTop, setIsAtTop] = useState(true);
-
-	useEffect(() => {
-		const checkScrollPosition = () => {
-			if (outerRef.current) {
-				setIsAtTop(outerRef.current.scrollTop === 0);
-			}
-		};
-
-		// Check initially and on scroll
-		checkScrollPosition();
-
-		const handleScroll = () => checkScrollPosition();
-		const scrollElement = outerRef.current;
-		if (scrollElement) {
-			scrollElement.addEventListener("scroll", handleScroll);
-			return () => scrollElement.removeEventListener("scroll", handleScroll);
-		}
-	}, []);
-
-	const toolbarItems = useMemo(() => {
-		return [
-			{
-				id: "today",
-				name: translations.TODAY,
-				icon: <TodayIcon />,
-				onClick: gotoToday,
-				disabled: isAtTop,
-				location: "header",
-				menu: false,
-			},
-			{
-				id: "monthWidget",
-				element: monthWidget,
-				location: "footer",
-			},
-			{
-				id: "yearWidget",
-				element: yearWidget,
-				location: "footer",
-			},
-		];
-	}, [translations, gotoToday, isAtTop, monthWidget, yearWidget]);
-
-	useToolbar({
-		id: "TracksView",
-		items: toolbarItems,
-		depends: [translations, selectedYear, selectedMonth, isMobile, isAtTop],
+	const { onItemsRendered } = useTracksDateToolbar({
+		groupedSessions,
+		listRef,
+		outerRef,
+		translations,
+		isMobile,
 	});
 
 	const itemData = useMemo(
@@ -407,7 +88,6 @@ export default function TracksView({
 			focusedSessionId,
 			handleSessionClick,
 			pageSize,
-			CARD_WIDTH,
 			store,
 			translations,
 			playingSession,

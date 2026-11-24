@@ -1,3 +1,8 @@
+import {
+	DeleteObjectCommand,
+	DeleteObjectsCommand,
+	ListObjectsV2Command,
+} from "@aws-sdk/client-s3";
 import { logger as structuredLogger } from "@util/api/logger";
 import { getSafeError } from "@util/api/safeError";
 import { isValidNewPassword } from "@util/auth/passwordPolicy";
@@ -9,11 +14,6 @@ import {
 	getSessionUser,
 	revokeAllSessions,
 } from "@util/auth/session";
-import {
-	DeleteObjectCommand,
-	DeleteObjectsCommand,
-	ListObjectsV2Command,
-} from "@aws-sdk/client-s3";
 import { getS3 } from "@util/storage/aws";
 import { findRecord, getCollection, handleRequest } from "@util/storage/mongo";
 import { hash as bcryptHash } from "bcryptjs";
@@ -49,30 +49,29 @@ async function deleteUserData(userId: string) {
 					ContinuationToken: continuationToken,
 				}),
 			);
-			const objects = (page.Contents ?? [])
-				.map((item: any) => item.Key)
-				.filter(
-					(key: unknown): key is string =>
-						typeof key === "string" && key.startsWith(prefix),
-				)
-				.forEach((Key: string) => objectsToDelete.push({ Key }));
+			for (const item of page.Contents ?? []) {
+				const key = item.Key;
+				if (typeof key === "string" && key.startsWith(prefix)) {
+					objectsToDelete.push({ Key: key });
+				}
+			}
 			continuationToken = page.NextContinuationToken;
 		} while (continuationToken);
 
 		for (let offset = 0; offset < objectsToDelete.length; offset += 1000) {
-				const deleted = await s3.send(
-					new DeleteObjectsCommand({
-						Bucket: bucket,
+			const deleted = await s3.send(
+				new DeleteObjectsCommand({
+					Bucket: bucket,
 					Delete: {
 						Objects: objectsToDelete.slice(offset, offset + 1000),
 						Quiet: true,
 					},
-					}),
-				);
-				if (deleted.Errors?.length) {
-					throw new Error("PERSONAL_STORAGE_CLEANUP_FAILED");
-				}
+				}),
+			);
+			if (deleted.Errors?.length) {
+				throw new Error("PERSONAL_STORAGE_CLEANUP_FAILED");
 			}
+		}
 
 		await s3.send(
 			new DeleteObjectCommand({ Bucket: bucket, Key: `personal/${id}` }),

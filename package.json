@@ -38,7 +38,6 @@
 		"base64-arraybuffer-es6": "^3.1.0",
 		"bcryptjs": "^3.0.3",
 		"clsx": "^2.1.1",
-		"js-base64": "^3.7.8",
 		"js-cookie": "^3.0.7",
 		"jszip": "^3.10.1",
 		"mongodb": "^7.2.0",

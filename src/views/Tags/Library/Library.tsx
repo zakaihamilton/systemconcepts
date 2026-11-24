@@ -1,26 +1,10 @@
 import { registerToolbar, useToolbar } from "@components/Toolbar";
 import CloudSyncIcon from "@icons/svg/CloudSync.svg";
-import DeleteIcon from "@icons/svg/Delete.svg";
-import DeleteForeverIcon from "@icons/svg/DeleteForever.svg";
-import EditIcon from "@icons/svg/Edit.svg";
 import EditAttributesIcon from "@icons/svg/EditAttributes.svg";
 import MoreVertIcon from "@icons/svg/MoreVert.svg";
 import RefreshIcon from "@icons/svg/Refresh.svg";
 import { LIBRARY_LOCAL_PATH } from "@sync/constants";
-import { bumpLibraryCounter } from "@sync/libraryCounter";
-import Box from "@ui/Box";
-import Button from "@ui/Button";
-import Dialog from "@ui/Dialog";
-import DialogActions from "@ui/DialogActions";
-import DialogContent from "@ui/DialogContent";
-import DialogTitle from "@ui/DialogTitle";
 import IconButton from "@ui/IconButton";
-import ListItemIcon from "@ui/ListItemIcon";
-import ListItemText from "@ui/ListItemText";
-import Menu from "@ui/Menu";
-import MenuItem from "@ui/MenuItem";
-import TextField from "@ui/TextField";
-import Typography from "@ui/Typography";
 import { logger as structuredLogger } from "@util/api/logger";
 import { roleAuth } from "@util/auth/roles";
 import { createStore } from "@util/browser/store";
@@ -32,15 +16,20 @@ import { LibraryStore } from "@views/Library/Store";
 import Table from "@widgets/Table";
 import Cookies from "js-cookie";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import dialog from "../../../css/dialog-patterns.module.css";
 import BatchDialog from "../BatchDialog";
 import RebuildDialog from "../RebuildDialog/RebuildDialog";
 import SyncDialog from "../SyncDialog";
 import styles from "./Library.module.css";
+import TagActionDialogs from "./TagActionDialogs";
+import {
+	deleteLibraryTag,
+	deleteLibraryTagArticles,
+	renameLibraryTag,
+} from "./tagMutations";
 
 registerToolbar("LibraryTags", 110);
 
-export const LibraryTagsStore = createStore({
+const LibraryTagsStore = createStore({
 	order: "asc",
 	offset: 0,
 	orderBy: "count",
@@ -167,66 +156,13 @@ export default function LibraryTags() {
 		setProcessing(true);
 		try {
 			const { category, value: oldValue } = renameDialog;
-
-			// 1. Update tags array
-			const updatedTags = tags.map((tag) => {
-				if (tag[category] === oldValue) {
-					return { ...tag, [category]: newValue };
-				}
-				return tag;
-			});
-
-			// 2. Identify files to update
-			const affectedTags = tags.filter((tag) => tag[category] === oldValue);
-
-			// 3. Update files
-			// Group by path to minimize file reads
-			const filesToUpdate: Record<string, any> = {};
-			affectedTags.forEach((tag) => {
-				if (tag.path) {
-					if (!filesToUpdate[tag.path]) {
-						filesToUpdate[tag.path] = [];
-					}
-					filesToUpdate[tag.path].push(tag._id);
-				}
-			});
-
-			for (const [relativePath, ids] of Object.entries(filesToUpdate)) {
-				const filePath = makePath(LIBRARY_LOCAL_PATH, relativePath);
-				if (await storage.exists(filePath)) {
-					const content = await storage.readFile(filePath);
-					let data = JSON.parse(content);
-					let changed = false;
-
-					if (Array.isArray(data)) {
-						data = data.map((item) => {
-							if (ids.includes(item._id)) {
-								item[category] = newValue;
-								changed = true;
-							}
-							return item;
-						});
-					} else if (data._id && ids.includes(data._id)) {
-						data[category] = newValue;
-						changed = true;
-					}
-
-					if (changed) {
-						await storage.writeFile(filePath, JSON.stringify(data, null, 2));
-					}
-				}
-			}
-
-			// 4. Update tags.json
-			const tagsPath = makePath(LIBRARY_LOCAL_PATH, "tags.json");
-			await storage.writeFile(tagsPath, JSON.stringify(updatedTags, null, 2));
-
-			// 5. Update state
+			const updatedTags = await renameLibraryTag(
+				tags,
+				category,
+				oldValue,
+				newValue,
+			);
 			setTags(updatedTags);
-			LibraryStore.update((s) => {
-				s.tags = updatedTags;
-			});
-			await bumpLibraryCounter();
 		} catch (err: any) {
 			structuredLogger.error("Rename failed:", err);
 		} finally {
@@ -242,67 +178,8 @@ export default function LibraryTags() {
 		setProcessing(true);
 		try {
 			const { category, value: oldValue } = deleteDialog;
-
-			// 1. Update tags array (remove key or set to null?)
-			// Usually we remove the field or set to null.
-			// In tags.json context, fields are optional.
-			const updatedTags = tags.map((tag) => {
-				if (tag[category] === oldValue) {
-					const newTag = { ...tag };
-					delete newTag[category];
-					return newTag;
-				}
-				return tag;
-			});
-
-			// 2. Identify files to update
-			const affectedTags = tags.filter((tag) => tag[category] === oldValue);
-			const filesToUpdate: Record<string, any> = {};
-			affectedTags.forEach((tag) => {
-				if (tag.path) {
-					if (!filesToUpdate[tag.path]) {
-						filesToUpdate[tag.path] = [];
-					}
-					filesToUpdate[tag.path].push(tag._id);
-				}
-			});
-
-			for (const [relativePath, ids] of Object.entries(filesToUpdate)) {
-				const filePath = makePath(LIBRARY_LOCAL_PATH, relativePath);
-				if (await storage.exists(filePath)) {
-					const content = await storage.readFile(filePath);
-					let data = JSON.parse(content);
-					let changed = false;
-
-					if (Array.isArray(data)) {
-						data = data.map((item) => {
-							if (ids.includes(item._id)) {
-								delete item[category];
-								changed = true;
-							}
-							return item;
-						});
-					} else if (data._id && ids.includes(data._id)) {
-						delete data[category];
-						changed = true;
-					}
-
-					if (changed) {
-						await storage.writeFile(filePath, JSON.stringify(data, null, 2));
-					}
-				}
-			}
-
-			// 3. Update tags.json
-			const tagsPath = makePath(LIBRARY_LOCAL_PATH, "tags.json");
-			await storage.writeFile(tagsPath, JSON.stringify(updatedTags, null, 2));
-
-			// 4. Update state
+			const updatedTags = await deleteLibraryTag(tags, category, oldValue);
 			setTags(updatedTags);
-			LibraryStore.update((s) => {
-				s.tags = updatedTags;
-			});
-			await bumpLibraryCounter();
 		} catch (err: any) {
 			structuredLogger.error("Delete failed:", err);
 		} finally {
@@ -317,66 +194,12 @@ export default function LibraryTags() {
 		setProcessing(true);
 		try {
 			const { category, value: filterValue } = deleteArticlesDialog;
-
-			// 1. Identify articles to delete
-			const articlesToDelete = tags.filter(
-				(tag) => tag[category] === filterValue,
+			const updatedTags = await deleteLibraryTagArticles(
+				tags,
+				category,
+				filterValue,
 			);
-			const idsToDelete = articlesToDelete.map((tag) => tag._id);
-
-			// 2. Update tags array - remove these articles entirely
-			const updatedTags = tags.filter((tag) => !idsToDelete.includes(tag._id));
-
-			// 3. Group by file path to handle file operations
-			const filesToUpdate: Record<string, any> = {};
-			articlesToDelete.forEach((tag) => {
-				if (tag.path) {
-					if (!filesToUpdate[tag.path]) {
-						filesToUpdate[tag.path] = [];
-					}
-					filesToUpdate[tag.path].push(tag._id);
-				}
-			});
-
-			// 4. Update files
-			for (const [relativePath, ids] of Object.entries(filesToUpdate)) {
-				const filePath = makePath(LIBRARY_LOCAL_PATH, relativePath);
-				if (await storage.exists(filePath)) {
-					const content = await storage.readFile(filePath);
-					let data = JSON.parse(content);
-					let shouldWrite = false;
-					let shouldDelete = false;
-
-					if (Array.isArray(data)) {
-						const newData = data.filter((item) => !ids.includes(item._id));
-						if (newData.length === 0) {
-							shouldDelete = true;
-						} else if (newData.length !== data.length) {
-							data = newData;
-							shouldWrite = true;
-						}
-					} else if (data._id && ids.includes(data._id)) {
-						shouldDelete = true;
-					}
-
-					if (shouldDelete) {
-						await storage.deleteFile(filePath);
-					} else if (shouldWrite) {
-						await storage.writeFile(filePath, JSON.stringify(data, null, 2));
-					}
-				}
-			}
-
-			// 5. Update tags.json
-			const tagsPath = makePath(LIBRARY_LOCAL_PATH, "tags.json");
-			await storage.writeFile(tagsPath, JSON.stringify(updatedTags, null, 2));
-
-			// 6. Update state
 			setTags(updatedTags);
-			LibraryStore.update((s) => {
-				s.tags = updatedTags;
-			});
-			await bumpLibraryCounter();
 		} catch (err: any) {
 			structuredLogger.error("Delete articles failed:", err);
 		} finally {
@@ -458,176 +281,24 @@ export default function LibraryTags() {
 				}}
 			/>
 
-			<Menu
-				open={!!menuPosition}
-				onClose={handleActionMenuClose}
-				anchorReference="anchorPosition"
-				anchorPosition={menuPosition}
-			>
-				<MenuItem
-					onClick={() => {
-						setNewValue(actionItem.value);
-						setRenameDialog(actionItem);
-						handleActionMenuClose();
-					}}
-				>
-					<ListItemIcon>
-						<EditIcon fontSize="small" />
-					</ListItemIcon>
-					<ListItemText>{translations.RENAME}</ListItemText>
-				</MenuItem>
-				<MenuItem
-					onClick={() => {
-						setDeleteDialog(actionItem);
-						handleActionMenuClose();
-					}}
-				>
-					<ListItemIcon>
-						<DeleteIcon fontSize="small" color="warning" />
-					</ListItemIcon>
-					<ListItemText>{translations.DELETE_TAG}</ListItemText>
-				</MenuItem>
-				<MenuItem
-					onClick={() => {
-						setDeleteArticlesDialog(actionItem);
-						handleActionMenuClose();
-					}}
-				>
-					<ListItemIcon>
-						<DeleteForeverIcon fontSize="small" color="error" />
-					</ListItemIcon>
-					<ListItemText>{translations.DELETE_ARTICLES}</ListItemText>
-				</MenuItem>
-			</Menu>
-
-			{/* Rename Dialog */}
-			<Dialog
-				open={!!renameDialog}
-				onClose={() => !processing && setRenameDialog(null)}
-			>
-				<DialogTitle>{translations.RENAME_TAG}</DialogTitle>
-				<DialogContent>
-					<Box className={dialog.renameContent}>
-						<Typography
-							variant="caption"
-							color="text.secondary"
-							display="block"
-							gutterBottom
-						>
-							{renameDialog?.category &&
-								(translations[renameDialog.category.toUpperCase()] ||
-									renameDialog.category)}
-						</Typography>
-						<TextField
-							autoFocus
-							fullWidth
-							value={newValue}
-							onChange={(e: any) => setNewValue(e.target.value)}
-							label={translations.VALUE}
-							disabled={processing}
-						/>
-					</Box>
-				</DialogContent>
-				<DialogActions>
-					<Button onClick={() => setRenameDialog(null)} disabled={processing}>
-						{translations.CANCEL}
-					</Button>
-					<Button
-						onClick={handleRename}
-						variant="contained"
-						disabled={processing || !newValue.trim()}
-					>
-						{processing ? translations.SAVING : translations.SAVE}
-					</Button>
-				</DialogActions>
-			</Dialog>
-
-			{/* Delete Dialog */}
-			<Dialog
-				open={!!deleteDialog}
-				onClose={() => !processing && setDeleteDialog(null)}
-			>
-				<DialogTitle>{translations.DELETE_TAG}</DialogTitle>
-				<DialogContent>
-					<Typography>{translations.DELETE_TAG_CONFIRM}</Typography>
-					{deleteDialog && (
-						<Box className={dialog.highlightBoxSm}>
-							<Typography variant="body2" color="text.secondary">
-								{deleteDialog.category}:
-							</Typography>
-							<Typography variant="body1" fontWeight="bold">
-								{deleteDialog.value}
-							</Typography>
-							<Typography
-								variant="caption"
-								display="block"
-								className={styles.affectedCaption}
-							>
-								{translations.AFFECTED_ITEMS}: {deleteDialog.count}
-							</Typography>
-						</Box>
-					)}
-				</DialogContent>
-				<DialogActions>
-					<Button onClick={() => setDeleteDialog(null)} disabled={processing}>
-						{translations.CANCEL}
-					</Button>
-					<Button
-						onClick={handleDelete}
-						variant="contained"
-						color="error"
-						disabled={processing}
-					>
-						{processing ? translations.DELETING : translations.DELETE}
-					</Button>
-				</DialogActions>
-			</Dialog>
-
-			{/* Delete Articles Dialog */}
-			<Dialog
-				open={!!deleteArticlesDialog}
-				onClose={() => !processing && setDeleteArticlesDialog(null)}
-			>
-				<DialogTitle className={dialog.titleErrorColor}>
-					{translations.DELETE_ARTICLES}
-				</DialogTitle>
-				<DialogContent>
-					<Typography>{translations.DELETE_ARTICLES_CONFIRM}</Typography>
-					{deleteArticlesDialog && (
-						<Box className={styles.deleteArticlesHighlight}>
-							<Typography variant="body2" className={styles.errorBoxText}>
-								{deleteArticlesDialog.category}:
-							</Typography>
-							<Typography variant="body1" fontWeight="bold">
-								{deleteArticlesDialog.value}
-							</Typography>
-							<Typography
-								variant="caption"
-								display="block"
-								className={styles.deleteArticlesCaption}
-							>
-								{translations.ARTICLES_TO_DELETE}: {deleteArticlesDialog.count}
-							</Typography>
-						</Box>
-					)}
-				</DialogContent>
-				<DialogActions>
-					<Button
-						onClick={() => setDeleteArticlesDialog(null)}
-						disabled={processing}
-					>
-						{translations.CANCEL}
-					</Button>
-					<Button
-						onClick={handleDeleteArticles}
-						variant="contained"
-						color="error"
-						disabled={processing}
-					>
-						{processing ? translations.DELETING : translations.DELETE_FOREVER}
-					</Button>
-				</DialogActions>
-			</Dialog>
+			<TagActionDialogs
+				translations={translations}
+				processing={processing}
+				menuPosition={menuPosition}
+				actionItem={actionItem}
+				onMenuClose={handleActionMenuClose}
+				renameDialog={renameDialog}
+				setRenameDialog={setRenameDialog}
+				newValue={newValue}
+				setNewValue={setNewValue}
+				onRename={handleRename}
+				deleteDialog={deleteDialog}
+				setDeleteDialog={setDeleteDialog}
+				onDelete={handleDelete}
+				deleteArticlesDialog={deleteArticlesDialog}
+				setDeleteArticlesDialog={setDeleteArticlesDialog}
+				onDeleteArticles={handleDeleteArticles}
+			/>
 
 			{/* Sync Confirmation Dialog */}
 			<SyncDialog

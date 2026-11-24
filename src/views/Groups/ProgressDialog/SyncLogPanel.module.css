@@ -1,0 +1,142 @@
+/* Cloud Sync Tab specific styles */
+.syncTabContent {
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+}
+
+.syncSection {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+	padding: 1.2rem;
+}
+
+.syncHeader {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	font-weight: 700;
+	font-size: 1rem;
+	color: var(--primary-color, #40c4ff);
+}
+
+.copySyncLogButton {
+	color: var(--text-color-secondary) !important;
+}
+
+.copySyncLogButton:hover {
+	color: var(--primary-color, #40c4ff) !important;
+}
+
+.syncChip {
+	background: color-mix(
+		in srgb,
+		var(--primary-color) 10%,
+		transparent
+	) !important;
+	color: var(--primary-color, #40c4ff) !important;
+	font-weight: 600 !important;
+	border: 1px solid color-mix(in srgb, var(--primary-color) 20%, transparent) !important;
+}
+
+.syncContent {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+}
+
+.syncProgress {
+	display: flex;
+	flex-direction: column;
+	gap: 0.4rem;
+}
+
+.progressBar {
+	height: 6px !important;
+	border-radius: 99px;
+	background-color: var(--border-color) !important;
+}
+
+.progressText {
+	display: flex;
+	align-items: center;
+	font-size: 0.85rem;
+	color: var(--text-color-secondary);
+}
+
+.syncLogs {
+	display: flex;
+	flex-direction: column;
+	gap: 0.4rem;
+	background: #0d0e12;
+	/* Solid high-contrast dark background for console */
+	border: 1px solid var(--border-color);
+	padding: 1rem;
+	border-radius: 10px;
+	height: 260px;
+	overflow-y: auto;
+	font-family: "JetBrains Mono", "Fira Code", monospace;
+	font-size: 0.8rem;
+	box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+.logEntry {
+	color: #e2e8f0;
+	padding: 0.25rem 0.5rem;
+	border-radius: 4px;
+	word-break: break-all;
+	line-height: 1.4;
+}
+
+.logEntry.verbose {
+	color: #b8c3d1;
+}
+
+.logEntry.info {
+	color: #e2e8f0;
+	/* Crisp light slate */
+}
+
+.logEntry.success {
+	color: #4ade80;
+	/* Vibrant high-contrast green */
+	background: rgba(74, 222, 128, 0.1);
+}
+
+.logEntry.error {
+	color: #f87171;
+	/* Vibrant high-contrast red */
+	background: rgba(248, 113, 113, 0.1);
+}
+
+.logEntry.warning {
+	color: #fbbf24;
+	/* Vibrant high-contrast yellow */
+	background: rgba(251, 191, 36, 0.1);
+}
+
+.logNotice,
+.copyStatus {
+	color: var(--text-color);
+	font-size: 0.85rem;
+}
+
+.logNotice {
+	margin: 0;
+}
+
+.empty {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 0.5rem;
+	padding: 3rem;
+	color: var(--text-color-secondary);
+}
+
+.emptyIcon {
+	font-size: 2rem !important;
+	opacity: 0.5;
+}

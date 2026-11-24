@@ -6,7 +6,6 @@ import ExpandMoreIcon from "@icons/svg/ExpandMore.svg";
 import InfoIcon from "@icons/svg/Info.svg";
 import UploadIcon from "@icons/svg/Upload.svg";
 import { SyncActiveStore, UpdateSessionsStore } from "@sync/syncState";
-import { IconButton } from "@ui";
 import Tab from "@ui/Tab";
 import { logger as structuredLogger } from "@util/api/logger";
 import { formatDuration } from "@util/data/string";
@@ -19,6 +18,7 @@ import clsx from "clsx";
 import { useEffect, useMemo, useRef, useState } from "react";
 import styles from "./ProgressDialog.module.css";
 import ProgressItem from "./ProgressItem";
+import RecentSessionsTab from "./RecentSessionsTab";
 import SyncLogPanel from "./SyncLogPanel";
 
 export default function ProgressDialog() {
@@ -294,196 +294,13 @@ export default function ProgressDialog() {
 						/>
 					)}
 					{activeTab === "recent" && (
-						<div className={styles.recentTabContent}>
-							{loadingSessions && last50.length === 0 ? (
-								<div className={styles.empty}>
-									<AutorenewIcon
-										className={clsx(styles.emptyIcon, styles.rotating)}
-									/>
-									<div>Loading recent sessions...</div>
-								</div>
-							) : last50.length > 0 ? (
-								<div className={styles.tableContainer}>
-									<table className={styles.recentTable}>
-										<thead>
-											<tr>
-												<th>Session</th>
-												<th
-													className={clsx(styles.centerAlign, styles.slimCol)}
-												>
-													Tags
-												</th>
-												<th
-													className={clsx(styles.centerAlign, styles.slimCol)}
-												>
-													Duration
-												</th>
-												<th
-													className={clsx(styles.centerAlign, styles.slimCol)}
-												>
-													Summary
-												</th>
-												<th
-													className={clsx(styles.centerAlign, styles.slimCol)}
-												>
-													Transcript
-												</th>
-												<th
-													className={clsx(styles.centerAlign, styles.slimCol)}
-												>
-													Thumbnail
-												</th>
-												<th
-													className={clsx(styles.centerAlign, styles.actionCol)}
-												>
-													Action
-												</th>
-											</tr>
-										</thead>
-										<tbody>
-											{last50.map((session, idx) => {
-												const hasTags =
-													Array.isArray(session.tags) &&
-													session.tags.length > 0;
-												const hasDuration =
-													typeof session.duration === "number" &&
-													session.duration > 0.5;
-												const hasSummary =
-													!!session.summaryText || !!session.summary;
-												const hasTranscription = !!session.transcription;
-												const hasThumbnail = !!session.thumbnail;
-
-												const isSessionSyncing =
-													busy && activeSyncingSessionId === session.id;
-
-												return (
-													<tr key={idx}>
-														<td>
-															<div className={styles.sessionTableTitle}>
-																{session.name || session.id}
-															</div>
-															<div className={styles.sessionTableSub}>
-																{session.group} • {session.date}
-															</div>
-														</td>
-														<td
-															className={clsx(
-																styles.centerAlign,
-																styles.slimCol,
-															)}
-														>
-															<span
-																className={clsx(
-																	styles.tableIndicator,
-																	hasTags
-																		? styles.indActive
-																		: styles.indInactive,
-																)}
-															>
-																{hasTags ? "🟢" : "⚫"}
-															</span>
-														</td>
-														<td
-															className={clsx(
-																styles.centerAlign,
-																styles.slimCol,
-															)}
-														>
-															<span
-																className={clsx(
-																	styles.tableIndicator,
-																	hasDuration
-																		? styles.indActive
-																		: styles.indInactive,
-																)}
-															>
-																{hasDuration ? "🟢" : "⚫"}
-															</span>
-														</td>
-														<td
-															className={clsx(
-																styles.centerAlign,
-																styles.slimCol,
-															)}
-														>
-															<span
-																className={clsx(
-																	styles.tableIndicator,
-																	hasSummary
-																		? styles.indActive
-																		: styles.indInactive,
-																)}
-															>
-																{hasSummary ? "🟢" : "⚫"}
-															</span>
-														</td>
-														<td
-															className={clsx(
-																styles.centerAlign,
-																styles.slimCol,
-															)}
-														>
-															<span
-																className={clsx(
-																	styles.tableIndicator,
-																	hasTranscription
-																		? styles.indActive
-																		: styles.indInactive,
-																)}
-															>
-																{hasTranscription ? "🟢" : "⚫"}
-															</span>
-														</td>
-														<td
-															className={clsx(
-																styles.centerAlign,
-																styles.slimCol,
-															)}
-														>
-															<span
-																className={clsx(
-																	styles.tableIndicator,
-																	hasThumbnail
-																		? styles.indActive
-																		: styles.indInactive,
-																)}
-															>
-																{hasThumbnail ? "🟢" : "⚫"}
-															</span>
-														</td>
-														<td
-															className={clsx(
-																styles.centerAlign,
-																styles.actionCol,
-															)}
-														>
-															<IconButton
-																onClick={() => handleUpdateSession(session)}
-																disabled={busy}
-																size="small"
-																className={styles.tableActionBtn}
-															>
-																<AutorenewIcon
-																	className={clsx(
-																		styles.tableActionIcon,
-																		isSessionSyncing && styles.rotating,
-																	)}
-																/>
-															</IconButton>
-														</td>
-													</tr>
-												);
-											})}
-										</tbody>
-									</table>
-								</div>
-							) : (
-								<div className={styles.empty}>
-									<InfoIcon className={styles.emptyIcon} />
-									<div>No sessions found in the system.</div>
-								</div>
-							)}
-						</div>
+						<RecentSessionsTab
+							loadingSessions={loadingSessions}
+							sessions={last50}
+							busy={busy}
+							activeSyncingSessionId={activeSyncingSessionId}
+							onUpdateSession={handleUpdateSession}
+						/>
 					)}
 				</div>
 			</div>

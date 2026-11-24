@@ -8,7 +8,7 @@ import LinearProgress from "@ui/LinearProgress";
 import { useTranslations } from "@util/domain/translations";
 import clsx from "clsx";
 import { useLayoutEffect, useRef } from "react";
-import styles from "./ProgressDialog.module.css";
+import styles from "./SyncLogPanel.module.css";
 
 export default function SyncLogPanel({
 	syncing,
