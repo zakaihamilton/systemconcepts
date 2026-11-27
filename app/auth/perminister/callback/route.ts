@@ -6,6 +6,8 @@ import {
 	perministerLogout,
 	perministerSession,
 } from "@util/auth/perminister";
+import { clearSessionCookies } from "@util/auth/session";
+import { logger as structuredLogger } from "@util/api/logger";
 import {
 	matchesPerministerSsoState,
 	perministerSsoCookieName,
@@ -34,6 +36,7 @@ function redirectToAccount(request: Request, state: string) {
 	}
 	response.headers.set("Cache-Control", "no-store");
 	response.headers.set("Referrer-Policy", "no-referrer");
+	clearSessionCookies(response);
 	return response;
 }
 
@@ -90,7 +93,14 @@ export async function GET(request: Request) {
 				"Perminister session identity did not match the OIDC response.",
 			);
 		}
-		const user = await localUserForPerministerSession(session);
+		const sessionEmail = session.account.email?.trim().toLowerCase() ?? null;
+		const verifiedEmail =
+			exchanged.verifiedEmail && exchanged.verifiedEmail === sessionEmail
+				? exchanged.verifiedEmail
+				: null;
+		const user = await localUserForPerministerSession(session, {
+			verifiedEmail,
+		});
 		const expiry = Date.parse(session.session.expiresAt ?? exchanged.expiresAt);
 		const maxAge = Math.min(
 			30 * 24 * 60 * 60,
@@ -125,7 +135,8 @@ export async function GET(request: Request) {
 		response.headers.set("Cache-Control", "no-store");
 		response.headers.set("Referrer-Policy", "no-referrer");
 		return response;
-	} catch {
+	} catch (error) {
+		structuredLogger.error("Perminister sign-in failed", error);
 		if (exchangedToken)
 			await perministerLogout(exchangedToken).catch(() => undefined);
 		return redirectToAccount(request, state);

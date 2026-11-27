@@ -1,6 +1,6 @@
 import "server-only";
 
-import { findRecord, replaceRecord } from "@util/storage/mongo";
+import { findRecord, listCollection, replaceRecord } from "@util/storage/mongo";
 import { exchangePerministerOidcCode } from "./perministerOidc";
 
 const REQUEST_TIMEOUT_MS = 12_000;
@@ -125,6 +125,7 @@ export function perministerAuthorizationUrl(
 	challenge: string,
 	nonce: string,
 	requestOrigin?: string,
+	forceLogin = false,
 ): string {
 	const config = authConfig();
 	const redirectUri = new URL(
@@ -132,7 +133,7 @@ export function perministerAuthorizationUrl(
 		appOrigin(requestOrigin),
 	).toString();
 	const url = new URL("/oauth/authorize", config.baseUrl);
-	url.search = new URLSearchParams({
+	const params = new URLSearchParams({
 		client_id: config.clientId,
 		redirect_uri: redirectUri,
 		response_type: "code",
@@ -141,7 +142,9 @@ export function perministerAuthorizationUrl(
 		nonce,
 		code_challenge: challenge,
 		code_challenge_method: "S256",
-	}).toString();
+	});
+	if (forceLogin) params.set("prompt", "login");
+	url.search = params.toString();
 	return url.toString();
 }
 
@@ -335,6 +338,7 @@ export async function perministerLogout(token: string): Promise<void> {
 
 export async function localUserForPerministerSession(
 	session: PerministerSession,
+	options: { verifiedEmail?: string | null } = {},
 ): Promise<any> {
 	const roleOrder = [
 		"visitor",
@@ -385,9 +389,16 @@ export async function localUserForPerministerSession(
 			"This Perminister account has an invalid System Concepts link.",
 		);
 	}
+	const verifiedEmail = options.verifiedEmail?.trim().toLowerCase() ?? "";
+	const emailPattern = verifiedEmail
+		? new RegExp(
+				`^${verifiedEmail.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`,
+				"i",
+			)
+		: null;
 
 	const collectionName = "users";
-	const [boundUser, usernameUser, legacyUser] = await Promise.all([
+	const [boundUser, usernameUser, legacyUser, emailMatches] = await Promise.all([
 		findRecord({
 			collectionName,
 			query: { perministerSubjectId: session.account.subjectId },
@@ -398,24 +409,34 @@ export async function localUserForPerministerSession(
 		legacyAccountId && legacyAccountId !== username
 			? findRecord({ collectionName, query: { id: legacyAccountId } })
 			: Promise.resolve(null),
+		emailPattern
+			? listCollection({
+					collectionName,
+					query: { email: emailPattern },
+					fields: { _id: 0, id: 1, email: 1, perministerSubjectId: 1 },
+					limit: 2,
+				})
+			: Promise.resolve(null),
 	]);
+	if (emailMatches && emailMatches.length > 1) {
+		throw new Error(
+			"This Perminister email conflicts with multiple System Concepts accounts.",
+		);
+	}
+	const emailUser = emailMatches?.[0]
+		? await findRecord({ collectionName, query: { id: emailMatches[0].id } })
+		: null;
 
-	if (
-		boundUser &&
-		((usernameUser && usernameUser.id !== boundUser.id) ||
-			(legacyUser && legacyUser.id !== boundUser.id))
-	) {
+	const matchedUsers = [boundUser, usernameUser, legacyUser, emailUser].filter(
+		(user) => user && typeof user.id === "string",
+	);
+	if (new Set(matchedUsers.map((user) => user.id)).size > 1) {
 		throw new Error(
 			"This Perminister account conflicts with an existing System Concepts ID.",
 		);
 	}
-	if (usernameUser && legacyUser && usernameUser.id !== legacyUser.id) {
-		throw new Error(
-			"This Perminister account conflicts with an existing System Concepts ID.",
-		);
-	}
 
-	let user = boundUser ?? legacyUser ?? usernameUser;
+	let user = boundUser ?? legacyUser ?? usernameUser ?? emailUser;
 	if (!user) {
 		throw new Error("This System Concepts account has not been provisioned.");
 	}
@@ -427,8 +448,17 @@ export async function localUserForPerministerSession(
 			"This System Concepts ID is linked to another Perminister account.",
 		);
 	}
+	if (organizationId && !assignedRole) {
+		throw new Error(
+			"A System Concepts role has not been assigned in Perminister.",
+		);
+	}
 	if (!user.perministerSubjectId) {
-		if (!legacyAccountId || user.id !== legacyAccountId) {
+		const matchedBySystemConceptsId =
+			(legacyAccountId && user.id === legacyAccountId) ||
+			(username && user.id === username);
+		const matchedByVerifiedEmail = emailUser && emailUser.id === user.id;
+		if (!matchedBySystemConceptsId && !matchedByVerifiedEmail) {
 			throw new Error(
 				"This System Concepts account must be linked by the migration before sign-in.",
 			);
@@ -444,11 +474,6 @@ export async function localUserForPerministerSession(
 			throw new PerministerUnavailableError();
 		}
 		user = linked;
-	}
-	if (organizationId && !assignedRole) {
-		throw new Error(
-			"A System Concepts role has not been assigned in Perminister.",
-		);
 	}
 	const legacyRole = roleOrder.includes(user.role)
 		? (user.role as (typeof roleOrder)[number])

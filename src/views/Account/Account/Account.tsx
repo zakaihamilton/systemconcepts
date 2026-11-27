@@ -75,8 +75,12 @@ export default function Account({ redirect }: any) {
 				const returnTo = redirect
 					? `/#/${decodeURIComponent(redirect)}`
 					: "/#/";
+				const params = new URLSearchParams({ next: returnTo });
+				if (window.location.hash.includes("auth=perminister-error")) {
+					params.set("force_login", "true");
+				}
 				window.location.assign(
-					`/auth/perminister/start?${new URLSearchParams({ next: returnTo })}`,
+					`/auth/perminister/start?${params}`,
 				);
 				return;
 			}
