@@ -19,9 +19,60 @@ import { NextResponse } from "next/server";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-function redirectToAccount(request: Request, state: string) {
+type SignInFailureReason =
+	| "account_not_found"
+	| "account_conflict"
+	| "account_linked_elsewhere"
+	| "access_missing"
+	| "session_invalid"
+	| "service_unavailable"
+	| "provider_sign_in_failed"
+	| "unexpected";
+
+function signInFailureReason(error: unknown): SignInFailureReason {
+	if (!(error instanceof Error)) return "unexpected";
+	const message = error.message;
+	if (message === "This System Concepts account has not been provisioned.") {
+		return "account_not_found";
+	}
+	if (
+		message.includes("must be linked by the migration") ||
+		message.includes("ID has not been assigned")
+	) {
+		return "account_not_found";
+	}
+	if (
+		message.includes("conflicts with multiple System Concepts accounts") ||
+		message.includes("conflicts with an existing System Concepts ID")
+	) {
+		return "account_conflict";
+	}
+	if (message.includes("linked to another Perminister account")) {
+		return "account_linked_elsewhere";
+	}
+	if (
+		message.includes("does not have access to the System Concepts organization") ||
+		message.includes("role has not been assigned in Perminister")
+	) {
+		return "access_missing";
+	}
+	if (message.includes("temporarily unavailable")) {
+		return "service_unavailable";
+	}
+	if (/session|token|identity|OIDC/i.test(message)) return "session_invalid";
+	return "unexpected";
+}
+
+function redirectToAccount(
+	request: Request,
+	state: string,
+	reason: SignInFailureReason,
+) {
 	const response = NextResponse.redirect(
-		new URL("/#/account?auth=perminister-error", request.url),
+		new URL(
+			`/#/account?auth=perminister-error&reason=${reason}`,
+			request.url,
+		),
 		303,
 	);
 	const cookieName = perministerSsoCookieName(state);
@@ -47,10 +98,10 @@ export async function GET(request: Request) {
 		!perministerAuthEnabled() ||
 		url.searchParams.getAll("state").length !== 1
 	) {
-		return redirectToAccount(request, state);
+		return redirectToAccount(request, state, "service_unavailable");
 	}
 	const cookieName = perministerSsoCookieName(state);
-	if (!cookieName) return redirectToAccount(request, state);
+	if (!cookieName) return redirectToAccount(request, state, "session_invalid");
 
 	let returnTo: string | undefined;
 	let exchangedToken: string | undefined;
@@ -61,7 +112,7 @@ export async function GET(request: Request) {
 			process.env.PERMINISTER_APP_CLIENT_SECRET ?? "",
 		);
 		if (!transaction || !matchesPerministerSsoState(transaction.state, state)) {
-			return redirectToAccount(request, state);
+			return redirectToAccount(request, state, "session_invalid");
 		}
 		returnTo = transaction.returnTo;
 		const codes = url.searchParams.getAll("code");
@@ -72,7 +123,7 @@ export async function GET(request: Request) {
 			!codes[0] ||
 			codes[0].length > 2048
 		) {
-			return redirectToAccount(request, state);
+			return redirectToAccount(request, state, "provider_sign_in_failed");
 		}
 
 		const exchanged = await perministerExchangeAuthorizationCode(
@@ -136,9 +187,10 @@ export async function GET(request: Request) {
 		response.headers.set("Referrer-Policy", "no-referrer");
 		return response;
 	} catch (error) {
-		structuredLogger.error("Perminister sign-in failed", error);
+		const reason = signInFailureReason(error);
+		structuredLogger.error("Perminister sign-in failed", { reason, error });
 		if (exchangedToken)
 			await perministerLogout(exchangedToken).catch(() => undefined);
-		return redirectToAccount(request, state);
+		return redirectToAccount(request, state, reason);
 	}
 }

@@ -397,8 +397,22 @@ export async function localUserForPerministerSession(
 			)
 		: null;
 
+	const [verifiedEmailLocalPart = "", verifiedEmailDomain = ""] =
+		verifiedEmail.split("@");
+	// Legacy System Concepts IDs can match a verified personal Gmail local part.
+	const emailLocalPartUserId =
+		["gmail.com", "googlemail.com"].includes(verifiedEmailDomain) &&
+		/^[a-z0-9_-]{1,254}$/.test(verifiedEmailLocalPart)
+			? verifiedEmailLocalPart
+			: null;
 	const collectionName = "users";
-	const [boundUser, usernameUser, legacyUser, emailMatches] = await Promise.all([
+	const [
+		boundUser,
+		usernameUser,
+		legacyUser,
+		emailMatches,
+		emailLocalPartUser,
+	] = await Promise.all([
 		findRecord({
 			collectionName,
 			query: { perministerSubjectId: session.account.subjectId },
@@ -417,6 +431,12 @@ export async function localUserForPerministerSession(
 					limit: 2,
 				})
 			: Promise.resolve(null),
+		emailLocalPartUserId
+			? findRecord({
+					collectionName,
+					query: { id: emailLocalPartUserId },
+				})
+			: Promise.resolve(null),
 	]);
 	if (emailMatches && emailMatches.length > 1) {
 		throw new Error(
@@ -427,16 +447,25 @@ export async function localUserForPerministerSession(
 		? await findRecord({ collectionName, query: { id: emailMatches[0].id } })
 		: null;
 
-	const matchedUsers = [boundUser, usernameUser, legacyUser, emailUser].filter(
-		(user) => user && typeof user.id === "string",
-	);
+	const matchedUsers = [
+		boundUser,
+		usernameUser,
+		legacyUser,
+		emailUser,
+		emailLocalPartUser,
+	].filter((user) => user && typeof user.id === "string");
 	if (new Set(matchedUsers.map((user) => user.id)).size > 1) {
 		throw new Error(
 			"This Perminister account conflicts with an existing System Concepts ID.",
 		);
 	}
 
-	let user = boundUser ?? legacyUser ?? usernameUser ?? emailUser;
+	let user =
+		boundUser ??
+		legacyUser ??
+		usernameUser ??
+		emailUser ??
+		emailLocalPartUser;
 	if (!user) {
 		throw new Error("This System Concepts account has not been provisioned.");
 	}
@@ -457,7 +486,9 @@ export async function localUserForPerministerSession(
 		const matchedBySystemConceptsId =
 			(legacyAccountId && user.id === legacyAccountId) ||
 			(username && user.id === username);
-		const matchedByVerifiedEmail = emailUser && emailUser.id === user.id;
+		const matchedByVerifiedEmail =
+			(emailUser && emailUser.id === user.id) ||
+			(emailLocalPartUser && emailLocalPartUser.id === user.id);
 		if (!matchedBySystemConceptsId && !matchedByVerifiedEmail) {
 			throw new Error(
 				"This System Concepts account must be linked by the migration before sign-in.",
