@@ -12,6 +12,38 @@ export default [
 		value: "Perminister sign-in failed. Please try again.",
 	},
 	{
+		id: "PERMINISTER_ERROR_ACCOUNT_NOT_FOUND",
+		value: "No existing System Concepts account matched this Perminister login. The administrator needs to link the account.",
+	},
+	{
+		id: "PERMINISTER_ERROR_ACCOUNT_CONFLICT",
+		value: "This login matches multiple System Concepts accounts. Please contact the administrator.",
+	},
+	{
+		id: "PERMINISTER_ERROR_ACCOUNT_LINKED_ELSEWHERE",
+		value: "This System Concepts account is linked to a different Perminister identity. Please contact the administrator.",
+	},
+	{
+		id: "PERMINISTER_ERROR_ACCESS_MISSING",
+		value: "This Perminister account has no active System Concepts access role. Please contact the administrator.",
+	},
+	{
+		id: "PERMINISTER_ERROR_SESSION_INVALID",
+		value: "Perminister returned an invalid or expired login session. Please sign in again.",
+	},
+	{
+		id: "PERMINISTER_ERROR_SERVICE_UNAVAILABLE",
+		value: "Perminister is temporarily unavailable. Please try again later.",
+	},
+	{
+		id: "PERMINISTER_ERROR_PROVIDER_SIGN_IN_FAILED",
+		value: "Perminister did not complete sign-in. Please try again and enter your username and password.",
+	},
+	{
+		id: "PERMINISTER_ERROR_UNEXPECTED",
+		value: "An unexpected error occurred. Please share the reason code with the administrator.",
+	},
+	{
 		id: "SIGN_OUT",
 		value: "Sign Out",
 	},

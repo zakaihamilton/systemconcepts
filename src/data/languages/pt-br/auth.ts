@@ -12,6 +12,38 @@ export default [
 		value: "A entrada no Perminister falhou. Tente novamente.",
 	},
 	{
+		id: "PERMINISTER_ERROR_ACCOUNT_NOT_FOUND",
+		value: "Nenhuma conta existente do System Concepts correspondeu a este login do Perminister. O administrador precisa vincular a conta.",
+	},
+	{
+		id: "PERMINISTER_ERROR_ACCOUNT_CONFLICT",
+		value: "Este login corresponde a várias contas do System Concepts. Entre em contato com o administrador.",
+	},
+	{
+		id: "PERMINISTER_ERROR_ACCOUNT_LINKED_ELSEWHERE",
+		value: "Esta conta do System Concepts está vinculada a outra identidade Perminister. Entre em contato com o administrador.",
+	},
+	{
+		id: "PERMINISTER_ERROR_ACCESS_MISSING",
+		value: "Esta conta Perminister não tem uma função ativa de acesso ao System Concepts. Entre em contato com o administrador.",
+	},
+	{
+		id: "PERMINISTER_ERROR_SESSION_INVALID",
+		value: "O Perminister retornou uma sessão inválida ou expirada. Entre novamente.",
+	},
+	{
+		id: "PERMINISTER_ERROR_SERVICE_UNAVAILABLE",
+		value: "O Perminister está temporariamente indisponível. Tente novamente mais tarde.",
+	},
+	{
+		id: "PERMINISTER_ERROR_PROVIDER_SIGN_IN_FAILED",
+		value: "O Perminister não concluiu o login. Tente novamente e informe seu nome de usuário e senha.",
+	},
+	{
+		id: "PERMINISTER_ERROR_UNEXPECTED",
+		value: "Ocorreu um erro inesperado. Informe o código do motivo ao administrador.",
+	},
+	{
 		id: "EMAIL_ADDRESS",
 		value: "Endereço de E-mail",
 	},

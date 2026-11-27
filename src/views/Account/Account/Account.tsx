@@ -40,10 +40,29 @@ export default function Account({ redirect }: any) {
 	const changeRemember = (event: any) => setRemember(event.target.checked);
 
 	useEffect(() => {
-		if (window.location.hash.includes("auth=perminister-error")) {
+		const hashQuery = window.location.hash.split("?")[1] ?? "";
+		const params = new URLSearchParams(hashQuery);
+		if (params.get("auth") === "perminister-error") {
+			const allowedReasons = [
+				"account_not_found",
+				"account_conflict",
+				"account_linked_elsewhere",
+				"access_missing",
+				"session_invalid",
+				"service_unavailable",
+				"provider_sign_in_failed",
+				"unexpected",
+			];
+			const rawReason = params.get("reason") ?? "unexpected";
+			const reason = allowedReasons.includes(rawReason)
+				? rawReason
+				: "unexpected";
+			const reasonMessage =
+				translations[`PERMINISTER_ERROR_${reason.toUpperCase()}`] ||
+				translations.PERMINISTER_ERROR_UNEXPECTED ||
+				"Please contact the administrator with this reason code.";
 			setError(
-				translations.PERMINISTER_SIGN_IN_FAILED ||
-					"Perminister sign-in failed. Please try again.",
+				`${translations.PERMINISTER_SIGN_IN_FAILED || "Perminister sign-in failed."} ${reasonMessage} (${reason})`,
 			);
 		}
 	}, [translations]);

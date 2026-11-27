@@ -18,7 +18,10 @@ export const dynamic = "force-dynamic";
 
 function errorRedirect(request: Request) {
 	const response = NextResponse.redirect(
-		new URL("/#/account?auth=perminister-error", request.url),
+		new URL(
+			"/#/account?auth=perminister-error&reason=service_unavailable",
+			request.url,
+		),
 		303,
 	);
 	response.headers.set("Cache-Control", "no-store");

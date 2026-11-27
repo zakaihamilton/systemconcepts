@@ -12,6 +12,38 @@ export default [
 		value: "הכניסה ל-Perminister נכשלה. נסה שוב.",
 	},
 	{
+		id: "PERMINISTER_ERROR_ACCOUNT_NOT_FOUND",
+		value: "לא נמצא חשבון System Concepts קיים המתאים לכניסה זו. מנהל המערכת צריך לקשר את החשבון.",
+	},
+	{
+		id: "PERMINISTER_ERROR_ACCOUNT_CONFLICT",
+		value: "הכניסה הזו מתאימה למספר חשבונות System Concepts. יש לפנות למנהל המערכת.",
+	},
+	{
+		id: "PERMINISTER_ERROR_ACCOUNT_LINKED_ELSEWHERE",
+		value: "חשבון System Concepts זה מקושר לזהות Perminister אחרת. יש לפנות למנהל המערכת.",
+	},
+	{
+		id: "PERMINISTER_ERROR_ACCESS_MISSING",
+		value: "לחשבון Perminister זה אין הרשאת גישה פעילה ל-System Concepts. יש לפנות למנהל המערכת.",
+	},
+	{
+		id: "PERMINISTER_ERROR_SESSION_INVALID",
+		value: "Perminister החזיר הפעלת התחברות לא תקינה או שפג תוקפה. יש להתחבר שוב.",
+	},
+	{
+		id: "PERMINISTER_ERROR_SERVICE_UNAVAILABLE",
+		value: "שירות Perminister אינו זמין זמנית. נסה שוב מאוחר יותר.",
+	},
+	{
+		id: "PERMINISTER_ERROR_PROVIDER_SIGN_IN_FAILED",
+		value: "Perminister לא השלים את ההתחברות. נסה שוב והזן שם משתמש וסיסמה.",
+	},
+	{
+		id: "PERMINISTER_ERROR_UNEXPECTED",
+		value: "אירעה שגיאה לא צפויה. יש למסור למנהל המערכת את קוד הסיבה.",
+	},
+	{
 		id: "EMAIL_ADDRESS",
 		value: "כתובת אימייל",
 	},
