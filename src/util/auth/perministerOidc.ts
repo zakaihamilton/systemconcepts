@@ -90,7 +90,7 @@ async function verifyIdToken(
 	idToken: string,
 	config: OidcConfig,
 	metadata: { issuer: string; jwksUri: string },
-): Promise<string> {
+): Promise<{ subjectId: string; verifiedEmail: string | null }> {
 	if (idToken.length > 16_384)
 		throw new Error("Perminister returned an invalid ID token.");
 	const parts = idToken.split(".");
@@ -179,13 +179,21 @@ async function verifyIdToken(
 	) {
 		throw new Error("Perminister ID token validation failed.");
 	}
-	return payload.sub;
+	const email = typeof payload.email === "string" ? payload.email.trim() : "";
+	const verifiedEmail =
+		payload.email_verified === true &&
+		email.length <= 254 &&
+		/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+			? email.toLowerCase()
+			: null;
+	return { subjectId: payload.sub, verifiedEmail };
 }
 
 export async function exchangePerministerOidcCode(config: OidcConfig): Promise<{
 	accessToken: string;
 	expiresAt: string;
 	subjectId: string;
+	verifiedEmail: string | null;
 }> {
 	const baseUrl = new URL(config.baseUrl).origin;
 	const metadata = await providerMetadata(baseUrl);
@@ -221,10 +229,11 @@ export async function exchangePerministerOidcCode(config: OidcConfig): Promise<{
 	) {
 		throw new Error("Perminister returned an invalid token response.");
 	}
-	const subjectId = await verifyIdToken(token.id_token, config, metadata);
+	const identity = await verifyIdToken(token.id_token, config, metadata);
 	return {
 		accessToken: token.access_token,
 		expiresAt: new Date(Date.now() + token.expires_in * 1000).toISOString(),
-		subjectId,
+		subjectId: identity.subjectId,
+		verifiedEmail: identity.verifiedEmail,
 	};
 }

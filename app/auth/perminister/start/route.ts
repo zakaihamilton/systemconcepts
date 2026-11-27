@@ -9,6 +9,8 @@ import {
 	safeSystemConceptsReturnTo,
 	sealPerministerSsoTransaction,
 } from "@util/auth/perministerSso";
+import { clearSessionCookies } from "@util/auth/session";
+import { logger as structuredLogger } from "@util/api/logger";
 import { NextResponse } from "next/server";
 
 export const runtime = "nodejs";
@@ -21,6 +23,7 @@ function errorRedirect(request: Request) {
 	);
 	response.headers.set("Cache-Control", "no-store");
 	response.headers.set("Referrer-Policy", "no-referrer");
+	clearSessionCookies(response);
 	return response;
 }
 
@@ -34,6 +37,7 @@ export async function GET(request: Request) {
 			generated.challenge,
 			generated.nonce,
 			url.origin,
+			url.searchParams.get("force_login") === "true",
 		);
 		const redirectUri =
 			new URL(destination).searchParams.get("redirect_uri") ?? "";
@@ -64,7 +68,8 @@ export async function GET(request: Request) {
 		response.headers.set("Cache-Control", "no-store");
 		response.headers.set("Referrer-Policy", "no-referrer");
 		return response;
-	} catch {
+	} catch (error) {
+		structuredLogger.error("Perminister sign-in setup failed", error);
 		return errorRedirect(request);
 	}
 }
